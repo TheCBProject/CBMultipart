@@ -1,25 +1,19 @@
 package codechicken.microblock
 
-import net.minecraft.item.Item
 import codechicken.lib.config.ConfigTag
-import codechicken.microblock.handler.MicroblockProxy._
-import net.minecraft.item.ItemStack
-import net.minecraftforge.client.IItemRenderer
-import codechicken.lib.render.{TextureUtils, CCModel, CCRenderState}
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
-import codechicken.lib.vec.SwapYZ
-import codechicken.lib.vec.TransformationList
-import codechicken.lib.vec.Translation
-import codechicken.lib.vec.Scale
-import codechicken.lib.vec.Rotation
-import org.lwjgl.opengl.GL11
-import ItemRenderType._
-import codechicken.lib.math.MathHelper._
-import net.minecraft.util.ResourceLocation
-import net.minecraft.client.renderer.texture.{TextureMap, IIconRegister}
+import codechicken.lib.render._
 import codechicken.lib.render.uv.UVTranslation
-import codechicken.microblock.handler.MicroblockProxy
+import codechicken.lib.vec.SwapYZ
+import com.google.common.collect.ImmutableList
+import net.minecraft.block.state.IBlockState
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType
+import net.minecraft.client.renderer.block.model.{ItemCameraTransforms, ItemOverrideList}
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats
+import net.minecraft.item.{Item, ItemStack}
+import net.minecraft.util.{EnumFacing, ResourceLocation}
+import net.minecraftforge.client.model.IPerspectiveAwareModel
+import net.minecraftforge.client.model.IPerspectiveAwareModel.MapWrapper
+import org.lwjgl.opengl.GL11
 
 /**
  * Interface for items that are 'saws'
@@ -44,56 +38,66 @@ class ItemSaw(sawTag:ConfigTag, val harvestLevel:Int) extends Item with Saw
             setMaxDamage(maxDamage)
         setNoRepair()
         setMaxStackSize(1)
-        setCreativeTab(net.minecraft.creativetab.CreativeTabs.tabTools)
+        setCreativeTab(net.minecraft.creativetab.CreativeTabs.TOOLS)
     }
-    
+
     override def hasContainerItem = true
-        
+
     override def getContainerItem(stack:ItemStack) =
         if(isDamageable)
             new ItemStack(stack.getItem, 1, stack.getItemDamage+1)
         else
             stack
-    
-    override def doesContainerItemLeaveCraftingGrid(stack:ItemStack) = false
-    
+
     def getCuttingStrength(item:ItemStack) = harvestLevel
 }
 
-object ItemSawRenderer extends IItemRenderer
+object ItemSawRenderer extends IItemRenderer with IPerspectiveAwareModel
 {
-    val models = CCModel.parseObjModels(new ResourceLocation("microblock", "models/saw.obj"), 7, new SwapYZ())
+    val models = CCOBJParser.parseObjModels(new ResourceLocation("microblock", "models/saw.obj"), 7, new SwapYZ())
     val handle = models.get("Handle")
     val holder = models.get("BladeSupport")
     val blade = models.get("Blade")
-    
-    def handleRenderType(item:ItemStack, renderType:ItemRenderType) =
-        !MicroblockProxy.useSawIcons || TextureUtils.isMissing(item.getIconIndex, TextureMap.locationItemsTexture)
-    
-    def shouldUseRenderHelper(renderType:ItemRenderType, item:ItemStack, helper:ItemRendererHelper) = true
 
-    def renderItem(renderType:ItemRenderType, item:ItemStack, data:Object*)
+//    def handleRenderType(item:ItemStack, renderType:ItemRenderType) =
+//        !MicroblockProxy.useSawIcons || TextureUtils.isMissing(item.getIconIndex, TextureMap.locationItemsTexture)
+//
+//    def shouldUseRenderHelper(renderType:ItemRenderType, item:ItemStack, helper:ItemRendererHelper) = true
+
+    override def isBuiltInRenderer = true
+    override def getParticleTexture = null
+    override def getItemCameraTransforms = ItemCameraTransforms.DEFAULT
+    override def isAmbientOcclusion = true
+    override def isGui3d = true
+    override def getOverrides = ItemOverrideList.NONE
+    override def getQuads(state:IBlockState, side:EnumFacing, rand:Long) = ImmutableList.of()
+
+    override def handlePerspective(cameraTransformType:TransformType) =
+        MapWrapper.handlePerspective(this, TransformUtils.DEFAULT_BLOCK.getTransforms, cameraTransformType)
+
+    override def renderItem(item:ItemStack)
     {
-        val t = renderType match {
-            case INVENTORY => new TransformationList(new Scale(1.8), new Translation(0, 0, -0.6), new Rotation(-pi/4, 1, 0, 0), new Rotation(pi*3/4, 0, 1, 0))
-            case ENTITY => new TransformationList(new Scale(1), new Translation(0, 0, -0.25), new Rotation(-pi/4, 1, 0, 0))
-            case EQUIPPED_FIRST_PERSON => new TransformationList(new Scale(1.5), new Rotation(-pi/3, 1, 0, 0), new Rotation(pi*3/4, 0, 1, 0), new Translation(0.5, 0.5, 0.5))
-            case EQUIPPED => new TransformationList(new Scale(1.5), new Rotation(-pi/5, 1, 0, 0), new Rotation(-pi*3/4, 0, 1, 0), new Translation(0.75, 0.5, 0.75))
-            case _ => return
-        }
-        
+//        val t = renderType match {
+//            case INVENTORY => new TransformationList(new Scale(1.8), new Translation(0, 0, -0.6), new Rotation(-pi/4, 1, 0, 0), new Rotation(pi*3/4, 0, 1, 0))
+//            case ENTITY => new TransformationList(new Scale(1), new Translation(0, 0, -0.25), new Rotation(-pi/4, 1, 0, 0))
+//            case EQUIPPED_FIRST_PERSON => new TransformationList(new Scale(1.5), new Rotation(-pi/3, 1, 0, 0), new Rotation(pi*3/4, 0, 1, 0), new Translation(0.5, 0.5, 0.5))
+//            case EQUIPPED => new TransformationList(new Scale(1.5), new Rotation(-pi/5, 1, 0, 0), new Rotation(-pi*3/4, 0, 1, 0), new Translation(0.75, 0.5, 0.75))
+//            case _ => return
+//        }
+
         CCRenderState.reset()
-        CCRenderState.useNormals = true
+        //CCRenderState.useNormals = true
         CCRenderState.pullLightmap()
-        CCRenderState.changeTexture("microblock:textures/items/saw.png")
-        CCRenderState.startDrawing()
-        handle.render(t)
-        holder.render(t)
+        TextureUtils.changeTexture("microblock:textures/items/saw.png")
+        CCRenderState.startDrawing(GL11.GL_QUADS, DefaultVertexFormats.BLOCK)
+        handle.render()//(t)
+        holder.render()//(t)
         CCRenderState.draw()
         GL11.glDisable(GL11.GL_CULL_FACE)
-        CCRenderState.startDrawing()
-        blade.render(t, new UVTranslation(0, (item.getItem.asInstanceOf[Saw].getCuttingStrength(item)-1)*4/64D))
+        CCRenderState.startDrawing(GL11.GL_QUADS, DefaultVertexFormats.BLOCK)
+        blade.render(/**t, **/new UVTranslation(0, (item.getItem.asInstanceOf[Saw].getCuttingStrength(item)-1)*4/64D))
         CCRenderState.draw()
         GL11.glEnable(GL11.GL_CULL_FACE)
     }
+
 }

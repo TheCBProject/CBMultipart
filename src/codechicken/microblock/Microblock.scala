@@ -1,158 +1,172 @@
 package codechicken.microblock
 
-import net.minecraft.nbt.NBTTagCompound
-import codechicken.lib.lighting.LightMatrix
-import codechicken.microblock.MicroMaterialRegistry._
-import codechicken.lib.vec.BlockCoord
-import org.lwjgl.opengl.GL11
-import codechicken.lib.render.CCRenderState
-import net.minecraft.world.World
-import codechicken.lib.vec.Cuboid6
+import codechicken.lib.data.{MCDataInput, MCDataOutput}
+import codechicken.lib.raytracer.CuboidRayTraceResult
 import codechicken.lib.vec.Vector3
-import codechicken.multipart.TIconHitEffects
-import net.minecraft.util.IIcon
-import net.minecraft.block.Block
-import codechicken.multipart.TCuboidPart
-import net.minecraft.util.MovingObjectPosition
-import net.minecraft.entity.player.EntityPlayer
-import codechicken.multipart.JPartialOcclusion
-import codechicken.lib.render.Vertex5
-import net.minecraft.item.ItemStack
-import scala.collection.mutable.ListBuffer
-import codechicken.lib.data.MCDataOutput
-import codechicken.lib.data.MCDataInput
-import codechicken.lib.render.RenderUtils
-import codechicken.lib.render.IFaceRenderer
-import codechicken.multipart.TSlottedPart
-import scala.collection.JavaConversions._
-import codechicken.lib.render.TextureUtils
+import codechicken.microblock.MicroMaterialRegistry._
+import codechicken.multipart._
 import net.minecraft.entity.Entity
-import net.minecraft.init.Blocks
-import cpw.mods.fml.relauncher.{Side, SideOnly}
-import codechicken.lib.render.BlockRenderer.BlockFace
+import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.item.ItemStack
+import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.util.BlockRenderLayer
+import net.minecraftforge.client.model.ModelLoader
+import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-abstract class Microblock(var material:Int = 0) extends TCuboidPart
+import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
+
+abstract class Microblock(var material:Int = 0) extends TMultiPart with TCuboidPart
 {
     var shape:Byte = 0
 
-    def microClass:MicroblockClass
+    def microFactory:MicroblockFactory
 
-    def getType = microClass.getName
+    def getType = microFactory.getName
 
-    override def getStrength(hit:MovingObjectPosition, player:EntityPlayer) = getIMaterial match {
-        case null => super.getStrength(hit, player)
+    override def getStrength(player:EntityPlayer, hit:CuboidRayTraceResult) = getIMaterial match {
+        case null => super.getStrength(player, hit)
         case mat => mat.getStrength(player)
     }
 
-    override def doesTick = false
-    
     def getSize = shape>>4
-    
-    def getShape = shape&0xF
 
-    def setShape(size:Int, slot:Int) = shape = (size<<4|slot).toByte
+    def getShapeSlot = shape&0xF
+
+    /**
+      * General purpose microblock description value. These values are only used by
+      * subclass overrides in this class, so they can be whatever you would like.
+      *
+      * @param size A 28 bit value representing the current size
+      * @param slot A 4 bit value representing the current slot
+      */
+    def setShape(size:Int, slot:Int)
+    {
+        shape = (size<<4|slot).toByte
+    }
 
     def getMaterial = material
-    
+
     def getIMaterial = MicroMaterialRegistry.getMaterial(material)
-    
-    def itemClassID:Int
-    
-    override def getDrops = {
+
+    /**
+      * The factory ID that will be put into the ItemStack damage value
+      */
+    def itemFactoryID:Int
+
+    override def getDrops =
+    {
         var size = getSize
         val items = ListBuffer[ItemStack]()
-        for(s <- Seq(4, 2, 1))
-        {
+        for(s <- Seq(4, 2, 1)) {
             val m = size/s
             size-=m*s
             if(m > 0)
-                items+=ItemMicroPart.create(m, s|itemClassID<<8, MicroMaterialRegistry.materialName(material))
+                items+=ItemMicroPart.createStack(m, ItemMicroPart.damage(itemFactoryID, s), MicroMaterialRegistry.materialName(material))
         }
         items
     }
-    
-    override def pickItem(hit:MovingObjectPosition):ItemStack =  {
+
+    override def pickItem(hit:CuboidRayTraceResult):ItemStack =
+    {
         val size = getSize
         for(s <- Seq(4, 2, 1))
             if(size%s == 0 && size/s >= 1)
-                return ItemMicroPart.create(s|itemClassID<<8, MicroMaterialRegistry.materialName(material))
+                return ItemMicroPart.create(itemFactoryID, size, MicroMaterialRegistry.materialName(material))
 
-        return null//unreachable
+        null//unreachable
     }
-    
-    override def writeDesc(packet:MCDataOutput) {
-        writeMaterialID(packet, material)
+
+    override def writeDesc(packet:MCDataOutput)
+    {
+        writeMaterialID(packet, material) //read by IDynamicPartFactory
         packet.writeByte(shape)
     }
-    
-    override def readDesc(packet:MCDataInput) {
+
+    override def readDesc(packet:MCDataInput)
+    {
+        //matrialID writtin in writeDesc is read by the factory, no need to read it here
         shape = packet.readByte
     }
 
-    def sendShapeUpdate() {
+    def sendShapeUpdate()
+    {
         getWriteStream.writeByte(shape)
     }
-    
-    override def read(packet:MCDataInput) {
+
+    override def read(packet:MCDataInput)
+    {
         super.read(packet)
         tile.notifyPartChange(this)
     }
-    
-    override def save(tag:NBTTagCompound) {
+
+    override def save(tag:NBTTagCompound)
+    {
         tag.setByte("shape", shape)
         tag.setString("material", materialName(material))
     }
-    
-    override def load(tag:NBTTagCompound) {
+
+    override def load(tag:NBTTagCompound)
+    {
         shape = tag.getByte("shape")
         material = materialID(tag.getString("material"))
     }
-    
+
     def isTransparent = getIMaterial.isTransparent
-    
+
     override def getLightValue = getIMaterial.getLightValue
 
-    override def explosionResistance(entity:Entity) = getIMaterial.explosionResistance(entity) * microClass.getResistanceFactor
+    override def getExplosionResistance(entity:Entity) = getIMaterial.explosionResistance(entity) * microFactory.getResistanceFactor
 }
 
-trait MicroblockClient extends Microblock with TIconHitEffects with IMicroMaterialRender
+trait MicroblockClient extends Microblock with TIconHitEffectsPart with IMicroMaterialRender
 {
+    @SideOnly(Side.CLIENT)
+    override def getBreakingIcon(hit:CuboidRayTraceResult) = getBrokenIcon(hit.sideHit.ordinal)
+
+    @SideOnly(Side.CLIENT)
     def getBrokenIcon(side:Int) = getIMaterial match {
-        case null => Blocks.stone.getIcon(0, 0)
+        case null => ModelLoader.White.INSTANCE
         case mat => mat.getBreakingIcon(side)
     }
 
-    override def renderStatic(pos:Vector3, pass:Int) = {
-        if(getIMaterial.canRenderInPass(pass)) {
-            render(pos, pass)
+    override def renderStatic(pos:Vector3, layer:BlockRenderLayer) =
+    {
+        if (layer != null && getIMaterial.canRenderInLayer(layer)) {
+            render(pos, layer)
             true
-        }
-        else
+        } else
             false
     }
 
-    def render(pos:Vector3, pass:Int)
+    /**
+      * Called to add the vertecies of this part to CCRenderState
+      *
+      * @param pos The position of this part
+      * @param layer The block layer, null for inventory rendering
+      */
+    def render(pos:Vector3, layer:BlockRenderLayer)
 
     override def getRenderBounds = getBounds
 }
 
 trait CommonMicroblockClient extends CommonMicroblock with MicroblockClient with TMicroOcclusionClient
 {
-    def render(pos:Vector3, pass:Int) {
-        if(pass < 0)
-            MicroblockRender.renderCuboid(pos, getIMaterial, pass, getBounds, 0)
+    override def render(pos:Vector3, layer:BlockRenderLayer) {
+        if(layer == null)
+            MicroblockRender.renderCuboid(pos, getIMaterial, layer, getBounds, 0)
         else
-            MicroblockRender.renderCuboid(pos, getIMaterial, pass, renderBounds, renderMask)
+            MicroblockRender.renderCuboid(pos, getIMaterial, layer, renderBounds, renderMask)
     }
 }
 
-trait CommonMicroblock extends Microblock with JPartialOcclusion with TMicroOcclusion with TSlottedPart
+trait CommonMicroblock extends Microblock with TPartialOcclusionPart with TMicroOcclusion with TSlottedPart
 {
-    def microClass:CommonMicroClass
+    def microFactory:CommonMicroFactory
 
-    def getSlot = getShape
+    def getSlot = getShapeSlot
     def getSlotMask = 1<<getSlot
     def getPartialOcclusionBoxes = Seq(getBounds)
-    
-    override def itemClassID = microClass.getClassId
+
+    override def itemFactoryID = microFactory.getFactoryID
 }

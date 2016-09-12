@@ -1,26 +1,23 @@
 package codechicken.microblock
 
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.util.MovingObjectPosition
-import codechicken.multipart.TFacePart
-import codechicken.lib.vec.{Translation, Cuboid6, Rotation, Vector3}
-import codechicken.multipart.TNormalOcclusion
+import codechicken.lib.raytracer.{CuboidRayTraceResult, IndexedCuboid6}
+import codechicken.lib.render.RenderUtils
+import codechicken.lib.vec.Rotation._
+import codechicken.lib.vec.Vector3._
+import codechicken.lib.vec.{Cuboid6, Vector3}
 import codechicken.microblock.MicroMaterialRegistry.IMicroMaterial
-import net.minecraft.client.renderer.RenderBlocks
-import codechicken.lib.render.{BlockRenderer, RenderUtils, CCRenderState}
-import scala.collection.JavaConversions._
-import Rotation._
-import Vector3._
-import codechicken.lib.raytracer.IndexedCuboid6
+import codechicken.multipart.{TFacePart, TNormalOcclusionPart}
+import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.util.BlockRenderLayer
 import org.lwjgl.opengl.GL11
-import codechicken.lib.render.uv.IconTransformation
-import codechicken.lib.lighting.LightMatrix
+
+import scala.collection.JavaConversions._
 
 object HollowPlacement extends PlacementProperties
 {
     object HollowPlacementGrid extends FaceEdgeGrid(3 / 8D)
 
-    def microClass = HollowMicroClass
+    def microFactory = HollowMicroFactory
 
     def placementGrid = HollowPlacementGrid
 
@@ -31,7 +28,7 @@ object HollowPlacement extends PlacementProperties
     override def sneakOpposite(slot: Int, side: Int) = slot == (side ^ 1)
 }
 
-object HollowMicroClass extends CommonMicroClass
+object HollowMicroFactory extends CommonMicroFactory
 {
     var pBoxes: Array[Seq[Cuboid6]] = new Array(256)
     var occBounds: Array[Cuboid6] = new Array(256)
@@ -51,7 +48,7 @@ object HollowMicroClass extends CommonMicroClass
         }
     }
 
-    def getName = "mcr_hllw"
+    def getName = "forgemicroblock:mcr_hllw"
 
     def baseTrait = classOf[HollowMicroblock]
     def clientTrait = classOf[HollowMicroblockClient]
@@ -69,30 +66,30 @@ trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClien
 
     override def recalcBounds() {
         super.recalcBounds()
-        renderMask = renderMask & 0xFF | getHollowSize << 8
+        renderMask = renderMask&0xFF | getHollowSize<<8
     }
 
-    override def drawBreaking(renderBlocks: RenderBlocks) {
-        CCRenderState.reset()
-        CCRenderState.setPipeline(new Translation(x, y, z), new IconTransformation(renderBlocks.overrideBlockTexture))
-        renderHollow(null, 0, getBounds, 0, false,
-            (pos: Vector3, mat: IMicroMaterial, pass: Int, c: Cuboid6, sideMask: Int) =>
-                BlockRenderer.renderCuboid(c, sideMask))
-    }
+//    override def drawBreaking(renderBlocks:RenderBlocks) {
+//        CCRenderState.reset()
+//        CCRenderState.setPipeline(new Translation(x, y, z), new IconTransformation(renderBlocks.overrideBlockTexture))
+//        renderHollow(null, 0, getBounds, 0, false,
+//            (pos: Vector3, mat: IMicroMaterial, pass: Int, c: Cuboid6, sideMask: Int) =>
+//                BlockRenderer.renderCuboid(c, sideMask))
+//    }
 
-    override def render(pos: Vector3, pass: Int) {
-        if (pass == -1)
-            renderHollow(pos, pass, getBounds, 0, false, MicroblockRender.renderCuboid)
+    override def render(pos:Vector3, layer:BlockRenderLayer) {
+        if (layer == null)
+            renderHollow(pos, layer, getBounds, 0, false, MicroblockRender.renderCuboid)
         else if (isTransparent)
-            renderHollow(pos, pass, renderBounds, renderMask, false, MicroblockRender.renderCuboid)
+            renderHollow(pos, layer, renderBounds, renderMask, false, MicroblockRender.renderCuboid)
         else {
-            renderHollow(pos, pass, renderBounds, renderMask | 1 << getSlot, false, MicroblockRender.renderCuboid)
-            renderHollow(pos, pass, Cuboid6.full, ~(1 << getSlot), true, MicroblockRender.renderCuboid)
+            renderHollow(pos, layer, renderBounds, renderMask | 1 << getSlot, false, MicroblockRender.renderCuboid)
+            renderHollow(pos, layer, Cuboid6.full, ~(1 << getSlot), true, MicroblockRender.renderCuboid)
         }
     }
 
-    def renderHollow(pos: Vector3, pass: Int, c: Cuboid6, sideMask: Int, face: Boolean,
-                     f: (Vector3, IMicroMaterial, Int, Cuboid6, Int) => Unit) {
+    def renderHollow(pos:Vector3, layer:BlockRenderLayer, c:Cuboid6, sideMask:Int, face:Boolean, f:(Vector3, IMicroMaterial, BlockRenderLayer, Cuboid6, Int) => Unit)
+    {
         val mat = getIMaterial
         val size = renderMask >> 8
         val d1 = 0.5 - size / 32D
@@ -109,40 +106,41 @@ trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClien
             case 0 | 1 =>
                 if (face)
                     iMask = 0x3C
-                f(pos, mat, pass, new Cuboid6(d1, y1, d2, d2, y2, z2), 0x3B | iMask) //-z internal
-                f(pos, mat, pass, new Cuboid6(d1, y1, z1, d2, y2, d1), 0x37 | iMask) //+z internal
+                f(pos, mat, layer, new Cuboid6(d1, y1, d2, d2, y2, z2), 0x3B | iMask) //-z internal
+                f(pos, mat, layer, new Cuboid6(d1, y1, z1, d2, y2, d1), 0x37 | iMask) //+z internal
 
-                f(pos, mat, pass, new Cuboid6(d2, y1, d1, x2, y2, d2), sideMask & 0x23 | 0xC | iMask) //-x internal -y+y+x external
-                f(pos, mat, pass, new Cuboid6(x1, y1, d1, d1, y2, d2), sideMask & 0x13 | 0xC | iMask) //+x internal -y+y-x external
+                f(pos, mat, layer, new Cuboid6(d2, y1, d1, x2, y2, d2), sideMask & 0x23 | 0xC | iMask) //-x internal -y+y+x external
+                f(pos, mat, layer, new Cuboid6(x1, y1, d1, d1, y2, d2), sideMask & 0x13 | 0xC | iMask) //+x internal -y+y-x external
 
-                f(pos, mat, pass, new Cuboid6(x1, y1, d2, x2, y2, z2), sideMask & 0x3B | 4 | iMask) //-y+y+z-x+x external
-                f(pos, mat, pass, new Cuboid6(x1, y1, z1, x2, y2, d1), sideMask & 0x37 | 8 | iMask) //-y+y-z-x+x external
+                f(pos, mat, layer, new Cuboid6(x1, y1, d2, x2, y2, z2), sideMask & 0x3B | 4 | iMask) //-y+y+z-x+x external
+                f(pos, mat, layer, new Cuboid6(x1, y1, z1, x2, y2, d1), sideMask & 0x37 | 8 | iMask) //-y+y-z-x+x external
             case 2 | 3 =>
                 if (face)
                     iMask = 0x33
-                f(pos, mat, pass, new Cuboid6(d2, d1, z1, x2, d2, z2), 0x2F | iMask) //-x internal
-                f(pos, mat, pass, new Cuboid6(x1, d1, z1, d1, d2, z2), 0x1F | iMask) //+x internal
+                f(pos, mat, layer, new Cuboid6(d2, d1, z1, x2, d2, z2), 0x2F | iMask) //-x internal
+                f(pos, mat, layer, new Cuboid6(x1, d1, z1, d1, d2, z2), 0x1F | iMask) //+x internal
 
-                f(pos, mat, pass, new Cuboid6(d1, d2, z1, d2, y2, z2), sideMask & 0xE | 0x30 | iMask) //-y internal -z+z+y external
-                f(pos, mat, pass, new Cuboid6(d1, y1, z1, d2, d1, z2), sideMask & 0xD | 0x30 | iMask) //+y internal -z+z-y external
+                f(pos, mat, layer, new Cuboid6(d1, d2, z1, d2, y2, z2), sideMask & 0xE | 0x30 | iMask) //-y internal -z+z+y external
+                f(pos, mat, layer, new Cuboid6(d1, y1, z1, d2, d1, z2), sideMask & 0xD | 0x30 | iMask) //+y internal -z+z-y external
 
-                f(pos, mat, pass, new Cuboid6(d2, y1, z1, x2, y2, z2), sideMask & 0x2F | 0x10 | iMask) //-z+z+x-y+y external
-                f(pos, mat, pass, new Cuboid6(x1, y1, z1, d1, y2, z2), sideMask & 0x1F | 0x20 | iMask) //-z+z-x-y+y external
+                f(pos, mat, layer, new Cuboid6(d2, y1, z1, x2, y2, z2), sideMask & 0x2F | 0x10 | iMask) //-z+z+x-y+y external
+                f(pos, mat, layer, new Cuboid6(x1, y1, z1, d1, y2, z2), sideMask & 0x1F | 0x20 | iMask) //-z+z-x-y+y external
             case 4 | 5 =>
                 if (face)
                     iMask = 0xF
-                f(pos, mat, pass, new Cuboid6(x1, d2, d1, x2, y2, d2), 0x3E | iMask) //-y internal
-                f(pos, mat, pass, new Cuboid6(x1, y1, d1, x2, d1, d2), 0x3D | iMask) //+y internal
+                f(pos, mat, layer, new Cuboid6(x1, d2, d1, x2, y2, d2), 0x3E | iMask) //-y internal
+                f(pos, mat, layer, new Cuboid6(x1, y1, d1, x2, d1, d2), 0x3D | iMask) //+y internal
 
-                f(pos, mat, pass, new Cuboid6(x1, d1, d2, x2, d2, z2), sideMask & 0x38 | 3 | iMask) //-z internal -x+x+z external
-                f(pos, mat, pass, new Cuboid6(x1, d1, z1, x2, d2, d1), sideMask & 0x34 | 3 | iMask) //+z internal -x+x-z external
+                f(pos, mat, layer, new Cuboid6(x1, d1, d2, x2, d2, z2), sideMask & 0x38 | 3 | iMask) //-z internal -x+x+z external
+                f(pos, mat, layer, new Cuboid6(x1, d1, z1, x2, d2, d1), sideMask & 0x34 | 3 | iMask) //+z internal -x+x-z external
 
-                f(pos, mat, pass, new Cuboid6(x1, d2, z1, x2, y2, z2), sideMask & 0x3E | 1 | iMask) //-x+x+y-z+z external
-                f(pos, mat, pass, new Cuboid6(x1, y1, z1, x2, d1, z2), sideMask & 0x3D | 2 | iMask) //-x+x-y-z+z external
+                f(pos, mat, layer, new Cuboid6(x1, d2, z1, x2, y2, z2), sideMask & 0x3E | 1 | iMask) //-x+x+y-z+z external
+                f(pos, mat, layer, new Cuboid6(x1, y1, z1, x2, d1, z2), sideMask & 0x3D | 2 | iMask) //-x+x-y-z+z external
         }
     }
 
-    override def drawHighlight(hit: MovingObjectPosition, player: EntityPlayer, frame: Float): Boolean = {
+    override def drawHighlight(player:EntityPlayer, hit:CuboidRayTraceResult, frame:Float) =
+    {
         val size = getHollowSize
         val d1 = 0.5 - size / 32D
         val d2 = 0.5 + size / 32D
@@ -166,17 +164,18 @@ trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClien
         glDepthMask(true)
         glEnable(GL_TEXTURE_2D)
         glDisable(GL_BLEND)
-        return true
+
+        true
     }
 }
 
-trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclusion
+trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclusionPart
 {
-    def microClass = HollowMicroClass
+    def microFactory = HollowMicroFactory
 
-    def getBounds: Cuboid6 = FaceMicroClass.aBounds(shape)
+    def getBounds: Cuboid6 = FaceMicroFactory.aBounds(shape)
 
-    override def getPartialOcclusionBoxes = HollowMicroClass.pBoxes(shape)
+    override def getPartialOcclusionBoxes = HollowMicroFactory.pBoxes(shape)
 
     def getHollowSize = tile match {
         case null => 8
@@ -186,9 +185,10 @@ trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclu
         }
     }
 
-    def getOcclusionBoxes = {
+    def getOcclusionBoxes =
+    {
         val size = getHollowSize
-        val c = HollowMicroClass.occBounds(shape)
+        val c = HollowMicroFactory.occBounds(shape)
         val d1 = 0.5 - size / 32D
         val d2 = 0.5 + size / 32D
         val x1 = c.min.x

@@ -1,20 +1,15 @@
 package codechicken.microblock
 
-import java.io.File
-import java.io.IOException
-import java.io.PrintWriter
-import java.io.BufferedReader
-import java.io.FileReader
-import scala.collection.mutable.{Map => MMap}
-import net.minecraft.block.Block
-import net.minecraft.item.Item
-import java.lang.Exception
-import cpw.mods.fml.common.event.FMLInterModComms.IMCMessage
-import net.minecraft.item.ItemStack
-import BlockMicroMaterial.createAndRegister
-import BlockMicroMaterial.materialKey
+import java.io.{BufferedReader, File, FileReader, IOException, PrintWriter}
 import java.lang.{Iterable => JIterable}
+
+import codechicken.microblock.BlockMicroMaterial.{createAndRegister, materialKey}
+import net.minecraft.block.Block
+import net.minecraft.item.ItemStack
+import net.minecraftforge.fml.common.event.FMLInterModComms.IMCMessage
+
 import scala.collection.JavaConversions._
+import scala.collection.mutable.{Map => MMap}
 
 object ConfigContent
 {
@@ -99,27 +94,27 @@ object ConfigContent
     }
 
     def load() {
-        for(block <- Block.blockRegistry.asInstanceOf[JIterable[Block]]) {
-            val metas = Seq(block.getUnlocalizedName, Block.blockRegistry.getNameForObject(block)).flatMap(nameMap.remove).flatten
-            metas.foreach{m =>
-
-                try {
-                    createAndRegister(block, m)
-                }
-                catch {
-                    case e: IllegalStateException => logger.error("Unable to register micro material: " +
-                        materialKey(block, m) + "\n\t" + e.getMessage)
-                    case e: Exception =>
-                        logger.error("Unable to register micro material: " + materialKey(block, m), e)
-                }
-            }
-        }
-
-        nameMap.foreach(e => logger.warn("Unable to add micro material for block with unlocalised name " + e._1 + " as it doesn't exist"))
+//        for(block <- Block.REGISTRY.asInstanceOf[JIterable[Block]]) {
+//            val metas = Seq(block.getUnlocalizedName, Block.REGISTRY.getNameForObject(block)).flatMap(nameMap.remove).flatten
+//            metas.foreach { m =>
+//
+//                try {
+//                    createAndRegister(block, m)
+//                }
+//                catch {
+//                    case e: IllegalStateException => logger.error("Unable to register micro material: " +
+//                        materialKey(block, m) + "\n\t" + e.getMessage)
+//                    case e: Exception =>
+//                        logger.error("Unable to register micro material: " + materialKey(block, m), e)
+//                }
+//            }
+//        }
+//
+//        nameMap.foreach(e => logger.warn("Unable to add micro material for block with unlocalised name " + e._1 + " as it doesn't exist"))
     }
 
     def handleIMC(messages: Seq[IMCMessage]) {
-        messages.filter(_.key == "microMaterial").foreach{msg =>
+        messages.filter(_.key == "microMaterial").foreach { msg =>
 
             def error(s: String) {
                 logger.error("Invalid microblock IMC message from " + msg.getSender + ": " + s)
@@ -129,18 +124,18 @@ object ConfigContent
                 error("value is not an instanceof ItemStack")
             else {
                 val stack = msg.getItemStackValue
-                if (!Block.blockRegistry.containsId(Item.getIdFromItem(stack.getItem)))
+                if (!Block.REGISTRY.containsKey(stack.getItem.getRegistryName))
                     error("Invalid Block: " + stack.getItem)
                 else if (stack.getItemDamage < 0 || stack.getItemDamage >= 16)
                     error("Invalid metadata: " + stack.getItemDamage)
                 else {
-                    try {
-                        createAndRegister(Block.getBlockFromItem(stack.getItem), stack.getItemDamage)
-                    }
-                    catch {
-                        case e: IllegalStateException => error("Unable to register micro material: " +
-                            materialKey(Block.getBlockFromItem(stack.getItem), stack.getItemDamage) + "\n\t" + e.getMessage)
-                    }
+//                    try {
+//                        createAndRegister(Block.getBlockFromItem(stack.getItem), stack.getItemDamage)
+//                    }
+//                    catch {
+//                        case e: IllegalStateException => error("Unable to register micro material: " +
+//                            materialKey(Block.getBlockFromItem(stack.getItem), stack.getItemDamage) + "\n\t" + e.getMessage)
+//                    }
                 }
             }
         }

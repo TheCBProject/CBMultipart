@@ -1,14 +1,14 @@
 package codechicken.microblock.handler
 
-import codechicken.lib.packet.PacketCustom.{IHandshakeHandler, IClientPacketHandler, IServerPacketHandler}
 import codechicken.lib.packet.PacketCustom
-import net.minecraft.client.Minecraft
+import codechicken.lib.packet.PacketCustom.{IClientPacketHandler, IHandshakeHandler, IServerPacketHandler}
 import codechicken.microblock.MicroMaterialRegistry
+import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.EntityPlayerMP
-import net.minecraft.network.play.{INetHandlerPlayServer, INetHandlerPlayClient}
-import net.minecraft.network.play.server.S40PacketDisconnect
-import net.minecraft.util.ChatComponentTranslation
 import net.minecraft.network.NetHandlerPlayServer
+import net.minecraft.network.play.server.SPacketDisconnect
+import net.minecraft.network.play.{INetHandlerPlayClient, INetHandlerPlayServer}
+import net.minecraft.util.text.TextComponentString
 
 class MicroblockPH
 {
@@ -26,7 +26,7 @@ object MicroblockCPH extends MicroblockPH with IClientPacketHandler
     def handleMaterialRegistration(packet: PacketCustom, netHandler: INetHandlerPlayClient) {
         val missing = MicroMaterialRegistry.readIDMap(packet)
         if (!missing.isEmpty)
-            netHandler.handleDisconnect(new S40PacketDisconnect(new ChatComponentTranslation("microblock.missing", missing.mkString(", "))))
+            netHandler.handleDisconnect(new SPacketDisconnect(new TextComponentString("microblock.missing"+missing.mkString(", "))))
     }
 }
 
@@ -34,7 +34,9 @@ object MicroblockSPH extends MicroblockPH with IServerPacketHandler with IHandsh
 {
     def handlePacket(packet: PacketCustom, sender: EntityPlayerMP, netHandler:INetHandlerPlayServer) {}
 
-    def handshakeRecieved(netHandler: NetHandlerPlayServer) {
+
+    override def handshakeReceived(netHandler:NetHandlerPlayServer)
+    {
         val packet = new PacketCustom(registryChannel, 1)
         MicroMaterialRegistry.writeIDMap(packet)
         netHandler.sendPacket(packet.toPacket)

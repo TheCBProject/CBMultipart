@@ -1,123 +1,62 @@
 package codechicken.multipart.minecraft;
 
-import java.util.Random;
-
+import codechicken.multipart.IRandomDisplayTickPart;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockTorch;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.world.World;
-import codechicken.multipart.IRandomDisplayTick;
-import codechicken.lib.vec.BlockCoord;
-import codechicken.lib.vec.Cuboid6;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 
-public class TorchPart extends McSidedMetaPart implements IRandomDisplayTick
+import java.util.Random;
+
+public class TorchPart extends McSidedMetaPart implements IRandomDisplayTickPart
 {
-    public static BlockTorch torch = (BlockTorch) Blocks.torch;
-    public static int[] metaSideMap = new int[]{-1, 4, 5, 2, 3, 0};
-    public static int[] sideMetaMap = new int[]{5, 0, 3, 4, 1, 2};
-    
+    public static BlockTorch torch = (BlockTorch) Blocks.TORCH;
+
     public TorchPart()
     {
+        state = torch.getDefaultState();
     }
-    
-    public TorchPart(int meta)
+
+    public TorchPart(IBlockState state)
     {
-        super(meta);
+        super(state);
     }
-    
+
     @Override
     public Block getBlock()
     {
         return torch;
     }
-    
+
     @Override
     public String getType()
     {
         return "mc_torch";
     }
-    
+
     @Override
-    public Cuboid6 getBounds()
+    public int getSideFromState()
     {
-        return getBounds(meta);
+        return state.getValue(BlockTorch.FACING).getOpposite().ordinal();
     }
-    
-    public Cuboid6 getBounds(int meta)
-    {
-        double d = 0.15;
-        if (meta == 1)
-            return new Cuboid6(0, 0.2, 0.5 - d, d * 2, 0.8, 0.5 + d);
-        if (meta == 2)
-            return new Cuboid6(1 - d * 2, 0.2, 0.5 - d, 1, 0.8, 0.5 + d);
-        if (meta == 3)
-            return new Cuboid6(0.5 - d, 0.2, 0, 0.5 + d, 0.8, d * 2);
-        if (meta == 4)
-            return new Cuboid6(0.5 - d, 0.2, 1 - d * 2, 0.5 + d, 0.8, 1);
-        
-        d = 0.1;
-        return new Cuboid6(0.5 - d, 0, 0.5 - d, 0.5 + d, 0.6, 0.5 + d);
-    }
-    
-    @Override
-    public int sideForMeta(int meta)
-    {
-        return metaSideMap[meta];
-    }
-    
+
     @Override
     public boolean canStay()
     {
-        return sideForMeta(meta) == 0 && world().getBlock(x(), y() - 1, z()).canPlaceTorchOnTop(world(), x(), y() - 1, z()) || super.canStay();
-    }
-    
-    public static McBlockPart placement(World world, BlockCoord pos, int side)
-    {
-        if(side == 0)
-            return null;
-        pos = pos.copy().offset(side^1);
-        Block block = world.getBlock(pos.x, pos.y, pos.z);
-        if(!block.isSideSolid(world, pos.x, pos.y, pos.z, ForgeDirection.getOrientation(side)) && (side != 1 || block.canPlaceTorchOnTop(world, pos.x, pos.y, pos.z)))
-            return null;
-
-        return new TorchPart(sideMetaMap[side^1]);
+        if (getSideFromState() == 0) {
+            BlockPos offset = pos().offset(EnumFacing.DOWN);
+            IBlockState state = world().getBlockState(offset);
+            if (state.getBlock().canPlaceTorchOnTop(state, world(), offset))
+                return true;
+        }
+        return super.canStay();
     }
 
     @Override
     public void randomDisplayTick(Random random)
     {
-        double d0 = x() + 0.5;
-        double d1 = y() + 0.7;
-        double d2 = z() + 0.5;
-        double d3 = 0.22D;
-        double d4 = 0.27D;
-        
-        World world = world();
-        if (meta == 1)
-        {
-            world.spawnParticle("smoke", d0 - d4, d1 + d3, d2, 0, 0, 0);
-            world.spawnParticle("flame", d0 - d4, d1 + d3, d2, 0, 0, 0);
-        }
-        else if (meta == 2)
-        {
-            world.spawnParticle("smoke", d0 + d4, d1 + d3, d2, 0, 0, 0);
-            world.spawnParticle("flame", d0 + d4, d1 + d3, d2, 0, 0, 0);
-        }
-        else if (meta == 3)
-        {
-            world.spawnParticle("smoke", d0, d1 + d3, d2 - d4, 0, 0, 0);
-            world.spawnParticle("flame", d0, d1 + d3, d2 - d4, 0, 0, 0);
-        }
-        else if (meta == 4)
-        {
-            world.spawnParticle("smoke", d0, d1 + d3, d2 + d4, 0, 0, 0);
-            world.spawnParticle("flame", d0, d1 + d3, d2 + d4, 0, 0, 0);
-        }
-        else
-        {
-            world.spawnParticle("smoke", d0, d1, d2, 0, 0, 0);
-            world.spawnParticle("flame", d0, d1, d2, 0, 0, 0);
-        }
+        getBlock().randomDisplayTick(state, world(), pos(), random);
     }
 }

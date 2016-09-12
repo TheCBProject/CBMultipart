@@ -1,13 +1,14 @@
 package codechicken.multipart.asm
-import java.util.BitSet
+
+import java.util.{BitSet => JBitSet}
 
 trait ScratchBitSet
 {
-    private val bitSets = new ThreadLocal[BitSet]
+    private val bitSets = new ThreadLocal[JBitSet]
 
     def getBitSet = bitSets.get match {
         case null =>
-            val bitset = new BitSet
+            val bitset = new JBitSet
             bitSets.set(bitset)
             bitset
         case bitset => bitset

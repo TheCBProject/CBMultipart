@@ -1,13 +1,11 @@
 package codechicken.multipart.scalatraits
 
-import net.minecraftforge.common.util.ForgeDirection
-import codechicken.multipart.TMultiPart
-import codechicken.multipart.TileMultipart
-import net.minecraftforge.fluids.IFluidHandler
-import net.minecraftforge.fluids.FluidStack
-import net.minecraftforge.fluids.FluidTankInfo
-import net.minecraftforge.fluids.Fluid
 import java.util.LinkedList
+
+import codechicken.multipart.{TMultiPart, TileMultipart}
+import net.minecraft.util.EnumFacing
+import net.minecraftforge.fluids.{Fluid, FluidStack, FluidTankInfo, IFluidHandler}
+
 import scala.collection.JavaConversions._
 
 /**
@@ -17,35 +15,35 @@ import scala.collection.JavaConversions._
 trait TFluidHandlerTile extends TileMultipart with IFluidHandler
 {
     var tankList = new LinkedList[IFluidHandler]()
-    
+
     override def copyFrom(that:TileMultipart)
     {
         super.copyFrom(that)
         if(that.isInstanceOf[TFluidHandlerTile])
             tankList = that.asInstanceOf[TFluidHandlerTile].tankList
     }
-    
+
     override def bindPart(part:TMultiPart)
     {
         super.bindPart(part)
         if(part.isInstanceOf[IFluidHandler])
             tankList+=part.asInstanceOf[IFluidHandler]
     }
-    
+
     override def partRemoved(part:TMultiPart, p:Int)
     {
         super.partRemoved(part, p)
         if(part.isInstanceOf[IFluidHandler])
             tankList-=part.asInstanceOf[IFluidHandler]
     }
-    
+
     override def clearParts()
     {
         super.clearParts()
         tankList.clear()
     }
-    
-    override def getTankInfo(dir:ForgeDirection):Array[FluidTankInfo] =
+
+    override def getTankInfo(dir:EnumFacing):Array[FluidTankInfo] =
     {
         var tankCount:Int = 0
         tankList.foreach(t => tankCount += t.getTankInfo(dir).length)
@@ -57,21 +55,21 @@ trait TFluidHandlerTile extends TileMultipart with IFluidHandler
         })
         return tanks
     }
-    
-    override def fill(dir:ForgeDirection, liquid:FluidStack, doFill:Boolean):Int = 
+
+    override def fill(dir:EnumFacing, liquid:FluidStack, doFill:Boolean):Int =
     {
         var filled = 0
         val initial = liquid.amount
-        tankList.foreach(p => 
+        tankList.foreach(p =>
             filled+=p.fill(dir, copy(liquid, initial-filled), doFill)
         )
         return filled
     }
-    
-    override def canFill(dir:ForgeDirection, liquid:Fluid) = tankList.find(_.canFill(dir, liquid)).isDefined
-    
-    override def canDrain(dir:ForgeDirection, liquid:Fluid) = tankList.find(_.canDrain(dir, liquid)).isDefined
-    
+
+    override def canFill(dir:EnumFacing, liquid:Fluid) = tankList.find(_.canFill(dir, liquid)).isDefined
+
+    override def canDrain(dir:EnumFacing, liquid:Fluid) = tankList.find(_.canDrain(dir, liquid)).isDefined
+
     private def copy(liquid:FluidStack, quantity:Int):FluidStack =
     {
         val copy = liquid.copy
@@ -79,7 +77,7 @@ trait TFluidHandlerTile extends TileMultipart with IFluidHandler
         return copy
     }
 
-    override def drain(dir:ForgeDirection, amount:Int, doDrain:Boolean):FluidStack =
+    override def drain(dir:EnumFacing, amount:Int, doDrain:Boolean):FluidStack =
     {
         var drained:FluidStack = null
         var d_amount = 0
@@ -103,7 +101,7 @@ trait TFluidHandlerTile extends TileMultipart with IFluidHandler
         return drained
     }
 
-    override def drain(dir:ForgeDirection, fluid:FluidStack, doDrain:Boolean):FluidStack =
+    override def drain(dir:EnumFacing, fluid:FluidStack, doDrain:Boolean):FluidStack =
     {
         val amount = fluid.amount
         var drained:FluidStack = null

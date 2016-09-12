@@ -1,13 +1,9 @@
 package codechicken.multipart.scalatraits
 
-import codechicken.multipart.TileMultipart
-import codechicken.multipart.IRedstonePart
-import codechicken.multipart.RedstoneInteractions._
-import codechicken.multipart.PartMap._
 import codechicken.lib.vec.Rotation._
-import codechicken.multipart.IRedstoneTile
-import codechicken.multipart.TFacePart
-import codechicken.multipart.TEdgePart
+import codechicken.multipart.PartMap._
+import codechicken.multipart.RedstoneInteractions._
+import codechicken.multipart.{IRedstonePart, IRedstoneTile, TEdgePart, TFacePart, TileMultipart}
 
 /**
  * Mixin trait implementation for IRedstonePart
@@ -26,9 +22,9 @@ trait TRedstoneTile extends TileMultipart with IRedstoneTile
             val l = p.strongPowerLevel(side)
             if(l > max) max = l
         }
-        return max
+        max
     }
-    
+
     def openConnections(side:Int):Int =
     {
         var m = 0x10
@@ -40,48 +36,47 @@ trait TRedstoneTile extends TileMultipart with IRedstoneTile
             i+=1
         }
         m&=redstoneConductionF(side)
-        return m
+        m
     }
-    
+
     def redstoneConductionF(i:Int) = partMap(i) match {
         case null => 0x1F
         case p => p.asInstanceOf[TFacePart].redstoneConductionMap
     }
-    
+
     def redstoneConductionE(i:Int) = partMap(i) match {
         case null => true
         case p => p.asInstanceOf[TEdgePart].conductsRedstone
     }
-    
-    override def weakPowerLevel(side:Int):Int = 
-        weakPowerLevel(side, otherConnectionMask(getWorldObj, xCoord, yCoord, zCoord, side, true))
-    
+
+    override def weakPowerLevel(side:Int):Int =
+        weakPowerLevel(side, otherConnectionMask(getWorld, getPos, side, true))
+
     override def canConnectRedstone(side:Int):Boolean =
     {
-        val vside = vanillaToSide(side)
-        return (getConnectionMask(vside) & otherConnectionMask(getWorldObj, xCoord, yCoord, zCoord, vside, false)) > 0
+        //val vside = vanillaToSide(side)
+        (getConnectionMask(side) & otherConnectionMask(getWorld, getPos, side, false)) > 0
     }
-    
-    def getConnectionMask(side:Int):Int = 
+
+    def getConnectionMask(side:Int):Int =
     {
         val mask = openConnections(side)
         var res = 0
-        partList.foreach(p => 
-            res|=connectionMask(p, side)&mask)
-        return res
+        partList.foreach(p => res|=connectionMask(p, side)&mask)
+        res
     }
-    
-    def weakPowerLevel(side:Int, mask:Int):Int = 
+
+    def weakPowerLevel(side:Int, mask:Int):Int =
     {
         val tmask = openConnections(side)&mask
         var max = 0
-        partList.foreach(p => 
+        partList.foreach(p =>
             if((connectionMask(p, side)&tmask) > 0)
             {
                 val l = p.asInstanceOf[IRedstonePart].weakPowerLevel(side)
                 if(l > max) max = l
             })
-        return max
+        max
     }
 }
 

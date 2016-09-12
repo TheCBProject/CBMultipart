@@ -1,74 +1,138 @@
 package codechicken.multipart
 
-import codechicken.lib.render.CCRenderState
+import java.util.{HashMap => JHashMap, Map => JMap}
+
+import codechicken.lib.render.block.{BlockRenderingRegistry, ICCBlockRenderer}
+import codechicken.lib.render.{CCRenderState, TextureUtils}
 import codechicken.lib.vec.Vector3
-import cpw.mods.fml.client.registry.ISimpleBlockRenderingHandler
-import cpw.mods.fml.client.registry.RenderingRegistry
+import codechicken.multipart.BlockMultipart._
 import net.minecraft.block.Block
-import net.minecraft.client.renderer.{Tessellator, RenderBlocks}
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
-import net.minecraft.tileentity.TileEntity
-import net.minecraft.world.IBlockAccess
+import net.minecraft.block.properties.IProperty
+import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
-import cpw.mods.fml.relauncher.SideOnly
-import cpw.mods.fml.relauncher.Side
-import codechicken.lib.raytracer.ExtendedMOP
-import codechicken.lib.lighting.LightMatrix
+import net.minecraft.client.renderer.block.model._
+import net.minecraft.client.renderer.block.statemap.DefaultStateMapper
+import net.minecraft.client.renderer.texture.TextureAtlasSprite
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats
+import net.minecraft.client.renderer.{GlStateManager, RenderHelper, VertexBuffer}
+import net.minecraft.util.math.BlockPos
+import net.minecraft.world.IBlockAccess
+import net.minecraftforge.client.MinecraftForgeClient
+import net.minecraftforge.fml.relauncher.{Side, SideOnly}
+import org.lwjgl.opengl.GL11
+
+import scala.collection.JavaConversions._
 
 /**
  * Internal class for rendering callbacks. Should be moved to the handler package
  */
 @SideOnly(Side.CLIENT)
-object MultipartRenderer extends TileEntitySpecialRenderer with ISimpleBlockRenderingHandler
+object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] with ICCBlockRenderer
 {
-    TileMultipart.renderID = RenderingRegistry.getNextAvailableRenderId
-    var pass:Int = 0
-    
-    override def renderTileEntityAt(t:TileEntity, x:Double, y:Double, z:Double, f:Float)
+    val renderType = BlockRenderingRegistry.createRenderType("fmpcbe_multipart_block")
+
+    BlockRenderingRegistry.registerRenderer(renderType, this)
+
+    override def renderTileEntityAt(tile:TileMultipartClient, x:Double, y:Double, z:Double, frame:Float, destroyStage:Int)
     {
-        val tmpart = t.asInstanceOf[TileMultipartClient]
-        if(tmpart.partList.isEmpty)
+        if (tile.partList.isEmpty)
             return
 
         CCRenderState.reset()
-        CCRenderState.pullLightmap()
-        CCRenderState.useNormals = true
-        
-        val pos = new Vector3(x, y, z)
-        tmpart.renderDynamic(pos, f, pass)
-    }
-    
-    override def getRenderId = TileMultipart.renderID
-    
-    override def renderWorldBlock(world:IBlockAccess, x:Int, y:Int, z:Int, block:Block, modelId:Int, renderer:RenderBlocks):Boolean =
-    {
-        val t = world.getTileEntity(x, y, z)
-        if(!t.isInstanceOf[TileMultipartClient])
-            return false
+        tile.renderDynamic(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame)
 
-        val tmpart = t.asInstanceOf[TileMultipartClient]
-        if(tmpart.partList.isEmpty)
-            return false
-        
-        if(renderer.hasOverrideBlockTexture)
-        {
-            val hit = Minecraft.getMinecraft.objectMouseOver
-            if(hit != null && hit.blockX == x && hit.blockY == y && hit.blockZ == z && ExtendedMOP.getData(hit).isInstanceOf[(_, _)])
-            {
-                val hitInfo:(Int, _) = ExtendedMOP.getData(hit)
-                if(hitInfo._1.isInstanceOf[Int] && hitInfo._1 >= 0 && hitInfo._1 < tmpart.partList.size)
-                    tmpart.partList(hitInfo._1).drawBreaking(renderer)
-            }
-            return false
-        }
-        
+        //Simulate fast render
+        import GL11._
+
+        //Set GL state
+        GlStateManager.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        GlStateManager.enableBlend()
+        GlStateManager.disableCull()
+        GlStateManager.shadeModel(if (Minecraft.isAmbientOcclusionEnabled) GL_SMOOTH else GL_FLAT)
+
+        //Set MC Render state
+        RenderHelper.disableStandardItemLighting()
+        TextureUtils.bindBlockTexture()
+
+        //Render through CC render pipeline
         CCRenderState.reset()
-        CCRenderState.lightMatrix.locate(world, x, y, z)
-        return tmpart.renderStatic(new Vector3(x, y, z), pass)
+        CCRenderState.startDrawing(GL_QUADS, DefaultVertexFormats.BLOCK)
+        val buffer = CCRenderState.getBuffer
+        tile.renderFast(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame, buffer)
+        buffer.setTranslation(0, 0, 0)
+        CCRenderState.draw()
+
+        //Reset MC Render state
+        RenderHelper.enableStandardItemLighting()
     }
-    
-    override def renderInventoryBlock(block:Block, meta:Int, modelId:Int, renderer:RenderBlocks) {}
 
+    override def renderTileEntityFast(tile:TileMultipartClient, x:Double, y:Double, z:Double, frame:Float, destroyStage:Int, buffer:VertexBuffer)
+    {
+        if (tile.partList.isEmpty)
+            return
 
-    def shouldRender3DInInventory(modelId:Int) = false
+        CCRenderState.reset()
+        CCRenderState.bind(buffer)
+        tile.renderFast(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame, buffer)
+    }
+
+    override def renderBlock(world:IBlockAccess, pos:BlockPos, state:IBlockState, buffer:VertexBuffer) =
+        getClientTile(world, pos) match {
+            case null => false
+            case tile =>
+                CCRenderState.reset()
+                CCRenderState.bind(buffer)
+                CCRenderState.lightMatrix.locate(world, pos)
+                tile.renderStatic(new Vector3(pos), MinecraftForgeClient.getRenderLayer)
+        }
+
+    override def handleRenderBlockDamage(world:IBlockAccess, pos:BlockPos, state:IBlockState, sprite:TextureAtlasSprite, buffer:VertexBuffer)
+    {
+        getClientTile(world, pos) match {
+            case null =>
+            case tile =>
+                CCRenderState.reset()
+                CCRenderState.bind(buffer)
+                tile.renderDamage(new Vector3(pos), sprite)
+        }
+    }
+
+    override def renderBrightness(state:IBlockState, brightness:Float){}
+}
+
+object MultipartStateMapper extends DefaultStateMapper
+{
+    private var replaceNormal:Boolean = true
+
+    override def putStateModelLocations(block:Block):JMap[IBlockState, ModelResourceLocation] =
+    {
+        val mappings = new JHashMap[IBlockState, ModelResourceLocation]
+        replaceNormal = false
+        mappings.putAll(super.putStateModelLocations(block))
+        replaceNormal = true
+
+        import MultiPartRegistryClient._
+
+        for ((partName, container) <- nameToStateContainer) {
+
+            nameToModelMapper.get(partName) match {
+                case Some(mapper) =>
+                    mappings.putAll(mapper.putStateModelLocations(partName, container))
+                case None =>
+                    val modelPath = MultiPartRegistryClient.nameToModelPath(partName)
+                    for (state <- container.getValidStates)
+                        mappings.put(state, new ModelResourceLocation(modelPath, getPropertyString(state.getProperties)))
+            }
+        }
+
+        mappings
+    }
+
+    override def getPropertyString(map:JMap[IProperty[_], Comparable[_]]):String =
+    {
+        val str = super.getPropertyString(map)
+        if (replaceNormal && (str == "normal")) return "multipart"
+        str
+    }
 }

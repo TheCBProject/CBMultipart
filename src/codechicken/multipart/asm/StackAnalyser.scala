@@ -1,18 +1,19 @@
 package codechicken.multipart.asm
 
-import scala.collection.mutable.{Map => MMap, ListBuffer => MList}
-import org.objectweb.asm.tree._
 import org.objectweb.asm.Opcodes._
 import org.objectweb.asm.Type
 import org.objectweb.asm.Type._
+import org.objectweb.asm.tree._
+
 import scala.collection.JavaConversions._
+import scala.collection.mutable.{ListBuffer => MList, Map => MMap}
 
 object StackAnalyser
 {
     def width(t:Type):Int = t.getSize
     def width(s:String):Int = width(Type.getType(s))
     def width(it:Iterable[Type]):Int = it.foldLeft(0)(_+width(_))
-    
+
     abstract class StackEntry(implicit val insn:AbstractInsnNode)
     {
         def getType:Type
@@ -112,22 +113,22 @@ object StackAnalyser
 class StackAnalyser(val owner:Type, val m:MethodNode)
 {
     import StackAnalyser._
-    
+
     val stack = MList[StackEntry]()
     val locals = MList[LocalEntry]()
     private val catchHandlers = MMap[LabelNode, TryCatchBlockNode]()
-    
+
     {
         if((m.access & ACC_STATIC) == 0)
             pushL(This(owner))
-    
+
         val ptypes = getArgumentTypes(m.desc)
         for(i <- 0 until ptypes.length)
             pushL(Param(i, ptypes(i)))
-            
+
         m.tryCatchBlocks.foreach(b => catchHandlers.put(b.handler, b))
     }
-    
+
     def pushL(entry:LocalEntry) = setL(locals.size, entry)
 
     def setL(i:Int, entry:LocalEntry) =
@@ -137,12 +138,12 @@ class StackAnalyser(val owner:Type, val m:MethodNode)
         if(entry.getType.getSize == 2)
             locals(i+1) = entry
     }
-    
+
     def push(entry:StackEntry) = insert(0, entry)
 
     def _pop(i:Int = 0) = stack.remove(stack.size-i-1)
 
-    def pop(i:Int = 0) = 
+    def pop(i:Int = 0) =
     {
         val e = _pop(i)
         if(e.getType.getSize == 2)
@@ -152,10 +153,10 @@ class StackAnalyser(val owner:Type, val m:MethodNode)
         }
         e
     }
-    
+
     def peek(i:Int = 0) = stack(stack.size-i-1)
-    
-    def insert(i:Int, entry:StackEntry) 
+
+    def insert(i:Int, entry:StackEntry)
     {
         if(entry.getType.getSize == 0)
             return
@@ -163,7 +164,7 @@ class StackAnalyser(val owner:Type, val m:MethodNode)
         if(entry.getType.getSize == 2)
             stack.insert(stack.size-i, entry)
     }
-    
+
     def popArgs(desc:String) =
     {
         val t = getType(desc)
@@ -172,7 +173,7 @@ class StackAnalyser(val owner:Type, val m:MethodNode)
             args(args.length-i-1) = pop()
         args
     }
-    
+
     def visitInsn(ainsn:AbstractInsnNode)
     {
         implicit val thisInsn = ainsn//passes to any StackEntry we create
@@ -194,12 +195,12 @@ class StackAnalyser(val owner:Type, val m:MethodNode)
                 case FCONST_2 => push(Const(2F))
                 case DCONST_0 => push(Const(0D))
                 case DCONST_1 => push(Const(1D))
-                
+
                 case i if i >= IALOAD && i <= SALOAD =>
                     push(ArrayLoad(pop(), pop()))
                 case i if i >= IASTORE && i <= SASTORE =>
                     pop(); pop(); pop()
-                
+
                 case POP => _pop()
                 case POP2 => _pop(); _pop()
                 case DUP => push(peek())
@@ -209,14 +210,14 @@ class StackAnalyser(val owner:Type, val m:MethodNode)
                 case DUP2_X1 => insert(3, peek(1)); insert(3, peek())
                 case DUP2_X2 => insert(4, peek(1)); insert(4, peek())
                 case SWAP => push(pop(1))
-                
+
                 case i if i >= IADD && i <= DREM =>
                     push(BinaryOp(i, pop(), pop()))
                 case i if i >= INEG && i <= DNEG =>
                     push(UnaryOp(i, pop()))
                 case i if i >= ISHL && i <= LXOR =>
                     push(BinaryOp(i, pop(), pop()))
-                    
+
                 case L2I|F2I|D2I => push(PrimitiveCast(pop(), DOUBLE_TYPE))
                 case I2L|F2L|D2L => push(PrimitiveCast(pop(), LONG_TYPE))
                 case I2F|L2F|D2F => push(PrimitiveCast(pop(), FLOAT_TYPE))
@@ -224,16 +225,16 @@ class StackAnalyser(val owner:Type, val m:MethodNode)
                 case I2B => push(PrimitiveCast(pop(), BYTE_TYPE))
                 case I2C => push(PrimitiveCast(pop(), CHAR_TYPE))
                 case I2S => push(PrimitiveCast(pop(), SHORT_TYPE))
-                
+
                 case i if i >= LCMP && i <= DCMPG =>
                     push(BinaryOp(i, pop(), pop()))
-                
+
                 case i if i >= IRETURN && i <= ARETURN => pop()
-                
+
                 case ARRAYLENGTH => push(ArrayLength(pop()))
                 case ATHROW => pop()
                 case MONITORENTER|MONITOREXIT => pop()
-                
+
                 case _ =>
 
             }

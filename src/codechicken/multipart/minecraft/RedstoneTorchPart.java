@@ -1,136 +1,107 @@
 package codechicken.multipart.minecraft;
 
-import java.util.Random;
-
+import codechicken.multipart.IFaceRedstonePart;
+import codechicken.multipart.RedstoneInteractions;
+import codechicken.multipart.TRandomUpdateTickPart;
 import codechicken.multipart.TickScheduler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRedstoneTorch;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
-import codechicken.lib.vec.BlockCoord;
-import codechicken.lib.vec.Cuboid6;
-import codechicken.multipart.IFaceRedstonePart;
-import codechicken.multipart.TRandomUpdateTick;
-import codechicken.multipart.RedstoneInteractions;
+import net.minecraft.util.SoundCategory;
 
-public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, TRandomUpdateTick
+import java.util.Random;
+
+public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, TRandomUpdateTickPart
 {
-    public static BlockRedstoneTorch torchActive = (BlockRedstoneTorch) Blocks.redstone_torch;
-    public static BlockRedstoneTorch torchIdle = (BlockRedstoneTorch) Blocks.unlit_redstone_torch;
-    
+    public static BlockRedstoneTorch torchActive = (BlockRedstoneTorch) Blocks.REDSTONE_TORCH;
+    public static BlockRedstoneTorch torchIdle = (BlockRedstoneTorch) Blocks.UNLIT_REDSTONE_TORCH;
+
     public class BurnoutEntry
     {
         public BurnoutEntry(long l)
         {
             timeout = l;
         }
-        
+
         long timeout;
         BurnoutEntry next;
     }
-    
+
     private BurnoutEntry burnout;
-    
+
     public RedstoneTorchPart()
     {
+        state = torchActive.getDefaultState();
     }
-    
-    public RedstoneTorchPart(int meta)
+
+    public RedstoneTorchPart(IBlockState state)
     {
-        super(meta);
+        super(state);
     }
-    
-    @Override
-    public Block getBlock()
-    {
-        return active() ? torchActive : torchIdle;
-    }
-    
-    public boolean active()
-    {
-        return (meta&0x10) > 0;
-    }
-    
+
     @Override
     public String getType()
     {
         return "mc_redtorch";
     }
-    
+
     @Override
-    public int sideForMeta(int meta)
+    public byte getMeta()
     {
-        return super.sideForMeta(meta&7);
+        int m = getBlock().getMetaFromState(state);
+        if (active()) m |= 1<<7;
+        return (byte) m;
     }
-    
+
     @Override
-    public Cuboid6 getBounds()
+    public void setMeta(byte meta)
     {
-        return getBounds(meta&7);
+        state = ((meta&1<<7) != 0 ? torchActive : torchIdle).getStateFromMeta(meta&0x7F);
     }
-    
-    public static McBlockPart placement(World world, BlockCoord pos, int side)
+
+    @Override
+    public Block getBlock()
     {
-        if(side == 0)
-            return null;
-        pos = pos.copy().offset(side^1);
-        if(!world.isSideSolid(pos.x, pos.y, pos.z, ForgeDirection.getOrientation(side)))
-            return null;
-        
-        return new RedstoneTorchPart(sideMetaMap[side^1]|0x10);
+        return active() ? torchActive : torchIdle;
     }
-    
+
+    public boolean active()
+    {
+        return state.getBlock() == torchActive;
+    }
+
     @Override
     public void randomDisplayTick(Random random)
     {
         if(!active())
             return;
-        
-        double d0 = x() + 0.5 + (random.nextFloat() - 0.5) * 0.2;
-        double d1 = y() + 0.7 + (random.nextFloat() - 0.5) * 0.2;
-        double d2 = z() + 0.5 + (random.nextFloat() - 0.5) * 0.2;
-        double d3 = 0.22D;
-        double d4 = 0.27D;
-        
-        World world = world();
-        int m = meta&7;
-        if (m == 1)
-            world.spawnParticle("reddust", d0 - d4, d1 + d3, d2, 0, 0, 0);
-        else if (m == 2)
-            world.spawnParticle("reddust", d0 + d4, d1 + d3, d2, 0, 0, 0);
-        else if (m == 3)
-            world.spawnParticle("reddust", d0, d1 + d3, d2 - d4, 0, 0, 0);
-        else if (m == 4)
-            world.spawnParticle("reddust", d0, d1 + d3, d2 + d4, 0, 0, 0);
-        else
-            world.spawnParticle("reddust", d0, d1, d2, 0, 0, 0);
+
+        super.randomDisplayTick(random);
     }
-    
+
     @Override
-    public ItemStack pickItem(MovingObjectPosition hit)
+    public ItemStack getDropStack()
     {
         return new ItemStack(torchActive);
     }
-    
+
     @Override
     public void onNeighborChanged()
     {
-        if(!world().isRemote)
-        {
+        if(!world().isRemote) {
             if(!dropIfCantStay() && isBeingPowered() == active())
                 scheduleTick(2);
         }
     }
-    
+
     public boolean isBeingPowered()
     {
-        int side = metaSideMap[meta&7];
-        return RedstoneInteractions.getPowerTo(this, side) > 0;
+        return RedstoneInteractions.getPowerTo(this, getSideFromState()) > 0;
     }
-    
+
     @Override
     public void scheduledTick()
     {
@@ -154,14 +125,12 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
         long time = world().getTotalWorldTime();
         while(burnout != null && burnout.timeout <= time)
             burnout = burnout.next;
-        
-        if(add)
-        {
+
+        if(add) {
             BurnoutEntry e = new BurnoutEntry(world().getTotalWorldTime()+60);
             if(burnout == null)
                 burnout = e;
-            else
-            {
+            else {
                 BurnoutEntry b = burnout;
                 while(b.next != null)
                     b = b.next;
@@ -171,45 +140,35 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
 
         if(burnout == null)
             return false;
-        
+
         int i = 0;
         BurnoutEntry b = burnout;
-        while(b != null)
-        {
+        while(b != null) {
             i++;
             b = b.next;
         }
         return i >= 8;
     }
-    
+
     private void toggle()
     {
-        if(active())//deactivating
-        {
-            if(burnedOut(true))
-            {
-                World world = world();
-                Random rand = world.rand;
-                world.playSoundEffect(x()+0.5, y()+0.5, z()+0.5, "random.fizz", 0.5F, 2.6F + (rand.nextFloat() - rand.nextFloat()) * 0.8F);
-                McMultipartSPH.spawnBurnoutSmoke(world, x(), y(), z());
+        if(active()) {
+            if(burnedOut(true)) {
+                world().playSound(null, pos(), SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 0.5F, 2.6F + (world().rand.nextFloat() - world().rand.nextFloat()) * 0.8F);
+                McMultipartSPH.spawnBurnoutSmoke(world(), x(), y(), z());
             }
-        }
-        else if(burnedOut(false))
-        {
+        } else if(burnedOut(false))
             return;
-        }
-        
-        meta ^= 0x10;
+
+        if (active())
+            state = torchIdle.getDefaultState().withProperty(BlockRedstoneTorch.FACING, state.getValue(BlockRedstoneTorch.FACING));
+        else
+            state = torchActive.getDefaultState().withProperty(BlockRedstoneTorch.FACING, state.getValue(BlockRedstoneTorch.FACING));
+
         sendDescUpdate();
         tile().markDirty();
         tile().notifyPartChange(this);
         tile().notifyNeighborChange(1);
-    }
-    
-    @Override
-    public void drop() {
-        meta|=0x10;//set state to on for drop
-        super.drop();
     }
 
     @Override
@@ -218,7 +177,7 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
         if(active())
             tile().notifyNeighborChange(1);
     }
-    
+
     @Override
     public void onAdded()
     {
@@ -236,17 +195,18 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
     @Override
     public int weakPowerLevel(int side)
     {
-        return active() && side != metaSideMap[meta&7] ? 15 : 0;
+        return active() && side != getSideFromState() ? 15 : 0;
     }
-    
+
     @Override
     public boolean canConnectRedstone(int side)
     {
         return true;
     }
-    
+
     @Override
-    public int getFace() {
-        return metaSideMap[meta&7];
+    public int getFace()
+    {
+        return getSideFromState();
     }
 }

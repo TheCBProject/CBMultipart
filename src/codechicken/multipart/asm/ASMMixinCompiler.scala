@@ -1,25 +1,24 @@
 package codechicken.multipart.asm
 
-import scala.collection.mutable.{Map => MMap, ListBuffer => MList, Set => MSet}
-import java.util.{Set => JSet}
-import scala.collection.JavaConversions._
-import org.objectweb.asm.tree._
-import org.objectweb.asm.Opcodes._
-import org.objectweb.asm.ClassReader
-import org.objectweb.asm.Type
-import org.objectweb.asm.MethodVisitor
-import Type._
-import codechicken.lib.asm.ASMHelper._
-import codechicken.lib.asm.{InsnListSection, InsnComparator, ASMHelper, ObfMapping}
 import java.io.File
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import net.minecraft.launchwrapper.LaunchClassLoader
+import java.lang.reflect.{Method, Modifier}
+import java.util.{Set => JSet}
+
+import codechicken.lib.asm.ASMHelper._
+import codechicken.lib.asm.{ASMHelper, InsnComparator, InsnListSection, ObfMapping}
+import codechicken.multipart.asm.ASMImplicits._
 import codechicken.multipart.handler.MultipartProxy
-import cpw.mods.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper
+import net.minecraft.launchwrapper.LaunchClassLoader
+import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler
 import org.apache.logging.log4j.LogManager
-import ASMImplicits._
-import cpw.mods.fml.relauncher.FMLLaunchHandler
+import org.objectweb.asm.Opcodes._
+import org.objectweb.asm.Type._
+import org.objectweb.asm.tree._
+import org.objectweb.asm.{ClassReader, MethodVisitor, Type}
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable.{ListBuffer => MList, Map => MMap, Set => MSet}
 
 object DebugPrinter
 {
@@ -80,14 +79,14 @@ object ASMMixinCompiler
             return null
 
         def useTransformers = f_transformerExceptions.get(cl).asInstanceOf[JSet[String]]
-            .find(jName.startsWith).isEmpty
+                .exists(jName.startsWith)
 
         val obfName = if (ObfMapping.obfuscated) FMLDeobfuscatingRemapper.INSTANCE.unmap(name).replace('/', '.') else jName
         val bytes = cl.getClassBytes(obfName)
         if (bytes != null && useTransformers)
             return m_runTransformers.invoke(cl, jName, obfName, bytes).asInstanceOf[Array[Byte]]
 
-        return bytes
+        bytes
     }
 
     def internalDefine(name$: String, bytes: Array[Byte]) {
@@ -156,7 +155,7 @@ object ASMMixinCompiler
     private val infoCache = MMap[String, ClassInfo]()
 
     def remClassInfo(name: String) = infoCache.remove(name)
-    implicit def getClassInfo(name: String) = infoCache.getOrElseUpdate(name, ClassInfo.obtainInfo(name))
+    implicit def getClassInfo(name: String):ClassInfo = infoCache.getOrElseUpdate(name, ClassInfo.obtainInfo(name))
     implicit def getClassInfo(cnode: ClassNode):ClassInfo = getClassInfo(cnode.name)
     implicit def getClassInfo(clazz: Class[_]):ClassInfo = if(clazz == null) null else getClassInfo(clazz.nodeName)
 
@@ -177,7 +176,7 @@ object ASMMixinCompiler
             def name = clazz.nodeName
             def superClass = Option(clazz.getSuperclass)
             def interfaces = clazz.getInterfaces.map(getClassInfo)
-            def methods = clazz.getMethods.map(ReflectionMethodInfo(_))
+            def methods = clazz.getMethods.map(ReflectionMethodInfo)
         }
 
         class ClassNodeInfo(val cnode: ClassNode) extends ClassInfo

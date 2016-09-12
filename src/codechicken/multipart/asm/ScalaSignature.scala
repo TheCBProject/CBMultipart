@@ -1,14 +1,11 @@
 package codechicken.multipart.asm
 
-import org.objectweb.asm.tree.ClassNode
-import org.objectweb.asm.tree.AnnotationNode
-import org.objectweb.asm.tree.FieldNode
-import org.objectweb.asm.tree.MethodNode
 import java.util.{List => JList}
-import scala.collection.JavaConverters._
-import scala.collection.JavaConversions._
 
-import ScalaSignature._
+import codechicken.multipart.asm.ScalaSignature._
+import org.objectweb.asm.tree.{AnnotationNode, ClassNode}
+
+import scala.collection.JavaConversions._
 
 object ScalaSignature
 {

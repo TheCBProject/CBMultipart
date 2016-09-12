@@ -1,16 +1,20 @@
 package codechicken.multipart.scalatraits
 
-import net.minecraft.inventory.{IInventory, ISidedInventory}
+import java.util.{LinkedList => JLinkedList}
+
 import codechicken.multipart.{TMultiPart, TileMultipart}
-import java.util.LinkedList
-import net.minecraft.item.ItemStack
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.inventory.{IInventory, ISidedInventory}
+import net.minecraft.item.ItemStack
+import net.minecraft.util.EnumFacing
+import net.minecraft.util.text.TextComponentString
+
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 
 trait TIInventoryTile extends TileMultipart with ISidedInventory
 {
-    var invList = new LinkedList[IInventory]()
+    var invList = new JLinkedList[IInventory]()
     var slotMap = Array[(IInventory, Int)]()
 
     override def copyFrom(that:TileMultipart)
@@ -56,70 +60,82 @@ trait TIInventoryTile extends TileMultipart with ISidedInventory
         }
     }
 
-    def getSizeInventory:Int = slotMap.length
+    override def getName = "Multipart Inventory"
 
-    def getStackInSlot(i:Int) = {
-        val (inv, slot) = slotMap(i)
+    override def getDisplayName = new TextComponentString(getName)
+
+    override def hasCustomName = false
+
+    override def getSizeInventory:Int = slotMap.length
+
+    override def getStackInSlot(index:Int) = {
+        val (inv, slot) = slotMap(index)
         inv.getStackInSlot(slot)
     }
 
-    def decrStackSize(i:Int, j:Int) = {
-        val (inv, slot) = slotMap(i)
-        inv.decrStackSize(slot, j)
+    override def decrStackSize(index:Int, count:Int) = {
+        val (inv, slot) = slotMap(index)
+        inv.decrStackSize(slot, count)
     }
 
-    def getStackInSlotOnClosing(i:Int) = {
-        val (inv, slot) = slotMap(i)
-        inv.getStackInSlotOnClosing(slot)
+    override def removeStackFromSlot(index: Int) = {
+        val (inv, slot) = slotMap(index)
+        inv.removeStackFromSlot(index)
     }
 
-    def setInventorySlotContents(i:Int, itemstack:ItemStack) = {
-        val (inv, slot) = slotMap(i)
-        inv.setInventorySlotContents(slot, itemstack)
+    override def setInventorySlotContents(index:Int, stack:ItemStack) = {
+        val (inv, slot) = slotMap(index)
+        inv.setInventorySlotContents(slot, stack)
     }
 
-    def getInventoryName = "Multipart Inventory"
+    override def getInventoryStackLimit = 64
 
-    def hasCustomInventoryName = false
+    override def isUseableByPlayer(player:EntityPlayer) = true
 
-    def getInventoryStackLimit = 64
+    override def openInventory(player:EntityPlayer){}
 
-    def isUseableByPlayer(entityplayer:EntityPlayer) = true
+    override def closeInventory(player:EntityPlayer){}
 
-    def openInventory(){}
-
-    def closeInventory(){}
-
-    def isItemValidForSlot(i:Int, itemstack:ItemStack) = {
+    override def isItemValidForSlot(i:Int, itemstack:ItemStack) = {
         val (inv, slot) = slotMap(i)
         inv.isItemValidForSlot(slot, itemstack)
     }
 
-    def getAccessibleSlotsFromSide(side:Int) = {
+    override def getField(id:Int) = 0
+
+    override def setField(id:Int, value:Int){}
+
+    override def getFieldCount = 0
+
+    override def clear() {
+        for (inv <- invList) inv.clear()
+    }
+
+    override def getSlotsForFace(side:EnumFacing) = {
         val buf = new ArrayBuffer[Int]()
         var base = 0
         for(inv <- invList) {
             inv match {
-                case isided:ISidedInventory => buf++=isided.getAccessibleSlotsFromSide(side).map(_ + base)
+                case is:ISidedInventory => buf ++= is.getSlotsForFace(side).map(_ + base)
                 case _ =>
             }
-            base+=inv.getSizeInventory
+            base += inv.getSizeInventory
         }
         buf.toArray
     }
 
-    def canInsertItem(i:Int, itemstack:ItemStack, j:Int) = {
+    override def canInsertItem(i:Int, itemstack:ItemStack, direction:EnumFacing) = {
         val (inv, slot) = slotMap(i)
         inv match {
-            case isided:ISidedInventory => isided.canInsertItem(slot, itemstack, j)
+            case is:ISidedInventory => is.canInsertItem(slot, itemstack, direction)
             case _ => true
         }
     }
 
-    def canExtractItem(i:Int, itemstack:ItemStack, j:Int) = {
+    override def canExtractItem(i:Int, itemstack:ItemStack, direction:EnumFacing) = {
         val (inv, slot) = slotMap(i)
         inv match {
-            case isided:ISidedInventory => isided.canExtractItem(slot, itemstack, j)
+            case is:ISidedInventory => is.canExtractItem(slot, itemstack, direction)
             case _ => true
         }
     }

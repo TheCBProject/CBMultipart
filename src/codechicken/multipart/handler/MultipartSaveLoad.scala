@@ -1,16 +1,17 @@
 package codechicken.multipart.handler
 
-import net.minecraft.tileentity.TileEntity
-import net.minecraft.nbt.NBTTagCompound
 import java.util.Map
-import net.minecraft.world.chunk.Chunk
-import net.minecraft.world.ChunkPosition
-import codechicken.multipart.{MultipartHelper, TileMultipart}
+
 import codechicken.lib.asm.ObfMapping
-import net.minecraft.world.World
-import scala.collection.mutable
 import codechicken.multipart.MultipartHelper.IPartTileConverter
+import codechicken.multipart.{MultipartHelper, TileMultipart}
+import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.tileentity.TileEntity
+import net.minecraft.world.World
+import net.minecraft.world.chunk.Chunk
+
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 /**
  * Hack due to lack of TileEntityLoadEvent in forge
@@ -24,13 +25,15 @@ object MultipartSaveLoad
     {
         var tag: NBTTagCompound = _
 
-        override def readFromNBT(t: NBTTagCompound) {
+        override def readFromNBT(t: NBTTagCompound)
+        {
             super.readFromNBT(t)
             tag = t
         }
     }
 
-    def hookLoader() {
+    def hookLoader()
+    {
         val field = classOf[TileEntity].getDeclaredField(
             new ObfMapping("net/minecraft/tileentity/TileEntity", "field_145855_i", "Ljava/util/Map;")
                 .toRuntime.s_name)
@@ -41,11 +44,13 @@ object MultipartSaveLoad
 
     private val classToNameMap = getClassToNameMap
 
-    def registerTileClass(t: Class[_ <: TileEntity]) {
+    def registerTileClass(t: Class[_ <: TileEntity])
+    {
         classToNameMap.put(t, "savedMultipart")
     }
 
-    def getClassToNameMap = {
+    def getClassToNameMap =
+    {
         val field = classOf[TileEntity].getDeclaredField(
             new ObfMapping("net/minecraft/tileentity/TileEntity", "field_145853_j", "Ljava/util/Map;")
                 .toRuntime.s_name)
@@ -53,9 +58,10 @@ object MultipartSaveLoad
         field.get(null).asInstanceOf[Map[Class[_ <: TileEntity], String]]
     }
 
-    def loadTiles(chunk: Chunk) {
-        loadingWorld = chunk.worldObj
-        val iterator = chunk.chunkTileEntityMap.asInstanceOf[Map[ChunkPosition, TileEntity]].entrySet.iterator
+    def loadTiles(chunk: Chunk)
+    {
+        loadingWorld = chunk.getWorld
+        val iterator = chunk.getTileEntityMap.entrySet.iterator
         while (iterator.hasNext) {
             val e = iterator.next
             var next = false
@@ -65,10 +71,8 @@ object MultipartSaveLoad
                 case t => converters.find(_.canConvert(t)) match {
                     case Some(c) =>
                         val parts = c.convert(t)
-                        if(!parts.isEmpty)
-                            MultipartHelper.createTileFromParts(parts)
-                        else
-                            null
+                        if(parts.nonEmpty) MultipartHelper.createTileFromParts(parts)
+                        else null
                     case _ =>
                         next = true
                         null
@@ -77,12 +81,11 @@ object MultipartSaveLoad
 
             if(!next) {
                 if (t != null) {
-                    t.setWorldObj(e.getValue.getWorldObj)
+                    t.setWorldObj(e.getValue.getWorld)
                     t.validate()
                     e.setValue(t)
                 }
-                else
-                    iterator.remove()
+                else iterator.remove()
             }
         }
     }

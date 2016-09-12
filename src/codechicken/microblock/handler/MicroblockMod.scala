@@ -1,18 +1,14 @@
 package codechicken.microblock.handler
 
-import cpw.mods.fml.common.Mod
-import cpw.mods.fml.common.event.FMLInitializationEvent
-import cpw.mods.fml.common.event.FMLPreInitializationEvent
-import cpw.mods.fml.common.Mod.EventHandler
-import cpw.mods.fml.common.event.FMLServerAboutToStartEvent
-import codechicken.microblock.MicroMaterialRegistry
-import codechicken.microblock.DefaultContent
-import cpw.mods.fml.common.event.FMLPostInitializationEvent
-import codechicken.microblock.ConfigContent
-import cpw.mods.fml.common.event.FMLInterModComms.IMCEvent
+import codechicken.microblock.{ConfigContent, DefaultContent, MicroMaterialRegistry}
+import net.minecraftforge.fml.common.Mod
+import net.minecraftforge.fml.common.Mod.EventHandler
+import net.minecraftforge.fml.common.event.FMLInterModComms.IMCEvent
+import net.minecraftforge.fml.common.event.{FMLInitializationEvent, FMLPostInitializationEvent, FMLPreInitializationEvent, FMLServerAboutToStartEvent}
+
 import scala.collection.JavaConversions._
 
-@Mod(modid = "ForgeMicroblock", acceptedMinecraftVersions = "[1.7.10]", dependencies = "required-after:ForgeMultipart", modLanguage = "scala")
+@Mod(modid = "ForgeMicroblock", acceptedMinecraftVersions = "[1.10]", dependencies = "required-after:forgemultipartcbe", modLanguage = "scala")
 object MicroblockMod
 {
     @EventHandler
@@ -23,24 +19,24 @@ object MicroblockMod
     }
 
     @EventHandler
-    def init(event: FMLInitializationEvent) {
+    def init(event:FMLInitializationEvent) {
         MicroblockProxy.init()
         ConfigContent.load()
     }
 
     @EventHandler
-    def postInit(event: FMLPostInitializationEvent) {
+    def postInit(event:FMLPostInitializationEvent) {
         MicroMaterialRegistry.setupIDMap()
         MicroblockProxy.postInit()
     }
 
     @EventHandler
-    def beforeServerStart(event: FMLServerAboutToStartEvent) {
+    def beforeServerStart(event:FMLServerAboutToStartEvent) {
         MicroMaterialRegistry.setupIDMap()
     }
 
     @EventHandler
-    def handleIMC(event: IMCEvent) {
+    def handleIMC(event:IMCEvent) {
         ConfigContent.handleIMC(event.getMessages)
     }
 }

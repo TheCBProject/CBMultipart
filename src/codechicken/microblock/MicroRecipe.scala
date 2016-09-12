@@ -5,6 +5,7 @@ import net.minecraft.world.World
 import net.minecraft.inventory.InventoryCrafting
 import net.minecraft.item.ItemStack
 import codechicken.microblock.handler.MicroblockProxy._
+import net.minecraftforge.common.ForgeHooks
 import net.minecraftforge.oredict.RecipeSorter
 
 object MicroRecipe extends IRecipe
@@ -12,11 +13,21 @@ object MicroRecipe extends IRecipe
     RecipeSorter.register("fmp:micro", getClass, RecipeSorter.Category.SHAPED, "after:forge:shapelessore")
 
     def getRecipeOutput = ItemMicroPart.create(1, 1, "tile.stone")
-    
+
     def getRecipeSize = 9
-    
+
     def matches(icraft:InventoryCrafting, world:World) = getCraftingResult(icraft) != null
-    
+
+    override def getRemainingItems(inv:InventoryCrafting) =
+    {
+        val stacks = new Array[ItemStack](inv.getSizeInventory)
+        for (i <- 0 until stacks.length) {
+            val stack = inv.getStackInSlot(i)
+            stacks(i) = ForgeHooks.getContainerItem(stack)
+        }
+        stacks
+    }
+
     def getCraftingResult(icraft:InventoryCrafting):ItemStack =
     {
         var res = getHollowResult(icraft)
@@ -30,8 +41,8 @@ object MicroRecipe extends IRecipe
         res = getHollowFillResult(icraft)
         return res
     }
-    
-    def create(amount:Int, mcrClass:Int, size:Int, material:Int):ItemStack =
+
+    def create(amount:Int, factoryID:Int, size:Int, material:Int):ItemStack =
     {
         if(size == 8)
         {
@@ -39,52 +50,52 @@ object MicroRecipe extends IRecipe
             item.stackSize = amount
             return item
         }
-        return ItemMicroPart.create(amount, mcrClass<<8|size, MicroMaterialRegistry.materialName(material))
+        ItemMicroPart.createStack(amount, ItemMicroPart.damage(factoryID, size), MicroMaterialRegistry.materialName(material))
     }
-    
-    def microMaterial(item:ItemStack) = 
+
+    def microMaterial(item:ItemStack) =
         if(item.getItem == itemMicro)
             ItemMicroPart.getMaterialID(item)
         else
             findMaterial(item)
-    
-    def microClass(item:ItemStack) = 
+
+    def microFactory(item:ItemStack) =
         if(item.getItem == itemMicro)
             item.getItemDamage >> 8
         else
             0
-    
-    def microSize(item:ItemStack) = 
+
+    def microSize(item:ItemStack) =
         if(item.getItem == itemMicro)
             item.getItemDamage & 0xFF
         else
             8
-    
+
     def getHollowResult(icraft:InventoryCrafting):ItemStack =
     {
         if(icraft.getStackInRowAndColumn(1, 1) != null) return null
-        
+
         val first = icraft.getStackInRowAndColumn(0, 0)
-        if(first == null || first.getItem != itemMicro || microClass(first) != 0) return null
+        if(first == null || first.getItem != itemMicro || microFactory(first) != 0) return null
         val size = microSize(first)
         val material = microMaterial(first)
-        
+
         for(i <- 1 to 8 if i != 4)
         {
             val item = icraft.getStackInSlot(i)
-            if(item == null || item.getItem != itemMicro || 
+            if(item == null || item.getItem != itemMicro ||
                     microMaterial(item) != material || item.getItemDamage != first.getItemDamage)
                 return null
         }
         return create(8, 1, size, material)
     }
-    
-    def getGluingResult(icraft:InventoryCrafting):ItemStack = 
+
+    def getGluingResult(icraft:InventoryCrafting):ItemStack =
     {
         var size = 0
         var count = 0
         var smallest = 0
-        var mcrClass = 0
+        var mcrFactory = 0
         var material = 0
         for(i <- 0 until 9)
         {
@@ -95,13 +106,13 @@ object MicroRecipe extends IRecipe
                 if(count == 0)
                 {
                     size = microSize(item)
-                    mcrClass = microClass(item)
+                    mcrFactory = microFactory(item)
                     material = microMaterial(item)
                     count = 1
                     smallest = size
                 }
-                else if(microClass(item) != mcrClass || microMaterial(item) != material) return null
-                else if(mcrClass >= 2 && microSize(item) != smallest) return null
+                else if(microFactory(item) != mcrFactory || microMaterial(item) != material) return null
+                else if(mcrFactory >= 2 && microSize(item) != smallest) return null
                 else
                 {
                     smallest= Math.min(smallest, microSize(item))
@@ -110,14 +121,14 @@ object MicroRecipe extends IRecipe
                 }
             }
         }
-        
+
         if(count <= 1) return null
-        
-        mcrClass match {
+
+        mcrFactory match {
             case 3 => count match {
                 case 2 => create(1, 0, smallest, material)
                 case _ => null
-            } 
+            }
             case 2 => count match {
                 case 2 => create(1, 3, smallest, material)
                 case 4 => create(1, 0, smallest, material)
@@ -130,12 +141,12 @@ object MicroRecipe extends IRecipe
                 else if(base.get <= smallest)
                     null
                 else
-                    create(size/base.get, mcrClass, base.get, material)
+                    create(size/base.get, mcrFactory, base.get, material)
             case _ => null
         }
     }
-    
-    def getSaw(icraft:InventoryCrafting):(Saw, Int, Int) = 
+
+    def getSaw(icraft:InventoryCrafting):(Saw, Int, Int) =
     {
         for(r <- 0 until 3)
             for(c <- 0 until 3)
@@ -146,70 +157,70 @@ object MicroRecipe extends IRecipe
             }
         return (null, 0, 0)
     }
-    
+
     def canCut(saw:Saw, sawItem:ItemStack, material:Int):Boolean = {
         val sawStrength = saw.getCuttingStrength(sawItem)
         val matStrength = MicroMaterialRegistry.getMaterial(material).getCutterStrength
         return sawStrength >= matStrength || sawStrength == MicroMaterialRegistry.getMaxCuttingStrength
     }
-    
-    def getThinningResult(icraft:InventoryCrafting):ItemStack = 
+
+    def getThinningResult(icraft:InventoryCrafting):ItemStack =
     {
         val (saw, row, col) = getSaw(icraft)
         if(saw == null)
             return null
-            
+
         val item = icraft.getStackInRowAndColumn(col, row+1)
         if(item == null)
             return null
-        
+
         val size = microSize(item)
         val material = microMaterial(item)
-        val mcrClass = microClass(item)
+        val mcrClass = microFactory(item)
         if(size == 1 || material < 0 || !canCut(saw, icraft.getStackInRowAndColumn(col, row), material))
             return null
-        
+
         for(r <- 0 until 3)
             for(c <- 0 until 3)
                 if((c != col || r != row && r != row+1) &&
                         icraft.getStackInRowAndColumn(c, r) != null)
                     return null
-        
+
         return create(2, mcrClass, size/2, material)
     }
-    
+
     def findMaterial(item:ItemStack):Int =
         MicroMaterialRegistry.getIdMap.find{m => val mitem = m._2.getItem
                 item.getItem == mitem.getItem &&
-                item.getItemDamage == mitem.getItemDamage && 
+                item.getItemDamage == mitem.getItemDamage &&
                 ItemStack.areItemStackTagsEqual(item, mitem)} match {
             case None => -1
             case Some((name, m)) => MicroMaterialRegistry.materialID(name)
         }
-    
+
     val splitMap = Map(0 -> 3, 1 -> 3, 3 -> 2)
-    def getSplittingResult(icraft:InventoryCrafting):ItemStack = 
+    def getSplittingResult(icraft:InventoryCrafting):ItemStack =
     {
         val (saw, row, col) = getSaw(icraft)
         if(saw == null) return null
         val item = icraft.getStackInRowAndColumn(col+1, row)
         if(item == null || item.getItem != itemMicro) return null
-        val mcrClass = microClass(item)
+        val mcrClass = microFactory(item)
         val material = microMaterial(item)
         if(!canCut(saw, icraft.getStackInRowAndColumn(col, row), material)) return null
         val split = splitMap.get(mcrClass)
         if(split.isEmpty)return null
-        
+
         for(r <- 0 until 3)
             for(c <- 0 until 3)
                 if((r != row || c != col && c != col+1) &&
                         icraft.getStackInRowAndColumn(c, r) != null)
                     return null
-        
+
         return create(2, split.get, microSize(item), material)
     }
-    
-    def getHollowFillResult(icraft:InventoryCrafting):ItemStack = 
+
+    def getHollowFillResult(icraft:InventoryCrafting):ItemStack =
     {
         var cover:ItemStack = null
         for(i <- 0 until 9)
@@ -217,7 +228,7 @@ object MicroRecipe extends IRecipe
             val item = icraft.getStackInSlot(i)
             if(item != null)
             {
-                if(item.getItem != itemMicro || cover != null || microClass(item) != 1) return null
+                if(item.getItem != itemMicro || cover != null || microFactory(item) != 1) return null
                 else cover = item
             }
         }

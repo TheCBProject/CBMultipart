@@ -22,7 +22,7 @@ object TileCache
     def apply(c:BlockCoord) = map.get(c)
     def clear() = map.clear()
 
-    def findTile(world:World, c:BlockCoord) = BlockMultipart.getTile(world, c.x, c.y, c.z) match {
+    def findTile(world:World, c:BlockCoord) = BlockMultipart.getTile(world, c.pos()) match {
         case null => apply(c) match {
             case Some(FlaggedTile(t, rem)) =>
                 if(!rem)

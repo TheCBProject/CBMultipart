@@ -33,11 +33,11 @@ public enum PartMap
     EDGE_XPN(24),//9
     EDGE_XNP(25),//10
     EDGE_XPP(26);//11
-    
+
     public final int i;
     public final int mask;
-    
-    private PartMap(int i)
+
+    PartMap(int i)
     {
         this.i = i;
         mask = 1<<i;
@@ -58,7 +58,7 @@ public enum PartMap
     {
         return values()[i+15];
     }
-    
+
     /**
      * Don't actually use this.
      */
@@ -66,9 +66,9 @@ public enum PartMap
     {
         return values()[i+7];
     }
-    
+
     /**
-     * Returns a 3 bit mask of the axis xzy that are variable in this edge. 
+     * Returns a 3 bit mask of the axis xzy that are variable in this edge.
      * For example, the first 4 edges (15-18) are along the Y axis, variable in x and z, so the mask is 110b. Note axis y is 1<<0, z is 1<<1 and x is 1<<2
      * Note the parameter e is relative to the first edge slot and can range from 0-11
      */
@@ -82,7 +82,7 @@ public enum PartMap
         }
         throw new IllegalArgumentException("Switch Falloff");
     }
-    
+
     /**
      * Unpacks an edge index, to a mask where high values indicate positive positions in that axis.
      * Note the parameter e is relative to the first edge slot and can range from 0-11
@@ -98,7 +98,7 @@ public enum PartMap
         }
         throw new IllegalArgumentException("Switch Falloff");
     }
-    
+
     /**
      * Repacks a mask of axis bits indicating positive positions, into an edge in along the same axis as e.
      * Note the parameter e is relative to the first edge slot and can range from 0-11
@@ -113,13 +113,13 @@ public enum PartMap
         }
         throw new IllegalArgumentException("Switch Falloff");
     }
-    
+
     private static int[] edgeBetweenMap = new int[]{
         -1, -1, 8, 10, 4, 5,
         -1, -1, 9, 11, 6, 7,
         -1, -1,-1, -1, 0, 2,
         -1, -1,-1, -1, 1, 3};
-    
+
     /**
      * Returns the slot of the edge between 2 sides.
      */

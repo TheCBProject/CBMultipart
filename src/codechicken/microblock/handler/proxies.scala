@@ -1,24 +1,25 @@
 package codechicken.microblock.handler
 
-import net.minecraftforge.common.MinecraftForge
-import codechicken.multipart.handler.MultipartProxy._
-import codechicken.microblock._
-import net.minecraftforge.client.MinecraftForgeClient
-import cpw.mods.fml.relauncher.SideOnly
-import cpw.mods.fml.relauncher.Side
-import net.minecraft.item.crafting.CraftingManager
-import net.minecraft.item.Item
-import net.minecraft.item.crafting.IRecipe
 import java.util.{List => JList}
+
 import codechicken.lib.config.ConfigFile
-import net.minecraftforge.oredict.OreDictionary
-import net.minecraft.item.ItemStack
-import net.minecraftforge.oredict.ShapedOreRecipe
 import codechicken.lib.packet.PacketCustom
-import cpw.mods.fml.common.registry.GameRegistry
-import net.minecraft.client.renderer.RenderBlocks
+import codechicken.lib.render.ModelRegistryHelper
+import codechicken.microblock._
+import codechicken.multipart.handler.MultipartProxy._
+import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.init.{Blocks, Items}
+import net.minecraft.item.crafting.CraftingManager
+import net.minecraft.item.{Item, ItemStack}
+import net.minecraftforge.client.event.ModelBakeEvent
+import net.minecraftforge.client.model.ModelLoader
+import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.registry.GameRegistry
+import net.minecraftforge.fml.relauncher.{Side, SideOnly}
+import net.minecraftforge.oredict.{OreDictionary, ShapedOreRecipe}
 import org.apache.logging.log4j.Logger
+
 import scala.collection.mutable
 
 class MicroblockProxy_serverImpl
@@ -33,17 +34,17 @@ class MicroblockProxy_serverImpl
 
     var useSawIcons: Boolean = _
 
-    def preInit(logger: Logger) {
+    def preInit(logger:Logger) {
         this.logger = logger
         itemMicro = new ItemMicroPart
-        GameRegistry.registerItem(itemMicro, "microblock")
         sawStone = createSaw(config, "sawStone", 1)
         sawIron = createSaw(config, "sawIron", 2)
         sawDiamond = createSaw(config, "sawDiamond", 3)
-        stoneRod = new Item().setUnlocalizedName("microblock:stoneRod").setTextureName("microblock:stoneRod")
-        GameRegistry.registerItem(stoneRod, "stoneRod")
+        stoneRod = new Item().setUnlocalizedName("stoneRod")//.setTextureName("microblock:stoneRod")
+        GameRegistry.register(stoneRod.setRegistryName("stoneRod"))
 
         OreDictionary.registerOre("rodStone", stoneRod)
+
         MinecraftForge.EVENT_BUS.register(MicroblockEventHandler)
 
         useSawIcons = config.getTag("useSawIcons").setComment("Set to true to use mc style icons for the saw instead of the 3D model").getBooleanValue(false)
@@ -52,14 +53,14 @@ class MicroblockProxy_serverImpl
     protected var saws = mutable.MutableList[Item]()
     def createSaw(config: ConfigFile, name: String, strength: Int) = {
         val saw = new ItemSaw(config.getTag(name).useBraces(), strength)
-            .setUnlocalizedName("microblock:" + name).setTextureName("microblock:" + name)
-        GameRegistry.registerItem(saw, name)
+            .setUnlocalizedName(name)//.setTextureName("microblock:" + name)
+        GameRegistry.register(saw.setRegistryName(name))
         saws+=saw
         saw
     }
 
     def addSawRecipe(saw: Item, blade: Item) {
-        CraftingManager.getInstance.getRecipeList.asInstanceOf[JList[IRecipe]].add(
+        CraftingManager.getInstance.getRecipeList.add(
             new ShapedOreRecipe(new ItemStack(saw),
                 "srr",
                 "sbr",
@@ -69,11 +70,11 @@ class MicroblockProxy_serverImpl
     }
 
     def init() {
-        CraftingManager.getInstance.getRecipeList.asInstanceOf[JList[IRecipe]].add(MicroRecipe)
-        CraftingManager.getInstance.addRecipe(new ItemStack(stoneRod, 4), "s", "s", 's': Character, Blocks.stone)
-        addSawRecipe(sawStone, Items.flint)
-        addSawRecipe(sawIron, Items.iron_ingot)
-        addSawRecipe(sawDiamond, Items.diamond)
+        CraftingManager.getInstance.getRecipeList.add(MicroRecipe)
+        CraftingManager.getInstance.addRecipe(new ItemStack(stoneRod, 4), "s", "s", 's': Character, Blocks.STONE)
+        addSawRecipe(sawStone, Items.FLINT)
+        addSawRecipe(sawIron, Items.IRON_INGOT)
+        addSawRecipe(sawDiamond, Items.DIAMOND)
     }
 
     def postInit() {
@@ -85,20 +86,33 @@ class MicroblockProxy_serverImpl
 class MicroblockProxy_clientImpl extends MicroblockProxy_serverImpl
 {
     @SideOnly(Side.CLIENT)
-    lazy val renderBlocks = new RenderBlocks
+    override def preInit(logger:Logger)
+    {
+        super.preInit(logger)
+
+        ModelRegistryHelper.registerItemRenderer(itemMicro, ItemMicroPartRenderer)
+        saws.foreach(ModelRegistryHelper.registerItemRenderer(_, ItemSawRenderer))
+    }
 
     @SideOnly(Side.CLIENT)
-    override def postInit() {
+    override def postInit()
+    {
         super.postInit()
-        MicroMaterialRegistry.loadIcons()
-        MinecraftForgeClient.registerItemRenderer(itemMicro, ItemMicroPartRenderer)
         PacketCustom.assignHandler(MicroblockCPH.registryChannel, MicroblockCPH)
     }
 
     @SideOnly(Side.CLIENT)
-    override def init() {
+    override def init()
+    {
         super.init()
-        saws.foreach(MinecraftForgeClient.registerItemRenderer(_, ItemSawRenderer))
+        MinecraftForge.EVENT_BUS.register(this)
+    }
+
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    def onModelBakeEvent(event:ModelBakeEvent)
+    {
+        MicroMaterialRegistry.loadIcons() //Theres probably a better place for this
     }
 }
 

@@ -1,22 +1,24 @@
 package codechicken.microblock
 
-import codechicken.multipart.asm.{ScratchBitSet, ASMMixinFactory}
-import java.util.BitSet
+import java.util.{BitSet => JBitSet}
+
+import codechicken.multipart.asm.{ASMMixinFactory, ScratchBitSet}
+
+trait IGeneratedMaterial
+{
+    def addTraits(traits:JBitSet, mcrClass:MicroblockFactory, client:Boolean)
+}
 
 object MicroblockGenerator extends ASMMixinFactory(classOf[Microblock], classOf[Int]) with ScratchBitSet
 {
-    trait IGeneratedMaterial
+    def create(mcrFactory:MicroblockFactory, material:Int, client:Boolean) =
     {
-        def addTraits(traits:BitSet, mcrClass:MicroblockClass, client:Boolean)
-    }
-
-    def create(mcrClass: MicroblockClass, material: Int, client: Boolean) = {
         val bitset = freshBitSet
-        bitset.set(mcrClass.baseTraitId)
-        if(client) bitset.set(mcrClass.clientTraitId)
+        bitset.set(mcrFactory.baseTraitId)
+        if(client) bitset.set(mcrFactory.clientTraitId)
 
         MicroMaterialRegistry.getMaterial(material) match {
-            case genMat:IGeneratedMaterial => genMat.addTraits(bitset, mcrClass, client)
+            case genMat:IGeneratedMaterial => genMat.addTraits(bitset, mcrFactory, client)
             case _ =>
         }
 

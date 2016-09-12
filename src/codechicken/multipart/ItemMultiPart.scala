@@ -1,12 +1,11 @@
 package codechicken.multipart
 
-import net.minecraft.item.Item
-import codechicken.lib.vec.Vector3
-import codechicken.lib.vec.Rotation
-import net.minecraft.item.ItemStack
+import codechicken.lib.vec.{BlockCoord, Rotation, Vector3}
 import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.item.{Item, ItemStack}
+import net.minecraft.util.math.BlockPos
+import net.minecraft.util.{EnumActionResult, EnumFacing, EnumHand}
 import net.minecraft.world.World
-import codechicken.lib.vec.BlockCoord
 
 /**
  * Java class implementation
@@ -18,35 +17,32 @@ abstract class JItemMultiPart extends Item with TItemMultiPart
  */
 trait TItemMultiPart extends Item
 {
-    def getHitDepth(vhit:Vector3, side:Int):Double = 
+    def getHitDepth(vhit:Vector3, side:Int):Double =
         vhit.copy.scalarProject(Rotation.axes(side)) + (side%2^1)
-        
-    override def onItemUse(item:ItemStack, player:EntityPlayer, world:World, x:Int, y:Int, z:Int, side:Int, hitX:Float, hitY:Float, hitZ:Float):Boolean =
+
+    override def onItemUse(stack:ItemStack, player:EntityPlayer, world:World, bpos:BlockPos, hand:EnumHand, facing:EnumFacing, hitX:Float, hitY:Float, hitZ:Float):EnumActionResult =
     {
-        val pos = new BlockCoord(x, y, z)
+        val pos = new BlockCoord(bpos)
+        val side = facing.getIndex
         val vhit = new Vector3(hitX, hitY, hitZ)
         val d = getHitDepth(vhit, side)
-    
-        def place():Boolean =
+
+        def place():EnumActionResult =
         {
-            val part = newPart(item, player, world, pos, side, vhit)
-            if(part == null || !TileMultipart.canPlacePart(world, pos, part))
-                return false
-            
-            if(!world.isRemote)
-                TileMultipart.addPart(world, pos, part)
-            if(!player.capabilities.isCreativeMode)
-                item.stackSize-=1
-            return true
+            val part = newPart(stack, player, world, pos, side, vhit)
+            if(part == null || !TileMultipart.canPlacePart(world, pos, part)) return EnumActionResult.FAIL
+
+            if(!world.isRemote) TileMultipart.addPart(world, pos, part)
+            if(!player.capabilities.isCreativeMode) stack.stackSize-=1
+            EnumActionResult.SUCCESS
         }
-        
-        if(d < 1 && place())
-            return true
-        
+
+        if(d < 1 && place() == EnumActionResult.SUCCESS) return EnumActionResult.SUCCESS
+
         pos.offset(side)
-        return place()
+        place()
     }
-    
+
     /**
      * Create a new part based on the placement information parameters.
      */

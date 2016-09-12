@@ -1,18 +1,20 @@
 package codechicken.multipart.asm
 
 import java.lang.reflect.Constructor
-import scala.collection.mutable
+import java.util.{BitSet => JBitSet}
+
+import codechicken.multipart.asm.ASMImplicits._
+import codechicken.multipart.asm.ASMMixinCompiler._
 import org.objectweb.asm.tree.ClassNode
-import java.util.BitSet
+
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import ASMMixinCompiler._
-import ASMImplicits._
 
 class ASMMixinFactory[T](val baseType:Class[T], private val paramTypes:Class[_]*)
 {
     private val traitMap = mutable.Map[String, Int]()
     private val traits = ArrayBuffer[String]()
-    private val classMap = mutable.Map[BitSet, Constructor[_ <: T]]()
+    private val classMap = mutable.Map[JBitSet, Constructor[_ <: T]]()
 
     private var ugenid = 0
 
@@ -22,7 +24,7 @@ class ASMMixinFactory[T](val baseType:Class[T], private val paramTypes:Class[_]*
         ret
     }
 
-    private def compile(traitSet:BitSet) = {
+    private def compile(traitSet:JBitSet) = {
         val seq = Seq.newBuilder[String]
         var i = -1
         while({i = traitSet.nextSetBit(i+1); i >= 0})
@@ -33,10 +35,10 @@ class ASMMixinFactory[T](val baseType:Class[T], private val paramTypes:Class[_]*
         c.getDeclaredConstructor(paramTypes:_*)
     }
 
-    protected def onCompiled(clazz:Class[_ <: T], traitSet:BitSet){}
+    protected def onCompiled(clazz:Class[_ <: T], traitSet:JBitSet){}
     protected def autoCompleteJavaTrait(cnode:ClassNode){}
 
-    def construct(traitSet:BitSet, args:Object*) = synchronized {
+    def construct(traitSet:JBitSet, args:Object*) = synchronized {
         (classMap.get(traitSet) match {
             case Some(c) => c
             case None =>

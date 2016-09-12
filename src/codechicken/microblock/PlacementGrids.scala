@@ -9,9 +9,9 @@ import codechicken.multipart.PartMap
 
 trait PlacementGrid
 {
-    def getHitSlot(vhit: Vector3, side: Int): Int
+    def getHitSlot(vhit:Vector3, side:Int): Int
 
-    def render(hit: Vector3, side: Int) {
+    def render(hit:Vector3, side:Int) {
         glTransformFace(hit, side)
         glLineWidth(2)
         glColor4f(0, 0, 0, 1)
@@ -23,7 +23,7 @@ trait PlacementGrid
 
     def drawLines() {}
 
-    def glTransformFace(hit: Vector3, side: Int) {
+    def glTransformFace(hit:Vector3, side:Int) {
         val pos = new BlockCoord(hit)
         glPushMatrix()
         glTranslated(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5)
@@ -73,7 +73,7 @@ class FaceEdgeGrid(size: Double) extends PlacementGrid
         glVertex3d(-size, 0, -size)
     }
 
-    def getHitSlot(vhit: Vector3, side: Int) = {
+    def getHitSlot(vhit:Vector3, side: Int) = {
         val s1 = (side + 2) % 6
         val s2 = (side + 4) % 6
         val u = vhit.copy.add(-0.5, -0.5, -0.5).scalarProject(Rotation.axes(s1))
@@ -112,7 +112,7 @@ object CornerPlacementGrid extends PlacementGrid
         glVertex3d(0.5, 0, 0)
     }
 
-    def getHitSlot(vhit: Vector3, side: Int): Int = {
+    def getHitSlot(vhit:Vector3, side: Int): Int = {
         val s1 = ((side & 6) + 3) % 6
         val s2 = ((side & 6) + 5) % 6
         val u = vhit.copy().add(-0.5, -0.5, -0.5).scalarProject(Rotation.axes(s1))
@@ -122,7 +122,7 @@ object CornerPlacementGrid extends PlacementGrid
         val bv = if (v >= 0) 1 else 0
         val bw = (side & 1) ^ 1
 
-        return 7 + (
+        7 + (
             bw << (side >> 1) |
                 bu << (s1 >> 1) |
                 bv << (s2 >> 1))
@@ -174,6 +174,6 @@ object EdgePlacementGrid extends PlacementGrid
         else
             if(v > 0) s2 else s2^1
 
-        return PartMap.edgeBetween(side^1, s)
+        PartMap.edgeBetween(side^1, s)
     }
 }

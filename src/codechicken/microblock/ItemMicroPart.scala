@@ -1,88 +1,89 @@
 package codechicken.microblock
 
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
-import ItemMicroPart._
-import net.minecraftforge.client.IItemRenderer
-import net.minecraftforge.client.IItemRenderer.ItemRenderType
-import net.minecraftforge.client.IItemRenderer.ItemRendererHelper
-import org.lwjgl.opengl.GL11
-import codechicken.microblock.MicroMaterialRegistry.IMicroMaterial
-import java.util.List
-import net.minecraft.creativetab.CreativeTabs
-import codechicken.lib.render.CCRenderState
-import net.minecraft.client.renderer.texture.IIconRegister
-import codechicken.microblock.handler.MicroblockProxy
-import net.minecraft.util.{StatCollector, MovingObjectPosition}
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.world.World
+import java.util.{List => JList}
+
 import codechicken.lib.raytracer.RayTracer
+import codechicken.lib.render.{CCRenderState, IItemRenderer, TextureUtils, TransformUtils}
 import codechicken.lib.vec.Vector3
-import codechicken.lib.render.TextureUtils
-import net.minecraft.util.MovingObjectPosition.MovingObjectType
-import CommonMicroClass._
+import codechicken.microblock.CommonMicroFactory._
+import codechicken.microblock.ItemMicroPart._
+import codechicken.microblock.MicroMaterialRegistry.IMicroMaterial
+import codechicken.microblock.handler.MicroblockProxy
+import com.google.common.collect.ImmutableList
+import net.minecraft.block.state.IBlockState
+import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType
+import net.minecraft.client.renderer.block.model.{ItemCameraTransforms, ItemOverrideList, ModelResourceLocation}
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats
+import net.minecraft.creativetab.CreativeTabs
+import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.item.{Item, ItemStack}
+import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.util.math.{BlockPos, RayTraceResult}
+import net.minecraft.util.text.translation.I18n
+import net.minecraft.util.{EnumActionResult, EnumFacing, EnumHand, SoundCategory}
+import net.minecraft.world.World
+import net.minecraftforge.client.model.IPerspectiveAwareModel
+import net.minecraftforge.client.model.IPerspectiveAwareModel.MapWrapper
+import net.minecraftforge.fml.common.registry.GameRegistry
+import org.lwjgl.opengl.GL11
 
 class ItemMicroPart extends Item
 {
     setUnlocalizedName("microblock")
+    GameRegistry.register(this.setRegistryName("forgemicroblock:microblock"))
     setHasSubtypes(true)
-    
+
     override def getItemStackDisplayName(stack:ItemStack):String =
     {
         val material = getMaterial(stack)
-        val mcrClass = getMicroClass(stack.getItemDamage)
-        val size = stack.getItemDamage&0xFF
-        if(material == null || mcrClass == null)
+        val mcrFactory = getFactory(stack)
+        val size = getSize(stack)
+        if(material == null || mcrFactory == null)
             return "Unnamed"
-        
-        return StatCollector.translateToLocalFormatted(mcrClass.getName+"."+size+".name", material.getLocalizedName)
+
+        I18n.translateToLocalFormatted(mcrFactory.getName.split(":")(1) +"."+size+".name", material.getLocalizedName)
     }
-    
-    override def getSubItems(item:Item, tab:CreativeTabs, list$:List[_])
+
+    override def getSubItems(item:Item, tab:CreativeTabs, list:JList[ItemStack])
     {
-        val list = list$.asInstanceOf[List[ItemStack]]
-        for(classId <- 0 until classes.length)
+        for(factoryID <- 0 until factories.length)
         {
-            val mcrClass = classes(classId)
-            if(mcrClass != null)
+            val factory = factories(factoryID)
+            if(factory != null)
                 for(size <- Seq(1, 2, 4))
-                    MicroMaterialRegistry.getIdMap.foreach(e => list.add(create(classId<<8|size, e._1)))
+                    MicroMaterialRegistry.getIdMap.foreach(e => list.add(create(factoryID, size, e._1)))
         }
     }
-    
-    override def registerIcons(register:IIconRegister){}
-    
-    override def onItemUse(item:ItemStack, player:EntityPlayer, world:World, x:Int, y:Int, z:Int, s:Int, hitX:Float, hitY:Float, hitZ:Float):Boolean =
+
+    override def onItemUse(stack:ItemStack, player:EntityPlayer, world:World, pos:BlockPos, hand:EnumHand, facing:EnumFacing, hitX:Float, hitY:Float, hitZ:Float):EnumActionResult =
     {
-        val material = getMaterialID(item)
-        val mcrClass = getMicroClass(item.getItemDamage)
-        val size = item.getItemDamage&0xFF
-        if(material < 0 || mcrClass == null)
-            return false
-            
-        val hit = RayTracer.retraceBlock(world, player, x, y, z)
-        if(hit != null && hit.typeOfHit == MovingObjectType.BLOCK)
+        val material = getMaterialID(stack)
+        val mcrFactory = getFactory(stack)
+        val size = getSize(stack)
+        if(material < 0 || mcrFactory == null)
+            return EnumActionResult.FAIL
+
+        val hit = RayTracer.retraceBlock(world, player, pos)
+        if(hit != null && hit.typeOfHit == RayTraceResult.Type.BLOCK)
         {
-            val placement = MicroblockPlacement(player, hit, size, material, !player.capabilities.isCreativeMode, mcrClass.placementProperties)
+            val placement = MicroblockPlacement(player, hit, size, material, !player.capabilities.isCreativeMode, mcrFactory.placementProperties)
             if(placement == null)
-                return false
-            
-            if(!world.isRemote)
-            {
-                placement.place(world, player, item)
+                return EnumActionResult.FAIL
+
+            if(!world.isRemote) {
+                placement.place(world, player, stack)
                 if(!player.capabilities.isCreativeMode)
-                    placement.consume(world, player, item)
-                
+                    placement.consume(world, player, stack)
                 val sound = MicroMaterialRegistry.getMaterial(material).getSound
                 if(sound != null)
-                    world.playSoundEffect(placement.pos.x + 0.5D, placement.pos.y + 0.5D, placement.pos.z + 0.5D, sound.func_150496_b, (sound.getVolume + 1.0F) / 2.0F, sound.getPitch * 0.8F)
+                    world.playSound(null, placement.pos.x + 0.5D, placement.pos.y + 0.5D, placement.pos.z + 0.5D, sound.getPlaceSound, SoundCategory.BLOCKS, (sound.getVolume + 1.0F) / 2.0F, sound.getPitch * 0.8F)
+
             }
-            
-            return true
+
+            return EnumActionResult.SUCCESS
         }
-        
-        return false
+
+        EnumActionResult.FAIL
     }
 }
 
@@ -93,78 +94,111 @@ object ItemMicroPart
         if(!stack.hasTagCompound)
             stack.setTagCompound(new NBTTagCompound())
     }
-    
+
+    /**
+      * Creates an ItemStack damage by packing the following information:
+      *
+      * @param factoryID The id of the factory for this part.
+      * @param size The size of this microblock. Valid values are 1, 2, and 4 (representing 1/8th, 2/8th, and 4/8th respectively)
+      * @return The packed damage value
+      */
+    def damage(factoryID:Int, size:Int):Int = factoryID<<8|size&0xFF
+
+    /**
+      * Unpacks the damage value from the ItemStack and returns the factory ID
+      */
+    def factoryID(damage:Int) = damage>>8
+
+    /**
+      * Unpacks the damage value from the ItemStack and returns the size in eigths
+      */
+    def size(damage:Int) = damage&0xFF
+
+    def create(factoryID:Int, size:Int, material:Int):ItemStack = create(damage(factoryID, size), material)
+
+    def create(factoryID:Int, size:Int, material:String):ItemStack = create(damage(factoryID, size), material)
+
     def create(damage:Int, material:Int):ItemStack = create(damage, MicroMaterialRegistry.materialName(material))
-    
-    def create(damage:Int, material:String):ItemStack = create(1, damage, material)
-    
-    def create(amount:Int, damage:Int, material:String):ItemStack = 
+
+    def create(damage:Int, material:String):ItemStack = createStack(1, damage, material)
+
+    def createStack(amount:Int, damage:Int, material:String):ItemStack =
     {
         val stack = new ItemStack(MicroblockProxy.itemMicro, amount, damage)
         checkTagCompound(stack)
         stack.getTagCompound.setString("mat", material)
-        return stack
+        stack
     }
-    
-    def getMaterial(stack:ItemStack):IMicroMaterial =
-    {
-        checkTagCompound(stack)
-        if(!stack.getTagCompound.hasKey("mat"))
-            return null
 
-        return MicroMaterialRegistry.getMaterial(stack.getTagCompound.getString("mat"))
-    }
-    
+    /** Itemstack getters **/
+
+    def getFactoryID(stack:ItemStack):Int = factoryID(stack.getItemDamage)
+
+    def getFactory(stack:ItemStack) = CommonMicroFactory.factories(getFactoryID(stack))
+
+    def getSize(stack:ItemStack):Int = size(stack.getItemDamage)
+
     def getMaterialID(stack:ItemStack):Int =
     {
         checkTagCompound(stack)
         if(!stack.getTagCompound.hasKey("mat"))
             return 0
 
-        return MicroMaterialRegistry.materialID(stack.getTagCompound.getString("mat"))
+        MicroMaterialRegistry.materialID(stack.getTagCompound.getString("mat"))
+    }
+
+    def getMaterial(stack:ItemStack):IMicroMaterial =
+    {
+        checkTagCompound(stack)
+        if(!stack.getTagCompound.hasKey("mat"))
+            return null
+
+        MicroMaterialRegistry.getMaterial(stack.getTagCompound.getString("mat"))
     }
 }
 
-object ItemMicroPartRenderer extends IItemRenderer
+object ItemMicroPartRenderer extends IItemRenderer with IPerspectiveAwareModel
 {
-    def handleRenderType(item:ItemStack, t:ItemRenderType) = true
-    
-    def shouldUseRenderHelper(t:ItemRenderType, item:ItemStack, helper:ItemRendererHelper) = true
-    
-    def renderItem(t:ItemRenderType, item:ItemStack, data:Object*)
+    val modelResLoc = new ModelResourceLocation("forgemicroblocks:microblock", "inventory")
+
+    override def isBuiltInRenderer = true
+    override def getParticleTexture = null
+    override def getItemCameraTransforms = ItemCameraTransforms.DEFAULT
+    override def isAmbientOcclusion = true
+    override def isGui3d = true
+    override def getOverrides = ItemOverrideList.NONE
+    override def getQuads(state:IBlockState, side:EnumFacing, rand:Long) = ImmutableList.of()
+
+    override def handlePerspective(cameraTransformType:TransformType) =
+        MapWrapper.handlePerspective(this, TransformUtils.DEFAULT_BLOCK.getTransforms, cameraTransformType)
+
+    def renderItem(item:ItemStack)
     {
         val material = getMaterial(item)
-        val mcrClass = getMicroClass(item.getItemDamage)
-        val size = item.getItemDamage&0xFF
-        if(material == null || mcrClass == null)
+        val factory = getFactory(item)
+        val size = getSize(item)
+        if(material == null || factory == null)
             return
-        
-        GL11.glPushMatrix()
-        if(t == ItemRenderType.ENTITY)
-            GL11.glScaled(0.5, 0.5, 0.5)
-        if(t == ItemRenderType.INVENTORY || t == ItemRenderType.ENTITY)
-            GL11.glTranslatef(-0.5F, -0.5F, -0.5F)
 
-        TextureUtils.bindAtlas(0)
+        TextureUtils.bindBlockTexture()
         CCRenderState.reset()
-        CCRenderState.useNormals = true
         CCRenderState.pullLightmap()
-        CCRenderState.startDrawing()
-            val part = mcrClass.create(true, getMaterialID(item)).asInstanceOf[MicroblockClient]
-            part.setShape(size, mcrClass.itemSlot)
-            part.render(new Vector3(0.5, 0.5, 0.5).subtract(part.getBounds.center), -1)
+        CCRenderState.startDrawing(GL11.GL_QUADS, DefaultVertexFormats.ITEM)
+        val part = factory.create(true, getMaterialID(item)).asInstanceOf[MicroblockClient]
+        part.setShape(size, factory.itemSlot)
+        part.render(new Vector3(0.5, 0.5, 0.5).subtract(part.getBounds.center), null)
         CCRenderState.draw()
-        GL11.glPopMatrix()
     }
-    
-    def renderHighlight(player:EntityPlayer, stack:ItemStack, hit:MovingObjectPosition):Boolean =
+
+    def renderHighlight(player:EntityPlayer, stack:ItemStack, hit:RayTraceResult):Boolean =
     {
         val material = getMaterialID(stack)
-        val mcrClass = getMicroClass(stack.getItemDamage)
-        val size = stack.getItemDamage&0xFF
+        val mcrClass = getFactory(stack)
+        val size = getSize(stack)
+
         if(material < 0 || mcrClass == null)
             return false
-        
-        return MicroMaterialRegistry.renderHighlight(player, hit, mcrClass, size, material)
+
+        MicroMaterialRegistry.renderHighlight(player, hit, mcrClass, size, material)
     }
 }

@@ -1,17 +1,12 @@
 package codechicken.microblock.handler
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent
-import cpw.mods.fml.relauncher.SideOnly
-import cpw.mods.fml.relauncher.Side
-import net.minecraftforge.client.event.TextureStitchEvent
-import codechicken.microblock.MicroMaterialRegistry
-import net.minecraftforge.client.event.DrawBlockHighlightEvent
-import org.lwjgl.opengl.GL11
 import codechicken.lib.render.RenderUtils
-import codechicken.microblock.ItemMicroPartRenderer
-import cpw.mods.fml.common.Loader
-import cpw.mods.fml.common.LoaderState
-import net.minecraft.util.MovingObjectPosition.MovingObjectType
+import codechicken.microblock.{ItemMicroPartRenderer, MicroMaterialRegistry}
+import net.minecraft.util.math.RayTraceResult
+import net.minecraftforge.client.event.{DrawBlockHighlightEvent, TextureStitchEvent}
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.relauncher.{Side, SideOnly}
+import org.lwjgl.opengl.GL11
 
 object MicroblockEventHandler
 {
@@ -19,20 +14,21 @@ object MicroblockEventHandler
     @SideOnly(Side.CLIENT)
     def postTextureStitch(event:TextureStitchEvent.Post)
     {
-        if(event.map.getTextureType == 0)
-            MicroMaterialRegistry.loadIcons()
+        MicroMaterialRegistry.loadIcons()
     }
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     def drawBlockHighlight(event:DrawBlockHighlightEvent)
     {
-        if(event.currentItem != null && event.currentItem.getItem == MicroblockProxy.itemMicro && 
-                event.target != null && event.target.typeOfHit == MovingObjectType.BLOCK)
+        val currentItem = event.getPlayer.getHeldItemMainhand
+
+        if(currentItem != null && currentItem.getItem == MicroblockProxy.itemMicro &&
+                event.getTarget != null && event.getTarget.typeOfHit == RayTraceResult.Type.BLOCK)
         {
             GL11.glPushMatrix()
-                RenderUtils.translateToWorldCoords(event.player, event.partialTicks)
-                if(ItemMicroPartRenderer.renderHighlight(event.player, event.currentItem, event.target))
+                RenderUtils.translateToWorldCoords(event.getPlayer, event.getPartialTicks)
+                if(ItemMicroPartRenderer.renderHighlight(event.getPlayer, currentItem, event.getTarget))
                     event.setCanceled(true)
             GL11.glPopMatrix()
         }

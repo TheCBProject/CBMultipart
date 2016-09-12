@@ -1,14 +1,15 @@
 package codechicken.multipart.asm
 
-import ASMMixinCompiler._
-import codechicken.lib.asm.ASMHelper._
-import codechicken.lib.asm.{ObfMapping, CC_ClassWriter}
-import org.objectweb.asm.{Label, FieldVisitor, MethodVisitor}
-import org.objectweb.asm.Opcodes._
-import org.objectweb.asm.tree.{MethodNode, ClassNode}
-import codechicken.multipart.{MultipartGenerator, TileMultipart}
 import java.util.BitSet
-import ASMImplicits._
+
+import codechicken.lib.asm.ASMHelper._
+import codechicken.lib.asm.{CC_ClassWriter, ObfMapping}
+import codechicken.multipart.asm.ASMImplicits._
+import codechicken.multipart.asm.ASMMixinCompiler._
+import codechicken.multipart.{MultipartGenerator, TileMultipart}
+import org.objectweb.asm.Opcodes._
+import org.objectweb.asm.tree.{ClassNode, MethodNode}
+import org.objectweb.asm.{FieldVisitor, Label, MethodVisitor}
 
 import scala.collection.JavaConversions._
 

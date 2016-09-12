@@ -2,7 +2,7 @@ package codechicken.multipart.scalatraits
 
 import codechicken.multipart.TileMultipart
 import codechicken.multipart.TMultiPart
-import codechicken.multipart.JPartialOcclusion
+import codechicken.multipart.TPartialOcclusionPart
 import codechicken.multipart.PartialOcclusionTest
 
 /**
@@ -12,12 +12,12 @@ class TPartialOcclusionTile extends TileMultipart
 {
     override def occlusionTest(parts:Seq[TMultiPart], npart:TMultiPart):Boolean =
     {
-        if(npart.isInstanceOf[JPartialOcclusion] && !partialOcclusionTest(parts:+npart))
+        if(npart.isInstanceOf[TPartialOcclusionPart] && !partialOcclusionTest(parts:+npart))
             return false
-        
-        return super.occlusionTest(parts, npart)
+
+        super.occlusionTest(parts, npart)
     }
-    
+
     def partialOcclusionTest(parts:Seq[TMultiPart]):Boolean =
     {
         val test = new PartialOcclusionTest(parts.length)
@@ -25,10 +25,10 @@ class TPartialOcclusionTile extends TileMultipart
         while(i < parts.length)
         {
             val part = parts(i)
-            if(part.isInstanceOf[JPartialOcclusion])
-                test.fill(i, part.asInstanceOf[JPartialOcclusion])
+            if(part.isInstanceOf[TPartialOcclusionPart])
+                test.fill(i, part.asInstanceOf[TPartialOcclusionPart])
             i+=1
         }
-        return test()
+        test()
     }
 }

@@ -1,18 +1,18 @@
 package codechicken.multipart.asm
 
-import java.util.BitSet
+import java.util.{BitSet => JBitSet}
 
 object ASMImplicits
 {
-    implicit class ExtBitSet(val bitset:BitSet) extends AnyVal
+    implicit class ExtBitSet(val bitset:JBitSet) extends AnyVal
     {
-        def set(b:BitSet) = {
+        def set(b:JBitSet) = {
             bitset.clear()
             bitset.or(b)
             bitset
         }
 
-        def copy = new BitSet().set(bitset)
+        def copy = new JBitSet().set(bitset)
     }
 
     def nodeName(name:String) = if(name == null) null else name.replace('.', '/')

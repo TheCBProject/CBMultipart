@@ -1,10 +1,10 @@
 package codechicken.multipart.minecraft;
 
+import codechicken.lib.packet.PacketCustom;
+import codechicken.lib.packet.PacketCustom.IServerPacketHandler;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.world.World;
-import codechicken.lib.packet.PacketCustom;
-import codechicken.lib.packet.PacketCustom.IServerPacketHandler;
 
 public class McMultipartSPH implements IServerPacketHandler
 {

@@ -1,21 +1,23 @@
 package codechicken.multipart.handler
 
-import codechicken.multipart._
-import cpw.mods.fml.client.registry.RenderingRegistry
-import cpw.mods.fml.client.registry.ClientRegistry
-import net.minecraft.tileentity.TileEntity
-import codechicken.lib.config.ConfigFile
 import java.io.File
-import net.minecraftforge.common.MinecraftForge
-import cpw.mods.fml.relauncher.SideOnly
-import cpw.mods.fml.relauncher.Side
+
+import codechicken.lib.config.ConfigFile
 import codechicken.lib.packet.PacketCustom
-import net.minecraft.world.ChunkCoordIntPair
 import codechicken.lib.vec.BlockCoord
 import codechicken.lib.world.{TileChunkLoadHook, WorldExtensionManager}
-import cpw.mods.fml.common.FMLCommonHandler
-import cpw.mods.fml.common.registry.GameRegistry
-import net.minecraft.block.Block
+import codechicken.multipart._
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
+import net.minecraft.tileentity.TileEntity
+import net.minecraft.util.ResourceLocation
+import net.minecraft.util.math.ChunkPos
+import net.minecraftforge.client.event.ModelBakeEvent
+import net.minecraftforge.client.model.ModelLoader
+import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.fml.client.registry.ClientRegistry
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.registry.GameRegistry
+import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import org.apache.logging.log4j.Logger
 
 class MultipartProxy_serverImpl
@@ -24,30 +26,33 @@ class MultipartProxy_serverImpl
     var config:ConfigFile = _
     var logger:Logger = _
 
-    def preInit(cfgdir: File, logger:Logger) {
+    def preInit(cfgdir: File, logger:Logger)
+    {
         this.logger = logger
         config = new ConfigFile(new File(cfgdir, "multipart.cfg"))
             .setComment("Multipart API config file")
 
-        GameRegistry.registerBlock(new BlockMultipart().setBlockName("multipart"), null, "block")
-        block = Block.blockRegistry.getObject("ForgeMultipart:block").asInstanceOf[BlockMultipart]
+        block = new BlockMultipart()
+        GameRegistry.register(block.setRegistryName(new ResourceLocation(MultipartMod.modID, "multipart_block")))
 
+        MultipartGenerator.registerTrait("net.minecraft.util.ITickable", "codechicken.multipart.scalatraits.TTickableTile")
         MultipartGenerator.registerTrait("codechicken.multipart.TSlottedPart", "codechicken.multipart.scalatraits.TSlottedTile")
         MultipartGenerator.registerTrait("net.minecraftforge.fluids.IFluidHandler", "codechicken.multipart.scalatraits.TFluidHandlerTile")
         MultipartGenerator.registerTrait("net.minecraft.inventory.IInventory", "codechicken.multipart.scalatraits.JInventoryTile")
         MultipartGenerator.registerTrait("net.minecraft.inventory.ISidedInventory", "codechicken.multipart.scalatraits.JInventoryTile")
-        MultipartGenerator.registerTrait("codechicken.multipart.JPartialOcclusion", "codechicken.multipart.scalatraits.TPartialOcclusionTile")
+        MultipartGenerator.registerTrait("codechicken.multipart.TPartialOcclusionPart", "codechicken.multipart.scalatraits.TPartialOcclusionTile")
         MultipartGenerator.registerTrait("codechicken.multipart.IRedstonePart", "codechicken.multipart.scalatraits.TRedstoneTile")
-        MultipartGenerator.registerTrait("codechicken.multipart.IRandomDisplayTick", "codechicken.multipart.scalatraits.TRandomDisplayTickTile", null)
-        MultipartGenerator.registerTrait("codechicken.multipart.INeighborTileChange", null, "codechicken.multipart.scalatraits.TTileChangeTile")
+        MultipartGenerator.registerTrait("codechicken.multipart.IRandomDisplayTickPart", "codechicken.multipart.scalatraits.TRandomDisplayTickTile", null)
+        MultipartGenerator.registerTrait("codechicken.multipart.INeighborTileChangePart", null, "codechicken.multipart.scalatraits.TTileChangeTile")
+        MultipartGenerator.registerTrait("codechicken.multipart.IModelRenderPart", "codechicken.multipart.scalatraits.TModelRenderTile", null)
 
         MultipartSaveLoad.hookLoader()
     }
 
-    def init() {}
+    def init(){}
 
-    def postInit() {
-        FMLCommonHandler.instance().bus().register(MultipartEventHandler)
+    def postInit()
+    {
         MinecraftForge.EVENT_BUS.register(MultipartEventHandler)
         PacketCustom.assignHandler(MultipartSPH.channel, MultipartSPH)
         PacketCustom.assignHandshakeHandler(MultipartSPH.registryChannel, MultipartSPH)
@@ -58,7 +63,8 @@ class MultipartProxy_serverImpl
         MultipartCompatiblity.load()
     }
 
-    def onTileClassBuilt(t: Class[_ <: TileEntity]) {
+    def onTileClassBuilt(t: Class[_ <: TileEntity])
+    {
         MultipartSaveLoad.registerTileClass(t)
     }
 }
@@ -66,25 +72,53 @@ class MultipartProxy_serverImpl
 class MultipartProxy_clientImpl extends MultipartProxy_serverImpl
 {
     @SideOnly(Side.CLIENT)
-    override def postInit() {
+    override def preInit(cfgdir:File, logger:Logger)
+    {
+        super.preInit(cfgdir, logger)
+
+        ModelLoader.setCustomStateMapper(block, MultipartStateMapper)
+    }
+
+    @SideOnly(Side.CLIENT)
+    override def init()
+    {
+        super.init()
+
+        MinecraftForge.EVENT_BUS.register(this)
+    }
+
+    @SideOnly(Side.CLIENT)
+    override def postInit()
+    {
         super.postInit()
-        RenderingRegistry.registerBlockHandler(MultipartRenderer)
+
         PacketCustom.assignHandler(MultipartCPH.channel, MultipartCPH)
         PacketCustom.assignHandler(MultipartCPH.registryChannel, MultipartCPH)
 
-        FMLCommonHandler.instance().bus().register(ControlKeyHandler)
+        MinecraftForge.EVENT_BUS.register(ControlKeyHandler)
         ClientRegistry.registerKeyBinding(ControlKeyHandler)
     }
 
     @SideOnly(Side.CLIENT)
-    override def onTileClassBuilt(t: Class[_ <: TileEntity]) {
+    override def onTileClassBuilt(t:Class[_ <: TileEntity])
+    {
         super.onTileClassBuilt(t)
-        ClientRegistry.bindTileEntitySpecialRenderer(t, MultipartRenderer)
+        ClientRegistry.bindTileEntitySpecialRenderer(t.asInstanceOf[Class[TileEntity]], MultipartRenderer.asInstanceOf[TileEntitySpecialRenderer[TileEntity]])
+    }
+
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    def onModelBakeEvent(event:ModelBakeEvent)
+    {
+//        event.getModelRegistry.putObject(
+//            new ModelResourceLocation(block.getRegistryName.toString),
+//            MultipartTileModel
+//        )
     }
 }
 
 object MultipartProxy extends MultipartProxy_clientImpl
 {
-    def indexInChunk(cc: ChunkCoordIntPair, i: Int) = new BlockCoord(cc.chunkXPos << 4 | i & 0xF, (i >> 8) & 0xFF, cc.chunkZPos << 4 | (i & 0xF0) >> 4)
-    def indexInChunk(pos: BlockCoord) = pos.x & 0xF | pos.y << 8 | (pos.z & 0xF) << 4
+    def indexInChunk(cc:ChunkPos, i: Int) = new BlockCoord(cc.chunkXPos << 4 | i & 0xF, (i >> 8) & 0xFF, cc.chunkZPos << 4 | (i & 0xF0) >> 4)
+    def indexInChunk(pos:BlockCoord) = pos.x & 0xF | pos.y << 8 | (pos.z & 0xF) << 4
 }

@@ -1,59 +1,61 @@
 package codechicken.multipart.scalatraits
 
 import codechicken.multipart.TMultiPart
-import codechicken.multipart.INeighborTileChange
+import codechicken.multipart.INeighborTileChangePart
 import codechicken.multipart.TileMultipart
 import codechicken.lib.vec.BlockCoord
+import net.minecraft.util.math.BlockPos
 
 /**
  * Mixin implementation for INeighborTileChange
- * 
+ *
  * Reduces unnecessary computation
  */
-trait TTileChangeTile extends TileMultipart {
+trait TTileChangeTile extends TileMultipart
+{
     var weakTileChanges = false
-    
+
     override def copyFrom(that:TileMultipart)
     {
         super.copyFrom(that)
         if(that.isInstanceOf[TTileChangeTile])
             weakTileChanges = that.asInstanceOf[TTileChangeTile].weakTileChanges
     }
-    
+
     override def bindPart(part:TMultiPart)
     {
         super.bindPart(part)
-        if(part.isInstanceOf[INeighborTileChange])
-            weakTileChanges|=part.asInstanceOf[INeighborTileChange].weakTileChanges
+        if(part.isInstanceOf[INeighborTileChangePart])
+            weakTileChanges |= part.asInstanceOf[INeighborTileChangePart].weakTileChanges
     }
-    
+
     override def clearParts()
     {
         super.clearParts()
         weakTileChanges = false
     }
-    
-    override def partRemoved(part:TMultiPart, p:Int) {
-        super.partRemoved(part, p)
-        weakTileChanges = partList.exists(p => p.isInstanceOf[INeighborTileChange] && p.asInstanceOf[INeighborTileChange].weakTileChanges)
-    }
-    
-    override def onNeighborTileChange(tileX:Int, tileY:Int, tileZ:Int)
+
+    override def partRemoved(part:TMultiPart, p:Int)
     {
-        super.onNeighborTileChange(tileX, tileY, tileZ)
-        val offset = new BlockCoord(tileX, tileY, tileZ).sub(xCoord, yCoord, zCoord)
+        super.partRemoved(part, p)
+        weakTileChanges = partList.exists(p => p.isInstanceOf[INeighborTileChangePart] && p.asInstanceOf[INeighborTileChangePart].weakTileChanges)
+    }
+
+    override def onNeighborTileChange(neighborPos:BlockPos)
+    {
+        super.onNeighborTileChange(neighborPos)
+        val offset = new BlockCoord(neighborPos).sub(getPos.getX, getPos.getY, getPos.getZ)
         val diff = offset.absSum
         val side = offset.toSide
-        
-        if(side < 0 || diff <= 0 || diff > 2)
-            return
-            
+
+        if(side < 0 || diff <= 0 || diff > 2) return
+
         val weak = diff == 2
-        operate{ p =>
-            if(p.isInstanceOf[INeighborTileChange])
-                p.asInstanceOf[INeighborTileChange].onNeighborTileChanged(side, weak)
+        operate { p =>
+            if(p.isInstanceOf[INeighborTileChangePart])
+                p.asInstanceOf[INeighborTileChangePart].onNeighborTileChanged(side, weak)
         }
     }
 
-    override def getWeakChanges() = weakTileChanges
+    override def getWeakChanges = weakTileChanges
 }
