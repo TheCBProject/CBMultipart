@@ -1,6 +1,5 @@
 package codechicken.multipart.minecraft;
 
-import codechicken.lib.vec.BlockCoord;
 import codechicken.multipart.IPartConverter;
 import codechicken.multipart.IPartFactory;
 import codechicken.multipart.MultiPartRegistry;
@@ -8,6 +7,7 @@ import codechicken.multipart.TMultiPart;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.Arrays;
@@ -42,9 +42,9 @@ public class Content implements IPartFactory, IPartConverter
     }
 
     @Override
-    public TMultiPart convert(World world, BlockCoord pos)
+    public TMultiPart convert(World world, BlockPos pos)
     {
-        IBlockState state = world.getBlockState(pos.pos());
+        IBlockState state = world.getBlockState(pos);
         Block b = state.getBlock();
 
         if(b == Blocks.TORCH)

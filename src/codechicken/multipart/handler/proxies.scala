@@ -10,7 +10,7 @@ import codechicken.multipart._
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.ResourceLocation
-import net.minecraft.util.math.ChunkPos
+import net.minecraft.util.math.{BlockPos, ChunkPos}
 import net.minecraftforge.client.event.ModelBakeEvent
 import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.common.MinecraftForge
@@ -122,6 +122,6 @@ class MultipartProxy_clientImpl extends MultipartProxy_serverImpl
 
 object MultipartProxy extends MultipartProxy_clientImpl
 {
-    def indexInChunk(cc:ChunkPos, i: Int) = new BlockCoord(cc.chunkXPos << 4 | i & 0xF, (i >> 8) & 0xFF, cc.chunkZPos << 4 | (i & 0xF0) >> 4)
-    def indexInChunk(pos:BlockCoord) = pos.x & 0xF | pos.y << 8 | (pos.z & 0xF) << 4
+    def indexInChunk(cc:ChunkPos, i: Int) = new BlockPos(cc.chunkXPos << 4 | i & 0xF, (i >> 8) & 0xFF, cc.chunkZPos << 4 | (i & 0xF0) >> 4)
+    def indexInChunk(pos:BlockPos) = pos.getX & 0xF | pos.getY << 8 | (pos.getZ & 0xF) << 4
 }

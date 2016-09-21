@@ -5,13 +5,13 @@ import java.util.{Map => JMap}
 
 import codechicken.lib.data.{MCDataInput, MCDataOutput}
 import codechicken.lib.packet.PacketCustom
-import codechicken.lib.vec.BlockCoord
 import com.google.common.collect.ArrayListMultimap
 import net.minecraft.block.Block
 import net.minecraft.block.state.{BlockStateContainer, IBlockState}
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.ResourceLocation
+import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import net.minecraftforge.fml.common.{Loader, ModContainer}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
@@ -71,7 +71,7 @@ trait IPartConverter
     /**
       * Return a multipart version of the block at pos in world. Return null if no conversion is possible.
       */
-    def convert(world:World, pos:BlockCoord):TMultiPart
+    def convert(world:World, pos: BlockPos):TMultiPart
 }
 
 /**
@@ -230,7 +230,7 @@ object MultiPartRegistry
     /**
       * Calls converters to create a multipart version of the block at pos
       */
-    def convertBlock(world:World, pos:BlockCoord, block:Block):TMultiPart =
+    def convertBlock(world:World, pos: BlockPos, block:Block):TMultiPart =
     {
         for (c <- converters.get(block)) {
             val ret = c.convert(world, pos)

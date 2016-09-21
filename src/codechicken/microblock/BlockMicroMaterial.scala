@@ -83,7 +83,7 @@ class BlockMicroMaterial(val state:IBlockState) extends IMicroMaterial
                 Minecraft.getMinecraft.getBlockColors.colorMultiplier(state, null, null, 0)<<8|0xFF
             case world =>
                 Minecraft.getMinecraft.getBlockColors.colorMultiplier(state,
-                    CCRenderState.lightMatrix.access, CCRenderState.lightMatrix.pos.pos(), 0)<<8|0xFF
+                    CCRenderState.lightMatrix.access, CCRenderState.lightMatrix.pos, 0)<<8|0xFF
         }
     }
 

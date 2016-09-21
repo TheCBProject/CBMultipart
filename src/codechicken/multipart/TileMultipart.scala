@@ -7,7 +7,7 @@ import codechicken.lib.data.MCDataOutput
 import codechicken.lib.packet.PacketCustom
 import codechicken.lib.raytracer.{CuboidRayTraceResult, DistanceRayTraceResult}
 import codechicken.lib.render.RenderUtils
-import codechicken.lib.vec.{BlockCoord, Cuboid6, Vector3}
+import codechicken.lib.vec.{Cuboid6, Vector3}
 import codechicken.lib.world.IChunkLoadTile
 import codechicken.multipart.handler.{MultipartCompatiblity, MultipartProxy, MultipartSPH}
 import net.minecraft.client.Minecraft
@@ -170,7 +170,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile
       */
     def getWriteStream(part:TMultiPart):MCDataOutput = getWriteStream.writeByte(partList.indexOf(part))
 
-    private def getWriteStream = MultipartSPH.getTileStream(worldObj, new BlockCoord(this))
+    private def getWriteStream = MultipartSPH.getTileStream(worldObj, getPos)
 
     /**** Adding/Removing parts ****/
 
@@ -613,7 +613,7 @@ object TileMultipart
     /**
      * Gets a multipart tile instance at pos, converting if necessary.
      */
-    def getOrConvertTile(world:World, pos:BlockCoord) = getOrConvertTile2(world, pos)._1
+    def getOrConvertTile(world:World, pos: BlockPos) = getOrConvertTile2(world, pos)._1
 
     /**
      * Gets a multipart tile instance at pos, converting if necessary.
@@ -622,16 +622,16 @@ object TileMultipart
  *
      * @return (The tile or null if there was none, true if the tile is a result of a conversion)
      */
-    def getOrConvertTile2(world:World, pos:BlockCoord):(TileMultipart, Boolean) =
+    def getOrConvertTile2(world:World, pos: BlockPos):(TileMultipart, Boolean) =
     {
-        val t = world.getTileEntity(pos.pos)
+        val t = world.getTileEntity(pos)
         if(t.isInstanceOf[TileMultipart])
             return (t.asInstanceOf[TileMultipart], false)
 
-        val p = MultiPartRegistry.convertBlock(world, pos, world.getBlockState(pos.pos).getBlock)
+        val p = MultiPartRegistry.convertBlock(world, pos, world.getBlockState(pos).getBlock)
         if(p != null) {
             val t = MultipartGenerator.generateCompositeTile(null, Seq(p), world.isRemote)
-            t.setPos(pos.pos)
+            t.setPos(pos)
             t.setWorldObj(world)
             t.addPart_do(p)
             return (t, true)
@@ -642,27 +642,27 @@ object TileMultipart
     /**
      * Gets the multipart tile instance at pos, or null if it doesn't exist or is not a multipart tile
      */
-    def getTile(world:World, pos:BlockCoord) =
-        world.getTileEntity(pos.pos) match {
+    def getTile(world:World, pos:BlockPos) =
+        world.getTileEntity(pos) match {
             case t:TileMultipart => t
             case _ => null
         }
 
-    def checkNoEntityCollision(world:World, pos:BlockCoord, part:TMultiPart) =
-        part.getCollisionBoxes.forall(b => world.checkNoEntityCollision(b.aabb.offset(pos.x, pos.y, pos.z)))
+    def checkNoEntityCollision(world:World, pos:BlockPos, part:TMultiPart) =
+        part.getCollisionBoxes.forall(b => world.checkNoEntityCollision(b.aabb.offset(pos)))
 
     /**
      * Returns whether part can be added to the space at pos. Will do conversions as necessary.
      * This function is the recommended way to add parts to the world.
      */
-    def canPlacePart(world:World, pos:BlockCoord, part:TMultiPart):Boolean =
+    def canPlacePart(world:World, pos:BlockPos, part:TMultiPart):Boolean =
     {
         if(!checkNoEntityCollision(world, pos, part))
             return false
 
         val t = getOrConvertTile(world, pos)
         if(t != null) return t.canAddPart(part)
-        else if(!MultipartCompatiblity.canAddPart(world, pos.pos()))
+        else if(!MultipartCompatiblity.canAddPart(world, pos))
             return false
 
         if(!replaceable(world, pos)) return false
@@ -673,18 +673,18 @@ object TileMultipart
     /**
      * Returns if the block at pos is replaceable (air, vines etc)
      */
-    def replaceable(world:World, pos:BlockCoord):Boolean =
+    def replaceable(world:World, pos:BlockPos):Boolean =
     {
-        val state = world.getBlockState(pos.pos)
+        val state = world.getBlockState(pos)
         val block = state.getBlock
-        block.isAir(state, world, pos.pos) || block.isReplaceable(world, pos.pos)
+        block.isAir(state, world, pos) || block.isReplaceable(world, pos)
     }
 
     /**
      * Adds a part to a block space. canPlacePart should always be called first.
      * The addition of parts on the client is handled internally.
      */
-    def addPart(world:World, pos:BlockCoord, part:TMultiPart):TileMultipart =
+    def addPart(world:World, pos:BlockPos, part:TMultiPart):TileMultipart =
     {
         assert(!world.isRemote, "Cannot add multi parts to a client tile.")
         MultipartGenerator.addPart(world, pos, part)
@@ -693,7 +693,7 @@ object TileMultipart
     /**
      * Constructs this tile and its parts from a desc packet
      */
-    def handleDescPacket(world:World, pos:BlockCoord, packet:PacketCustom)
+    def handleDescPacket(world:World, pos:BlockPos, packet:PacketCustom)
     {
         val nparts = packet.readUByte
         val parts = new ListBuffer[TMultiPart]()
@@ -705,10 +705,10 @@ object TileMultipart
 
         if(parts.isEmpty) return
 
-        val t = world.getTileEntity(pos.pos)
+        val t = world.getTileEntity(pos)
         val tilemp = MultipartGenerator.generateCompositeTile(t, parts, true)
         if(tilemp != t) {
-            world.setBlockState(pos.pos, MultipartProxy.block.getDefaultState)
+            world.setBlockState(pos, MultipartProxy.block.getDefaultState)
             MultipartGenerator.silentAddTile(world, pos, tilemp)
         }
 
@@ -720,7 +720,7 @@ object TileMultipart
     /**
      * Handles an update packet, addition, removal and otherwise
      */
-    def handlePacket(pos:BlockCoord, world:World, i:Int, packet:PacketCustom)
+    def handlePacket(pos:BlockPos, world:World, i:Int, packet:PacketCustom)
     {
         def tilemp = TileCache.findTile(world, pos)
 
@@ -763,6 +763,7 @@ object TileMultipart
     /**
      * Drops an item around pos
      */
+    //TODO CCL
     def dropItem(stack:ItemStack, world:World, pos:Vector3)
     {
         val item = new EntityItem(world, pos.x, pos.y, pos.z, stack)

@@ -5,6 +5,7 @@ import codechicken.lib.packet.PacketCustom.IServerPacketHandler;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class McMultipartSPH implements IServerPacketHandler
@@ -22,6 +23,6 @@ public class McMultipartSPH implements IServerPacketHandler
     }
 
     public static void spawnBurnoutSmoke(World world, int x, int y, int z) {
-        new PacketCustom(channel, 1).writeCoord(x, y, z).sendToChunk(world, x >> 4, z >> 4);
+        new PacketCustom(channel, 1).writePos(new BlockPos(x, y, z)).sendToChunk(world, x >> 4, z >> 4);
     }
 }

@@ -5,16 +5,17 @@ import codechicken.multipart.ControlKeyModifer._
 import codechicken.multipart.{PartRayTraceResult, TileMultipart}
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
-import net.minecraft.util.math.RayTraceResult
+import net.minecraft.util.EnumFacing
+import net.minecraft.util.math.{BlockPos, RayTraceResult}
 import net.minecraft.world.World
 
-abstract class ExecutablePlacement(val pos:BlockCoord, val part:Microblock)
+abstract class ExecutablePlacement(val pos:BlockPos, val part:Microblock)
 {
     def place(world:World, player:EntityPlayer, item:ItemStack)
     def consume(world:World, player:EntityPlayer, item:ItemStack)
 }
 
-class AdditionPlacement($pos:BlockCoord, $part:Microblock) extends ExecutablePlacement($pos, $part)
+class AdditionPlacement($pos:BlockPos, $part:Microblock) extends ExecutablePlacement($pos, $part)
 {
     def place(world:World, player:EntityPlayer, item:ItemStack)
     {
@@ -27,7 +28,7 @@ class AdditionPlacement($pos:BlockCoord, $part:Microblock) extends ExecutablePla
     }
 }
 
-class ExpandingPlacement($pos:BlockCoord, $part:Microblock, opart:Microblock) extends ExecutablePlacement($pos, $part)
+class ExpandingPlacement($pos:BlockPos, $part:Microblock, opart:Microblock) extends ExecutablePlacement($pos, $part)
 {
     def place(world:World, player:EntityPlayer, item:ItemStack)
     {
@@ -67,8 +68,8 @@ class MicroblockPlacement(val player:EntityPlayer, val hit:RayTraceResult, val s
 {
     val world = player.worldObj
     val mcrFactory = pp.microFactory
-    val pos = new BlockCoord(hit.getBlockPos)
-    val vhit = new Vector3(hit.hitVec).add(-pos.x, -pos.y, -pos.z)
+    val pos = new BlockPos(hit.getBlockPos)
+    val vhit = new Vector3(hit.hitVec).add(-pos.getX, -pos.getY, -pos.getZ)
     val gtile = TileMultipart.getOrConvertTile2(world, pos)
     val htile = gtile._1
     val slot = pp.placementGrid.getHitSlot(vhit, hit.sideHit.ordinal)
@@ -127,7 +128,7 @@ class MicroblockPlacement(val player:EntityPlayer, val hit:RayTraceResult, val s
 
     def expand(mpart:Microblock, npart:Microblock):ExecutablePlacement =
     {
-        val pos = new BlockCoord(mpart.tile)
+        val pos = mpart.tile.getPos
         if(TileMultipart.checkNoEntityCollision(world, pos, npart) && mpart.tile.canReplacePart(mpart, npart))
             return new ExpandingPlacement(pos, npart, mpart)
         return null
@@ -137,7 +138,7 @@ class MicroblockPlacement(val player:EntityPlayer, val hit:RayTraceResult, val s
 
     def internalPlacement(htile:TileMultipart, npart:Microblock):ExecutablePlacement =
     {
-        val pos = new BlockCoord(htile)
+        val pos = htile.getPos
         if(TileMultipart.checkNoEntityCollision(world, pos, npart) && htile.canAddPart(npart))
             return new AdditionPlacement(pos, npart)
         return null
@@ -147,10 +148,10 @@ class MicroblockPlacement(val player:EntityPlayer, val hit:RayTraceResult, val s
 
     def externalPlacement(npart:Microblock):ExecutablePlacement =
     {
-        val pos = this.pos.copy().offset(side)
+        val pos = this.pos.offset(EnumFacing.VALUES.apply(side))
         if(TileMultipart.canPlacePart(world, pos, npart))
             return new AdditionPlacement(pos, npart)
-        return null
+        null
     }
 
     def getHitDepth(vhit:Vector3, side:Int):Double =

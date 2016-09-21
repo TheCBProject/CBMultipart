@@ -3,12 +3,12 @@ package codechicken.multipart
 import java.util.{BitSet => JBitSet}
 
 import codechicken.lib.packet.PacketCustom
-import codechicken.lib.vec.BlockCoord
 import codechicken.multipart.asm.ASMImplicits._
 import codechicken.multipart.asm.{MultipartMixinFactory, ScratchBitSet}
 import codechicken.multipart.handler.MultipartProxy
 import net.minecraft.network.play.server.SPacketBlockChange
 import net.minecraft.tileentity.TileEntity
+import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
 import scala.collection.mutable.{Map => MMap}
@@ -66,7 +66,7 @@ object MultipartGenerator extends ScratchBitSet
      * Check if part adds any new interfaces to tile, if so, replace tile with a new copy and call tile.addPart(part)
      * returns true if tile was replaced
      */
-    private[multipart] def addPart(world:World, pos:BlockCoord, part:TMultiPart):TileMultipart =
+    private[multipart] def addPart(world:World, pos:BlockPos, part:TMultiPart):TileMultipart =
     {
         val (tile, converted) = TileMultipart.getOrConvertTile2(world, pos)
         val bitset = setTraits(part, world.isRemote)
@@ -75,9 +75,9 @@ object MultipartGenerator extends ScratchBitSet
         if(ntile != null) {
             if(converted) {//perform client conversion
                 ntile.partList(0).invalidateConvertedTile()
-                world.setBlockState(pos.pos, MultipartProxy.block.getDefaultState, 0)
+                world.setBlockState(pos, MultipartProxy.block.getDefaultState, 0)
                 silentAddTile(world, pos, ntile)
-                PacketCustom.sendToChunk(new SPacketBlockChange(world, pos.pos), world, pos.x>>4, pos.z>>4)
+                PacketCustom.sendToChunk(new SPacketBlockChange(world, pos), world, pos.getX>>4, pos.getZ>>4)
                 ntile.partList(0).onConverted()
                 ntile.writeAddPart(ntile.partList(0))
             }
@@ -93,7 +93,7 @@ object MultipartGenerator extends ScratchBitSet
             }
         }
         else {
-            world.setBlockState(pos.pos, MultipartProxy.block.getDefaultState, 0)
+            world.setBlockState(pos, MultipartProxy.block.getDefaultState, 0)
             ntile = MultipartMixinFactory.construct(bitset)
             silentAddTile(world, pos, ntile)
         }
@@ -104,10 +104,10 @@ object MultipartGenerator extends ScratchBitSet
     /**
      * Adds a tile entity to the world without notifying neighbor blocks or adding it to the tick list
      */
-    def silentAddTile(world:World, pos:BlockCoord, tile:TileEntity) {
-    	val chunk = world.getChunkFromBlockCoords(pos.pos)
+    def silentAddTile(world:World, pos:BlockPos, tile:TileEntity) {
+    	val chunk = world.getChunkFromBlockCoords(pos)
     	if(chunk != null)
-    		chunk.addTileEntity(pos.pos(), tile)
+    		chunk.addTileEntity(pos, tile)
     }
 
     /**
@@ -128,7 +128,7 @@ object MultipartGenerator extends ScratchBitSet
         val ntile = generateCompositeTile(tile, tile.partList, tile.getWorld.isRemote)
         if(ntile != tile) {
             tile.setValid(false)
-            silentAddTile(tile.getWorld, new BlockCoord(tile), ntile)
+            silentAddTile(tile.getWorld, tile.getPos, ntile)
             ntile.from(tile)
             ntile.notifyTileChange()
         }

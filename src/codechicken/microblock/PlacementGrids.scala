@@ -1,11 +1,11 @@
 package codechicken.microblock
 
-import codechicken.lib.vec.Vector3
-import codechicken.lib.vec.BlockCoord
-import codechicken.lib.vec.Rotation
+import codechicken.lib.vec.{BlockCoord, Rotation, Vector3}
 import Rotation._
+import codechicken.lib.math.MathHelper
 import org.lwjgl.opengl.GL11._
 import codechicken.multipart.PartMap
+import net.minecraft.util.math.BlockPos
 
 trait PlacementGrid
 {
@@ -24,7 +24,7 @@ trait PlacementGrid
     def drawLines() {}
 
     def glTransformFace(hit:Vector3, side:Int) {
-        val pos = new BlockCoord(hit)
+        val pos = hit.copy.floor()
         glPushMatrix()
         glTranslated(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5)
         sideRotations(side).glApply()

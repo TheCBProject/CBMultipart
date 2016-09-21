@@ -1,6 +1,6 @@
 package codechicken.multipart
 
-import codechicken.lib.vec.{BlockCoord, Rotation, Vector3}
+import codechicken.lib.vec.{Rotation, Vector3}
 import net.minecraft.block.SoundType
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.{Item, ItemStack}
@@ -23,7 +23,7 @@ trait TItemMultiPart extends Item
 
     override def onItemUse(stack:ItemStack, player:EntityPlayer, world:World, bpos:BlockPos, hand:EnumHand, facing:EnumFacing, hitX:Float, hitY:Float, hitZ:Float):EnumActionResult =
     {
-        val pos = new BlockCoord(bpos)
+        var pos = new BlockPos(bpos)
         val side = facing.getIndex
         val vhit = new Vector3(hitX, hitY, hitZ)
         val d = getHitDepth(vhit, side)
@@ -46,14 +46,14 @@ trait TItemMultiPart extends Item
 
         if(d < 1 && place() == EnumActionResult.SUCCESS) return EnumActionResult.SUCCESS
 
-        pos.offset(side)
+        pos = pos.offset(facing)
         place()
     }
 
     /**
      * Create a new part based on the placement information parameters.
      */
-    def newPart(item:ItemStack, player:EntityPlayer, world:World, pos:BlockCoord, side:Int, vhit:Vector3):TMultiPart
+    def newPart(item:ItemStack, player:EntityPlayer, world:World, pos:BlockPos, side:Int, vhit:Vector3):TMultiPart
 
     /**
       * Optionally return a sound event here to have it played on a successful placement.

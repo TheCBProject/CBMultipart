@@ -1,10 +1,10 @@
 package codechicken.multipart.scalatraits
 
+import codechicken.lib.math.MathHelper
 import codechicken.multipart.TMultiPart
 import codechicken.multipart.INeighborTileChangePart
 import codechicken.multipart.TileMultipart
-import codechicken.lib.vec.BlockCoord
-import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.{BlockPos, Vec3i}
 
 /**
  * Mixin implementation for INeighborTileChange
@@ -44,9 +44,9 @@ trait TTileChangeTile extends TileMultipart
     override def onNeighborTileChange(neighborPos:BlockPos)
     {
         super.onNeighborTileChange(neighborPos)
-        val offset = new BlockCoord(neighborPos).sub(getPos.getX, getPos.getY, getPos.getZ)
-        val diff = offset.absSum
-        val side = offset.toSide
+        val offset = new BlockPos(neighborPos).subtract(new Vec3i(getPos.getX, getPos.getY, getPos.getZ))
+        val diff = MathHelper.absSum(offset)
+        val side = MathHelper.toSide(offset)
 
         if(side < 0 || diff <= 0 || diff > 2) return
 

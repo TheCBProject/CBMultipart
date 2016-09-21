@@ -33,7 +33,7 @@ object MicroblockRender
         val part = placement.part.asInstanceOf[MicroblockClient]
 
         glPushMatrix()
-        glTranslated(pos.x+0.5, pos.y+0.5, pos.z+0.5)
+        glTranslated(pos.getX+0.5, pos.getY+0.5, pos.getZ+0.5)
         glScaled(1.002, 1.002, 1.002)
         glTranslated(-0.5, -0.5, -0.5)
 

@@ -2,7 +2,6 @@ package codechicken.multipart.minecraft;
 
 import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.raytracer.RayTracer;
-import codechicken.lib.vec.BlockCoord;
 import codechicken.multipart.TileMultipart;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -11,6 +10,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -43,7 +43,7 @@ public class EventHandler
         if(hit == null)
             return false;
 
-        BlockCoord pos = new BlockCoord(hit.blockPos).offset(hit.sideHit.ordinal());
+        BlockPos pos = new BlockPos(hit.blockPos).offset(hit.sideHit);
         ItemStack held = player.getHeldItem(hand);
         McMetaPart part = null;
         if(held == null)
@@ -65,7 +65,7 @@ public class EventHandler
         if(part == null)
             return false;
 
-        part.setStateOnPlacement(world, pos.pos(), hit.sideHit, hit.hitVec, player, held);
+        part.setStateOnPlacement(world, pos, hit.sideHit, hit.hitVec, player, held);
 
         //TODO find purpose of keeping this
 //        if(world.isRemote && !player.isSneaking())//attempt to use block activated like normal and tell the server the right stuff
@@ -91,7 +91,7 @@ public class EventHandler
         if(!world.isRemote) {
             TileMultipart.addPart(world, pos, part);
             SoundType sound = part.getBlock().getSoundType();
-            world.playSound(null, pos.x + 0.5D, pos.y + 0.5D, pos.z + 0.5D,
+            world.playSound(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D,
                     sound.getPlaceSound(), SoundCategory.BLOCKS,
                     (sound.getVolume() + 1.0F) / 2.0F,
                     sound.getPitch() * 0.8F);

@@ -1,12 +1,12 @@
 package codechicken.multipart.minecraft;
 
-import codechicken.lib.vec.BlockCoord;
 import codechicken.lib.vec.Vector3;
 import codechicken.multipart.TFacePart;
 import codechicken.multipart.TileMultipart;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 
 public abstract class McSidedMetaPart extends McMetaPart implements TFacePart
 {
@@ -30,8 +30,9 @@ public abstract class McSidedMetaPart extends McMetaPart implements TFacePart
 
     public boolean canStay()
     {
-        BlockCoord pos = new BlockCoord(tile()).offset(getSideFromState());
-        return world().isSideSolid(pos.pos(), EnumFacing.VALUES[getSideFromState()]);
+        EnumFacing facing = EnumFacing.VALUES[getSideFromState()];
+        BlockPos pos = new BlockPos(tile().getPos()).offset(facing);
+        return world().isSideSolid(pos, facing);
     }
 
     public boolean dropIfCantStay()

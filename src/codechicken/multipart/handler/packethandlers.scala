@@ -6,7 +6,6 @@ import java.util.{Iterator => JIterator, LinkedList => JLinkedList, Map => JMap}
 import codechicken.lib.data.MCDataOutputWrapper
 import codechicken.lib.packet.PacketCustom
 import codechicken.lib.packet.PacketCustom.{IClientPacketHandler, IHandshakeHandler, IServerPacketHandler}
-import codechicken.lib.vec.BlockCoord
 import codechicken.multipart.handler.MultipartProxy._
 import codechicken.multipart.{ControlKeyModifer, MultiPartRegistry, PacketScheduler, TileMultipart}
 import net.minecraft.client.Minecraft
@@ -65,7 +64,7 @@ object MultipartCPH extends MultipartPH with IClientPacketHandler
     {
         var x = packet.readInt
         while (x != Int.MaxValue) {
-            val pos = new BlockCoord(x, packet.readInt, packet.readInt)
+            val pos = new BlockPos(x, packet.readInt, packet.readInt)
             var i = packet.readUByte
             while (i < 255) {
                 TileMultipart.handlePacket(pos, world, i, packet)
@@ -83,7 +82,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
         def getBytes = bout.toByteArray
     }
 
-    private val updateMap = MMap[World, MMap[BlockCoord, MCByteStream]]()
+    private val updateMap = MMap[World, MMap[BlockPos, MCByteStream]]()
     /**
      * These maps are keyed by entityID so that new player instances with the same entity id don't conflict world references
      */
@@ -110,14 +109,14 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
             updateMap.remove(world)
     }
 
-    def getTileStream(world:World, pos:BlockCoord) =
+    def getTileStream(world:World, pos: BlockPos) =
         updateMap.getOrElseUpdate(world, {
             if (world.isRemote)
                 throw new IllegalArgumentException("Cannot use MultipartSPH on a client world")
             MMap()
         }).getOrElseUpdate(pos, {
             val s = new MCByteStream(new ByteArrayOutputStream)
-            s.writeCoord(pos)
+            s.writePos(pos)
             s
         })
 
@@ -132,7 +131,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
                     val packet = new PacketCustom(channel, 3).compress()
 
                     var send = false
-                    for ((pos, stream) <- m if chunks(new ChunkPos(pos.x>>4, pos.z>>4))) {
+                    for ((pos, stream) <- m if chunks(new ChunkPos(pos.getX>>4, pos.getZ>>4))) {
                         send = true
                         packet.writeArray(stream.getBytes)
                         packet.writeByte(255) //terminator
@@ -178,7 +177,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
         while (it.hasNext) {
             val tile = it.next
             if (tile.isInstanceOf[TileMultipart]) {
-                s.writeShort(indexInChunk(new BlockCoord(tile)))
+                s.writeShort(indexInChunk(tile.getPos))
                 tile.asInstanceOf[TileMultipart].writeDesc(s)
                 num += 1
             }

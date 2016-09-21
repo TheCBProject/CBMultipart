@@ -1,9 +1,9 @@
 package codechicken.multipart
 
-import codechicken.lib.vec.BlockCoord
 import scala.collection.mutable.{Map => MMap}
 import net.minecraft.world.World
 import codechicken.multipart.handler.MultipartProxy
+import net.minecraft.util.math.BlockPos
 
 /**
  * In order to maintain tight client/server synchronisation without bandwidth overhead, all data written must be read.
@@ -15,14 +15,14 @@ object TileCache
 {
     case class FlaggedTile(t:TileMultipart, removed:Boolean)
 
-    val map = MMap[BlockCoord, FlaggedTile]()
+    val map = MMap[BlockPos, FlaggedTile]()
 
-    def add(t:TileMultipart) = map.put(new BlockCoord(t), FlaggedTile(t, false))
-    def remove(t:TileMultipart) = map.put(new BlockCoord(t), FlaggedTile(t, true))
-    def apply(c:BlockCoord) = map.get(c)
+    def add(t:TileMultipart) = map.put(t.getPos, FlaggedTile(t, false))
+    def remove(t:TileMultipart) = map.put(t.getPos, FlaggedTile(t, true))
+    def apply(c:BlockPos) = map.get(c)
     def clear() = map.clear()
 
-    def findTile(world:World, c:BlockCoord) = BlockMultipart.getTile(world, c.pos()) match {
+    def findTile(world:World, c:BlockPos) = BlockMultipart.getTile(world, c) match {
         case null => apply(c) match {
             case Some(FlaggedTile(t, rem)) =>
                 if(!rem)

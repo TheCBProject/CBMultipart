@@ -2,7 +2,6 @@ package codechicken.multipart
 
 import java.io.{DataOutputStream, File, FileInputStream, FileOutputStream}
 
-import codechicken.lib.vec.BlockCoord
 import codechicken.lib.world.{ChunkExtension, WorldExtension, WorldExtensionInstantiator}
 import net.minecraft.nbt.{CompressedStreamTools, NBTTagCompound, NBTTagList}
 import net.minecraft.util.math.ChunkPos
@@ -193,7 +192,7 @@ object TickScheduler extends WorldExtensionInstantiator
                 if(part.tile != null && !e.random)
                 {
                     val tag = new NBTTagCompound
-                    tag.setShort("pos", indexInChunk(new BlockCoord(part.tile)).toShort)
+                    tag.setShort("pos", indexInChunk(part.tile.getPos).toShort)
                     tag.setByte("i", part.tile.partList.indexOf(part).toByte)
                     tag.setLong("time", e.time)
                     tagList.appendTag(tag)
@@ -215,7 +214,7 @@ object TickScheduler extends WorldExtensionInstantiator
             {
                 val tag = tagList.getCompoundTagAt(i)
                 val pos = indexInChunk(cc, tag.getShort("pos"))
-                val tile = chunk.getTileEntityMap.get(pos.pos())
+                val tile = chunk.getTileEntityMap.get(pos)
                 if(tile.isInstanceOf[TileMultipart])
                     tickList+=new PartTickEntry(tile.asInstanceOf[TileMultipart].partList(tag.getByte("i")), tag.getLong("time"), false)
             }

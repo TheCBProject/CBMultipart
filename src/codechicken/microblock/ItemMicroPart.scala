@@ -76,7 +76,7 @@ class ItemMicroPart extends Item
                     placement.consume(world, player, stack)
                 val sound = MicroMaterialRegistry.getMaterial(material).getSound
                 if(sound != null)
-                    world.playSound(null, placement.pos.x + 0.5D, placement.pos.y + 0.5D, placement.pos.z + 0.5D, sound.getPlaceSound, SoundCategory.BLOCKS, (sound.getVolume + 1.0F) / 2.0F, sound.getPitch * 0.8F)
+                    world.playSound(null, placement.pos.getX + 0.5D, placement.pos.getY + 0.5D, placement.pos.getZ + 0.5D, sound.getPlaceSound, SoundCategory.BLOCKS, (sound.getVolume + 1.0F) / 2.0F, sound.getPitch * 0.8F)
 
             }
 
