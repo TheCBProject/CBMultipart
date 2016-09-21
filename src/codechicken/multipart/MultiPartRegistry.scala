@@ -265,8 +265,9 @@ object MultiPartRegistryClient
       * Optionally register a custom state mapper for this part. If you dont register
       * a custom mapper, a default vanilla mapper will be used.
       */
-    def registerCustomStateMapper(partName:String, mapper:IMultipartStateMapper)
+    def registerCustomStateMapper(part:IModelRenderPart, mapper:IMultipartStateMapper)
     {
-        nameToModelMapper += (partName -> mapper)
+        getModelPartContainer(part) //register right away so it can be mapped
+        nameToModelMapper += (part.getType -> mapper)
     }
 }

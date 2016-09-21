@@ -12,7 +12,7 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.block.model._
 import net.minecraft.client.renderer.block.statemap.DefaultStateMapper
-import net.minecraft.client.renderer.texture.TextureAtlasSprite
+import net.minecraft.client.renderer.texture.{TextureMap, TextureAtlasSprite}
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.client.renderer.{GlStateManager, RenderHelper, VertexBuffer}
@@ -30,9 +30,13 @@ import scala.collection.JavaConversions._
 @SideOnly(Side.CLIENT)
 object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] with ICCBlockRenderer
 {
-    val renderType = BlockRenderingRegistry.createRenderType("fmpcbe_multipart_block")
+    val renderType = BlockRenderingRegistry.createRenderType("fmpcbe_mpblock")
 
-    BlockRenderingRegistry.registerRenderer(renderType, this)
+    def register()
+    {
+        BlockRenderingRegistry.registerRenderer(renderType, this)
+    }
+
 
     override def renderTileEntityAt(tile:TileMultipartClient, x:Double, y:Double, z:Double, frame:Float, destroyStage:Int)
     {
@@ -99,6 +103,8 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
     }
 
     override def renderBrightness(state:IBlockState, brightness:Float){}
+
+    override def registerTextures(map:TextureMap){}
 }
 
 object MultipartStateMapper extends DefaultStateMapper

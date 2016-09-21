@@ -37,6 +37,11 @@ object BlockMultipart
         case _ => null
     }
 
+    def getPart(world:IBlockAccess, pos:BlockPos, slot:Int) = world.getTileEntity(pos) match {
+        case t:TileMultipart => t.partMap(slot)
+        case _ => null
+    }
+
     def retracePart(world:World, pos:BlockPos, player:EntityPlayer) =
         RayTracer.retraceBlock(world, player, pos) match {
             case partHit:PartRayTraceResult => partHit

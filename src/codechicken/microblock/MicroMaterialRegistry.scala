@@ -107,7 +107,7 @@ object MicroMaterialRegistry
         /**
          * Return true if a custom highlight was rendered and the default should be skipped
          */
-        def renderHighlight(player:EntityPlayer, hit:RayTraceResult, mcrClass:CommonMicroFactory, size:Int, material:Int): Boolean
+        def renderHighlight(player:EntityPlayer, hit:RayTraceResult, mcrFactory:CommonMicroFactory, size:Int, material:Int): Boolean
     }
 
     private val typeMap = MHashMap[String, IMicroMaterial]()

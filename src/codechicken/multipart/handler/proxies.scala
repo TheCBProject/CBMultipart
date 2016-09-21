@@ -97,13 +97,16 @@ class MultipartProxy_clientImpl extends MultipartProxy_serverImpl
 
         MinecraftForge.EVENT_BUS.register(ControlKeyHandler)
         ClientRegistry.registerKeyBinding(ControlKeyHandler)
+
+        MultipartRenderer.register()
     }
 
     @SideOnly(Side.CLIENT)
     override def onTileClassBuilt(t:Class[_ <: TileEntity])
     {
         super.onTileClassBuilt(t)
-        ClientRegistry.bindTileEntitySpecialRenderer(t.asInstanceOf[Class[TileEntity]], MultipartRenderer.asInstanceOf[TileEntitySpecialRenderer[TileEntity]])
+        ClientRegistry.bindTileEntitySpecialRenderer(t.asInstanceOf[Class[TileEntity]],
+            MultipartRenderer.asInstanceOf[TileEntitySpecialRenderer[TileEntity]])
     }
 
     @SubscribeEvent

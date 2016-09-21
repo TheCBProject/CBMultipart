@@ -5,7 +5,6 @@ import codechicken.lib.raytracer.RayTracer;
 import codechicken.lib.vec.BlockCoord;
 import codechicken.multipart.TileMultipart;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockFence;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -32,20 +31,20 @@ public class EventHandler
             if(placing.get() != null)
                 return;//for mods that do dumb stuff and call this event like MFR
             placing.set(event);
-            if(place(event.getEntityPlayer(), event.getEntityPlayer().worldObj))
+            if(place(event.getEntityPlayer(), event.getHand(), event.getEntityPlayer().worldObj))
                 event.setCanceled(true);
             placing.set(null);
         }
     }
 
-    public static boolean place(EntityPlayer player, World world)
+    public static boolean place(EntityPlayer player, EnumHand hand, World world)
     {
         RayTraceResult hit = RayTracer.retrace(player);
         if(hit == null)
             return false;
 
         BlockCoord pos = new BlockCoord(hit.blockPos).offset(hit.sideHit.ordinal());
-        ItemStack held = player.getHeldItem(EnumHand.MAIN_HAND);
+        ItemStack held = player.getHeldItem(hand);
         McMetaPart part = null;
         if(held == null)
             return false;
@@ -55,21 +54,20 @@ public class EventHandler
             return false;
 
         if(heldBlock == Blocks.TORCH)
-            part = new TorchPart();//TorchPart.placement(world, pos, hit.sideHit);
-//        else if(heldBlock == Blocks.lever)
-//            part = LeverPart.placement(world, pos, player, hit.sideHit);
-//        else if(heldBlock == Blocks.stone_button)
-//            part = ButtonPart.placement(world, pos, hit.sideHit, 0);
-//        else if(heldBlock == Blocks.wooden_button)
-//            part = ButtonPart.placement(world, pos, hit.sideHit, 1);
+            part = new TorchPart();
+        else if(heldBlock == Blocks.LEVER)
+            part = new LeverPart();
+        else if(heldBlock == Blocks.STONE_BUTTON || heldBlock == Blocks.WOODEN_BUTTON)
+            part = new ButtonPart();
         else if(heldBlock == Blocks.REDSTONE_TORCH)
             part = new RedstoneTorchPart();
 
         if(part == null)
             return false;
 
-        part.setStateOnPlacement(world, pos.pos(), hit.sideHit, hit.hitVec, player);
+        part.setStateOnPlacement(world, pos.pos(), hit.sideHit, hit.hitVec, player, held);
 
+        //TODO find purpose of keeping this
 //        if(world.isRemote && !player.isSneaking())//attempt to use block activated like normal and tell the server the right stuff
 //        {
 //            Vector3 f = new Vector3(hit.hitVec).add(-hit.blockX, -hit.blockY, -hit.blockZ);
@@ -85,7 +83,7 @@ public class EventHandler
 //                return true;
 //            }
 //        }
-//
+
         TileMultipart tile = TileMultipart.getOrConvertTile(world, pos);
         if(tile == null || !tile.canAddPart(part))
             return false;
@@ -102,24 +100,24 @@ public class EventHandler
                 held.stackSize--;
                 if (held.stackSize == 0)  {
                     player.inventory.mainInventory[player.inventory.currentItem] = null;
-                    MinecraftForge.EVENT_BUS.post(new PlayerDestroyItemEvent(player, held, EnumHand.MAIN_HAND));
+                    MinecraftForge.EVENT_BUS.post(new PlayerDestroyItemEvent(player, held, hand));
                 }
             }
         }
         else {
-            player.swingArm(EnumHand.MAIN_HAND);
-            new PacketCustom(McMultipartSPH.channel, 1).sendToServer();
+            player.swingArm(hand);
+            new PacketCustom(McMultipartSPH.channel, 1).writeBoolean(hand == EnumHand.MAIN_HAND).sendToServer();
         }
         return true;
     }
 
-    /**
-     * Because vanilla is weird.
-     */
-    private static boolean ignoreActivate(Block block)
-    {
-        if(block instanceof BlockFence)
-            return true;
-        return false;
-    }
+//    /**
+//     * Because vanilla is weird.
+//     */
+//    private static boolean ignoreActivate(Block block)
+//    {
+//        if(block instanceof BlockFence)
+//            return true;
+//        return false;
+//    }
 }

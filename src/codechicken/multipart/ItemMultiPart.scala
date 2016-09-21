@@ -1,10 +1,11 @@
 package codechicken.multipart
 
 import codechicken.lib.vec.{BlockCoord, Rotation, Vector3}
+import net.minecraft.block.SoundType
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.{Item, ItemStack}
+import net.minecraft.util._
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.{EnumActionResult, EnumFacing, EnumHand}
 import net.minecraft.world.World
 
 /**
@@ -32,7 +33,13 @@ trait TItemMultiPart extends Item
             val part = newPart(stack, player, world, pos, side, vhit)
             if(part == null || !TileMultipart.canPlacePart(world, pos, part)) return EnumActionResult.FAIL
 
-            if(!world.isRemote) TileMultipart.addPart(world, pos, part)
+            if(!world.isRemote) {
+                TileMultipart.addPart(world, pos, part)
+                val sound = getPlacementSound(stack)
+                if(sound != null)
+                    world.playSound(null, bpos, sound.getPlaceSound,
+                        SoundCategory.BLOCKS, (sound.getVolume+1.0F)/2.0F, sound.getPitch*0.8F)
+            }
             if(!player.capabilities.isCreativeMode) stack.stackSize-=1
             EnumActionResult.SUCCESS
         }
@@ -47,4 +54,9 @@ trait TItemMultiPart extends Item
      * Create a new part based on the placement information parameters.
      */
     def newPart(item:ItemStack, player:EntityPlayer, world:World, pos:BlockCoord, side:Int, vhit:Vector3):TMultiPart
+
+    /**
+      * Optionally return a sound event here to have it played on a successful placement.
+      */
+    def getPlacementSound(item:ItemStack):SoundType = null
 }

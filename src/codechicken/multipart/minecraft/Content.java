@@ -18,8 +18,8 @@ public class Content implements IPartFactory, IPartConverter
     public TMultiPart createPart(String name, boolean client)
     {
         if(name.equals("mc_torch")) return new TorchPart();
-//        if(name.equals("mc_lever")) return new LeverPart();
-//        if(name.equals("mc_button")) return new ButtonPart();
+        if(name.equals("mc_lever")) return new LeverPart();
+        if(name.equals("mc_button")) return new ButtonPart();
         if(name.equals("mc_redtorch")) return new RedstoneTorchPart();
 
         return null;
@@ -49,15 +49,11 @@ public class Content implements IPartFactory, IPartConverter
 
         if(b == Blocks.TORCH)
             return new TorchPart(state);
-//        if(b == Blocks.lever)
-//            return new LeverPart(meta);
-//        if(b == Blocks.stone_button)
-//            return new ButtonPart(meta);
-//        if(b == Blocks.wooden_button)
-//            return new ButtonPart(meta|0x10);
-        if(b == Blocks.REDSTONE_TORCH)
-            return new RedstoneTorchPart(state);
-        if(b == Blocks.UNLIT_REDSTONE_TORCH)
+        if(b == Blocks.LEVER)
+            return new LeverPart(state);
+        if(b == Blocks.STONE_BUTTON || b == Blocks.WOODEN_BUTTON)
+            return new ButtonPart(state);
+        if(b == Blocks.REDSTONE_TORCH || b == Blocks.UNLIT_REDSTONE_TORCH)
             return new RedstoneTorchPart(state);
 
         return null;

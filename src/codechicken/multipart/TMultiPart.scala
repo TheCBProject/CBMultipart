@@ -35,16 +35,19 @@ abstract class TMultiPart
     /**
       * Short getter for xCoord
       */
+    @deprecated
     def x = tile.getPos.getX
 
     /**
       * Short getter for yCoord
       */
+    @deprecated
     def y = tile.getPos.getY
 
     /**
       * Short getter for zCoord
       */
+    @deprecated
     def z = tile.getPos.getZ
 
     /**
@@ -315,7 +318,7 @@ abstract class TMultiPart
       * If true, this entity will be bulk-rendered through renderFast. Otherwise,
       * it will be rendererd through renderDynamic
       */
-    def canRenderFast = true
+    def canRenderFast = false
 
     /**
       * Render the dynamic, changing faces of this part as in a FastTESR. You can

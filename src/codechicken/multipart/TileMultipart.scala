@@ -1,11 +1,11 @@
 package codechicken.multipart
 
 import java.lang.{Iterable => JIterable}
-import java.util.{Collection => JCollection, List => JList, Random, ArrayList => JArrayList}
+import java.util.{ArrayList => JArrayList, Collection => JCollection, List => JList, Random}
 
 import codechicken.lib.data.MCDataOutput
 import codechicken.lib.packet.PacketCustom
-import codechicken.lib.raytracer.{DistanceRayTraceResult, CuboidRayTraceResult}
+import codechicken.lib.raytracer.{CuboidRayTraceResult, DistanceRayTraceResult}
 import codechicken.lib.render.RenderUtils
 import codechicken.lib.vec.{BlockCoord, Cuboid6, Vector3}
 import codechicken.lib.world.IChunkLoadTile
@@ -20,9 +20,9 @@ import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.{NBTTagCompound, NBTTagList}
 import net.minecraft.tileentity.TileEntity
-import net.minecraft.util.{EnumFacing, BlockRenderLayer, EnumHand}
 import net.minecraft.util.math.{AxisAlignedBB, BlockPos, Vec3d}
-import net.minecraft.world.World
+import net.minecraft.util.{BlockRenderLayer, EnumFacing, EnumHand}
+import net.minecraft.world.{EnumSkyBlock, World}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
@@ -323,7 +323,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile
       */
     def addCollisionBoxToList(entityBox:AxisAlignedBB, list:JList[AxisAlignedBB])
     {
-        val mask = new Cuboid6(entityBox).sub(new Vector3(pos)) //get entityBox in zero-space
+        val mask = new Cuboid6(entityBox).subtract(pos) //get entityBox in zero-space
         partList.foreach {_.getCollisionBoxes.foreach { c =>
             if (c.intersects(mask)) list.add(c.aabb().offset(pos))
         }}
@@ -515,6 +515,14 @@ class TileMultipart extends TileEntity with IChunkLoadTile
     def markRender()
     {
         worldObj.markBlockRangeForRenderUpdate(pos, pos)
+    }
+
+    def recalcLight(sky:Boolean, block:Boolean)
+    {
+        if (sky && !worldObj.provider.getHasNoSky)
+            worldObj.checkLightFor(EnumSkyBlock.SKY, pos)
+        if (block)
+            worldObj.checkLightFor(EnumSkyBlock.BLOCK, pos)
     }
 
     /**
