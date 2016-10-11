@@ -3,8 +3,8 @@ package codechicken.microblock.handler
 import java.util.{List => JList}
 
 import codechicken.lib.config.ConfigFile
+import codechicken.lib.model.ModelRegistryHelper
 import codechicken.lib.packet.PacketCustom
-import codechicken.lib.render.ModelRegistryHelper
 import codechicken.microblock._
 import codechicken.multipart.handler.MultipartProxy._
 import net.minecraft.client.renderer.block.model.ModelResourceLocation

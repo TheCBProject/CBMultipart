@@ -2,7 +2,7 @@ package codechicken.microblock
 
 import codechicken.lib.data.{MCDataInput, MCDataOutput}
 import codechicken.lib.packet.PacketCustom
-import codechicken.lib.render.CCRenderState.IVertexOperation
+import codechicken.lib.render.pipeline.IVertexOperation
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import codechicken.multipart.{IDWriter, MultiPartRegistry}
 import net.minecraft.block.SoundType

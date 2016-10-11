@@ -3,7 +3,8 @@ package codechicken.multipart
 import java.util.{HashMap => JHashMap, Map => JMap}
 
 import codechicken.lib.render.block.{BlockRenderingRegistry, ICCBlockRenderer}
-import codechicken.lib.render.{CCRenderState, TextureUtils}
+import codechicken.lib.render.CCRenderState
+import codechicken.lib.texture.TextureUtils
 import codechicken.lib.vec.Vector3
 import codechicken.multipart.BlockMultipart._
 import net.minecraft.block.Block
@@ -12,7 +13,7 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.block.model._
 import net.minecraft.client.renderer.block.statemap.DefaultStateMapper
-import net.minecraft.client.renderer.texture.{TextureMap, TextureAtlasSprite}
+import net.minecraft.client.renderer.texture.{TextureAtlasSprite, TextureMap}
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.client.renderer.{GlStateManager, RenderHelper, VertexBuffer}
@@ -42,8 +43,8 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
     {
         if (tile.partList.isEmpty)
             return
-
-        CCRenderState.reset()
+        val ccrs = CCRenderState.instance()
+        ccrs.reset()
         tile.renderDynamic(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame)
 
         //Simulate fast render
@@ -60,12 +61,12 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
         TextureUtils.bindBlockTexture()
 
         //Render through CC render pipeline
-        CCRenderState.reset()
-        CCRenderState.startDrawing(GL_QUADS, DefaultVertexFormats.BLOCK)
-        val buffer = CCRenderState.getBuffer
+        ccrs.reset()
+        ccrs.startDrawing(GL_QUADS, DefaultVertexFormats.BLOCK)
+        val buffer = ccrs.getBuffer
         tile.renderFast(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame, buffer)
         buffer.setTranslation(0, 0, 0)
-        CCRenderState.draw()
+        ccrs.draw()
 
         //Reset MC Render state
         RenderHelper.enableStandardItemLighting()
@@ -75,9 +76,9 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
     {
         if (tile.partList.isEmpty)
             return
-
-        CCRenderState.reset()
-        CCRenderState.bind(buffer)
+        val ccrs = CCRenderState.instance()
+        ccrs.reset()
+        ccrs.bind(buffer)
         tile.renderFast(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame, buffer)
     }
 
@@ -85,9 +86,10 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
         getClientTile(world, pos) match {
             case null => false
             case tile =>
-                CCRenderState.reset()
-                CCRenderState.bind(buffer)
-                CCRenderState.lightMatrix.locate(world, pos)
+                val ccrs = CCRenderState.instance()
+                ccrs.reset()
+                ccrs.bind(buffer)
+                ccrs.lightMatrix.locate(world, pos)
                 tile.renderStatic(new Vector3(pos), MinecraftForgeClient.getRenderLayer)
         }
 
@@ -96,8 +98,9 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
         getClientTile(world, pos) match {
             case null =>
             case tile =>
-                CCRenderState.reset()
-                CCRenderState.bind(buffer)
+                val ccrs = CCRenderState.instance()
+                ccrs.reset()
+                ccrs.bind(buffer)
                 tile.renderDamage(new Vector3(pos), sprite)
         }
     }

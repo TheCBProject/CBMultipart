@@ -2,17 +2,18 @@ package codechicken.microblock
 
 import java.util.{ArrayList => JArrayList}
 
-import codechicken.lib.lighting.{LightModel, LightMatrix}
+import codechicken.lib.lighting.{LightMatrix, LightModel}
 import codechicken.lib.model.bakery.CCModelBakery
 import codechicken.lib.render.BlockRenderer.BlockFace
-import codechicken.lib.render.{IItemRenderer, CCRenderState, TextureUtils}
+import codechicken.lib.render.CCRenderState
+import codechicken.lib.texture.TextureUtils
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import codechicken.microblock.MicroMaterialRegistry.IMicroMaterial
 import net.minecraft.block.state.IBlockState
-import net.minecraft.client.renderer.block.model.{ItemOverrideList, ItemCameraTransforms, IBakedModel, BakedQuad}
+import net.minecraft.client.renderer.block.model.{BakedQuad, IBakedModel, ItemCameraTransforms, ItemOverrideList}
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.util.{EnumFacing, BlockRenderLayer}
+import net.minecraft.util.{BlockRenderLayer, EnumFacing}
 import net.minecraft.util.math.RayTraceResult
 import net.minecraftforge.client.MinecraftForgeClient
 import net.minecraftforge.common.property.IExtendedBlockState
@@ -41,12 +42,13 @@ object MicroblockRender
         glDepthMask(false)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
+        val ccrs = CCRenderState.instance()
         TextureUtils.bindBlockTexture()
-        CCRenderState.reset()
-        CCRenderState.alphaOverride = 80
-        CCRenderState.startDrawing(GL_QUADS, DefaultVertexFormats.ITEM)
+        ccrs.reset()
+        ccrs.alphaOverride = 80
+        ccrs.startDrawing(GL_QUADS, DefaultVertexFormats.ITEM)
         part.render(Vector3.zero, null)
-        CCRenderState.draw()
+        ccrs.draw()
 
         glDisable(GL_BLEND)
         glDepthMask(true)
@@ -56,12 +58,13 @@ object MicroblockRender
     val face = new BlockFace()
     def renderCuboid(pos:Vector3, mat:IMicroMaterial, layer:BlockRenderLayer, c:Cuboid6, faces:Int)
     {
-        CCRenderState.setModel(face)
+        val ccrs = CCRenderState.instance()
+        ccrs.setModel(face)
         for(s <- 0 until 6 if (faces & 1<<s) == 0) {
             face.loadCuboidFace(c, s)
             val ops = mat.getMicroRenderOps(pos, s, layer, c)
             for (opSet <- ops)
-                CCRenderState.render(opSet:_*)
+                ccrs.render(opSet:_*)
         }
     }
 

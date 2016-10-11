@@ -1,8 +1,8 @@
 package codechicken.microblock
 
-import codechicken.lib.render.CCRenderState.IVertexOperation
-import codechicken.lib.render.TextureUtils
-import codechicken.lib.render.uv.{IconTransformation, UVTranslation}
+import codechicken.lib.render.pipeline.IVertexOperation
+import codechicken.lib.texture.TextureUtils
+import codechicken.lib.vec.uv.{IconTransformation, UVTranslation}
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks

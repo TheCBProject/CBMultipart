@@ -58,7 +58,7 @@ trait TModelRenderTile extends TileMultipartClient
 
         renderModel(modelPartList.filter(_.canRenderInLayer(layer)), {(model, state) =>
             Minecraft.getMinecraft.getBlockRendererDispatcher.getBlockModelRenderer
-                    .renderModel(getWorld, model, state, getPos, CCRenderState.getBuffer, true)
+                    .renderModel(getWorld, model, state, getPos, CCRenderState.instance().getBuffer, true)
             r |= true
         })
 
@@ -75,7 +75,7 @@ trait TModelRenderTile extends TileMultipartClient
                     renderModel(ListBuffer(p), {(model, state) =>
                         val dm = ForgeHooksClient.getDamageModel(model, texture, state, getWorld, getPos)
                         Minecraft.getMinecraft.getBlockRendererDispatcher.getBlockModelRenderer
-                                .renderModel(getWorld, dm, state, getPos, CCRenderState.getBuffer, true)
+                                .renderModel(getWorld, dm, state, getPos, CCRenderState.instance().getBuffer, true)
                     })
                 case _ =>
             }

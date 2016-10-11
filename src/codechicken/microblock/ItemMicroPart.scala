@@ -3,7 +3,10 @@ package codechicken.microblock
 import java.util.{List => JList}
 
 import codechicken.lib.raytracer.RayTracer
-import codechicken.lib.render.{CCRenderState, IItemRenderer, TextureUtils, TransformUtils}
+import codechicken.lib.render.item.IItemRenderer
+import codechicken.lib.render.CCRenderState
+import codechicken.lib.texture.TextureUtils
+import codechicken.lib.util.TransformUtils
 import codechicken.lib.vec.Vector3
 import codechicken.microblock.CommonMicroFactory._
 import codechicken.microblock.ItemMicroPart._
@@ -181,13 +184,14 @@ object ItemMicroPartRenderer extends IItemRenderer with IPerspectiveAwareModel
             return
 
         TextureUtils.bindBlockTexture()
-        CCRenderState.reset()
-        CCRenderState.pullLightmap()
-        CCRenderState.startDrawing(GL11.GL_QUADS, DefaultVertexFormats.ITEM)
+        val ccrs = CCRenderState.instance()
+        ccrs.reset()
+        ccrs.pullLightmap()
+        ccrs.startDrawing(GL11.GL_QUADS, DefaultVertexFormats.ITEM)
         val part = factory.create(true, getMaterialID(item)).asInstanceOf[MicroblockClient]
         part.setShape(size, factory.itemSlot)
         part.render(new Vector3(0.5, 0.5, 0.5).subtract(part.getBounds.center), null)
-        CCRenderState.draw()
+        ccrs.draw()
     }
 
     def renderHighlight(player:EntityPlayer, stack:ItemStack, hit:RayTraceResult):Boolean =

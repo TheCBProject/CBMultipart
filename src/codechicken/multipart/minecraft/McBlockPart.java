@@ -4,7 +4,7 @@ import codechicken.lib.raytracer.CuboidRayTraceResult;
 import codechicken.lib.raytracer.IndexedCuboid6;
 import codechicken.lib.render.BlockRenderer;
 import codechicken.lib.render.CCRenderState;
-import codechicken.lib.render.uv.IconTransformation;
+import codechicken.lib.vec.uv.IconTransformation;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
 import codechicken.multipart.*;
@@ -33,8 +33,9 @@ public abstract class McBlockPart extends TMultiPart implements TCuboidPart, TNo
     @Override
     public void renderBreaking(Vector3 pos, TextureAtlasSprite texture)
     {
-        CCRenderState.setPipeline(pos.translation(), new IconTransformation(texture));
-        BlockRenderer.renderCuboid(getBounds(), 0);
+        CCRenderState ccrs = CCRenderState.instance();
+        ccrs.setPipeline(pos.translation(), new IconTransformation(texture));
+        BlockRenderer.renderCuboid(ccrs, getBounds(), 0);
     }
 
     @Override

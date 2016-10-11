@@ -1,8 +1,9 @@
 package codechicken.microblock
 
-import codechicken.lib.render.CCRenderState.IVertexOperation
-import codechicken.lib.render.uv.{IconTransformation, MultiIconTransformation, UVTransformation}
-import codechicken.lib.render.{TextureUtils, CCRenderPipeline, CCRenderState, ColourMultiplier}
+import codechicken.lib.render.pipeline.{ColourMultiplier, IVertexOperation}
+import codechicken.lib.vec.uv.{IconTransformation, MultiIconTransformation, UVTransformation}
+import codechicken.lib.render.CCRenderState
+import codechicken.lib.texture.TextureUtils
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import codechicken.microblock.MicroMaterialRegistry.IMicroMaterial
 import codechicken.multipart.{BlockMultipart, MultipartStateMapper}
@@ -43,7 +44,7 @@ object MaterialRenderHelper
 
     def lighting() = {
         if(layer != null)
-            builder += CCRenderState.lightMatrix
+            builder += CCRenderState.instance().lightMatrix
         this
     }
 
@@ -71,7 +72,7 @@ class BlockMicroMaterial(val state:IBlockState) extends IMicroMaterial
         pIconT = new IconTransformation(TextureUtils.getParticleIconForBlock(state))
     }
 
-    override def getMicroRenderOps(pos:Vector3, side:Int, layer:BlockRenderLayer, bounds:Cuboid6):Seq[Seq[CCRenderState.IVertexOperation]] =
+    override def getMicroRenderOps(pos:Vector3, side:Int, layer:BlockRenderLayer, bounds:Cuboid6):Seq[Seq[IVertexOperation]] =
     {
         Seq(MaterialRenderHelper.start(pos, layer, icont).blockColour(getColour(layer)).lighting().result())
     }
@@ -83,7 +84,7 @@ class BlockMicroMaterial(val state:IBlockState) extends IMicroMaterial
                 Minecraft.getMinecraft.getBlockColors.colorMultiplier(state, null, null, 0)<<8|0xFF
             case world =>
                 Minecraft.getMinecraft.getBlockColors.colorMultiplier(state,
-                    CCRenderState.lightMatrix.access, CCRenderState.lightMatrix.pos, 0)<<8|0xFF
+                    CCRenderState.instance().lightMatrix.access, CCRenderState.instance().lightMatrix.pos, 0)<<8|0xFF
         }
     }
 

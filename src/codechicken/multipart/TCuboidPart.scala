@@ -4,7 +4,7 @@ import java.lang.Iterable
 
 import codechicken.lib.raytracer.IndexedCuboid6
 import codechicken.lib.render.{BlockRenderer, CCRenderState}
-import codechicken.lib.render.uv.IconTransformation
+import codechicken.lib.vec.uv.IconTransformation
 import codechicken.lib.vec.{Vector3, Cuboid6}
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 
@@ -28,7 +28,8 @@ trait TCuboidPart extends TMultiPart
 
     override def renderBreaking(pos:Vector3, texture:TextureAtlasSprite)
     {
-        CCRenderState.setPipeline(pos.translation(), new IconTransformation(texture))
-        BlockRenderer.renderCuboid(getBounds, 0)
+        val ccrs = CCRenderState.instance()
+        ccrs.setPipeline(pos.translation(), new IconTransformation(texture))
+        BlockRenderer.renderCuboid(ccrs, getBounds, 0)
     }
 }

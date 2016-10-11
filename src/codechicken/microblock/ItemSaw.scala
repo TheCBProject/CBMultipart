@@ -2,7 +2,10 @@ package codechicken.microblock
 
 import codechicken.lib.config.ConfigTag
 import codechicken.lib.render._
-import codechicken.lib.render.uv.UVTranslation
+import codechicken.lib.render.item.IItemRenderer
+import codechicken.lib.texture.TextureUtils
+import codechicken.lib.util.TransformUtils
+import codechicken.lib.vec.uv.UVTranslation
 import codechicken.lib.vec.SwapYZ
 import com.google.common.collect.ImmutableList
 import net.minecraft.block.state.IBlockState
@@ -84,19 +87,19 @@ object ItemSawRenderer extends IItemRenderer with IPerspectiveAwareModel
 //            case EQUIPPED => new TransformationList(new Scale(1.5), new Rotation(-pi/5, 1, 0, 0), new Rotation(-pi*3/4, 0, 1, 0), new Translation(0.75, 0.5, 0.75))
 //            case _ => return
 //        }
-
-        CCRenderState.reset()
+        val ccrs = CCRenderState.instance()
+        ccrs.reset()
         //CCRenderState.useNormals = true
-        CCRenderState.pullLightmap()
+        ccrs.pullLightmap()
         TextureUtils.changeTexture("microblock:textures/items/saw.png")
-        CCRenderState.startDrawing(GL11.GL_QUADS, DefaultVertexFormats.BLOCK)
-        handle.render()//(t)
-        holder.render()//(t)
-        CCRenderState.draw()
+        ccrs.startDrawing(GL11.GL_QUADS, DefaultVertexFormats.ITEM)
+        handle.render(ccrs)//(t)
+        holder.render(ccrs)//(t)
+        ccrs.draw()
         GL11.glDisable(GL11.GL_CULL_FACE)
-        CCRenderState.startDrawing(GL11.GL_QUADS, DefaultVertexFormats.BLOCK)
-        blade.render(/**t, **/new UVTranslation(0, (item.getItem.asInstanceOf[Saw].getCuttingStrength(item)-1)*4/64D))
-        CCRenderState.draw()
+        ccrs.startDrawing(GL11.GL_QUADS, DefaultVertexFormats.ITEM)
+        blade.render(ccrs,/**t, **/new UVTranslation(0, (item.getItem.asInstanceOf[Saw].getCuttingStrength(item)-1)*4/64D))
+        ccrs.draw()
         GL11.glEnable(GL11.GL_CULL_FACE)
     }
 
