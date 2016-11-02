@@ -1,6 +1,7 @@
 package codechicken.microblock
 
 import codechicken.lib.data.MCDataInput
+import codechicken.lib.render.CCRenderState
 import codechicken.lib.vec.Rotation._
 import codechicken.lib.vec.Vector3._
 import codechicken.lib.vec.{AxisCycle, Cuboid6, Scale, TransformationList, Vector3}
@@ -123,15 +124,15 @@ trait PostMicroblockClient extends PostMicroblock with MicroblockClient
     var renderBounds1:Cuboid6 = _
     var renderBounds2:Cuboid6 = _
 
-    override def render(pos:Vector3, layer:BlockRenderLayer)
+    override def render(pos:Vector3, layer:BlockRenderLayer, ccrs:CCRenderState)
     {
         val mat = getIMaterial
         if(layer == null)
-            MicroblockRender.renderCuboid(pos, mat, layer, getBounds, 0)
+            MicroblockRender.renderCuboid(pos, ccrs, mat, layer, getBounds, 0)
         else {
-            MicroblockRender.renderCuboid(pos, mat, layer, renderBounds1, 0)
+            MicroblockRender.renderCuboid(pos, ccrs, mat, layer, renderBounds1, 0)
             if (renderBounds2 != null)
-                MicroblockRender.renderCuboid(pos, mat, layer, renderBounds2, 0)
+                MicroblockRender.renderCuboid(pos, ccrs, mat, layer, renderBounds2, 0)
         }
     }
 

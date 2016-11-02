@@ -52,22 +52,22 @@ trait TModelRenderTile extends TileMultipartClient
         }
     }
 
-    override def renderStatic(pos:Vector3, layer:BlockRenderLayer) =
+    override def renderStatic(pos:Vector3, layer:BlockRenderLayer, ccrs:CCRenderState) =
     {
-        var r = super.renderStatic(pos, layer)
+        var r = super.renderStatic(pos, layer, ccrs)
 
         renderModel(modelPartList.filter(_.canRenderInLayer(layer)), {(model, state) =>
             Minecraft.getMinecraft.getBlockRendererDispatcher.getBlockModelRenderer
-                    .renderModel(getWorld, model, state, getPos, CCRenderState.instance().getBuffer, true)
+                    .renderModel(getWorld, model, state, getPos, ccrs.getBuffer, true)
             r |= true
         })
 
         r
     }
 
-    override def renderDamage(pos:Vector3, texture:TextureAtlasSprite)
+    override def renderDamage(pos:Vector3, texture:TextureAtlasSprite, ccrs:CCRenderState)
     {
-        super.renderDamage(pos, texture)
+        super.renderDamage(pos, texture, ccrs)
 
         Minecraft.getMinecraft.objectMouseOver match {
             case hit:PartRayTraceResult => partList(hit.partIndex) match {
@@ -75,7 +75,7 @@ trait TModelRenderTile extends TileMultipartClient
                     renderModel(ListBuffer(p), {(model, state) =>
                         val dm = ForgeHooksClient.getDamageModel(model, texture, state, getWorld, getPos)
                         Minecraft.getMinecraft.getBlockRendererDispatcher.getBlockModelRenderer
-                                .renderModel(getWorld, dm, state, getPos, CCRenderState.instance().getBuffer, true)
+                                .renderModel(getWorld, dm, state, getPos, ccrs.getBuffer, true)
                     })
                 case _ =>
             }

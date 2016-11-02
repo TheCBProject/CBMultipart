@@ -3,8 +3,8 @@ package codechicken.microblock
 import java.util.{List => JList}
 
 import codechicken.lib.raytracer.RayTracer
-import codechicken.lib.render.item.IItemRenderer
 import codechicken.lib.render.CCRenderState
+import codechicken.lib.render.item.IItemRenderer
 import codechicken.lib.texture.TextureUtils
 import codechicken.lib.util.TransformUtils
 import codechicken.lib.vec.Vector3
@@ -190,7 +190,7 @@ object ItemMicroPartRenderer extends IItemRenderer with IPerspectiveAwareModel
         ccrs.startDrawing(GL11.GL_QUADS, DefaultVertexFormats.ITEM)
         val part = factory.create(true, getMaterialID(item)).asInstanceOf[MicroblockClient]
         part.setShape(size, factory.itemSlot)
-        part.render(new Vector3(0.5, 0.5, 0.5).subtract(part.getBounds.center), null)
+        part.render(new Vector3(0.5, 0.5, 0.5).subtract(part.getBounds.center), null, ccrs)
         ccrs.draw()
     }
 

@@ -1,7 +1,7 @@
 package codechicken.microblock
 
 import codechicken.lib.raytracer.{CuboidRayTraceResult, IndexedCuboid6}
-import codechicken.lib.render.RenderUtils
+import codechicken.lib.render.{CCRenderState, RenderUtils}
 import codechicken.lib.vec.Rotation._
 import codechicken.lib.vec.Vector3._
 import codechicken.lib.vec.{Cuboid6, Vector3}
@@ -77,18 +77,18 @@ trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClien
 //                BlockRenderer.renderCuboid(c, sideMask))
 //    }
 
-    override def render(pos:Vector3, layer:BlockRenderLayer) {
+    override def render(pos:Vector3, layer:BlockRenderLayer, ccrs:CCRenderState) {
         if (layer == null)
-            renderHollow(pos, layer, getBounds, 0, false, MicroblockRender.renderCuboid)
+            renderHollow(pos, ccrs, layer, getBounds, 0, false, MicroblockRender.renderCuboid)
         else if (isTransparent)
-            renderHollow(pos, layer, renderBounds, renderMask, false, MicroblockRender.renderCuboid)
+            renderHollow(pos, ccrs, layer, renderBounds, renderMask, false, MicroblockRender.renderCuboid)
         else {
-            renderHollow(pos, layer, renderBounds, renderMask | 1 << getSlot, false, MicroblockRender.renderCuboid)
-            renderHollow(pos, layer, Cuboid6.full, ~(1 << getSlot), true, MicroblockRender.renderCuboid)
+            renderHollow(pos, ccrs, layer, renderBounds, renderMask | 1 << getSlot, false, MicroblockRender.renderCuboid)
+            renderHollow(pos, ccrs, layer, Cuboid6.full, ~(1 << getSlot), true, MicroblockRender.renderCuboid)
         }
     }
 
-    def renderHollow(pos:Vector3, layer:BlockRenderLayer, c:Cuboid6, sideMask:Int, face:Boolean, f:(Vector3, IMicroMaterial, BlockRenderLayer, Cuboid6, Int) => Unit)
+    def renderHollow(pos:Vector3, ccrs:CCRenderState, layer:BlockRenderLayer, c:Cuboid6, sideMask:Int, face:Boolean, f:(Vector3, CCRenderState, IMicroMaterial, BlockRenderLayer, Cuboid6, Int) => Unit)
     {
         val mat = getIMaterial
         val size = renderMask >> 8
@@ -106,36 +106,36 @@ trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClien
             case 0 | 1 =>
                 if (face)
                     iMask = 0x3C
-                f(pos, mat, layer, new Cuboid6(d1, y1, d2, d2, y2, z2), 0x3B | iMask) //-z internal
-                f(pos, mat, layer, new Cuboid6(d1, y1, z1, d2, y2, d1), 0x37 | iMask) //+z internal
+                f(pos, ccrs, mat, layer, new Cuboid6(d1, y1, d2, d2, y2, z2), 0x3B | iMask) //-z internal
+                f(pos, ccrs, mat, layer, new Cuboid6(d1, y1, z1, d2, y2, d1), 0x37 | iMask) //+z internal
 
-                f(pos, mat, layer, new Cuboid6(d2, y1, d1, x2, y2, d2), sideMask & 0x23 | 0xC | iMask) //-x internal -y+y+x external
-                f(pos, mat, layer, new Cuboid6(x1, y1, d1, d1, y2, d2), sideMask & 0x13 | 0xC | iMask) //+x internal -y+y-x external
+                f(pos, ccrs, mat, layer, new Cuboid6(d2, y1, d1, x2, y2, d2), sideMask & 0x23 | 0xC | iMask) //-x internal -y+y+x external
+                f(pos, ccrs, mat, layer, new Cuboid6(x1, y1, d1, d1, y2, d2), sideMask & 0x13 | 0xC | iMask) //+x internal -y+y-x external
 
-                f(pos, mat, layer, new Cuboid6(x1, y1, d2, x2, y2, z2), sideMask & 0x3B | 4 | iMask) //-y+y+z-x+x external
-                f(pos, mat, layer, new Cuboid6(x1, y1, z1, x2, y2, d1), sideMask & 0x37 | 8 | iMask) //-y+y-z-x+x external
+                f(pos, ccrs, mat, layer, new Cuboid6(x1, y1, d2, x2, y2, z2), sideMask & 0x3B | 4 | iMask) //-y+y+z-x+x external
+                f(pos, ccrs, mat, layer, new Cuboid6(x1, y1, z1, x2, y2, d1), sideMask & 0x37 | 8 | iMask) //-y+y-z-x+x external
             case 2 | 3 =>
                 if (face)
                     iMask = 0x33
-                f(pos, mat, layer, new Cuboid6(d2, d1, z1, x2, d2, z2), 0x2F | iMask) //-x internal
-                f(pos, mat, layer, new Cuboid6(x1, d1, z1, d1, d2, z2), 0x1F | iMask) //+x internal
+                f(pos, ccrs, mat, layer, new Cuboid6(d2, d1, z1, x2, d2, z2), 0x2F | iMask) //-x internal
+                f(pos, ccrs, mat, layer, new Cuboid6(x1, d1, z1, d1, d2, z2), 0x1F | iMask) //+x internal
 
-                f(pos, mat, layer, new Cuboid6(d1, d2, z1, d2, y2, z2), sideMask & 0xE | 0x30 | iMask) //-y internal -z+z+y external
-                f(pos, mat, layer, new Cuboid6(d1, y1, z1, d2, d1, z2), sideMask & 0xD | 0x30 | iMask) //+y internal -z+z-y external
+                f(pos, ccrs, mat, layer, new Cuboid6(d1, d2, z1, d2, y2, z2), sideMask & 0xE | 0x30 | iMask) //-y internal -z+z+y external
+                f(pos, ccrs, mat, layer, new Cuboid6(d1, y1, z1, d2, d1, z2), sideMask & 0xD | 0x30 | iMask) //+y internal -z+z-y external
 
-                f(pos, mat, layer, new Cuboid6(d2, y1, z1, x2, y2, z2), sideMask & 0x2F | 0x10 | iMask) //-z+z+x-y+y external
-                f(pos, mat, layer, new Cuboid6(x1, y1, z1, d1, y2, z2), sideMask & 0x1F | 0x20 | iMask) //-z+z-x-y+y external
+                f(pos, ccrs, mat, layer, new Cuboid6(d2, y1, z1, x2, y2, z2), sideMask & 0x2F | 0x10 | iMask) //-z+z+x-y+y external
+                f(pos, ccrs, mat, layer, new Cuboid6(x1, y1, z1, d1, y2, z2), sideMask & 0x1F | 0x20 | iMask) //-z+z-x-y+y external
             case 4 | 5 =>
                 if (face)
                     iMask = 0xF
-                f(pos, mat, layer, new Cuboid6(x1, d2, d1, x2, y2, d2), 0x3E | iMask) //-y internal
-                f(pos, mat, layer, new Cuboid6(x1, y1, d1, x2, d1, d2), 0x3D | iMask) //+y internal
+                f(pos, ccrs, mat, layer, new Cuboid6(x1, d2, d1, x2, y2, d2), 0x3E | iMask) //-y internal
+                f(pos, ccrs, mat, layer, new Cuboid6(x1, y1, d1, x2, d1, d2), 0x3D | iMask) //+y internal
 
-                f(pos, mat, layer, new Cuboid6(x1, d1, d2, x2, d2, z2), sideMask & 0x38 | 3 | iMask) //-z internal -x+x+z external
-                f(pos, mat, layer, new Cuboid6(x1, d1, z1, x2, d2, d1), sideMask & 0x34 | 3 | iMask) //+z internal -x+x-z external
+                f(pos, ccrs, mat, layer, new Cuboid6(x1, d1, d2, x2, d2, z2), sideMask & 0x38 | 3 | iMask) //-z internal -x+x+z external
+                f(pos, ccrs, mat, layer, new Cuboid6(x1, d1, z1, x2, d2, d1), sideMask & 0x34 | 3 | iMask) //+z internal -x+x-z external
 
-                f(pos, mat, layer, new Cuboid6(x1, d2, z1, x2, y2, z2), sideMask & 0x3E | 1 | iMask) //-x+x+y-z+z external
-                f(pos, mat, layer, new Cuboid6(x1, y1, z1, x2, d1, z2), sideMask & 0x3D | 2 | iMask) //-x+x-y-z+z external
+                f(pos, ccrs, mat, layer, new Cuboid6(x1, d2, z1, x2, y2, z2), sideMask & 0x3E | 1 | iMask) //-x+x+y-z+z external
+                f(pos, ccrs, mat, layer, new Cuboid6(x1, y1, z1, x2, d1, z2), sideMask & 0x3D | 2 | iMask) //-x+x-y-z+z external
         }
     }
 

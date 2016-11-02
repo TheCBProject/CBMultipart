@@ -7,6 +7,7 @@ import codechicken.lib.vec.Vector3
 import codechicken.lib.vec.Rotation
 import Rotation._
 import Vector3._
+import codechicken.lib.render.CCRenderState
 import net.minecraft.util.BlockRenderLayer
 
 object FacePlacement extends PlacementProperties
@@ -52,15 +53,15 @@ object FaceMicroFactory extends CommonMicroFactory
 
 trait FaceMicroblockClient extends CommonMicroblockClient
 {
-    override def render(pos:Vector3, layer:BlockRenderLayer) {
+    override def render(pos:Vector3, layer:BlockRenderLayer, ccrs:CCRenderState) {
         if(layer == null)
-            MicroblockRender.renderCuboid(pos, getIMaterial, layer, getBounds, 0)
+            MicroblockRender.renderCuboid(pos, ccrs, getIMaterial, layer, getBounds, 0)
         else if(isTransparent)
-            MicroblockRender.renderCuboid(pos, getIMaterial, layer, renderBounds, renderMask)
+            MicroblockRender.renderCuboid(pos, ccrs, getIMaterial, layer, renderBounds, renderMask)
         else {
             val mat = getIMaterial
-            MicroblockRender.renderCuboid(pos, mat, layer, renderBounds, renderMask | 1<<getSlot)
-            MicroblockRender.renderCuboid(pos, mat, layer, Cuboid6.full, ~(1<<getSlot))
+            MicroblockRender.renderCuboid(pos, ccrs, mat, layer, renderBounds, renderMask | 1<<getSlot)
+            MicroblockRender.renderCuboid(pos, ccrs, mat, layer, Cuboid6.full, ~(1<<getSlot))
         }
     }
 }

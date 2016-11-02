@@ -31,9 +31,8 @@ public abstract class McBlockPart extends TMultiPart implements TCuboidPart, TNo
     }
 
     @Override
-    public void renderBreaking(Vector3 pos, TextureAtlasSprite texture)
+    public void renderBreaking(Vector3 pos, TextureAtlasSprite texture, CCRenderState ccrs)
     {
-        CCRenderState ccrs = CCRenderState.instance();
         ccrs.setPipeline(pos.translation(), new IconTransformation(texture));
         BlockRenderer.renderCuboid(ccrs, getBounds(), 0);
     }

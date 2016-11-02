@@ -63,9 +63,8 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
         //Render through CC render pipeline
         ccrs.reset()
         ccrs.startDrawing(GL_QUADS, DefaultVertexFormats.BLOCK)
-        val buffer = ccrs.getBuffer
-        tile.renderFast(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame, buffer)
-        buffer.setTranslation(0, 0, 0)
+        tile.renderFast(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame, ccrs)
+        ccrs.getBuffer.setTranslation(0, 0, 0)
         ccrs.draw()
 
         //Reset MC Render state
@@ -79,7 +78,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
         val ccrs = CCRenderState.instance()
         ccrs.reset()
         ccrs.bind(buffer)
-        tile.renderFast(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame, buffer)
+        tile.renderFast(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame, ccrs)
     }
 
     override def renderBlock(world:IBlockAccess, pos:BlockPos, state:IBlockState, buffer:VertexBuffer) =
@@ -90,7 +89,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
                 ccrs.reset()
                 ccrs.bind(buffer)
                 ccrs.lightMatrix.locate(world, pos)
-                tile.renderStatic(new Vector3(pos), MinecraftForgeClient.getRenderLayer)
+                tile.renderStatic(new Vector3(pos), MinecraftForgeClient.getRenderLayer, ccrs)
         }
 
     override def handleRenderBlockDamage(world:IBlockAccess, pos:BlockPos, state:IBlockState, sprite:TextureAtlasSprite, buffer:VertexBuffer)
@@ -101,7 +100,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
                 val ccrs = CCRenderState.instance()
                 ccrs.reset()
                 ccrs.bind(buffer)
-                tile.renderDamage(new Vector3(pos), sprite)
+                tile.renderDamage(new Vector3(pos), sprite, ccrs)
         }
     }
 

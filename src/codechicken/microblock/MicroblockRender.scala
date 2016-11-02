@@ -47,7 +47,7 @@ object MicroblockRender
         ccrs.reset()
         ccrs.alphaOverride = 80
         ccrs.startDrawing(GL_QUADS, DefaultVertexFormats.ITEM)
-        part.render(Vector3.zero, null)
+        part.render(Vector3.zero, null, ccrs)
         ccrs.draw()
 
         glDisable(GL_BLEND)
@@ -56,9 +56,8 @@ object MicroblockRender
     }
 
     val face = new BlockFace()
-    def renderCuboid(pos:Vector3, mat:IMicroMaterial, layer:BlockRenderLayer, c:Cuboid6, faces:Int)
+    def renderCuboid(pos:Vector3, ccrs:CCRenderState, mat:IMicroMaterial, layer:BlockRenderLayer, c:Cuboid6, faces:Int)
     {
-        val ccrs = CCRenderState.instance()
         ccrs.setModel(face)
         for(s <- 0 until 6 if (faces & 1<<s) == 0) {
             face.loadCuboidFace(c, s)
@@ -76,7 +75,7 @@ object MicroblockRender
             face.loadCuboidFace(c, s)
             val ops = mat.getMicroRenderOps(pos, s, layer, c)
             for (opSet <- ops)
-                list ++= CCModelBakery.bakeModel(face, false, DefaultVertexFormats.BLOCK, null, 0, face.getVertices.length, opSet:_*)
+                list ++= CCModelBakery.bakeModel(face, false, DefaultVertexFormats.ITEM, 0, face.getVertices.length, opSet:_*)
         }
 
         list.result()

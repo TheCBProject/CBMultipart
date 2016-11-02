@@ -1,12 +1,12 @@
 package codechicken.multipart
 
 import java.lang.{Iterable => JIterable}
-import java.util.{ArrayList => JArrayList, Collection => JCollection, List => JList, Random}
+import java.util.{Random, ArrayList => JArrayList, Collection => JCollection, List => JList}
 
 import codechicken.lib.data.MCDataOutput
 import codechicken.lib.packet.PacketCustom
 import codechicken.lib.raytracer.{CuboidRayTraceResult, DistanceRayTraceResult}
-import codechicken.lib.render.RenderUtils
+import codechicken.lib.render.{CCRenderState, RenderUtils}
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import codechicken.lib.world.IChunkLoadTile
 import codechicken.multipart.handler.{MultipartCompatiblity, MultipartProxy, MultipartSPH}
@@ -547,20 +547,20 @@ trait TileMultipartClient extends TileMultipart
 {
     override def hasFastRenderer = partList.forall(_.canRenderFast)
 
-    def renderStatic(pos:Vector3, layer:BlockRenderLayer) = partList.count(_.renderStatic(pos, layer)) > 0
+    def renderStatic(pos:Vector3, layer:BlockRenderLayer, ccrs:CCRenderState) = partList.count(_.renderStatic(pos, layer, ccrs)) > 0
 
-    def renderDamage(pos:Vector3, texture:TextureAtlasSprite)
+    def renderDamage(pos:Vector3, texture:TextureAtlasSprite, ccrs:CCRenderState)
     {
          Minecraft.getMinecraft.objectMouseOver match {
              case hit:PartRayTraceResult =>
-                 partList(hit.partIndex).renderBreaking(pos, texture)
+                 partList(hit.partIndex).renderBreaking(pos, texture, ccrs)
              case _ =>
          }
     }
 
-    def renderFast(pos:Vector3, pass:Int, frame:Float, buffer:VertexBuffer)
+    def renderFast(pos:Vector3, pass:Int, frame:Float, ccrs:CCRenderState)
     {
-        partList.filter(_.canRenderFast).foreach(_.renderFast(pos, pass, frame, buffer))
+        partList.filter(_.canRenderFast).foreach(_.renderFast(pos, pass, frame, ccrs))
     }
 
     def renderDynamic(pos:Vector3, pass:Int, frame:Float)

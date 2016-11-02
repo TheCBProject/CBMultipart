@@ -5,6 +5,7 @@ import java.util.{EnumSet => JEnumSet}
 
 import codechicken.lib.data.{MCDataInput, MCDataOutput}
 import codechicken.lib.raytracer.{CuboidRayTraceResult, IndexedCuboid6, RayTracer}
+import codechicken.lib.render.CCRenderState
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import net.minecraft.client.particle.ParticleManager
 import net.minecraft.client.renderer.VertexBuffer
@@ -330,16 +331,22 @@ abstract class TMultiPart
       *  - CCRenderState.reset() has been called
       *  - The current buffer is bound
       *
+      *  Otherwise an instance of the VertexBuffer can be retrieved from
+      *  CCRenderState via CCRenderState.getBuffer()
+      *
       * NOTE: The tessellator is already drawing. DO NOT make draw calls or
       *       mess with the GL state
+      *
+      *       This may be called on a ChunkBatching thread. Please make sure
+      *       Everything you do is Thread Safe.
       *
       * @param pos The position of this block space relative to the renderer, same as x, y, z passed to TESR.
       * @param pass The render pass, 1 or 0
       * @param frame The partial interpolation frame value for animations between ticks
-      * @param buffer The buffer that needs to be used. It is also bound in CCRenderState
+      * @param ccrs The instance of CCRenderState to use.
       */
     @SideOnly(Side.CLIENT)
-    def renderFast(pos:Vector3, pass:Int, frame:Float, buffer:VertexBuffer){}
+    def renderFast(pos:Vector3, pass:Int, frame:Float, ccrs:CCRenderState){}
 
     /**
       * Render the dynamic, changing faces of this part and other gfx as in a TESR.
@@ -367,8 +374,15 @@ abstract class TMultiPart
       *  - The current buffer is bound
       *  - The light matrix is located
       *
+      *  Otherwise an instance of the VertexBuffer can be retrieved from
+      *  CCRenderState via CCRenderState.getBuffer()
+      *
       * NOTE: The tessellator is already drawing. DO NOT make draw calls or
       *       mess with the GL state
+      *
+      *       This may be called on a ChunkBatching thread. Please make sure
+      *       Everything you do is Thread Safe.
+      *
       *
       * @param pos The position to render at. Use this instead of the actual tile position
       *            (Although they will be the same in almost all cases).
@@ -376,7 +390,7 @@ abstract class TMultiPart
       * @return true if vertices were added to the buffer
       */
     @SideOnly(Side.CLIENT)
-    def renderStatic(pos:Vector3, layer:BlockRenderLayer) = false
+    def renderStatic(pos:Vector3, layer:BlockRenderLayer, ccrs:CCRenderState) = false
 
     /**
       * Render the static, unmoving faces of this part into the world renderer.
@@ -385,15 +399,21 @@ abstract class TMultiPart
       *  - CCRenderState.reset() has been called
       *  - The current buffer is bound
       *
+      *  Otherwise an instance of the VertexBuffer can be retrieved from
+      *  CCRenderState via CCRenderState.getBuffer()
+      *
       * NOTE: The tessellator is already drawing. DO NOT make draw calls or
       *       mess with the GL state
+      *
+      *       This may be called on a ChunkBatching thread. Please make sure
+      *       Everything you do is Thread Safe.
       *
       * @param pos The position to render at. Use this instead of the actual tile position
       *            (Although they will be the same in almost all cases)
       * @param texture The current f overlay texture
       */
     @SideOnly(Side.CLIENT)
-    def renderBreaking(pos:Vector3, texture:TextureAtlasSprite){}
+    def renderBreaking(pos:Vector3, texture:TextureAtlasSprite, ccrs:CCRenderState){}
 
     /**
       * Override the drawing of the selection box around this part.

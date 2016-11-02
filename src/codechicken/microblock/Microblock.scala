@@ -2,6 +2,7 @@ package codechicken.microblock
 
 import codechicken.lib.data.{MCDataInput, MCDataOutput}
 import codechicken.lib.raytracer.CuboidRayTraceResult
+import codechicken.lib.render.CCRenderState
 import codechicken.lib.vec.Vector3
 import codechicken.microblock.MicroMaterialRegistry._
 import codechicken.multipart._
@@ -130,10 +131,10 @@ trait MicroblockClient extends Microblock with TIconHitEffectsPart with IMicroMa
         case mat => mat.getBreakingIcon(side)
     }
 
-    override def renderStatic(pos:Vector3, layer:BlockRenderLayer) =
+    override def renderStatic(pos:Vector3, layer:BlockRenderLayer, ccrs:CCRenderState) =
     {
         if (layer != null && getIMaterial.canRenderInLayer(layer)) {
-            render(pos, layer)
+            render(pos, layer, ccrs)
             true
         } else
             false
@@ -145,18 +146,18 @@ trait MicroblockClient extends Microblock with TIconHitEffectsPart with IMicroMa
       * @param pos The position of this part
       * @param layer The block layer, null for inventory rendering
       */
-    def render(pos:Vector3, layer:BlockRenderLayer)
+    def render(pos:Vector3, layer:BlockRenderLayer, ccrs:CCRenderState)
 
     override def getRenderBounds = getBounds
 }
 
 trait CommonMicroblockClient extends CommonMicroblock with MicroblockClient with TMicroOcclusionClient
 {
-    override def render(pos:Vector3, layer:BlockRenderLayer) {
+    override def render(pos:Vector3, layer:BlockRenderLayer, ccrs:CCRenderState) {
         if(layer == null)
-            MicroblockRender.renderCuboid(pos, getIMaterial, layer, getBounds, 0)
+            MicroblockRender.renderCuboid(pos, ccrs, getIMaterial, layer, getBounds, 0)
         else
-            MicroblockRender.renderCuboid(pos, getIMaterial, layer, renderBounds, renderMask)
+            MicroblockRender.renderCuboid(pos, ccrs, getIMaterial, layer, renderBounds, renderMask)
     }
 }
 
