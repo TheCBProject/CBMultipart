@@ -100,20 +100,6 @@ class MicroblockProxy_clientImpl extends MicroblockProxy_serverImpl
         super.postInit()
         PacketCustom.assignHandler(MicroblockCPH.registryChannel, MicroblockCPH)
     }
-
-    @SideOnly(Side.CLIENT)
-    override def init()
-    {
-        super.init()
-        MinecraftForge.EVENT_BUS.register(this)
-    }
-
-    @SubscribeEvent
-    @SideOnly(Side.CLIENT)
-    def onModelBakeEvent(event:ModelBakeEvent)
-    {
-        MicroMaterialRegistry.loadIcons() //Theres probably a better place for this
-    }
 }
 
 object MicroblockProxy extends MicroblockProxy_clientImpl

@@ -1,26 +1,19 @@
 package codechicken.microblock
 
-import codechicken.lib.render.pipeline.{ColourMultiplier, IVertexOperation}
-import codechicken.lib.vec.uv.{IconTransformation, MultiIconTransformation, UVTransformation}
 import codechicken.lib.render.CCRenderState
+import codechicken.lib.render.pipeline.{ColourMultiplier, IVertexOperation}
 import codechicken.lib.texture.TextureUtils
+import codechicken.lib.vec.uv.{IconTransformation, MultiIconTransformation, UVTransformation}
 import codechicken.lib.vec.{Cuboid6, Vector3}
-import codechicken.microblock.MicroMaterialRegistry.IMicroMaterial
 import codechicken.multipart.{BlockMultipart, MultipartStateMapper}
 import net.minecraft.block.Block
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.{Item, ItemStack}
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.{BlockRenderLayer, EnumFacing}
-import net.minecraft.world.IBlockAccess
+import net.minecraft.util.BlockRenderLayer
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
-
-import scala.collection.JavaConversions._
-import scala.ref.WeakReference
 
 object MaterialRenderHelper
 {

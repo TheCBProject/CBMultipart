@@ -10,7 +10,6 @@ import codechicken.lib.util.TransformUtils
 import codechicken.lib.vec.Vector3
 import codechicken.microblock.CommonMicroFactory._
 import codechicken.microblock.ItemMicroPart._
-import codechicken.microblock.MicroMaterialRegistry.IMicroMaterial
 import codechicken.microblock.handler.MicroblockProxy
 import com.google.common.collect.ImmutableList
 import net.minecraft.block.state.IBlockState

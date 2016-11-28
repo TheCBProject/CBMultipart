@@ -14,7 +14,7 @@ object MicroblockEventHandler
     @SideOnly(Side.CLIENT)
     def postTextureStitch(event:TextureStitchEvent.Post)
     {
-        MicroMaterialRegistry.loadIcons()
+        MicroMaterialRegistry.markIconReload()
     }
 
     @SubscribeEvent

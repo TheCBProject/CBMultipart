@@ -5,7 +5,6 @@ import codechicken.lib.render.{CCRenderState, RenderUtils}
 import codechicken.lib.vec.Rotation._
 import codechicken.lib.vec.Vector3._
 import codechicken.lib.vec.{Cuboid6, Vector3}
-import codechicken.microblock.MicroMaterialRegistry.IMicroMaterial
 import codechicken.multipart.{TFacePart, TNormalOcclusionPart}
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.BlockRenderLayer

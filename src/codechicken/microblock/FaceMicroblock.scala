@@ -1,13 +1,10 @@
 package codechicken.microblock
 
-import codechicken.lib.vec.Cuboid6
-import codechicken.microblock.MicroMaterialRegistry.IMicroMaterial
-import codechicken.multipart.TFacePart
-import codechicken.lib.vec.Vector3
-import codechicken.lib.vec.Rotation
-import Rotation._
-import Vector3._
 import codechicken.lib.render.CCRenderState
+import codechicken.lib.vec.Rotation._
+import codechicken.lib.vec.{Cuboid6, Rotation, Vector3}
+import codechicken.lib.vec.Vector3._
+import codechicken.multipart.TFacePart
 import net.minecraft.util.BlockRenderLayer
 
 object FacePlacement extends PlacementProperties

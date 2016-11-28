@@ -6,7 +6,7 @@ import codechicken.multipart.asm.{ASMMixinFactory, ScratchBitSet}
 
 trait IGeneratedMaterial
 {
-    def addTraits(traits:JBitSet, mcrClass:MicroblockFactory, client:Boolean)
+    def addTraits(traits:JBitSet, mcrFactory:MicroblockFactory, client:Boolean)
 }
 
 object MicroblockGenerator extends ASMMixinFactory(classOf[Microblock], classOf[Int]) with ScratchBitSet

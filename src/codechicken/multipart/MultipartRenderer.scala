@@ -89,7 +89,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
                 ccrs.reset()
                 ccrs.bind(buffer)
                 ccrs.lightMatrix.locate(world, pos)
-                tile.renderStatic(new Vector3(pos), MinecraftForgeClient.getRenderLayer, ccrs)
+                tile.renderStatic(Vector3.fromBlockPos(pos), MinecraftForgeClient.getRenderLayer, ccrs)
         }
 
     override def handleRenderBlockDamage(world:IBlockAccess, pos:BlockPos, state:IBlockState, sprite:TextureAtlasSprite, buffer:VertexBuffer)
@@ -100,7 +100,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
                 val ccrs = CCRenderState.instance()
                 ccrs.reset()
                 ccrs.bind(buffer)
-                tile.renderDamage(new Vector3(pos), sprite, ccrs)
+                tile.renderDamage(Vector3.fromBlockPos(pos), sprite, ccrs)
         }
     }
 

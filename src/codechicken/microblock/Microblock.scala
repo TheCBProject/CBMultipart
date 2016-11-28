@@ -141,10 +141,11 @@ trait MicroblockClient extends Microblock with TIconHitEffectsPart with IMicroMa
     }
 
     /**
-      * Called to add the vertecies of this part to CCRenderState
+      * Called to add the vertecies of this part to the CCRenderState
       *
       * @param pos The position of this part
       * @param layer The block layer, null for inventory rendering
+      * @param ccrs The CCRenderState to add the verts to
       */
     def render(pos:Vector3, layer:BlockRenderLayer, ccrs:CCRenderState)
 

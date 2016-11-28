@@ -369,7 +369,7 @@ abstract class TMultiPart
 
     /**
       * Render the static, unmoving faces of this part into the world renderer.
-      * CCRenderState is set up as follows should you wish to use it:
+      * The given CCRenderState is set up as follows should you wish to use it:
       *  - CCRenderState.reset() has been called
       *  - The current buffer is bound
       *  - The light matrix is located
@@ -387,6 +387,7 @@ abstract class TMultiPart
       * @param pos The position to render at. Use this instead of the actual tile position
       *            (Although they will be the same in almost all cases).
       * @param layer The render layer
+      * @param ccrs An instance of CCRenderState that is in use
       * @return true if vertices were added to the buffer
       */
     @SideOnly(Side.CLIENT)
@@ -410,6 +411,7 @@ abstract class TMultiPart
       *
       * @param pos The position to render at. Use this instead of the actual tile position
       *            (Although they will be the same in almost all cases)
+      * @param ccrs An instance of CCRenderState that is in use
       * @param texture The current f overlay texture
       */
     @SideOnly(Side.CLIENT)
