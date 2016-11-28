@@ -119,7 +119,14 @@ object BlockMicroMaterial
         val numOfProps = state.getProperties.size
         if (numOfProps > 0) {
             key += "["
-            key += MultipartStateMapper.getPropertyString(state.getProperties)
+            import scala.collection.JavaConversions._
+            val properties = state.getProperties.iterator
+            while(properties.hasNext) {
+                val (p, v) = properties.next()
+                key += p.getName + "=" + v.toString
+                if (properties.hasNext)
+                    key += ","
+            }
             key += "]"
         }
         key

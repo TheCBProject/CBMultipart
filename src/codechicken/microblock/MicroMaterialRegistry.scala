@@ -109,7 +109,7 @@ trait IMicroHighlightRenderer
     def renderHighlight(player:EntityPlayer, hit:RayTraceResult, mcrFactory:CommonMicroFactory, size:Int, material:Int): Boolean
 }
 
-object MicroMaterialRegistry extends IResourceManagerReloadListener
+object MicroMaterialRegistry
 {
     private val typeMap = MHashMap[String, IMicroMaterial]()
     private val nameMap = MHashMap[String, Int]()
@@ -178,11 +178,6 @@ object MicroMaterialRegistry extends IResourceManagerReloadListener
             case saw:Saw => Some(saw.getMaxCuttingStrength)
             case _ => None
         }.max
-    }
-
-    override def onResourceManagerReload(resourceManager:IResourceManager)
-    {
-        markIconReload()
     }
 
     def markIconReload()
