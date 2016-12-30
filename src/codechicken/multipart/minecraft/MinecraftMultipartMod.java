@@ -6,10 +6,12 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = "MinecraftMultipart", acceptedMinecraftVersions="[1.10]")
+@Mod(modid = MinecraftMultipartMod.modID, acceptedMinecraftVersions="[1.10]")
 public class MinecraftMultipartMod
 {
-    @Mod.Instance("MinecraftMultipart")
+    public static final String modID = "minecraftmultipart";
+
+    @Mod.Instance(modID)
     public static MinecraftMultipartMod instance;
 
     @Mod.EventHandler

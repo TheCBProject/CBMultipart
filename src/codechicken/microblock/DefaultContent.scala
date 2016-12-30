@@ -1,7 +1,7 @@
 package codechicken.microblock
 
 import codechicken.microblock.BlockMicroMaterial._
-import net.minecraft.block.{BlockNewLog, BlockOldLog, BlockPlanks}
+import net.minecraft.block._
 import net.minecraft.init.Blocks._
 import MicroMaterialRegistry._
 
@@ -15,78 +15,77 @@ object DefaultContent
         EdgeMicroFactory.register(3)
         PostMicroFactory.register()
 
-        createAndRegister(STONE)
-        createAndRegister {
-            import net.minecraft.block.BlockDirt._
-            val default = DIRT.getDefaultState
-            Seq(
-                default.withProperty(VARIANT, DirtType.DIRT),
-                default.withProperty(VARIANT, DirtType.COARSE_DIRT),
-                default.withProperty(VARIANT, DirtType.PODZOL)
-            )
-        }
-        createAndRegister(COBBLESTONE)
-        createAndRegister {
-            import net.minecraft.block.BlockPlanks._
-            val default = PLANKS.getDefaultState
-            Seq(
-                default.withProperty(VARIANT, EnumType.OAK),
-                default.withProperty(VARIANT, EnumType.SPRUCE),
-                default.withProperty(VARIANT, EnumType.BIRCH),
-                default.withProperty(VARIANT, EnumType.ACACIA),
-                default.withProperty(VARIANT, EnumType.DARK_OAK)
-            )
-        }
-
-        createAndRegister(
-            BlockPlanks.EnumType.values().slice(0, 4).map { logType =>
-                LOG.getDefaultState.withProperty(BlockOldLog.VARIANT, logType)
-            }
-        )
-
-        createAndRegister(
-            BlockPlanks.EnumType.values().slice(4, 6).map { logType =>
-                LOG2.getDefaultState.withProperty(BlockNewLog.VARIANT, logType)
-            }
-        )
-
-//        createAndRegister(leaves, 0 to 3)
-//        createAndRegister(leaves2, 0 to 1, "tile.leaves2")
-//        createAndRegister(sponge)
-//        createAndRegister(glass)
-//        createAndRegister(lapis_block)
-//        createAndRegister(sandstone, 0 to 2)
-//        createAndRegister(wool, 0 to 15)
-//        createAndRegister(gold_block)
-//        createAndRegister(iron_block)
-//        createAndRegister(brick_block)
-//        createAndRegister(bookshelf)
-//        createAndRegister(mossy_cobblestone)
-//        createAndRegister(obsidian)
-//        createAndRegister(diamond_block)
-//        createAndRegister(ice)
-//        createAndRegister(snow)
-//        createAndRegister(clay)
-//        createAndRegister(netherrack)
-//        createAndRegister(soul_sand)
-//        createAndRegister(glowstone)
-//        createAndRegister(stonebrick, 0 to 3)
-//        createAndRegister(nether_brick)
-//        createAndRegister(end_stone)
-//        createAndRegister(emerald_block)
-//        createAndRegister(redstone_block)
-//        createAndRegister(quartz_block)
-//        createAndRegister(stained_hardened_clay, 0 to 15)
-//        createAndRegister(hardened_clay)
-//        createAndRegister(coal_block)
-//        createAndRegister(packed_ice)
-//        createAndRegister(stained_glass, 0 to 15)
-
+        createAndRegister(STONE, 0 to 6)
         registerMaterial(new GrassMicroMaterial, materialKey(GRASS))
+        createAndRegister(DIRT, 0 to 1)
+        registerMaterial(new TopMicroMaterial(DIRT.getStateFromMeta(2)), materialKey(DIRT.getStateFromMeta(2)))
+        createAndRegister(COBBLESTONE)
+        createAndRegister(PLANKS, 0 to 5)
+        createAndRegister(SAND, 0 to 1)
+        createAndRegister(GRAVEL)
+        createAndRegister(GOLD_ORE)
+        createAndRegister(IRON_ORE)
+        createAndRegister(COAL_ORE)
 
-//        MicroMaterialRegistry.remapName(oldKey(grass), materialKey(grass))
-//        registerMaterial(new GrassMicroMaterial, materialKey(grass))
-//        MicroMaterialRegistry.remapName(oldKey(mycelium), materialKey(mycelium))
-//        registerMaterial(new TopMicroMaterial(mycelium), materialKey(mycelium))
+        createAndRegister(BlockPlanks.EnumType.values.take(4).map {
+            LOG.getDefaultState.withProperty(BlockOldLog.VARIANT, _)
+        })
+
+        createAndRegister(BlockPlanks.EnumType.values.take(4).map {
+            LEAVES.getDefaultState.withProperty(BlockOldLeaf.VARIANT, _)
+        })
+
+        createAndRegister(SPONGE)
+        createAndRegister(GLASS)
+        createAndRegister(LAPIS_ORE)
+        createAndRegister(LAPIS_BLOCK)
+        createAndRegister(SANDSTONE, 0 to 2)
+        createAndRegister(WOOL, 0 to 15)
+        createAndRegister(GOLD_BLOCK)
+        createAndRegister(IRON_BLOCK)
+        createAndRegister(BRICK_BLOCK)
+        createAndRegister(BOOKSHELF)
+        createAndRegister(MOSSY_COBBLESTONE)
+        createAndRegister(OBSIDIAN)
+        createAndRegister(DIAMOND_ORE)
+        createAndRegister(DIAMOND_BLOCK)
+        createAndRegister(REDSTONE_ORE)
+        createAndRegister(ICE)
+        createAndRegister(SNOW)
+        createAndRegister(CLAY)
+        createAndRegister(NETHERRACK)
+        createAndRegister(SOUL_SAND)
+        createAndRegister(GLOWSTONE)
+        createAndRegister(STAINED_GLASS, 0 to 15)
+        createAndRegister(STONEBRICK, 0 to 3)
+        createAndRegister(NETHER_BRICK)
+        registerMaterial(new TopMicroMaterial(MYCELIUM), materialKey(MYCELIUM))
+        createAndRegister(END_STONE)
+        createAndRegister(EMERALD_ORE)
+        createAndRegister(EMERALD_BLOCK)
+        createAndRegister(REDSTONE_BLOCK)
+        createAndRegister(QUARTZ_ORE)
+        createAndRegister(QUARTZ_BLOCK, 0 to 2)
+        createAndRegister(STAINED_HARDENED_CLAY, 0 to 15)
+
+        createAndRegister(BlockPlanks.EnumType.values.drop(4).map {
+            LEAVES2.getDefaultState.withProperty(BlockNewLeaf.VARIANT, _)
+        })
+
+        createAndRegister(BlockPlanks.EnumType.values().drop(4).map {
+            LOG2.getDefaultState.withProperty(BlockNewLog.VARIANT, _)
+        })
+
+        createAndRegister(PRISMARINE, 0 to 2)
+        createAndRegister(HARDENED_CLAY)
+        createAndRegister(COAL_BLOCK)
+        createAndRegister(PACKED_ICE)
+        createAndRegister(RED_SANDSTONE, 0 to 2)
+        createAndRegister(PURPUR_BLOCK)
+        createAndRegister(PURPUR_PILLAR)
+        createAndRegister(END_BRICKS)
+        createAndRegister(MAGMA)
+        createAndRegister(NETHER_WART_BLOCK)
+        createAndRegister(RED_NETHER_BRICK)
     }
 }

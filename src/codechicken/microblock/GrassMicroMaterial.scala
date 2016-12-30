@@ -4,6 +4,7 @@ import codechicken.lib.render.pipeline.IVertexOperation
 import codechicken.lib.texture.TextureUtils
 import codechicken.lib.vec.uv.{IconTransformation, UVTranslation}
 import codechicken.lib.vec.{Cuboid6, Vector3}
+import net.minecraft.block.Block
 import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
 import net.minecraft.util.BlockRenderLayer
@@ -37,6 +38,8 @@ class GrassMicroMaterial extends BlockMicroMaterial(Blocks.GRASS.getDefaultState
 
 class TopMicroMaterial($state:IBlockState) extends BlockMicroMaterial($state)
 {
+    def this(b:Block) = this(b.getDefaultState)
+
     override def getMicroRenderOps(pos:Vector3, side:Int, layer:BlockRenderLayer, bounds:Cuboid6) =
     {
         val list = Seq.newBuilder[Seq[IVertexOperation]]

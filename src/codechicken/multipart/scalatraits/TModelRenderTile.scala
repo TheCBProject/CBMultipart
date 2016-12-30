@@ -67,8 +67,6 @@ trait TModelRenderTile extends TileMultipartClient
 
     override def renderDamage(pos:Vector3, texture:TextureAtlasSprite, ccrs:CCRenderState)
     {
-        super.renderDamage(pos, texture, ccrs)
-
         Minecraft.getMinecraft.objectMouseOver match {
             case hit:PartRayTraceResult => partList(hit.partIndex) match {
                 case p:IModelRenderPart =>
@@ -78,6 +76,7 @@ trait TModelRenderTile extends TileMultipartClient
                                 .renderModel(getWorld, dm, state, getPos, ccrs.getBuffer, true)
                     })
                 case _ =>
+                    super.renderDamage(pos, texture, ccrs)
             }
             case _ =>
         }

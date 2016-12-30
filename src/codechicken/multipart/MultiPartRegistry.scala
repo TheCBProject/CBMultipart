@@ -133,8 +133,6 @@ object MultiPartRegistry
             if (nameToFactory.contains(s))
                 throw new IllegalStateException("Part with id "+s+" is already registered.")
 
-            logger.info("Registered multipart "+s)
-
             nameToFactory.put(s, partFactory)
         }
     }

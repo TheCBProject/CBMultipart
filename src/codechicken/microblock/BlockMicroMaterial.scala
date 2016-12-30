@@ -60,9 +60,14 @@ class BlockMicroMaterial(val state:IBlockState) extends IMicroMaterial
     @SideOnly(Side.CLIENT)
     override def loadIcons()
     {
-        icont = new MultiIconTransformation(Array.tabulate(6)(
-            side => TextureUtils.getIconsForBlock(state, side)(0)):_*)
-        pIconT = new IconTransformation(TextureUtils.getParticleIconForBlock(state))
+        try {
+            icont = new MultiIconTransformation(Array.tabulate(6)(
+                side => TextureUtils.getIconsForBlock(state, side)(0)):_*)
+            pIconT = new IconTransformation(TextureUtils.getParticleIconForBlock(state))
+        } catch {
+            case e:RuntimeException =>
+                logger.error(s"unable to load microblock icons for block ${state.getBlock} with state $state")
+        }
     }
 
     override def getMicroRenderOps(pos:Vector3, side:Int, layer:BlockRenderLayer, bounds:Cuboid6):Seq[Seq[IVertexOperation]] =
@@ -75,7 +80,7 @@ class BlockMicroMaterial(val state:IBlockState) extends IMicroMaterial
         layer match {
             case null =>
                 Minecraft.getMinecraft.getBlockColors.colorMultiplier(state, null, null, 0)<<8|0xFF
-            case world =>
+            case _ =>
                 Minecraft.getMinecraft.getBlockColors.colorMultiplier(state,
                     CCRenderState.instance().lightMatrix.access, CCRenderState.instance().lightMatrix.pos, 0)<<8|0xFF
         }
@@ -94,7 +99,7 @@ class BlockMicroMaterial(val state:IBlockState) extends IMicroMaterial
 
     def isTransparent = !state.isOpaqueCube
 
-    def getLightValue = state.getLightValue()
+    def getLightValue = state.getLightValue
 
     def toolClasses = Seq("axe", "pickaxe", "shovel")
 
@@ -145,5 +150,10 @@ object BlockMicroMaterial
     def createAndRegister(states:Seq[IBlockState])
     {
         states.foreach(createAndRegister)
+    }
+
+    def createAndRegister(block:Block, metas:Seq[Int])
+    {
+        createAndRegister(metas map block.getStateFromMeta)
     }
 }
