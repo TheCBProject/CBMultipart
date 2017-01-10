@@ -188,9 +188,13 @@ abstract class TMultiPart
     /**
       * Return a value indicating how hard this part is to break
       *
+      * By default, MC calculates as:
+      *
+      * {Player dig speed 0-1} / {block hardness} / {if can harvest 30 else 100}
+      *
       * @param hit An instance of ExtendedMOP from collisionRayTrace
       */
-    def getStrength(player:EntityPlayer, hit:CuboidRayTraceResult):Float = 1
+    def getStrength(player:EntityPlayer, hit:CuboidRayTraceResult):Float = 1/30f
 
     /**
       * Called when this part is added to the block space
