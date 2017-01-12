@@ -57,7 +57,7 @@ minecraft {
 
 sourceSets {
     main {
-        def root = project.projectDir.parentFile
+        def root = project.projectDir
         scala {
             srcDir new File(root, "src")
         }

@@ -23,7 +23,7 @@ import scala.collection.JavaConversions._
   * Internal RayTracing class that can save parts as part of their hit data
   */
 class PartRayTraceResult(val partIndex:Int, crtr:CuboidRayTraceResult)
-        extends CuboidRayTraceResult(new Vector3(crtr.hitVec), crtr.blockPos, crtr.sideHit, crtr.cuboid6, crtr.dist)
+        extends CuboidRayTraceResult(new Vector3(crtr.hitVec), crtr.getBlockPos, crtr.sideHit, crtr.cuboid6, crtr.dist)
 
 object BlockMultipart
 {
@@ -50,7 +50,7 @@ object BlockMultipart
 
     def drawHighlight(world:World, player:EntityPlayer, hit:RayTraceResult, frame:Float):Boolean =
     {
-        (getClientTile(world, hit.blockPos), hit) match {
+        (getClientTile(world, hit.getBlockPos), hit) match {
             case (null, _) => false
             case (tile, pHit:PartRayTraceResult) => tile.drawHighlight(player, pHit, frame)
         }
@@ -300,7 +300,7 @@ class BlockMultipart extends Block(Material.ROCK)
     @SideOnly(Side.CLIENT)
     override def addHitEffects(state:IBlockState, world:World, hit:RayTraceResult, manager:ParticleManager) =
     {
-        (getClientTile(world, hit.blockPos), hit) match {
+        (getClientTile(world, hit.getBlockPos), hit) match {
             case (null, _) =>
             case (tile, pHit:PartRayTraceResult) =>
                 tile.addHitEffects(pHit, manager)
