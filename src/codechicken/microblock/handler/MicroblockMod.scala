@@ -13,7 +13,7 @@ object MicroblockMod
 {
     @EventHandler
     def preInit(event: FMLPreInitializationEvent) {
-        MicroblockProxy.preInit(event.getModLog)
+        MicroblockProxy.preInit()
         DefaultContent.load()
         ConfigContent.parse(event.getModConfigurationDirectory)
     }

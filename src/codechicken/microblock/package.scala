@@ -1,8 +1,8 @@
 package codechicken
 
-import codechicken.microblock.handler.MicroblockProxy
+import org.apache.logging.log4j.LogManager
 
 package object microblock
 {
-    def logger = MicroblockProxy.logger
+    def logger = LogManager.getLogger("ForgeMicroBlockCBE")
 }

@@ -12,7 +12,7 @@ object MultipartMod
 
     @EventHandler
     def preInit(event:FMLPreInitializationEvent) {
-        MultipartProxy.preInit(event.getModConfigurationDirectory, event.getModLog)
+        MultipartProxy.preInit(event.getModConfigurationDirectory)
     }
 
     @EventHandler

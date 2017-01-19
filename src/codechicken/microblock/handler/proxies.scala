@@ -17,13 +17,13 @@ import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import net.minecraftforge.oredict.{OreDictionary, ShapedOreRecipe}
-import org.apache.logging.log4j.Logger
+import org.apache.logging.log4j.{LogManager, Logger}
 
 import scala.collection.mutable
 
 class MicroblockProxy_serverImpl
 {
-    var logger: Logger = _
+    var logger: Logger = LogManager.getLogger("ForgeMicroBlockCBE")
 
     var itemMicro: ItemMicroPart = _
     var sawStone: Item = _
@@ -33,8 +33,7 @@ class MicroblockProxy_serverImpl
 
     var useSawIcons: Boolean = _
 
-    def preInit(logger:Logger) {
-        this.logger = logger
+    def preInit() {
         itemMicro = new ItemMicroPart
         GameRegistry.register(itemMicro.setRegistryName("microblock"))
         sawStone = createSaw(config, "saw_stone", 1)

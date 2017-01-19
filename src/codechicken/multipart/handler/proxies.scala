@@ -18,17 +18,16 @@ import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
-import org.apache.logging.log4j.Logger
+import org.apache.logging.log4j.{LogManager, Logger}
 
 class MultipartProxy_serverImpl
 {
     var block:BlockMultipart = _
     var config:ConfigFile = _
-    var logger:Logger = _
+    var logger:Logger = LogManager.getLogger("ForgeMultiPartCBE")
 
-    def preInit(cfgdir: File, logger:Logger)
+    def preInit(cfgdir: File)
     {
-        this.logger = logger
         config = new ConfigFile(new File(cfgdir, "multipart.cfg"))
             .setComment("Multipart API config file")
 
