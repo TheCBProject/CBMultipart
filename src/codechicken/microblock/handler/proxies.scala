@@ -85,9 +85,9 @@ class MicroblockProxy_serverImpl
 class MicroblockProxy_clientImpl extends MicroblockProxy_serverImpl
 {
     @SideOnly(Side.CLIENT)
-    override def preInit(logger:Logger)
+    override def preInit()
     {
-        super.preInit(logger)
+        super.preInit()
 
         ModelRegistryHelper.registerItemRenderer(itemMicro, ItemMicroPartRenderer)
         registerFMPItemModel(stoneRod)

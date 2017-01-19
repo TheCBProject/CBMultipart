@@ -71,9 +71,9 @@ class MultipartProxy_serverImpl
 class MultipartProxy_clientImpl extends MultipartProxy_serverImpl
 {
     @SideOnly(Side.CLIENT)
-    override def preInit(cfgdir:File, logger:Logger)
+    override def preInit(cfgdir:File)
     {
-        super.preInit(cfgdir, logger)
+        super.preInit(cfgdir)
 
         ModelLoader.setCustomStateMapper(block, MultipartStateMapper)
     }
