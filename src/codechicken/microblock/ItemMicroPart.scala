@@ -32,7 +32,6 @@ import org.lwjgl.opengl.GL11
 class ItemMicroPart extends Item
 {
     setUnlocalizedName("microblock")
-    GameRegistry.register(this.setRegistryName("forgemicroblock:microblock"))
     setHasSubtypes(true)
 
     override def getItemStackDisplayName(stack:ItemStack):String =

@@ -1,7 +1,10 @@
-item.microblock:sawStone.name=Sierra de Piedra
-item.microblock:sawIron.name=Sierra de Hierro
-item.microblock:sawDiamond.name=Sierra de Diamante
-item.microblock:stoneRod.name=Palo de Piedra
+microblock.missing=The following microblocks are not installed on this client: %s
+multipart.missing=The following multiparts are not installed on this client: %s
+
+item.microblock:saw_stone.name=Sierra de Piedra
+item.microblock:saw_iron.name=Sierra de Hierro
+item.microblock:saw_diamond.name=Sierra de Diamante
+item.microblock:stone_rod.name=Palo de Piedra
 
 mcr_face.1.name=Cubierta de %s
 mcr_face.1.subset=Cubierta
@@ -30,3 +33,5 @@ mcr_cnr.2.name=Esquina de %s
 mcr_cnr.2.subset=Esquina
 mcr_cnr.4.name=Cuarto de %s
 mcr_cnr.4.subset=Cuarto
+
+nei.subsets.Microblocks=Microblocks

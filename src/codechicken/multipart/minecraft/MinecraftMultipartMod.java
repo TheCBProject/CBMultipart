@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 @Mod(modid = MinecraftMultipartMod.modID, acceptedMinecraftVersions="[1.10]")
 public class MinecraftMultipartMod
 {
-    public static final String modID = "minecraftmultipart";
+    public static final String modID = "minecraftmultipartcbe";
 
     @Mod.Instance(modID)
     public static MinecraftMultipartMod instance;

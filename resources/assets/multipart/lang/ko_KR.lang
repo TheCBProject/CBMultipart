@@ -1,10 +1,10 @@
 microblock.missing=마이크로블럭이 %s에 설치 되어있지 않습니다
 multipart.missing=%s에 멀티파트가 설치 되지 않았습니다
 
-item.microblock:sawStone.name=돌 톱
-item.microblock:sawIron.name=철 톱
-item.microblock:sawDiamond.name=다이아몬드 톱
-item.microblock:stoneRod.name=돌 막대
+item.microblock:saw_stone.name=돌 톱
+item.microblock:saw_iron.name=철 톱
+item.microblock:saw_diamond.name=다이아몬드 톱
+item.microblock:stone_rod.name=돌 막대
 
 mcr_face.1.name=%s 덮개
 mcr_face.1.subset=덮개
@@ -33,3 +33,5 @@ mcr_cnr.2.name=%s 코너
 mcr_cnr.2.subset=코너
 mcr_cnr.4.name=%s 노치
 mcr_cnr.4.subset=노치
+
+nei.subsets.Microblocks=Microblocks

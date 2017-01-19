@@ -7,14 +7,13 @@ import codechicken.lib.model.ModelRegistryHelper
 import codechicken.lib.packet.PacketCustom
 import codechicken.microblock._
 import codechicken.multipart.handler.MultipartProxy._
+import net.minecraft.client.renderer.ItemMeshDefinition
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.init.{Blocks, Items}
 import net.minecraft.item.crafting.CraftingManager
 import net.minecraft.item.{Item, ItemStack}
-import net.minecraftforge.client.event.ModelBakeEvent
 import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.registry.GameRegistry
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import net.minecraftforge.oredict.{OreDictionary, ShapedOreRecipe}
@@ -37,11 +36,12 @@ class MicroblockProxy_serverImpl
     def preInit(logger:Logger) {
         this.logger = logger
         itemMicro = new ItemMicroPart
-        sawStone = createSaw(config, "sawStone", 1)
-        sawIron = createSaw(config, "sawIron", 2)
-        sawDiamond = createSaw(config, "sawDiamond", 3)
-        stoneRod = new Item().setUnlocalizedName("stoneRod")//.setTextureName("microblock:stoneRod")
-        GameRegistry.register(stoneRod.setRegistryName("stoneRod"))
+        GameRegistry.register(itemMicro.setRegistryName("microblock"))
+        sawStone = createSaw(config, "saw_stone", 1)
+        sawIron = createSaw(config, "saw_iron", 2)
+        sawDiamond = createSaw(config, "saw_diamond", 3)
+        stoneRod = new Item().setUnlocalizedName("microblock:stone_rod")
+        GameRegistry.register(stoneRod.setRegistryName("stone_rod"))
 
         OreDictionary.registerOre("rodStone", stoneRod)
 
@@ -53,7 +53,7 @@ class MicroblockProxy_serverImpl
     protected var saws = mutable.MutableList[Item]()
     def createSaw(config: ConfigFile, name: String, strength: Int) = {
         val saw = new ItemSaw(config.getTag(name).useBraces(), strength)
-            .setUnlocalizedName(name)//.setTextureName("microblock:" + name)
+            .setUnlocalizedName("microblock:" + name)
         GameRegistry.register(saw.setRegistryName(name))
         saws+=saw
         saw
@@ -91,7 +91,19 @@ class MicroblockProxy_clientImpl extends MicroblockProxy_serverImpl
         super.preInit(logger)
 
         ModelRegistryHelper.registerItemRenderer(itemMicro, ItemMicroPartRenderer)
-        saws.foreach(ModelRegistryHelper.registerItemRenderer(_, ItemSawRenderer))
+        registerFMPItemModel(stoneRod)
+        saws.foreach(registerFMPItemModel)
+        //saws.foreach(ModelRegistryHelper.registerItemRenderer(_, ItemSawRenderer))
+    }
+
+    @SideOnly(Side.CLIENT)
+    def registerFMPItemModel(item :Item){
+        val loc = item.getRegistryName
+        val mLoc = new ModelResourceLocation("microblockcbe:items", s"type=${loc.getResourcePath}")
+        ModelLoader.setCustomModelResourceLocation(item, 0, mLoc)
+        ModelLoader.setCustomMeshDefinition(item, new ItemMeshDefinition {
+            override def getModelLocation(stack: ItemStack) = mLoc
+        })
     }
 
     @SideOnly(Side.CLIENT)

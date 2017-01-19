@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.event.{FMLInitializationEvent, FMLPostIniti
 
 import scala.collection.JavaConversions._
 
-@Mod(modid = "ForgeMicroblock", acceptedMinecraftVersions = "[1.10]", dependencies = "required-after:forgemultipartcbe", modLanguage = "scala")
+@Mod(modid = "microblockcbe", acceptedMinecraftVersions = "[1.10]", dependencies = "required-after:forgemultipartcbe", modLanguage = "scala")
 object MicroblockMod
 {
     @EventHandler

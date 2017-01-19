@@ -1,10 +1,10 @@
 microblock.missing=Microblock modu kurulmamış: %s
 multipart.missing=Multipart modu kurulmamış: %s
 
-item.microblock:sawStone.name=Taş Testere
-item.microblock:sawIron.name=Demir Testere
-item.microblock:sawDiamond.name=Elmas Testere
-item.microblock:stoneRod.name=Taş Çubuk
+item.microblock:saw_stone.name=Taş Testere
+item.microblock:saw_iron.name=Demir Testere
+item.microblock:saw_diamond.name=Elmas Testere
+item.microblock:stone_rod.name=Taş Çubuk
 
 mcr_face.1.name=%s Kapak
 mcr_face.1.subset=Kapak
@@ -33,3 +33,5 @@ mcr_cnr.2.name=Orta Köşe %s
 mcr_cnr.2.subset=Orta Köşe
 mcr_cnr.4.name=Kalın Köşe %s 
 mcr_cnr.4.subset=Kalın Köşe
+
+nei.subsets.Microblocks=Microblocks

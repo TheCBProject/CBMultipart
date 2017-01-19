@@ -57,7 +57,7 @@ class ItemSaw(sawTag:ConfigTag, val harvestLevel:Int) extends Item with Saw
 
 object ItemSawRenderer extends IItemRenderer with IPerspectiveAwareModel
 {
-    val models = CCOBJParser.parseObjModels(new ResourceLocation("microblock", "models/saw.obj"), 7, new SwapYZ())
+    val models = CCOBJParser.parseObjModels(new ResourceLocation("microblockcbe", "models/saw.obj"), 7, new SwapYZ())
     val handle = models.get("Handle")
     val holder = models.get("BladeSupport")
     val blade = models.get("Blade")

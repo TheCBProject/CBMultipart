@@ -1,10 +1,10 @@
 microblock.missing=Les microblocs suivants ne sont pas installés sur ce client : %s
 multipart.missing=Les multipièces suivantes ne sont pas installées sur ce client : %s
 
-item.microblock:sawStone.name=Scie en pierre
-item.microblock:sawIron.name=Scie en fer
-item.microblock:sawDiamond.name=Scie en diamant
-item.microblock:stoneRod.name=Bâton de pierre
+item.microblock:saw_stone.name=Scie en pierre
+item.microblock:saw_iron.name=Scie en fer
+item.microblock:saw_diamond.name=Scie en diamant
+item.microblock:stone_rod.name=Bâton de pierre
 
 mcr_face.1.name=Couvercle de/d' %s
 mcr_face.1.subset=Couvercle
@@ -34,4 +34,4 @@ mcr_cnr.2.subset=Coin
 mcr_cnr.4.name=Encoche de/d' %s
 mcr_cnr.4.subset=Encoche
 
-key.control=[Forge Multipart] Disposition du bloc
+nei.subsets.Microblocks=Microblocks

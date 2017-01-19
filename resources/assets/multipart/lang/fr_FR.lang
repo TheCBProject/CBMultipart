@@ -1,7 +1,10 @@
-item.microblock:sawStone.name=Scie en pierre
-item.microblock:sawIron.name=Scie en fer
-item.microblock:sawDiamond.name=Scie en diamant
-item.microblock:stoneRod.name=Bâtons en pierre
+microblock.missing=The following microblocks are not installed on this client: %s
+multipart.missing=The following multiparts are not installed on this client: %s
+
+item.microblock:saw_stone.name=Scie en pierre
+item.microblock:saw_iron.name=Scie en fer
+item.microblock:saw_diamond.name=Scie en diamant
+item.microblock:stone_rod.name=Bâtons en pierre
 
 mcr_face.1.name=Couvercle de %s
 mcr_face.1.subset=Couvercle
@@ -30,3 +33,5 @@ mcr_cnr.2.name=Bordure de %s
 mcr_cnr.2.subset=Bordure
 mcr_cnr.4.name=Entaille de %s
 mcr_cnr.4.subset=Entaille
+
+nei.subsets.Microblocks=Microblocks
