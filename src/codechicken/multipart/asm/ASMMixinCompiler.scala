@@ -536,9 +536,9 @@ object ASMMixinCompiler
     }
 
     def listSideOnly(sig:ScalaSignature) = {
-        val side = "cpw.mods.fml.relauncher.Side."+FMLLaunchHandler.side.name
+        val side = "net.minecraftforge.fml.relauncher.Side."+FMLLaunchHandler.side.name
         sig.collect[sig.AnnotationInfo](40).filter{ a =>
-            a.annType.name == "cpw.mods.fml.relauncher.SideOnly" &&
+            a.annType.name == "net.minecraftforge.relauncher.SideOnly" &&
             a.getValue[sig.EnumLiteral]("value").value.full != side
         }.map(_.owner.full).toSet
     }
@@ -561,6 +561,7 @@ object ASMMixinCompiler
 
         val csym = info.csym
         for (sym <- sig.collect[sig.MethodSymbol](8)) {
+            logger.debug(sym)
             if (sym.isParam || sym.owner != csym) {}
             else if (sideOnly(sym.full)) {}
             else if (sym.isAccessor) {
