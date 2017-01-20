@@ -79,3 +79,10 @@ trait TTickableTile extends TileMultipart with ITickable
         }
     }
 }
+
+/**
+  * To handle obfuscation issues, this is registered as a java trait.
+  */
+class JTickableTile extends TileMultipart with TTickableTile
+{
+}
