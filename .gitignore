@@ -1,2 +1,9 @@
 /build/build
 /build/.gradle
+.gradle
+out
+run
+*.ipr
+*.iws
+*.iml
+build
