@@ -99,10 +99,6 @@ trait IRedstoneConnectorBlock
  */
 object RedstoneInteractions
 {
-
-    //val vanillaSideMap = Array(-2, -1, 0, 2, 3, 1)
-    //val sideVanillaMap = Array(1, 2, 5, 3, 4)
-
     /**
      * Hardcoded vanilla overrides for Block.canConnectRedstone (see @IRedstoneConnectorBlock)
      */

@@ -165,9 +165,9 @@ class BlockMultipart extends Block(Material.ROCK)
         }
 
     override def getPlayerRelativeBlockHardness(state:IBlockState, player:EntityPlayer, world:World, pos:BlockPos):Float =
-        getTile(world, pos) match {
-            case null => 1/100F
-            case tile => tile.getPlayerRelativeBlockHardness(player, retracePart(world, pos, player))
+        (getTile(world, pos), retracePart(world, pos, player)) match {
+            case (tile:TileMultipart, hit:PartRayTraceResult) => tile.getPlayerRelativeBlockHardness(player, hit)
+            case _ => 1/100F
         }
 
     override def removedByPlayer(state:IBlockState, world:World, pos:BlockPos, player:EntityPlayer, willHarvest:Boolean):Boolean =
@@ -207,22 +207,22 @@ class BlockMultipart extends Block(Material.ROCK)
         }
 
     override def getPickBlock(state:IBlockState, target:RayTraceResult, world:World, pos:BlockPos, player:EntityPlayer):ItemStack =
-        getTile(world, pos) match {
-            case null => null
-            case tile => tile.getPickBlock(retracePart(world, pos, player))
+        (getTile(world, pos), retracePart(world, pos, player)) match {
+            case (tile:TileMultipart, hit:PartRayTraceResult) => tile.getPickBlock(hit)
+            case _ => null
         }
 
     override def onBlockActivated(world:World, pos:BlockPos, state:IBlockState, player:EntityPlayer, hand:EnumHand, heldItem:ItemStack, side:EnumFacing, hitX:Float, hitY:Float, hitZ:Float):Boolean =
-        getTile(world, pos) match {
-            case null => false
-            case tile => tile.onBlockActivated(player, retracePart(world, pos, player), hand)
+        (getTile(world, pos), retracePart(world, pos, player)) match {
+            case (tile:TileMultipart, hit:PartRayTraceResult) => tile.onBlockActivated(player, hit, hand)
+            case _ => false
         }
 
     override def onBlockClicked(world:World, pos:BlockPos, player:EntityPlayer)
     {
-        getTile(world, pos) match {
-            case null =>
-            case tile => tile.onBlockClicked(player, retracePart(world, pos, player))
+        (getTile(world, pos), retracePart(world, pos, player)) match {
+            case (tile:TileMultipart, hit:PartRayTraceResult) => tile.onBlockClicked(player, hit)
+            case _ =>
         }
     }
 
@@ -301,9 +301,8 @@ class BlockMultipart extends Block(Material.ROCK)
     override def addHitEffects(state:IBlockState, world:World, hit:RayTraceResult, manager:ParticleManager) =
     {
         (getClientTile(world, hit.getBlockPos), hit) match {
-            case (null, _) =>
-            case (tile:TileMultipartClient, pHit:PartRayTraceResult) =>
-                tile.addHitEffects(pHit, manager)
+            case (tile:TileMultipartClient, pHit:PartRayTraceResult) => tile.addHitEffects(pHit, manager)
+            case _ =>
         }
         true
     }
