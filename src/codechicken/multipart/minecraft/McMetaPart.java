@@ -22,6 +22,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -104,7 +105,7 @@ public abstract class McMetaPart extends McBlockPart implements IModelRenderPart
     @Override
     public float getStrength(EntityPlayer player, CuboidRayTraceResult hit)
     {
-       return BlockMultipart.getStrength(player, state);
+        return ForgeHooks.blockStrength(state, player, world(), new BlockPos(0, -1, 0));
     }
 
     @Override

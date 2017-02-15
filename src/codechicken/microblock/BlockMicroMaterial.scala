@@ -5,7 +5,6 @@ import codechicken.lib.render.pipeline.{ColourMultiplier, IVertexOperation}
 import codechicken.lib.texture.TextureUtils
 import codechicken.lib.vec.uv.{IconTransformation, MultiIconTransformation, UVTransformation}
 import codechicken.lib.vec.{Cuboid6, Vector3}
-import codechicken.multipart.{BlockMultipart, MultipartStateMapper}
 import net.minecraft.block.Block
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
@@ -13,6 +12,8 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.{Item, ItemStack}
 import net.minecraft.util.BlockRenderLayer
+import net.minecraft.util.math.BlockPos
+import net.minecraftforge.common.ForgeHooks
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
 object MaterialRenderHelper
@@ -95,7 +96,8 @@ class BlockMicroMaterial(val state:IBlockState) extends IMicroMaterial
 
     def getLocalizedName = getItem.getDisplayName
 
-    def getStrength(player:EntityPlayer) = BlockMultipart.getStrength(player, state)
+    def getStrength(player:EntityPlayer) =
+        ForgeHooks.blockStrength(state, player, player.worldObj, new BlockPos(0, -1, 0))
 
     def isTransparent = !state.isOpaqueCube
 

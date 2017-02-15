@@ -55,40 +55,6 @@ object BlockMultipart
             case (tile, pHit:PartRayTraceResult) => tile.drawHighlight(player, pHit, frame)
         }
     }
-
-    /**
-      * Replacement for ForgeHooks.blockStrength, because it does dumb things like
-      * check if the block is actually in position for no reason. Use this when
-      * the block isnt actually in-world.
-      */
-    def getStrength(player:EntityPlayer, state:IBlockState) =
-    {
-        var hardness = 30F
-        try {
-            hardness = state.getBlockHardness(null, BlockPos.ORIGIN)
-        } catch {
-            case e:Exception =>
-        }
-
-        def canHarvest:Boolean =
-        {
-            if (state.getMaterial.isToolNotRequired)
-                return true
-
-            val stack = player.getHeldItemMainhand
-            val tool = state.getBlock.getHarvestTool(state)
-            if (stack == null || tool == null)
-                return player.canHarvestBlock(state)
-
-            val lvl = stack.getItem.getHarvestLevel(stack, tool)
-            if (lvl < 0)
-                return player.canHarvestBlock(state)
-
-            lvl >= state.getBlock.getHarvestLevel(state)
-        }
-
-        player.getDigSpeed(state) / hardness / (if (canHarvest) 30F else 100F)
-    }
 }
 
 /**
