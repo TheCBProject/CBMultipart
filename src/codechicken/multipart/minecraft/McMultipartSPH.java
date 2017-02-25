@@ -10,7 +10,7 @@ import net.minecraft.world.World;
 
 public class McMultipartSPH implements IServerPacketHandler
 {
-    public static Object channel = MinecraftMultipartMod.instance;
+    public static Object channel = "mcmultipart_cbe";
 
     @Override
     public void handlePacket(PacketCustom packet, EntityPlayerMP sender, INetHandlerPlayServer netHandler) {

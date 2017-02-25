@@ -10,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 
 public class McMultipartCPH implements IClientPacketHandler
 {
-    public static Object channel = MinecraftMultipartMod.instance;
+    public static Object channel = "mcmultipart_cbe";
 
     @Override
     public void handlePacket(PacketCustom packet, Minecraft mc, INetHandlerPlayClient netHandler) {
