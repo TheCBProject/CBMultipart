@@ -24,12 +24,12 @@ class GrassMicroMaterial extends BlockMicroMaterial(Blocks.GRASS.getDefaultState
         val list = Seq.newBuilder[Seq[IVertexOperation]]
 
         if (side == 1)
-            list += MaterialRenderHelper.start(pos, layer, icont).blockColour(getColour(layer)).lighting().result()
+            list += MaterialRenderHelper.instance.start(pos, layer, icont).blockColour(getColour(layer)).lighting().result()
         else
-            list += MaterialRenderHelper.start(pos, layer, icont).lighting().result()
+            list += MaterialRenderHelper.instance.start(pos, layer, icont).lighting().result()
 
         if(side > 1)
-            list += MaterialRenderHelper.start(pos, layer, new UVTranslation(0, bounds.max.y-1) ++ sideIconT)
+            list += MaterialRenderHelper.instance.start(pos, layer, new UVTranslation(0, bounds.max.y-1) ++ sideIconT)
                 .blockColour(getColour(layer)).lighting().result()
 
         list.result()
@@ -45,9 +45,9 @@ class TopMicroMaterial($state:IBlockState) extends BlockMicroMaterial($state)
         val list = Seq.newBuilder[Seq[IVertexOperation]]
 
         if (side <= 1)
-            list += MaterialRenderHelper.start(pos, layer, icont).blockColour(getColour(layer)).lighting().result()
+            list += MaterialRenderHelper.instance.start(pos, layer, icont).blockColour(getColour(layer)).lighting().result()
         else
-            list += MaterialRenderHelper.start(pos, layer, new UVTranslation(0, bounds.max.y-1) ++ icont)
+            list += MaterialRenderHelper.instance.start(pos, layer, new UVTranslation(0, bounds.max.y-1) ++ icont)
                         .blockColour(getColour(layer)).lighting().result()
 
         list.result()

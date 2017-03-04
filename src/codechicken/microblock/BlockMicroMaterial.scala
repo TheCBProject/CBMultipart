@@ -18,6 +18,15 @@ import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
 object MaterialRenderHelper
 {
+    private val instances = new ThreadLocal[MaterialRenderHelper] {
+        override def initialValue() = new MaterialRenderHelper
+    }
+
+    def instance = instances.get()
+}
+
+class MaterialRenderHelper
+{
     private var layer:BlockRenderLayer = null
     private var builder = Seq.newBuilder[IVertexOperation]
 
@@ -73,7 +82,7 @@ class BlockMicroMaterial(val state:IBlockState) extends IMicroMaterial
 
     override def getMicroRenderOps(pos:Vector3, side:Int, layer:BlockRenderLayer, bounds:Cuboid6):Seq[Seq[IVertexOperation]] =
     {
-        Seq(MaterialRenderHelper.start(pos, layer, icont).blockColour(getColour(layer)).lighting().result())
+        Seq(MaterialRenderHelper.instance.start(pos, layer, icont).blockColour(getColour(layer)).lighting().result())
     }
 
     def getColour(layer:BlockRenderLayer) =

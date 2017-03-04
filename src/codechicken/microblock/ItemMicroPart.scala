@@ -26,7 +26,6 @@ import net.minecraft.util.{EnumActionResult, EnumFacing, EnumHand, SoundCategory
 import net.minecraft.world.World
 import net.minecraftforge.client.model.IPerspectiveAwareModel
 import net.minecraftforge.client.model.IPerspectiveAwareModel.MapWrapper
-import net.minecraftforge.fml.common.registry.GameRegistry
 import org.lwjgl.opengl.GL11
 
 class ItemMicroPart extends Item
@@ -171,7 +170,7 @@ object ItemMicroPartRenderer extends IItemRenderer with IPerspectiveAwareModel
     override def getQuads(state:IBlockState, side:EnumFacing, rand:Long) = ImmutableList.of()
 
     override def handlePerspective(cameraTransformType:TransformType) =
-        MapWrapper.handlePerspective(this, TransformUtils.DEFAULT_BLOCK.getTransforms, cameraTransformType)
+        MapWrapper.handlePerspective(this, TransformUtils.DEFAULT_BLOCK, cameraTransformType)
 
     def renderItem(item:ItemStack)
     {
@@ -186,9 +185,11 @@ object ItemMicroPartRenderer extends IItemRenderer with IPerspectiveAwareModel
         ccrs.reset()
         ccrs.pullLightmap()
         ccrs.startDrawing(GL11.GL_QUADS, DefaultVertexFormats.ITEM)
+
         val part = factory.create(true, getMaterialID(item)).asInstanceOf[MicroblockClient]
         part.setShape(size, factory.itemSlot)
         part.render(new Vector3(0.5, 0.5, 0.5).subtract(part.getBounds.center), null, ccrs)
+
         ccrs.draw()
     }
 
