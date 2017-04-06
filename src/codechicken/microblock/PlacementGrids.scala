@@ -1,11 +1,9 @@
 package codechicken.microblock
 
-import codechicken.lib.vec.{BlockCoord, Rotation, Vector3}
+import codechicken.lib.vec.{Rotation, Vector3}
 import Rotation._
-import codechicken.lib.math.MathHelper
 import org.lwjgl.opengl.GL11._
 import codechicken.multipart.PartMap
-import net.minecraft.util.math.BlockPos
 
 trait PlacementGrid
 {
