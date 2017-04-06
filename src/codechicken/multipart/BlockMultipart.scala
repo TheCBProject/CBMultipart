@@ -250,6 +250,7 @@ class BlockMultipart extends Block(Material.ROCK)
             case tile => tile.weakPowerLevel(side.getIndex^1)
         }
 
+    @SideOnly (Side.CLIENT)
     override def getRenderType(state:IBlockState) = MultipartRenderer.renderType
 
     override def canRenderInLayer(state:IBlockState, layer:BlockRenderLayer) = true
