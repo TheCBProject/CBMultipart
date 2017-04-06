@@ -30,6 +30,10 @@ object MultipartSaveLoad
             super.readFromNBT(t)
             tag = t
         }
+
+        def fmp_handleLoad(world: World):Unit = {
+            handleTileLoad(this, world)
+        }
     }
 
     def hookLoader()
@@ -88,5 +92,25 @@ object MultipartSaveLoad
                 else iterator.remove()
             }
         }
+    }
+
+    def handleTileLoad(tile: TileEntity, world: World): TileEntity = {
+        val t = tile match {
+            case t:TileNBTContainer if t.tag.getString("id") == "savedMultipart" =>
+                TileMultipart.createFromNBT(t.tag)
+            case t => converters.find(_.canConvert(t)) match {
+                case Some(c) =>
+                    val parts = c.convert(t)
+                    if(parts.nonEmpty) MultipartHelper.createTileFromParts(parts)
+                    else null
+                case _ =>
+                    null
+            }
+        }
+
+        if (t != null) {
+            world.setTileEntity(t.getPos, t)
+        }
+        t
     }
 }
