@@ -32,7 +32,7 @@ object ConfigContent
         val writer = new PrintWriter(cfgFile)
         writer.println("#Configuration file for adding microblock materials for aesthetic blocks added by mods")
         writer.println("#Each line needs to be of the form <name>:<meta>")
-        writer.println("#<name> is the unlocalised name or registry key of the block/item enclosed in quotes. NEI can help you find these")
+        writer.println("#<name> is the registry key of the block/item enclosed in quotes. NEI can help you find these")
         writer.println("#<meta> may be ommitted, in which case it defaults to 0, otherwise it can be a number, a comma separated list of numbers, or a dash separated range")
         writer.println("#Ex. \"dirt\" \"minecraft:planks\":3 \"iron_ore\":1,2,3,5 \"ThermalFoundation:Storage\":0-15")
         writer.close()
@@ -52,12 +52,12 @@ object ConfigContent
         if(!name.contains('.') && !name.contains(':'))
             name = "minecraft:"+name
 
-        var meta = Seq(0)
+        var metas = Seq(0)
         if(line.length > q2+1) {
             if(line.charAt(q2+1) != ':')
                 throw new IllegalArgumentException("Name must be followed by a colon separator")
 
-            meta = line.substring(q2+2).split(",").flatMap{s =>
+            metas = line.substring(q2+2).split(",").flatMap{s =>
                 if (s.contains("-")) {
                     val split2 = s.split("-")
                     if (split2.length != 2)
@@ -70,7 +70,7 @@ object ConfigContent
             }
         }
 
-        nameMap.put(name, meta)
+        nameMap.put(name, metas)
     }
 
     def loadLines(cfgFile: File) {
@@ -94,23 +94,25 @@ object ConfigContent
     }
 
     def load() {
-//        for(block <- Block.REGISTRY.asInstanceOf[JIterable[Block]]) {
-//            val metas = Seq(block.getUnlocalizedName, Block.REGISTRY.getNameForObject(block)).flatMap(nameMap.remove).flatten
-//            metas.foreach { m =>
-//
-//                try {
-//                    createAndRegister(block, m)
-//                }
-//                catch {
-//                    case e: IllegalStateException => logger.error("Unable to register micro material: " +
-//                        materialKey(block, m) + "\n\t" + e.getMessage)
-//                    case e: Exception =>
-//                        logger.error("Unable to register micro material: " + materialKey(block, m), e)
-//                }
-//            }
-//        }
-//
-//        nameMap.foreach(e => logger.warn("Unable to add micro material for block with unlocalised name " + e._1 + " as it doesn't exist"))
+        for(block <- Block.REGISTRY.asInstanceOf[JIterable[Block]]) {
+            val metas = Seq(block.getRegistryName.toString).flatMap(nameMap.remove).flatten
+            metas.foreach { m =>
+                val state = block.getStateFromMeta(m)
+
+                try {
+                    createAndRegister(state)
+                    logger.debug("Adding micro material from config: " + materialKey(state))
+                }
+               catch {
+                    case e: IllegalStateException => logger.error("Unable to register micro material: " +
+                        materialKey(state) + "\n\t" + e.getMessage)
+                    case e: Exception =>
+                       logger.error("Unable to register micro material: " + materialKey(state), e)
+                }
+            }
+        }
+
+        nameMap.foreach(e => logger.warn("Unable to add micro material for block with unlocalised name " + e._1 + " as it doesn't exist"))
     }
 
     def handleIMC(messages: Seq[IMCMessage]) {
@@ -129,13 +131,17 @@ object ConfigContent
                 else if (stack.getItemDamage < 0 || stack.getItemDamage >= 16)
                     error("Invalid metadata: " + stack.getItemDamage)
                 else {
-//                    try {
-//                        createAndRegister(Block.getBlockFromItem(stack.getItem), stack.getItemDamage)
-//                    }
-//                    catch {
-//                        case e: IllegalStateException => error("Unable to register micro material: " +
-//                            materialKey(Block.getBlockFromItem(stack.getItem), stack.getItemDamage) + "\n\t" + e.getMessage)
-//                    }
+
+                    val state = Block.getBlockFromItem(stack.getItem).getStateFromMeta(stack.getItemDamage)
+
+                    try {
+                        createAndRegister(state)
+                        logger.debug("Adding micro material from IMC. Mod: [" + msg.getSender + "] Material Key: [" + materialKey(state) + "]")
+                    }
+                    catch {
+                        case e: IllegalStateException => error("Unable to register micro material: " +
+                            materialKey(state) + "\n\t" + e.getMessage)
+                    }
                 }
             }
         }
