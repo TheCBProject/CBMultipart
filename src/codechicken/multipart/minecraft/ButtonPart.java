@@ -83,7 +83,7 @@ public class ButtonPart extends McSidedMetaPart implements IFaceRedstonePart
         Block heldBlock = Block.getBlockFromItem(held.getItem());
         if (!(heldBlock instanceof  BlockButton))
             throw new RuntimeException("Invalid placement of Button Part");
-        state = heldBlock.onBlockPlaced(world, pos, facing, (float)hitVec.xCoord, (float)hitVec.yCoord, (float)hitVec.zCoord, 0, placer);
+        state = heldBlock.getStateForPlacement(world, pos, facing, (float)hitVec.xCoord, (float)hitVec.yCoord, (float)hitVec.zCoord, 0, placer);
     }
 
     @Override

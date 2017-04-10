@@ -4,8 +4,8 @@ import java.io.{ByteArrayOutputStream, DataOutputStream}
 import java.util.{Iterator => JIterator, LinkedList => JLinkedList, Map => JMap}
 
 import codechicken.lib.data.MCDataOutputWrapper
-import codechicken.lib.packet.PacketCustom
-import codechicken.lib.packet.PacketCustom.{IClientPacketHandler, IHandshakeHandler, IServerPacketHandler}
+import codechicken.lib.packet.ICustomPacketHandler.{IClientPacketHandler, IServerPacketHandler}
+import codechicken.lib.packet.{IHandshakeHandler, PacketCustom}
 import codechicken.multipart.handler.MultipartProxy._
 import codechicken.multipart.{ControlKeyModifer, MultiPartRegistry, PacketScheduler, TileMultipart}
 import net.minecraft.client.Minecraft
@@ -35,8 +35,8 @@ object MultipartCPH extends MultipartPH with IClientPacketHandler
         try {
             packet.getType match {
                 case 1 => handlePartRegistration(packet, netHandler)
-                case 2 => handleCompressedTileDesc(packet, mc.theWorld)
-                case 3 => handleCompressedTileData(packet, mc.theWorld)
+                case 2 => handleCompressedTileDesc(packet, mc.world)
+                case 3 => handleCompressedTileData(packet, mc.world)
             }
         }
         catch {
@@ -125,7 +125,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
         PacketScheduler.sendScheduled()
 
         for (p <- players if chunkWatchers.containsKey(p.getEntityId)) {
-            updateMap.get(p.worldObj) match {
+            updateMap.get(p.world) match {
                 case Some(m) if m.nonEmpty =>
                     val chunks = chunkWatchers(p.getEntityId)
                     val packet = new PacketCustom(channel, 3).compress()
@@ -146,7 +146,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
         updateMap.foreach(_._2.clear())
         for (p <- players if newWatchers.containsKey(p.getEntityId)) {
             for (c <- newWatchers(p.getEntityId)) {
-                val chunk = p.worldObj.getChunkFromChunkCoords(c.chunkXPos, c.chunkZPos)
+                val chunk = p.world.getChunkFromChunkCoords(c.chunkXPos, c.chunkZPos)
                 val pkt = getDescPacket(chunk, chunk.getTileEntityMap.values.iterator)
                 if (pkt != null) pkt.sendToPlayer(p)
                 chunkWatchers.addBinding(p.getEntityId, c)

@@ -1,12 +1,13 @@
 package codechicken.multipart.minecraft;
 
+import codechicken.lib.CodeChickenLib;
 import codechicken.lib.packet.PacketCustom;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = MinecraftMultipartMod.modID, acceptedMinecraftVersions="[1.10]")
+@Mod(modid = MinecraftMultipartMod.modID, acceptedMinecraftVersions= CodeChickenLib.MC_VERSION_DEP)
 public class MinecraftMultipartMod
 {
     public static final String modID = "minecraftmultipartcbe";

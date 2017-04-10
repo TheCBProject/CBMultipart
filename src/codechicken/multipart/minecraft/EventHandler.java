@@ -31,7 +31,7 @@ public class EventHandler
             if(placing.get() != null)
                 return;//for mods that do dumb stuff and call this event like MFR
             placing.set(event);
-            if(place(event.getEntityPlayer(), event.getHand(), event.getEntityPlayer().worldObj))
+            if(place(event.getEntityPlayer(), event.getHand(), event.getEntityPlayer().world))
                 event.setCanceled(true);
             placing.set(null);
         }
@@ -97,9 +97,9 @@ public class EventHandler
                     sound.getPitch() * 0.8F);
 
             if(!player.capabilities.isCreativeMode) {
-                held.stackSize--;
-                if (held.stackSize == 0)  {
-                    player.inventory.mainInventory[player.inventory.currentItem] = null;
+                held.shrink(1);
+                if (held.getCount() == 0)  {
+                    player.inventory.mainInventory.set(player.inventory.currentItem, ItemStack.EMPTY);
                     MinecraftForge.EVENT_BUS.post(new PlayerDestroyItemEvent(player, held, hand));
                 }
             }

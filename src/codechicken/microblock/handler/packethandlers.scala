@@ -1,7 +1,7 @@
 package codechicken.microblock.handler
 
-import codechicken.lib.packet.PacketCustom
-import codechicken.lib.packet.PacketCustom.{IClientPacketHandler, IHandshakeHandler, IServerPacketHandler}
+import codechicken.lib.packet.ICustomPacketHandler.{IClientPacketHandler, IServerPacketHandler}
+import codechicken.lib.packet.{IHandshakeHandler, PacketCustom}
 import codechicken.microblock.MicroMaterialRegistry
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.EntityPlayerMP

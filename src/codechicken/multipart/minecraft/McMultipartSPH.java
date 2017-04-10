@@ -1,7 +1,7 @@
 package codechicken.multipart.minecraft;
 
+import codechicken.lib.packet.ICustomPacketHandler.IServerPacketHandler;
 import codechicken.lib.packet.PacketCustom;
-import codechicken.lib.packet.PacketCustom.IServerPacketHandler;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.util.EnumHand;
@@ -17,7 +17,7 @@ public class McMultipartSPH implements IServerPacketHandler
         switch (packet.getType()) {
             case 1:
                 EventHandler.place(sender, packet.readBoolean() ?
-                        EnumHand.MAIN_HAND : EnumHand.OFF_HAND, sender.worldObj);
+                        EnumHand.MAIN_HAND : EnumHand.OFF_HAND, sender.world);
                 break;
         }
     }

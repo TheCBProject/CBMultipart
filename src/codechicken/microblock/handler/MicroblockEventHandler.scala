@@ -5,7 +5,7 @@ import codechicken.microblock.{ItemMicroPartRenderer, MicroMaterialRegistry}
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.math.RayTraceResult
 import net.minecraftforge.client.event.{DrawBlockHighlightEvent, TextureStitchEvent}
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.eventhandler.{EventPriority, SubscribeEvent}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
 object MicroblockEventHandler
@@ -17,7 +17,7 @@ object MicroblockEventHandler
         MicroMaterialRegistry.markIconReload()
     }
 
-    @SubscribeEvent
+    @SubscribeEvent (priority = EventPriority.HIGH)
     @SideOnly(Side.CLIENT)
     def drawBlockHighlight(event:DrawBlockHighlightEvent)
     {

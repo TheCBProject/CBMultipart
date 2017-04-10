@@ -59,7 +59,7 @@ class MaterialRenderHelper
  */
 class BlockMicroMaterial(val state:IBlockState) extends IMicroMaterial
 {
-    val blockKey = state.getPropertyNames
+    val blockKey = state.getPropertyKeys
 
     @SideOnly(Side.CLIENT)
     var icont:MultiIconTransformation = _
@@ -106,7 +106,7 @@ class BlockMicroMaterial(val state:IBlockState) extends IMicroMaterial
     def getLocalizedName = getItem.getDisplayName
 
     def getStrength(player:EntityPlayer) =
-        ForgeHooks.blockStrength(state, player, player.worldObj, new BlockPos(0, -1, 0))
+        ForgeHooks.blockStrength(state, player, player.world, new BlockPos(0, -1, 0))
 
     def isTransparent = !state.isOpaqueCube
 

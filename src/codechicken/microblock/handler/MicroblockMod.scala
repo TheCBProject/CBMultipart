@@ -1,5 +1,6 @@
 package codechicken.microblock.handler
 
+import codechicken.lib.CodeChickenLib
 import codechicken.microblock.{ConfigContent, DefaultContent, MicroMaterialRegistry}
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler
@@ -8,7 +9,7 @@ import net.minecraftforge.fml.common.event.{FMLInitializationEvent, FMLPostIniti
 
 import scala.collection.JavaConversions._
 
-@Mod(modid = "microblockcbe", acceptedMinecraftVersions = "[1.10]", dependencies = "required-after:forgemultipartcbe", modLanguage = "scala")
+@Mod(modid = "microblockcbe", acceptedMinecraftVersions = CodeChickenLib.MC_VERSION_DEP, dependencies = "required-after:forgemultipartcbe", modLanguage = "scala")
 object MicroblockMod
 {
     @EventHandler

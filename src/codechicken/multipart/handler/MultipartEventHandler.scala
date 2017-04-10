@@ -43,17 +43,17 @@ object MultipartEventHandler
     def serverTick(event:TickEvent.ServerTickEvent)
     {
         if(event.phase == TickEvent.Phase.END)
-            MultipartSPH.onTickEnd(FMLCommonHandler.instance().getMinecraftServerInstance.getPlayerList.getPlayerList)
+            MultipartSPH.onTickEnd(FMLCommonHandler.instance().getMinecraftServerInstance.getPlayerList.getPlayers)
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     @SideOnly(Side.CLIENT)
     def drawBlockHighlight(event:DrawBlockHighlightEvent)
     {
         if(event.getTarget != null && event.getTarget.typeOfHit == RayTraceResult.Type.BLOCK &&
-            event.getPlayer.worldObj.getTileEntity(event.getTarget.getBlockPos).isInstanceOf[TileMultipart])
+            event.getPlayer.world.getTileEntity(event.getTarget.getBlockPos).isInstanceOf[TileMultipart])
         {
-            if(BlockMultipart.drawHighlight(event.getPlayer.worldObj, event.getPlayer, event.getTarget, event.getPartialTicks))
+            if(BlockMultipart.drawHighlight(event.getPlayer.world, event.getPlayer, event.getTarget, event.getPartialTicks))
                 event.setCanceled(true)
         }
     }

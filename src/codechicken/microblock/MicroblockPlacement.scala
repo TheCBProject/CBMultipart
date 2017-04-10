@@ -1,6 +1,6 @@
 package codechicken.microblock
 
-import codechicken.lib.vec.{BlockCoord, Rotation, Vector3}
+import codechicken.lib.vec.{Rotation, Vector3}
 import codechicken.multipart.ControlKeyModifer._
 import codechicken.multipart.{PartRayTraceResult, TileMultipart}
 import net.minecraft.entity.player.EntityPlayer
@@ -24,7 +24,7 @@ class AdditionPlacement($pos:BlockPos, $part:Microblock) extends ExecutablePlace
 
     def consume(world:World, player:EntityPlayer, item:ItemStack)
     {
-        item.stackSize-=1
+        item.shrink(1)
     }
 }
 
@@ -39,7 +39,7 @@ class ExpandingPlacement($pos:BlockPos, $part:Microblock, opart:Microblock) exte
 
     def consume(world:World, player:EntityPlayer, item:ItemStack)
     {
-        item.stackSize-=1
+        item.shrink(1)
     }
 }
 
@@ -66,7 +66,7 @@ object MicroblockPlacement
 
 class MicroblockPlacement(val player:EntityPlayer, val hit:RayTraceResult, val size:Int, val material:Int, val checkMaterial:Boolean, val pp:PlacementProperties)
 {
-    val world = player.worldObj
+    val world = player.world
     val mcrFactory = pp.microFactory
     val pos = new BlockPos(hit.getBlockPos)
     val vhit = new Vector3(hit.hitVec).add(-pos.getX, -pos.getY, -pos.getZ)

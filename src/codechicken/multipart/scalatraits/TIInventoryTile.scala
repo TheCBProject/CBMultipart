@@ -60,6 +60,15 @@ trait TIInventoryTile extends TileMultipart with ISidedInventory
         }
     }
 
+    override def isEmpty = {
+        for ((inv, slot) <- slotMap) {
+            if (!inv.getStackInSlot(slot).isEmpty) {
+                false
+            }
+        }
+        true
+    }
+
     override def getName = "Multipart Inventory"
 
     override def getDisplayName = new TextComponentString(getName)
@@ -90,7 +99,7 @@ trait TIInventoryTile extends TileMultipart with ISidedInventory
 
     override def getInventoryStackLimit = 64
 
-    override def isUseableByPlayer(player:EntityPlayer) = true
+    override def isUsableByPlayer(player:EntityPlayer) = true
 
     override def openInventory(player:EntityPlayer){}
 

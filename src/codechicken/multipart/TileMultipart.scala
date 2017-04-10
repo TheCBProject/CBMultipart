@@ -177,7 +177,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile
       */
     def getWriteStream(part:TMultiPart):MCDataOutput = getWriteStream.writeByte(partList.indexOf(part))
 
-    private def getWriteStream = MultipartSPH.getTileStream(worldObj, getPos)
+    private def getWriteStream = MultipartSPH.getTileStream(world, getPos)
 
     /**** Adding/Removing parts ****/
 
@@ -185,7 +185,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile
      * Returns true if part can be added to this space
      */
     def canAddPart(part:TMultiPart) =
-        MultipartCompatiblity.canAddPart(worldObj, pos) &&
+        MultipartCompatiblity.canAddPart(world, pos) &&
                 !partList.contains(part) &&
                 occlusionTest(partList, part)
 
@@ -217,7 +217,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile
 
     private[multipart] def addPart_impl(part:TMultiPart)
     {
-        if(!worldObj.isRemote) writeAddPart(part)
+        if(!world.isRemote) writeAddPart(part)
 
         addPart_do(part)
         part.onAdded()
@@ -249,13 +249,13 @@ class TileMultipart extends TileEntity with IChunkLoadTile
       */
     def remPart(part:TMultiPart):TileMultipart =
     {
-        assert(!worldObj.isRemote, "Cannot remove multi parts from a client tile")
+        assert(!world.isRemote, "Cannot remove multi parts from a client tile")
         remPart_impl(part)
     }
 
     private[multipart] def remPart_impl(part:TMultiPart):TileMultipart =
     {
-        remPart_do(part, !worldObj.isRemote)
+        remPart_do(part, !world.isRemote)
 
         if (!isInvalid) {
             val tile = MultipartGenerator.partRemoved(this)
@@ -283,7 +283,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile
         part.onRemoved()
         part.tile = null
 
-        if (partList.isEmpty) worldObj.setBlockToAir(pos)
+        if (partList.isEmpty) world.setBlockToAir(pos)
         r
     }
 
@@ -291,8 +291,8 @@ class TileMultipart extends TileEntity with IChunkLoadTile
     {
         clearParts()
         parts.foreach(p => addPart_do(p))
-        if (worldObj != null) {
-            if (worldObj.isRemote)
+        if (world != null) {
+            if (world.isRemote)
                 operate(_.onWorldJoin())
             notifyPartChange(null)
         }
@@ -308,9 +308,9 @@ class TileMultipart extends TileEntity with IChunkLoadTile
     {
         if(!isInvalid) {
             super.invalidate()
-            if(worldObj != null) {
+            if(world != null) {
                 partList.foreach(_.onWorldSeparate())
-                if(worldObj.isRemote)
+                if(world.isRemote)
                     TileCache.remove(this)
             }
         }
@@ -319,7 +319,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile
     override def validate()
     {
         super.validate()
-        if(worldObj != null && worldObj.isRemote)
+        if(world != null && world.isRemote)
             TileCache.add(this)
     }
 
@@ -351,7 +351,6 @@ class TileMultipart extends TileEntity with IChunkLoadTile
             p.collisionRayTrace(start, end) match {
                 case crtr:CuboidRayTraceResult =>
                     val partMOP = new PartRayTraceResult(i, crtr)
-                    partMOP.disableAutoHitboxRender = true //We want to handle this ourselves from BlockMultipart.drawHighlight
                     list += partMOP
                 case _ =>
             }
@@ -476,7 +475,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile
       */
     def notifyTileChange()
     {
-        worldObj.notifyNeighborsOfStateChange(pos, MultipartProxy.block)
+        world.notifyNeighborsOfStateChange(pos, MultipartProxy.block, true)
     }
 
     /**
@@ -487,9 +486,9 @@ class TileMultipart extends TileEntity with IChunkLoadTile
     {
         internalPartChange(part)
 
-        worldObj.notifyBlockUpdate(pos, MultipartProxy.block.getDefaultState, MultipartProxy.block.getDefaultState, 3)
-        worldObj.notifyNeighborsOfStateChange(pos, MultipartProxy.block)
-        worldObj.checkLight(pos)
+        world.notifyBlockUpdate(pos, MultipartProxy.block.getDefaultState, MultipartProxy.block.getDefaultState, 3)
+        world.notifyNeighborsOfStateChange(pos, MultipartProxy.block, true)
+        world.checkLight(pos)
     }
 
     /**
@@ -513,7 +512,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile
       */
     override def markDirty()
     {
-        worldObj.markChunkDirty(pos, this)
+        world.markChunkDirty(pos, this)
     }
 
     /**
@@ -521,15 +520,15 @@ class TileMultipart extends TileEntity with IChunkLoadTile
       */
     def markRender()
     {
-        worldObj.markBlockRangeForRenderUpdate(pos, pos)
+        world.markBlockRangeForRenderUpdate(pos, pos)
     }
 
     def recalcLight(sky:Boolean, block:Boolean)
     {
-        if (sky && !worldObj.provider.getHasNoSky)
-            worldObj.checkLightFor(EnumSkyBlock.SKY, pos)
+        if (sky && !world.provider.hasNoSky)
+            world.checkLightFor(EnumSkyBlock.SKY, pos)
         if (block)
-            worldObj.checkLightFor(EnumSkyBlock.BLOCK, pos)
+            world.checkLightFor(EnumSkyBlock.BLOCK, pos)
     }
 
     /**
@@ -537,7 +536,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile
       */
     def notifyNeighborChange(side:Int)
     {
-        worldObj.notifyNeighborsOfStateChange(getPos.offset(EnumFacing.values()(side)), MultipartProxy.block)
+        world.notifyNeighborsOfStateChange(getPos.offset(EnumFacing.values()(side)), MultipartProxy.block, true)
     }
 
     /**
@@ -546,7 +545,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile
     def dropItems(items:JIterable[ItemStack])
     {
         val pos = Vector3.fromTileCenter(this)
-        items.foreach(item => TileMultipart.dropItem(item, worldObj, pos))
+        items.foreach(item => TileMultipart.dropItem(item, world, pos))
     }
 }
 
@@ -582,7 +581,7 @@ trait TileMultipartClient extends TileMultipart
             case null => false
             case part =>
                 if (!part.drawHighlight(player, hit, frame))
-                    RenderUtils.renderHitBox(player, hit.cuboid6.copy.add(new Vector3(getPos)), frame)
+                    RenderUtils.renderHitBox(player, hit.cuboid6.copy.add(Vector3.fromBlockPos(getPos)), frame)
                 true
         }
 
@@ -639,7 +638,7 @@ object TileMultipart
         if(p != null) {
             val t = MultipartGenerator.generateCompositeTile(null, Seq(p), world.isRemote)
             t.setPos(pos)
-            t.setWorldObj(world)
+            t.setWorld(world)
             t.addPart_do(p)
             return (t, true)
         }
@@ -778,6 +777,6 @@ object TileMultipart
         item.motionY = world.rand.nextGaussian()*0.05+0.2
         item.motionZ = world.rand.nextGaussian()*0.05
         item.setPickupDelay(10)
-        world.spawnEntityInWorld(item)
+        world.spawnEntity(item)
     }
 }

@@ -4,9 +4,9 @@ import java.io.File
 
 import codechicken.lib.config.ConfigFile
 import codechicken.lib.packet.PacketCustom
-import codechicken.lib.vec.BlockCoord
 import codechicken.lib.world.{TileChunkLoadHook, WorldExtensionManager}
 import codechicken.multipart._
+import codechicken.multipart.handler.MultipartSaveLoad.TileNBTContainer
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.ResourceLocation
@@ -36,7 +36,7 @@ class MultipartProxy_serverImpl
 
         MultipartGenerator.registerTrait("net.minecraft.util.ITickable", "codechicken.multipart.scalatraits.JTickableTile")
         MultipartGenerator.registerTrait("codechicken.multipart.TSlottedPart", "codechicken.multipart.scalatraits.TSlottedTile")
-        MultipartGenerator.registerTrait("net.minecraftforge.fluids.IFluidHandler", "codechicken.multipart.scalatraits.TFluidHandlerTile")
+        //MultipartGenerator.registerTrait("net.minecraftforge.fluids.IFluidHandler", "codechicken.multipart.scalatraits.TFluidHandlerTile")
         MultipartGenerator.registerTrait("net.minecraft.inventory.IInventory", "codechicken.multipart.scalatraits.JInventoryTile")
         MultipartGenerator.registerTrait("net.minecraft.inventory.ISidedInventory", "codechicken.multipart.scalatraits.JInventoryTile")
         MultipartGenerator.registerTrait("codechicken.multipart.TPartialOcclusionPart", "codechicken.multipart.scalatraits.TPartialOcclusionTile")
@@ -45,7 +45,7 @@ class MultipartProxy_serverImpl
         MultipartGenerator.registerTrait("codechicken.multipart.INeighborTileChangePart", null, "codechicken.multipart.scalatraits.TTileChangeTile")
         MultipartGenerator.registerTrait("codechicken.multipart.IModelRenderPart", "codechicken.multipart.scalatraits.TModelRenderTile", null)
 
-        MultipartSaveLoad.hookLoader()
+        MultipartSaveLoad.load()
     }
 
     def init(){}

@@ -18,15 +18,7 @@ object MicroRecipe extends IRecipe
 
     def matches(icraft:InventoryCrafting, world:World) = getCraftingResult(icraft) != null
 
-    override def getRemainingItems(inv:InventoryCrafting) =
-    {
-        val stacks = new Array[ItemStack](inv.getSizeInventory)
-        for (i <- 0 until stacks.length) {
-            val stack = inv.getStackInSlot(i)
-            stacks(i) = ForgeHooks.getContainerItem(stack)
-        }
-        stacks
-    }
+    override def getRemainingItems(inv:InventoryCrafting) = ForgeHooks.defaultRecipeGetRemainingItems(inv)
 
     def getCraftingResult(icraft:InventoryCrafting):ItemStack =
     {
@@ -47,7 +39,7 @@ object MicroRecipe extends IRecipe
         if(size == 8)
         {
             val item = MicroMaterialRegistry.getMaterial(material).getItem.copy
-            item.stackSize = amount
+            item.setCount(amount)
             return item
         }
         ItemMicroPart.createStack(amount, ItemMicroPart.damage(factoryID, size), MicroMaterialRegistry.materialName(material))

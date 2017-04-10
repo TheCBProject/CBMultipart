@@ -1,7 +1,7 @@
 package codechicken.multipart.minecraft;
 
+import codechicken.lib.packet.ICustomPacketHandler.IClientPacketHandler;
 import codechicken.lib.packet.PacketCustom;
-import codechicken.lib.packet.PacketCustom.IClientPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.network.play.INetHandlerPlayClient;
@@ -16,7 +16,7 @@ public class McMultipartCPH implements IClientPacketHandler
     public void handlePacket(PacketCustom packet, Minecraft mc, INetHandlerPlayClient netHandler) {
         switch (packet.getType()) {
             case 1:
-                spawnBurnoutSmoke(mc.theWorld, packet.readPos());
+                spawnBurnoutSmoke(mc.world, packet.readPos());
                 break;
         }
     }

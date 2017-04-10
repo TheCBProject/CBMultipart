@@ -21,8 +21,9 @@ trait TItemMultiPart extends Item
     def getHitDepth(vhit:Vector3, side:Int):Double =
         vhit.copy.scalarProject(Rotation.axes(side)) + (side%2^1)
 
-    override def onItemUse(stack:ItemStack, player:EntityPlayer, world:World, bpos:BlockPos, hand:EnumHand, facing:EnumFacing, hitX:Float, hitY:Float, hitZ:Float):EnumActionResult =
+    override def onItemUse(player:EntityPlayer, world:World, bpos:BlockPos, hand:EnumHand, facing:EnumFacing, hitX:Float, hitY:Float, hitZ:Float):EnumActionResult =
     {
+        val stack = player.getHeldItem(hand)
         var pos = new BlockPos(bpos)
         val side = facing.getIndex
         val vhit = new Vector3(hitX, hitY, hitZ)
@@ -40,7 +41,7 @@ trait TItemMultiPart extends Item
                     world.playSound(null, bpos, sound.getPlaceSound,
                         SoundCategory.BLOCKS, (sound.getVolume+1.0F)/2.0F, sound.getPitch*0.8F)
             }
-            if(!player.capabilities.isCreativeMode) stack.stackSize-=1
+            if(!player.capabilities.isCreativeMode) stack.shrink(1)
             EnumActionResult.SUCCESS
         }
 

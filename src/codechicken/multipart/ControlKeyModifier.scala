@@ -48,7 +48,7 @@ object ControlKeyHandler extends KeyBinding("key.control", Keyboard.KEY_LCONTROL
             wasPressed = pressed
             if(Minecraft.getMinecraft.getConnection != null)
             {
-                map.put(Minecraft.getMinecraft.thePlayer, pressed)
+                map.put(Minecraft.getMinecraft.player, pressed)
                 val packet = new PacketCustom(MultipartCPH.channel, 1)
                 packet.writeBoolean(pressed)
                 packet.sendToServer()

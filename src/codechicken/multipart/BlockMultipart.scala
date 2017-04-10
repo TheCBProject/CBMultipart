@@ -84,7 +84,7 @@ class BlockMultipart extends Block(Material.ROCK)
             case tile => tile.partList.isEmpty
         }
 
-    override def addCollisionBoxToList(state:IBlockState, world:World, pos:BlockPos, entityBox:AxisAlignedBB, collidingBoxes:JList[AxisAlignedBB], entity:Entity)
+    override def addCollisionBoxToList(state:IBlockState, world:World, pos:BlockPos, entityBox:AxisAlignedBB, collidingBoxes:JList[AxisAlignedBB], entity:Entity, flag:Boolean)
     {
         getTile(world, pos) match {
             case null =>
@@ -178,7 +178,7 @@ class BlockMultipart extends Block(Material.ROCK)
             case _ => null
         }
 
-    override def onBlockActivated(world:World, pos:BlockPos, state:IBlockState, player:EntityPlayer, hand:EnumHand, heldItem:ItemStack, side:EnumFacing, hitX:Float, hitY:Float, hitZ:Float):Boolean =
+    override def onBlockActivated(world:World, pos:BlockPos, state:IBlockState, player:EntityPlayer, hand:EnumHand, side:EnumFacing, hitX:Float, hitY:Float, hitZ:Float):Boolean =
         (getTile(world, pos), retracePart(world, pos, player)) match {
             case (tile:TileMultipart, hit:PartRayTraceResult) => tile.onBlockActivated(player, hit, hand)
             case _ => false
@@ -208,7 +208,7 @@ class BlockMultipart extends Block(Material.ROCK)
         }
     }
 
-    override def neighborChanged(state:IBlockState, world:World, pos:BlockPos, neighborBlock:Block)
+    override def neighborChanged(state:IBlockState, world:World, pos:BlockPos, neighborBlock:Block, fromPos:BlockPos)
     {
         getTile(world, pos) match {
             case null =>

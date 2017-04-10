@@ -1,7 +1,7 @@
 package codechicken.multipart
 
 import codechicken.lib.raytracer.CuboidRayTraceResult
-import codechicken.lib.render.DigIconParticle
+import codechicken.lib.render.particle.{CustomParticleHandler, DigIconParticle}
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import net.minecraft.client.particle.ParticleManager
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
@@ -21,9 +21,9 @@ object IconHitEffects
 {
     def addHitEffects(part:TIconHitEffectsPart, hit:CuboidRayTraceResult, manager:ParticleManager)
     {
-        DigIconParticle.addBlockHitEffects(part.tile.getWorld,
+        CustomParticleHandler.addBlockHitEffects(part.tile.getWorld,
             part.getBounds.copy.add(Vector3.fromTile(part.tile)),
-            hit.sideHit.ordinal, part.getBreakingIcon(hit), manager)
+            hit.sideHit, part.getBreakingIcon(hit), manager)
     }
 
     def addDestroyEffects(part:TIconHitEffectsPart, manager:ParticleManager)
@@ -40,7 +40,7 @@ object IconHitEffects
             if(scaleDensity) part.getBounds.copy
             else Cuboid6.full.copy
 
-        DigIconParticle.addBlockDestroyEffects(part.tile.getWorld,
+        CustomParticleHandler.addBlockDestroyEffects(part.tile.getWorld,
             bounds.add(Vector3.fromTile(part.tile)), icons, manager)
     }
 }

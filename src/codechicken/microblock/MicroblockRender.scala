@@ -2,9 +2,9 @@ package codechicken.microblock
 
 import java.util.{ArrayList => JArrayList}
 
-import codechicken.lib.model.bakery.CCModelBakery
 import codechicken.lib.render.BlockRenderer.BlockFace
 import codechicken.lib.render.CCRenderState
+import codechicken.lib.render.buffer.BakingVertexBuffer
 import codechicken.lib.texture.TextureUtils
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import net.minecraft.client.renderer.block.model.BakedQuad
@@ -68,11 +68,24 @@ object MicroblockRender
     {
         val list = Seq.newBuilder[BakedQuad]
 
+        val ccrs = CCRenderState.instance
+        val buffer = BakingVertexBuffer.create
+
+
+
         for(s <- 0 until 6 if (faces & 1<<s) == 0) {
             face.loadCuboidFace(c, s)
             val ops = mat.getMicroRenderOps(pos, s, layer, c)
-            for (opSet <- ops)
-                list ++= CCModelBakery.bakeModel(face, false, DefaultVertexFormats.ITEM, 0, face.getVertices.length, opSet:_*)
+            for (opSet <- ops) {
+                ccrs.reset()
+                buffer.reset()
+                buffer.begin(0x07, DefaultVertexFormats.ITEM)
+                ccrs.bind(buffer)
+                ccrs.setPipeline(face, 0, face.getVertices.length, opSet: _*)
+                ccrs.render()
+                buffer.finishDrawing()
+                list ++= buffer.bake()
+            }
         }
 
         list.result()

@@ -22,7 +22,7 @@ import net.minecraft.item.{Item, ItemStack}
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.math.{BlockPos, RayTraceResult}
 import net.minecraft.util.text.translation.I18n
-import net.minecraft.util.{EnumActionResult, EnumFacing, EnumHand, SoundCategory}
+import net.minecraft.util._
 import net.minecraft.world.World
 import net.minecraftforge.client.model.IPerspectiveAwareModel
 import net.minecraftforge.client.model.IPerspectiveAwareModel.MapWrapper
@@ -44,7 +44,7 @@ class ItemMicroPart extends Item
         I18n.translateToLocalFormatted(mcrFactory.getName.split(":")(1) +"."+size+".name", material.getLocalizedName)
     }
 
-    override def getSubItems(item:Item, tab:CreativeTabs, list:JList[ItemStack])
+    override def getSubItems(item:Item, tab:CreativeTabs, list:NonNullList[ItemStack])
     {
         for(factoryID <- 0 until factories.length)
         {
@@ -55,8 +55,9 @@ class ItemMicroPart extends Item
         }
     }
 
-    override def onItemUse(stack:ItemStack, player:EntityPlayer, world:World, pos:BlockPos, hand:EnumHand, facing:EnumFacing, hitX:Float, hitY:Float, hitZ:Float):EnumActionResult =
+    override def onItemUse(player:EntityPlayer, world:World, pos:BlockPos, hand:EnumHand, facing:EnumFacing, hitX:Float, hitY:Float, hitZ:Float):EnumActionResult =
     {
+        val stack = player.getHeldItem(hand)
         val material = getMaterialID(stack)
         val mcrFactory = getFactory(stack)
         val size = getSize(stack)

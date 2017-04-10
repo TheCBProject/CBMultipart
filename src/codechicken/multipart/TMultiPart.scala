@@ -136,7 +136,7 @@ abstract class TMultiPart
     def collisionRayTrace(start:Vec3d, end:Vec3d):CuboidRayTraceResult =
     {
         val boxes = getSubParts.map { _.copy }
-        RayTracer.rayTraceCuboidsClosest(start, end, boxes.toList, tile.getPos)
+        RayTracer.rayTraceCuboidsClosest(start, end, tile.getPos, boxes.toList)
     }
 
     /**
