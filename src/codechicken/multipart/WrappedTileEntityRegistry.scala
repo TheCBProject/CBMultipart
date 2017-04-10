@@ -4,6 +4,7 @@ import java.util.{HashMap => JHashMap}
 
 import codechicken.lib.asm.ObfMapping
 import codechicken.lib.util.ReflectionManager
+import codechicken.lib.util.registry.DuplicateValueRegistry
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.{IntIdentityHashBiMap, ResourceLocation}
 import net.minecraftforge.fml.common.registry.{GameData, LegacyNamespacedRegistry}
@@ -34,23 +35,11 @@ import net.minecraftforge.fml.common.registry.{GameData, LegacyNamespacedRegistr
   * We can then control what the registry returns for getNameForObject allowing us to do what we did before.
   * If someone has a better idea, Please contact us.
   */
-class WrappedTileEntityRegistry extends LegacyNamespacedRegistry[Class[_ <: TileEntity]] {
-
-    private val classMap: JHashMap[Class[_ <: TileEntity], ResourceLocation] = new JHashMap[Class[_ <: TileEntity], ResourceLocation]
-
-    override def getNameForObject(value: Class[_ <: TileEntity]): ResourceLocation = {
-        if (classMap.containsKey(value)) {
-            classMap.get(value)
-        } else {
-            super.getNameForObject(value)
-        }
-    }
-}
-
 object WrappedTileEntityRegistry {
 
-    val INSTANCE = new WrappedTileEntityRegistry
-    var wrapped: LegacyNamespacedRegistry[Class[_ <: TileEntity]] = null
+    val wrapped: LegacyNamespacedRegistry[Class[_ <: TileEntity]] = GameData.getTileEntityRegistry
+    val INSTANCE = new DuplicateValueRegistry(wrapped)
+
 
     def init(): Unit = {
         val gd = "net/minecraftforge/fml/common/registry/GameData"
@@ -62,8 +51,6 @@ object WrappedTileEntityRegistry {
         var mapping = new ObfMapping(gd, "getMain", s"()L$gd;")
 
         val gameData: GameData = ReflectionManager.callMethod(mapping, classOf[GameData], null)
-
-        wrapped = GameData.getTileEntityRegistry
 
         mapping = new ObfMapping(rs, "field_82596_a")
         ReflectionManager.setField(mapping, INSTANCE, ReflectionManager.getField(mapping, wrapped, classOf[Map[ResourceLocation, Class[_ <: TileEntity]]]))
@@ -82,6 +69,6 @@ object WrappedTileEntityRegistry {
     }
 
     def registerMapping(clazz: Class[_ <: TileEntity], key: ResourceLocation): Unit = {
-        INSTANCE.classMap.put(clazz, key)
+        INSTANCE.addMapping(clazz, key)
     }
 }

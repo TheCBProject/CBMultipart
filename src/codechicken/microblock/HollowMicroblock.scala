@@ -154,7 +154,7 @@ trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClien
         glDepthMask(false)
         glPushMatrix()
         RenderUtils.translateToWorldCoords(player, frame)
-        glTranslated(x, y, z)
+        glTranslated(pos.getX, pos.getY, pos.getZ)
         sideRotations(shape & 0xF).at(center).glApply()
 
         RenderUtils.drawCuboidOutline(new Cuboid6(0, 0, 0, 1, t, 1).expand(0.001))

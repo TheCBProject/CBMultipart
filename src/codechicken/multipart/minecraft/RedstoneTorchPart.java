@@ -155,7 +155,7 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
         if(active()) {
             if(burnedOut(true)) {
                 world().playSound(null, pos(), SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 0.5F, 2.6F + (world().rand.nextFloat() - world().rand.nextFloat()) * 0.8F);
-                McMultipartSPH.spawnBurnoutSmoke(world(), x(), y(), z());
+                McMultipartSPH.spawnBurnoutSmoke(world(), pos());
             }
         } else if(burnedOut(false))
             return;

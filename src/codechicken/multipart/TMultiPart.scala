@@ -34,24 +34,6 @@ abstract class TMultiPart
     def world = if(tile == null) null else tile.getWorld
 
     /**
-      * Short getter for xCoord
-      */
-    @deprecated
-    def x = tile.getPos.getX
-
-    /**
-      * Short getter for yCoord
-      */
-    @deprecated
-    def y = tile.getPos.getY
-
-    /**
-      * Short getter for zCoord
-      */
-    @deprecated
-    def z = tile.getPos.getZ
-
-    /**
       * Short getter for blockPos
       */
     def pos = tile.getPos

@@ -22,7 +22,7 @@ public class McMultipartSPH implements IServerPacketHandler
         }
     }
 
-    public static void spawnBurnoutSmoke(World world, int x, int y, int z) {
-        new PacketCustom(channel, 1).writePos(new BlockPos(x, y, z)).sendToChunk(world, x >> 4, z >> 4);
+    public static void spawnBurnoutSmoke(World world, BlockPos pos) {
+        new PacketCustom(channel, 1).writePos(pos).sendToChunk(world, pos.getX() >> 4, pos.getZ() >> 4);
     }
 }
