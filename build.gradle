@@ -18,6 +18,9 @@ apply plugin: 'maven'
 group = "codechicken"
 archivesBaseName = "ForgeMultipart"
 
+targetCompatibility = "1.8"
+sourceCompatibility = "1.8"
+
 // Define properties file
 ext.configFile = file "build.properties"
 
