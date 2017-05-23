@@ -4,7 +4,6 @@ import java.util.{HashMap => JHashMap}
 
 import codechicken.lib.asm.ObfMapping
 import codechicken.lib.util.ReflectionManager
-import codechicken.lib.util.registry.DuplicateValueRegistry
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.{IntIdentityHashBiMap, ResourceLocation}
 import net.minecraftforge.fml.common.registry.{GameData, LegacyNamespacedRegistry}
