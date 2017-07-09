@@ -7,15 +7,12 @@ import codechicken.lib.texture.TextureUtils
 import codechicken.lib.util.TransformUtils
 import codechicken.lib.vec.uv.UVTranslation
 import codechicken.lib.vec.SwapYZ
-import com.google.common.collect.ImmutableList
-import net.minecraft.block.state.IBlockState
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType
-import net.minecraft.client.renderer.block.model.{ItemCameraTransforms, ItemOverrideList}
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.item.{Item, ItemStack}
-import net.minecraft.util.{EnumFacing, ResourceLocation}
+import net.minecraft.util.ResourceLocation
 import net.minecraftforge.client.model.IPerspectiveAwareModel
-import net.minecraftforge.client.model.IPerspectiveAwareModel.MapWrapper
+import net.minecraftforge.common.model.IModelState
 import org.lwjgl.opengl.GL11
 
 /**
@@ -67,18 +64,10 @@ object ItemSawRenderer extends IItemRenderer with IPerspectiveAwareModel
 //
 //    def shouldUseRenderHelper(renderType:ItemRenderType, item:ItemStack, helper:ItemRendererHelper) = true
 
-    override def isBuiltInRenderer = true
-    override def getParticleTexture = null
-    override def getItemCameraTransforms = ItemCameraTransforms.DEFAULT
     override def isAmbientOcclusion = true
     override def isGui3d = true
-    override def getOverrides = ItemOverrideList.NONE
-    override def getQuads(state:IBlockState, side:EnumFacing, rand:Long) = ImmutableList.of()
-
-    override def handlePerspective(cameraTransformType:TransformType) =
-        MapWrapper.handlePerspective(this, TransformUtils.DEFAULT_BLOCK.getTransforms, cameraTransformType)
-
-    override def renderItem(item:ItemStack)
+    override def getTransforms: IModelState = TransformUtils.DEFAULT_BLOCK
+    override def renderItem(item:ItemStack, transformType: TransformType)
     {
 //        val t = renderType match {
 //            case INVENTORY => new TransformationList(new Scale(1.8), new Translation(0, 0, -0.6), new Rotation(-pi/4, 1, 0, 0), new Rotation(pi*3/4, 0, 1, 0))

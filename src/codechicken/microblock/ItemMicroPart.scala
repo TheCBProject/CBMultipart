@@ -11,10 +11,8 @@ import codechicken.lib.vec.Vector3
 import codechicken.microblock.CommonMicroFactory._
 import codechicken.microblock.ItemMicroPart._
 import codechicken.microblock.handler.MicroblockProxy
-import com.google.common.collect.ImmutableList
-import net.minecraft.block.state.IBlockState
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType
-import net.minecraft.client.renderer.block.model.{ItemCameraTransforms, ItemOverrideList, ModelResourceLocation}
+import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.entity.player.EntityPlayer
@@ -25,7 +23,7 @@ import net.minecraft.util.text.translation.I18n
 import net.minecraft.util._
 import net.minecraft.world.World
 import net.minecraftforge.client.model.IPerspectiveAwareModel
-import net.minecraftforge.client.model.IPerspectiveAwareModel.MapWrapper
+import net.minecraftforge.common.model.IModelState
 import org.lwjgl.opengl.GL11
 
 class ItemMicroPart extends Item
@@ -162,18 +160,10 @@ object ItemMicroPartRenderer extends IItemRenderer with IPerspectiveAwareModel
 {
     val modelResLoc = new ModelResourceLocation("forgemicroblocks:microblock", "inventory")
 
-    override def isBuiltInRenderer = true
-    override def getParticleTexture = null
-    override def getItemCameraTransforms = ItemCameraTransforms.DEFAULT
     override def isAmbientOcclusion = true
     override def isGui3d = true
-    override def getOverrides = ItemOverrideList.NONE
-    override def getQuads(state:IBlockState, side:EnumFacing, rand:Long) = ImmutableList.of()
-
-    override def handlePerspective(cameraTransformType:TransformType) =
-        MapWrapper.handlePerspective(this, TransformUtils.DEFAULT_BLOCK, cameraTransformType)
-
-    def renderItem(item:ItemStack)
+    override def getTransforms: IModelState = TransformUtils.DEFAULT_BLOCK
+    override def renderItem(item:ItemStack, transformType: TransformType)
     {
         val material = getMaterial(item)
         val factory = getFactory(item)

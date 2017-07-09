@@ -71,7 +71,7 @@ object ASMMixinCompiler
         }
     }
 
-    getBytes("cpw/mods/fml/common/asm/FMLSanityChecker")
+    getBytes("net/minecraftforge/fml/common/asm/FMLSanityChecker")
 
     def getBytes(name: String): Array[Byte] = {
         val jName = name.replace('/', '.')

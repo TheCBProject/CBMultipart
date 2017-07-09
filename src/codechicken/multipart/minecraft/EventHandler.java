@@ -46,7 +46,7 @@ public class EventHandler
         BlockPos pos = new BlockPos(hit.getBlockPos()).offset(hit.sideHit);
         ItemStack held = player.getHeldItem(hand);
         McMetaPart part = null;
-        if(held == null)
+        if(held.isEmpty())
             return false;
 
         Block heldBlock = Block.getBlockFromItem(held.getItem());

@@ -147,7 +147,7 @@ abstract class TMultiPart
     /**
       * Return the itemstack for the middle click pick-block function.
       */
-    def pickItem(hit:CuboidRayTraceResult):ItemStack = null
+    def pickItem(hit:CuboidRayTraceResult):ItemStack = ItemStack.EMPTY
 
     /**
       * If any part returns true for this, torches can be placed. Vanilla hacks...

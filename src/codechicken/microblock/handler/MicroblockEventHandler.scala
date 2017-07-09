@@ -23,7 +23,7 @@ object MicroblockEventHandler
     {
         val currentItem = event.getPlayer.getHeldItemMainhand
 
-        if(currentItem != null && currentItem.getItem == MicroblockProxy.itemMicro &&
+        if(!currentItem.isEmpty && currentItem.getItem == MicroblockProxy.itemMicro &&
                 event.getTarget != null && event.getTarget.typeOfHit == RayTraceResult.Type.BLOCK)
         {
             GlStateManager.pushMatrix()
