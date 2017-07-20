@@ -77,6 +77,7 @@ class BlockMicroMaterial(val state:IBlockState) extends IMicroMaterial
     @SideOnly(Side.CLIENT)
     override def loadIcons()
     {
+        @SideOnly(Side.CLIENT)
         def getSideIcon(state: IBlockState, s: Int): TextureAtlasSprite = {
             val side = EnumFacing.VALUES(s)
             val model = Minecraft.getMinecraft.getBlockRendererDispatcher.getModelForState(state)
