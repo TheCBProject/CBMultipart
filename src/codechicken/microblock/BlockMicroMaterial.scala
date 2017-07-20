@@ -1,5 +1,7 @@
 package codechicken.microblock
 
+
+import java.util.{LinkedList => JLinkedList, List => JList}
 import codechicken.lib.render.CCRenderState
 import codechicken.lib.render.pipeline.{ColourMultiplier, IVertexOperation}
 import codechicken.lib.texture.TextureUtils
@@ -8,13 +10,17 @@ import codechicken.lib.vec.{Cuboid6, Vector3}
 import net.minecraft.block.Block
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.block.model.BakedQuad
+import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.{Item, ItemStack}
-import net.minecraft.util.BlockRenderLayer
+import net.minecraft.util.{BlockRenderLayer, EnumFacing}
 import net.minecraft.util.math.BlockPos
 import net.minecraftforge.common.ForgeHooks
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
+
+import scala.collection.JavaConversions._
 
 object MaterialRenderHelper
 {
@@ -70,9 +76,29 @@ class BlockMicroMaterial(val state:IBlockState) extends IMicroMaterial
     @SideOnly(Side.CLIENT)
     override def loadIcons()
     {
+        @SideOnly(Side.CLIENT)
+        def getSideIcon(state: IBlockState, s: Int): TextureAtlasSprite = {
+            val side = EnumFacing.VALUES(s)
+            val model = Minecraft.getMinecraft.getBlockRendererDispatcher.getModelForState(state)
+            var winner = TextureUtils.getMissingSprite
+            if (model != null) {
+                val quads = new JLinkedList[BakedQuad]
+                quads.addAll(model.getQuads(state, side, 0))
+                quads.addAll(model.getQuads(state, null, 0).filter((quad : BakedQuad) => quad.getFace eq side))
+                if (quads.size > 0) {
+                    val list = new JLinkedList[TextureAtlasSprite]
+
+                    for (quad <- quads) {
+                        val sprite: TextureAtlasSprite = quad.getSprite
+                        list.add(sprite)
+                    }
+                    if (!list.isEmpty) winner = list.get(0)
+                }
+            }
+            winner
+        }
         try {
-            icont = new MultiIconTransformation(Array.tabulate(6)(
-                side => TextureUtils.getIconsForBlock(state, side)(0)):_*)
+            icont = new MultiIconTransformation(Array.tabulate(6)(side => getSideIcon(state, side)):_*)
             pIconT = new IconTransformation(TextureUtils.getParticleIconForBlock(state))
         } catch {
             case e:RuntimeException =>
