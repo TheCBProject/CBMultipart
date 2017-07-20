@@ -1,5 +1,6 @@
 package codechicken.microblock
 
+import java.util.function.Supplier
 import java.util.{ArrayList => JArrayList}
 
 import codechicken.lib.render.BlockRenderer.BlockFace
@@ -50,38 +51,42 @@ object MicroblockRender
         glPopMatrix()
     }
 
-    val face = new BlockFace()
+    private val instances = ThreadLocal.withInitial(new Supplier[BlockFace] {override def get = new BlockFace})
+
+    def face = instances.get()
     def renderCuboid(pos:Vector3, ccrs:CCRenderState, mat:IMicroMaterial, layer:BlockRenderLayer, c:Cuboid6, faces:Int)
     {
         MicroMaterialRegistry.loadIcons()
 
-        ccrs.setModel(face)
+        val f = face
+        ccrs.setModel(f)
         for(s <- 0 until 6 if (faces & 1<<s) == 0) {
-            face.loadCuboidFace(c, s)
+            f.loadCuboidFace(c, s)
             val ops = mat.getMicroRenderOps(pos, s, layer, c)
             for (opSet <- ops)
                 ccrs.render(opSet:_*)
         }
     }
 
+    @Deprecated
     def getQuadsList(pos:Vector3, mat:IMicroMaterial, layer:BlockRenderLayer, c:Cuboid6, faces:Int) =
     {
         val list = Seq.newBuilder[BakedQuad]
 
         val ccrs = CCRenderState.instance
         val buffer = BakingVertexBuffer.create
-
+        val f = face
 
 
         for(s <- 0 until 6 if (faces & 1<<s) == 0) {
-            face.loadCuboidFace(c, s)
+            f.loadCuboidFace(c, s)
             val ops = mat.getMicroRenderOps(pos, s, layer, c)
             for (opSet <- ops) {
                 ccrs.reset()
                 buffer.reset()
                 buffer.begin(0x07, DefaultVertexFormats.ITEM)
                 ccrs.bind(buffer)
-                ccrs.setPipeline(face, 0, face.getVertices.length, opSet: _*)
+                ccrs.setPipeline(f, 0, f.getVertices.length, opSet: _*)
                 ccrs.render()
                 buffer.finishDrawing()
                 list ++= buffer.bake()
