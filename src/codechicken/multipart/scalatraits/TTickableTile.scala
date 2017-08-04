@@ -27,9 +27,10 @@ trait TTickableTile extends TileMultipart with ITickable
     override def bindPart(part:TMultiPart)
     {
         super.bindPart(part)
-        //setTicking(true) //Probably a better place for setting a new tile to tick?
         part match {
-            case tickingPart:ITickable => tickingParts += tickingPart
+            case tickingPart:ITickable =>
+                tickingParts += tickingPart
+                setTicking(true)
             case _ =>
         }
     }
@@ -57,12 +58,6 @@ trait TTickableTile extends TileMultipart with ITickable
             val p = it.next()
             if(p.tile != null) p.update()
         }
-    }
-
-    override def onLoad()
-    {
-        super.onLoad()
-        setTicking(true)
     }
 
     private var doesTick = false

@@ -235,19 +235,19 @@ class BlockMultipart extends Block(Material.ROCK)
     override def canConnectRedstone(state:IBlockState, world:IBlockAccess, pos:BlockPos, side:EnumFacing):Boolean =
         getTile(world, pos) match {
             case null => false
-            case tile => side != null && tile.canConnectRedstone(side.getIndex)
+            case tile => side != null && tile.canConnectRedstone(side.getIndex^1) //'side' is respect to connecting block, we want with respect to this block
         }
 
     override def getStrongPower(state:IBlockState, world:IBlockAccess, pos:BlockPos, side:EnumFacing):Int =
         getTile(world, pos) match {
             case null => 0
-            case tile => tile.strongPowerLevel(side.getIndex^1)
+            case tile => tile.strongPowerLevel(side.getIndex^1) //'side' is respect to connecting block, we want with respect to this block
         }
 
     override def getWeakPower(state:IBlockState, world:IBlockAccess, pos:BlockPos, side:EnumFacing):Int =
         getTile(world, pos) match {
             case null => 0
-            case tile => tile.weakPowerLevel(side.getIndex^1)
+            case tile => tile.weakPowerLevel(side.getIndex^1) //'side' is respect to connecting block, we want with respect to this block
         }
 
     @SideOnly (Side.CLIENT)
