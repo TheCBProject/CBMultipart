@@ -53,10 +53,7 @@ trait TRedstoneTile extends TileMultipart with IRedstoneTile
         weakPowerLevel(side, otherConnectionMask(getWorld, getPos, side, true))
 
     override def canConnectRedstone(side:Int):Boolean =
-    {
-        //val vside = vanillaToSide(side)
         (getConnectionMask(side) & otherConnectionMask(getWorld, getPos, side, false)) > 0
-    }
 
     def getConnectionMask(side:Int):Int =
     {

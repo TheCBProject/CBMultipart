@@ -76,13 +76,6 @@ class TileMultipart extends TileEntity with IChunkLoadTile
     def loadTo(that:TileMultipart){}
 
     /**
-      * Called when this tile has been placed in the world, either from initial placement or hot-swap.
-      *
-      * Provided for trait overrides, do not call externally.
-      */
-    override def onLoad(){}
-
-    /**
       * Remove all parts from internal cache.
       *
       * Provided for trait overrides, do not call externally.
