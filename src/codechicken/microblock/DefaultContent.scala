@@ -16,9 +16,11 @@ object DefaultContent
         PostMicroFactory.register()
 
         createAndRegister(STONE, 0 to 6)
-        registerMaterial(new GrassMicroMaterial, materialKey(GRASS))
+        var id = materialKey(GRASS)
+        registerMaterial(new GrassMicroMaterial(id), id)
         createAndRegister(DIRT, 0 to 1)
-        registerMaterial(new TopMicroMaterial(DIRT.getStateFromMeta(2)), materialKey(DIRT.getStateFromMeta(2)))
+        id = materialKey(DIRT.getStateFromMeta(2))
+        registerMaterial(new TopMicroMaterial(DIRT.getStateFromMeta(2), id), id)
         createAndRegister(COBBLESTONE)
         createAndRegister(PLANKS, 0 to 5)
         createAndRegister(SAND, 0 to 1)

@@ -16,7 +16,7 @@ import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.registry.GameRegistry
+import net.minecraftforge.fml.common.registry.{ForgeRegistries, GameRegistry}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import org.apache.logging.log4j.{LogManager, Logger}
 
@@ -32,7 +32,7 @@ class MultipartProxy_serverImpl
             .setComment("Multipart API config file")
 
         block = new BlockMultipart()
-        GameRegistry.register(block.setRegistryName(new ResourceLocation(MultipartMod.modID, "multipart_block")))
+        ForgeRegistries.BLOCKS.register(block.setRegistryName(new ResourceLocation(MultipartMod.modID, "multipart_block")))
 
         MultipartGenerator.registerTrait("net.minecraft.util.ITickable", "codechicken.multipart.scalatraits.JTickableTile")
         MultipartGenerator.registerTrait("codechicken.multipart.TSlottedPart", "codechicken.multipart.scalatraits.TSlottedTile")
@@ -121,6 +121,6 @@ class MultipartProxy_clientImpl extends MultipartProxy_serverImpl
 
 object MultipartProxy extends MultipartProxy_clientImpl
 {
-    def indexInChunk(cc:ChunkPos, i: Int) = new BlockPos(cc.chunkXPos << 4 | i & 0xF, (i >> 8) & 0xFF, cc.chunkZPos << 4 | (i & 0xF0) >> 4)
+    def indexInChunk(cc:ChunkPos, i: Int) = new BlockPos(cc.x << 4 | i & 0xF, (i >> 8) & 0xFF, cc.z << 4 | (i & 0xF0) >> 4)
     def indexInChunk(pos:BlockPos) = pos.getX & 0xF | pos.getY << 8 | (pos.getZ & 0xF) << 4
 }

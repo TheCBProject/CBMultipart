@@ -16,7 +16,7 @@ import net.minecraft.client.renderer.block.statemap.DefaultStateMapper
 import net.minecraft.client.renderer.texture.{TextureAtlasSprite, TextureMap}
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
-import net.minecraft.client.renderer.{GlStateManager, RenderHelper, VertexBuffer}
+import net.minecraft.client.renderer.{BufferBuilder, GlStateManager, RenderHelper}
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
 import net.minecraftforge.client.MinecraftForgeClient
@@ -39,7 +39,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
     }
 
 
-    override def renderTileEntityAt(tile:TileMultipartClient, x:Double, y:Double, z:Double, frame:Float, destroyStage:Int)
+    override def render(tile:TileMultipartClient, x:Double, y:Double, z:Double, frame:Float, destroyStage:Int, alpha:Float)
     {
         if (tile.partList.isEmpty)
             return
@@ -71,7 +71,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
         RenderHelper.enableStandardItemLighting()
     }
 
-    override def renderTileEntityFast(tile:TileMultipartClient, x:Double, y:Double, z:Double, frame:Float, destroyStage:Int, buffer:VertexBuffer)
+    override def renderTileEntityFast(tile:TileMultipartClient, x:Double, y:Double, z:Double, frame:Float, destroyStage:Int, alpha: Float, buffer:BufferBuilder)
     {
         if (tile.partList.isEmpty)
             return
@@ -81,7 +81,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
         tile.renderFast(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame, ccrs)
     }
 
-    override def renderBlock(world:IBlockAccess, pos:BlockPos, state:IBlockState, buffer:VertexBuffer) =
+    override def renderBlock(world:IBlockAccess, pos:BlockPos, state:IBlockState, buffer:BufferBuilder) =
         getClientTile(world, pos) match {
             case null => false
             case tile =>
@@ -92,7 +92,7 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
                 tile.renderStatic(Vector3.fromBlockPos(pos), MinecraftForgeClient.getRenderLayer, ccrs)
         }
 
-    override def handleRenderBlockDamage(world:IBlockAccess, pos:BlockPos, state:IBlockState, sprite:TextureAtlasSprite, buffer:VertexBuffer)
+    override def handleRenderBlockDamage(world:IBlockAccess, pos:BlockPos, state:IBlockState, sprite:TextureAtlasSprite, buffer:BufferBuilder)
     {
         getClientTile(world, pos) match {
             case null =>
@@ -109,38 +109,41 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
     override def registerTextures(map:TextureMap){}
 }
 
+//TODO, This is probably not needed?
 object MultipartStateMapper extends DefaultStateMapper
 {
     private var replaceNormal:Boolean = true
 
-    override def putStateModelLocations(block:Block):JMap[IBlockState, ModelResourceLocation] =
-    {
-        val mappings = new JHashMap[IBlockState, ModelResourceLocation]
-        replaceNormal = false
-        mappings.putAll(super.putStateModelLocations(block))
-        replaceNormal = true
+    override protected def getModelResourceLocation(state: IBlockState) = new ModelResourceLocation(state.getBlock.getRegistryName, "normal")
 
-        import MultiPartRegistryClient._
+//    override def putStateModelLocations(block:Block):JMap[IBlockState, ModelResourceLocation] =
+//    {
+//        val mappings = new JHashMap[IBlockState, ModelResourceLocation]
+//        replaceNormal = false
+//        mappings.putAll(super.putStateModelLocations(block))
+//        replaceNormal = true
+//
+//        import MultiPartRegistryClient._
+//
+//        for ((partName, container) <- nameToStateContainer) {
+//
+//            nameToModelMapper.get(partName) match {
+//                case Some(mapper) =>
+//                    mappings.putAll(mapper.putStateModelLocations(partName, container))
+//                case None =>
+//                    val modelPath = MultiPartRegistryClient.nameToModelPath(partName)
+//                    for (state <- container.getValidStates)
+//                        mappings.put(state, new ModelResourceLocation(modelPath, getPropertyString(state.getProperties)))
+//            }
+//        }
+//
+//        mappings
+//    }
 
-        for ((partName, container) <- nameToStateContainer) {
-
-            nameToModelMapper.get(partName) match {
-                case Some(mapper) =>
-                    mappings.putAll(mapper.putStateModelLocations(partName, container))
-                case None =>
-                    val modelPath = MultiPartRegistryClient.nameToModelPath(partName)
-                    for (state <- container.getValidStates)
-                        mappings.put(state, new ModelResourceLocation(modelPath, getPropertyString(state.getProperties)))
-            }
-        }
-
-        mappings
-    }
-
-    override def getPropertyString(map:JMap[IProperty[_], Comparable[_]]):String =
-    {
-        val str = super.getPropertyString(map)
-        if (replaceNormal && (str == "normal")) return "multipart"
-        str
-    }
+//    override def getPropertyString(map:JMap[IProperty[_ <: Comparable[_]], Comparable[_]]):String =
+//    {
+//        val str = super.getPropertyString(map)
+//        if (replaceNormal && (str == "normal")) return "multipart"
+//        str
+//    }
 }

@@ -6,6 +6,7 @@ import net.minecraft.block.BlockTorch;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.Random;
@@ -31,9 +32,9 @@ public class TorchPart extends McSidedMetaPart implements IRandomDisplayTickPart
     }
 
     @Override
-    public String getType()
+    public ResourceLocation getType()
     {
-        return "mc_torch";
+        return new ResourceLocation("minecraft:torch");
     }
 
     @Override

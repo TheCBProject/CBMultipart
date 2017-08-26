@@ -1,13 +1,15 @@
 package codechicken.microblock
 
 import codechicken.lib.data.MCDataInput
-import codechicken.multipart.{IDynamicPartFactory, MultiPartRegistry}
+import codechicken.multipart.MultiPartRegistry
+import codechicken.multipart.api.IDynamicPartFactory
 import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
 abstract class MicroblockFactory extends IDynamicPartFactory
 {
-    def getName:String
+    def getName:ResourceLocation
 
     def baseTrait:Class[_ <: Microblock]
 
@@ -28,9 +30,9 @@ abstract class MicroblockFactory extends IDynamicPartFactory
 
     def create(client:Boolean, material:Int) = MicroblockGenerator.create(this, material, client)
 
-    override def createPart(name:String, packet:MCDataInput) = create(true, if (packet != null) MicroMaterialRegistry.readMaterialID(packet) else 0)
+    override def createPartClient(name:ResourceLocation, packet:MCDataInput) = create(true, if (packet != null) MicroMaterialRegistry.readMaterialID(packet) else 0)
 
-    override def createPart(name:String, nbt:NBTTagCompound) = create(false, if (nbt != null) MicroMaterialRegistry.materialID(nbt.getString("material")) else 0)
+    override def createPartServer(name:ResourceLocation, nbt:NBTTagCompound) = create(false, if (nbt != null) MicroMaterialRegistry.materialID(nbt.getString("material")) else 0)
 }
 
 /**

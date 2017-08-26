@@ -13,6 +13,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 
 public class LeverPart extends McSidedMetaPart implements IFaceRedstonePart
@@ -47,9 +48,9 @@ public class LeverPart extends McSidedMetaPart implements IFaceRedstonePart
     }
 
     @Override
-    public String getType()
+    public ResourceLocation getType()
     {
-        return "mc_lever";
+        return new ResourceLocation("minecraft:lever");
     }
 
     public boolean active()

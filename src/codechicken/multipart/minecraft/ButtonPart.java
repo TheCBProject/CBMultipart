@@ -12,10 +12,7 @@ import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -36,9 +33,9 @@ public class ButtonPart extends McSidedMetaPart implements IFaceRedstonePart
     }
 
     @Override
-    public String getType()
+    public ResourceLocation getType()
     {
-        return "mc_button";
+        return new ResourceLocation("minecraft:button");
     }
 
     @Override
@@ -83,7 +80,7 @@ public class ButtonPart extends McSidedMetaPart implements IFaceRedstonePart
         Block heldBlock = Block.getBlockFromItem(held.getItem());
         if (!(heldBlock instanceof  BlockButton))
             throw new RuntimeException("Invalid placement of Button Part");
-        state = heldBlock.getStateForPlacement(world, pos, facing, (float)hitVec.xCoord, (float)hitVec.yCoord, (float)hitVec.zCoord, 0, placer);
+        state = heldBlock.getStateForPlacement(world, pos, facing, (float)hitVec.x, (float)hitVec.y, (float)hitVec.z, 0, placer);
     }
 
     @Override

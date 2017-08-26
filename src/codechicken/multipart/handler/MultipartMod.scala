@@ -16,7 +16,7 @@ object MultipartMod
     @EventHandler
     def preInit(event:FMLPreInitializationEvent) {
         MultipartProxy.preInit(event.getModConfigurationDirectory)
-        WrappedTileEntityRegistry.init
+        WrappedTileEntityRegistry.init()
     }
 
     @EventHandler

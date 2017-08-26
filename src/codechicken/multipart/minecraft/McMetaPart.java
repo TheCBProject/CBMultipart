@@ -99,7 +99,7 @@ public abstract class McMetaPart extends McBlockPart implements IModelRenderPart
 
     public void setStateOnPlacement(World world, BlockPos pos, EnumFacing facing, Vec3d hitVec, EntityLivingBase placer, ItemStack held)
     {
-        state = getBlock().getStateForPlacement(world, pos, facing, (float)hitVec.xCoord, (float)hitVec.yCoord, (float)hitVec.zCoord, 0, placer);
+        state = getBlock().getStateForPlacement(world, pos, facing, (float)hitVec.x, (float)hitVec.y, (float)hitVec.z, 0, placer);
     }
 
     @Override

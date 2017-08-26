@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformT
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.item.{Item, ItemStack}
 import net.minecraft.util.ResourceLocation
-import net.minecraftforge.client.model.IPerspectiveAwareModel
 import net.minecraftforge.common.model.IModelState
 import org.lwjgl.opengl.GL11
 
@@ -52,7 +51,7 @@ class ItemSaw(sawTag:ConfigTag, val harvestLevel:Int) extends Item with Saw
     def getCuttingStrength(item:ItemStack) = harvestLevel
 }
 
-object ItemSawRenderer extends IItemRenderer with IPerspectiveAwareModel
+object ItemSawRenderer extends IItemRenderer
 {
     val models = OBJParser.parseModels(new ResourceLocation("microblockcbe", "models/saw.obj"), 7, new SwapYZ())
     val handle = models.get("Handle")

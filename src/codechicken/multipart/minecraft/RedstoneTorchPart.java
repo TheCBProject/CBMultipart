@@ -10,6 +10,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 
 import java.util.Random;
@@ -43,9 +44,9 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
     }
 
     @Override
-    public String getType()
+    public ResourceLocation getType()
     {
-        return "mc_redtorch";
+        return new ResourceLocation("minecraft:redstone_torch");
     }
 
     @Override

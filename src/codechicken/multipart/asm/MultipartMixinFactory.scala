@@ -2,8 +2,8 @@ package codechicken.multipart.asm
 
 import java.util.BitSet
 
-import codechicken.lib.asm.ASMHelper._
-import codechicken.lib.asm.{CC_ClassWriter, ObfMapping}
+import codechicken.asm.ASMHelper._
+import codechicken.asm.{CC_ClassWriter, ObfMapping}
 import codechicken.multipart.asm.ASMImplicits._
 import codechicken.multipart.asm.ASMMixinCompiler._
 import codechicken.multipart.{MultipartGenerator, TileMultipart}

@@ -4,8 +4,9 @@ import java.io.File
 import java.lang.reflect.{Method, Modifier}
 import java.util.{Set => JSet}
 
-import codechicken.lib.asm.ASMHelper._
-import codechicken.lib.asm.{ASMHelper, InsnComparator, InsnListSection, ObfMapping}
+import codechicken.asm.ASMHelper._
+import codechicken.asm.{ASMHelper, InsnComparator, InsnListSection}
+import codechicken.lib.reflect.ObfMapping
 import codechicken.multipart.asm.ASMImplicits._
 import codechicken.multipart.handler.MultipartProxy
 import net.minecraft.launchwrapper.LaunchClassLoader
@@ -579,7 +580,7 @@ object ASMMixinCompiler
                     })
             }
             else {
-                fields += FieldMixin(sym.name.trim, getReturnType(sym.jDesc).getDescriptor,
+                fields += FieldMixin(sym.name.trim, getType(sym.jDesc).getDescriptor,
                     if (fieldAccessors(sym.name.trim).isPrivate) ACC_PRIVATE else ACC_PUBLIC)
             }
         }

@@ -13,12 +13,6 @@ import scala.collection.JavaConversions._
 
 object MultipartEventHandler
 {
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    def tileEntityLoad(event:ChunkDataEvent.Load)
-    {
-        MultipartSaveLoad.loadTiles(event.getChunk)
-    }
-
     @SubscribeEvent
     def worldUnLoad(event:WorldEvent.Unload)
     {

@@ -1,11 +1,14 @@
 package codechicken.microblock
 
+import java.util.Comparator
+
 import codechicken.lib.data.{MCDataInput, MCDataOutput}
 import codechicken.lib.packet.PacketCustom
 import codechicken.lib.render.pipeline.IVertexOperation
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import codechicken.multipart.{IDWriter, MultiPartRegistry}
 import net.minecraft.block.SoundType
+import net.minecraft.block.state.IBlockState
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.client.resources.{IResourceManager, IResourceManagerReloadListener}
 import net.minecraft.entity.Entity
@@ -21,7 +24,7 @@ import scala.collection.mutable.{ListBuffer, HashMap => MHashMap}
 /**
   * Interface for defining a micro material
   */
-trait IMicroMaterial
+trait IMicroMaterial extends Ordered[IMicroMaterial]
 {
     /**
       * The icon to be used for breaking particles on side
@@ -96,6 +99,8 @@ trait IMicroMaterial
       * Get the explosion resistance of this part to an explosion caused by entity
       */
     def explosionResistance(entity:Entity): Float
+
+    def getMaterialID:String
 }
 
 /**
@@ -165,10 +170,10 @@ object MicroMaterialRegistry
     def remapName(oldName:String, newName:String):Unit = remap.put(oldName, newName)
 
     private[microblock] def setupIDMap() {
-        idMap = typeMap.toList.sortBy(_._1).toArray
+        idMap = typeMap.toList.sortBy(_._2).toArray
         idWriter.setMax(idMap.length)
         nameMap.clear()
-        for (i <- 0 until idMap.length)
+        for (i <- idMap.indices)
             nameMap.put(idMap(i)._1, i)
     }
 

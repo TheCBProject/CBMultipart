@@ -12,7 +12,6 @@ import codechicken.lib.world.IChunkLoadTile
 import codechicken.multipart.handler.{MultipartCompatiblity, MultipartProxy, MultipartSPH}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.particle.ParticleManager
-import net.minecraft.client.renderer.VertexBuffer
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityItem
@@ -21,7 +20,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.{NBTTagCompound, NBTTagList}
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.math.{AxisAlignedBB, BlockPos, Vec3d}
-import net.minecraft.util.{BlockRenderLayer, EnumFacing, EnumHand}
+import net.minecraft.util.{BlockRenderLayer, EnumFacing, EnumHand, ResourceLocation}
 import net.minecraft.world.{EnumSkyBlock, World}
 
 import scala.collection.JavaConversions._
@@ -143,7 +142,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile
         val taglist = new NBTTagList
         partList.foreach { part =>
             val parttag = new NBTTagCompound
-            parttag.setString("id", part.getType)
+            parttag.setString("id", part.getType.toString)
             part.save(parttag)
             taglist.appendTag(parttag)
         }
@@ -518,7 +517,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile
 
     def recalcLight(sky:Boolean, block:Boolean)
     {
-        if (sky && !world.provider.hasNoSky)
+        if (sky && !world.provider.isNether)
             world.checkLightFor(EnumSkyBlock.SKY, pos)
         if (block)
             world.checkLightFor(EnumSkyBlock.BLOCK, pos)
@@ -627,12 +626,12 @@ object TileMultipart
         if(t.isInstanceOf[TileMultipart])
             return (t.asInstanceOf[TileMultipart], false)
 
-        val p = MultiPartRegistry.convertBlock(world, pos, world.getBlockState(pos).getBlock)
-        if(p != null) {
-            val t = MultipartGenerator.generateCompositeTile(null, Seq(p), world.isRemote)
+        val p = MultiPartRegistry.convertBlock(world, pos, world.getBlockState(pos))
+        if(p.nonEmpty) {
+            val t = MultipartGenerator.generateCompositeTile(null, p, world.isRemote)
             t.setPos(pos)
             t.setWorld(world)
-            t.addPart_do(p)
+            p.foreach(t.addPart_do)
             return (t, true)
         }
         (null, false)
@@ -743,7 +742,7 @@ object TileMultipart
 
         for(i <- 0 until partList.tagCount) {
             val partTag = partList.getCompoundTagAt(i)
-            val partID = partTag.getString("id")
+            val partID = new ResourceLocation(partTag.getString("id"))
             val part = MultiPartRegistry.loadPart(partID, partTag)
             if(part != null) {
                 part.load(partTag)

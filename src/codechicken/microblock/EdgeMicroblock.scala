@@ -6,7 +6,7 @@ import codechicken.lib.vec.Rotation._
 import codechicken.lib.vec.Vector3._
 import codechicken.lib.vec.{AxisCycle, Cuboid6, Scale, TransformationList, Vector3}
 import codechicken.multipart._
-import net.minecraft.util.BlockRenderLayer
+import net.minecraft.util.{BlockRenderLayer, ResourceLocation}
 
 import scala.collection.JavaConversions._
 
@@ -75,7 +75,7 @@ object EdgeMicroFactory extends CommonMicroFactory
 
     override def itemSlot = 15
 
-    def getName = "forgemicroblock:mcr_edge"
+    def getName = new ResourceLocation("ccmb:mcr_edge")
 
     def baseTrait = classOf[EdgeMicroblock]
     def clientTrait = classOf[CommonMicroblockClient]
@@ -111,7 +111,7 @@ object PostMicroFactory extends MicroblockFactory
         }
     }
 
-    def getName = "forgemicroblock:mcr_post"
+    def getName = new ResourceLocation("ccmb:mcr_post")
 
     def baseTrait = classOf[PostMicroblock]
     def clientTrait = classOf[PostMicroblockClient]

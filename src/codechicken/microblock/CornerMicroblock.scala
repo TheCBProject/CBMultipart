@@ -4,6 +4,7 @@ import codechicken.lib.vec.Cuboid6
 import codechicken.lib.vec.Scale
 import codechicken.lib.vec.Vector3
 import Vector3._
+import net.minecraft.util.ResourceLocation
 
 object CornerPlacement extends PlacementProperties
 {
@@ -31,7 +32,7 @@ object CornerMicroFactory extends CommonMicroFactory
         }
     }
 
-    def getName = "forgemicroblock:mcr_cnr"
+    def getName = new ResourceLocation("ccmb:mcr_cnr")
 
     def baseTrait = classOf[CornerMicroblock]
     def clientTrait = classOf[CommonMicroblockClient]

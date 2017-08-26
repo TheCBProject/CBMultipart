@@ -16,7 +16,7 @@ trait IModelRenderPart
     /**
       * Pass-down from TMultiPart
       */
-    def getType:String
+    def getType:ResourceLocation
 
     /**
       * Used to determine if this part should be rendered in

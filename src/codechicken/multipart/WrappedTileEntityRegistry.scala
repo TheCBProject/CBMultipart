@@ -2,11 +2,10 @@ package codechicken.multipart
 
 import java.util.{HashMap => JHashMap}
 
-import codechicken.lib.asm.ObfMapping
-import codechicken.lib.util.ReflectionManager
+import codechicken.lib.reflect.{ObfMapping, ReflectionManager}
 import net.minecraft.tileentity.TileEntity
-import net.minecraft.util.{IntIdentityHashBiMap, ResourceLocation}
-import net.minecraftforge.fml.common.registry.{GameData, LegacyNamespacedRegistry}
+import net.minecraft.util.ResourceLocation
+import net.minecraft.util.registry.RegistryNamespaced
 
 /**
   * Created by covers1624 on 8/04/2017.
@@ -36,38 +35,18 @@ import net.minecraftforge.fml.common.registry.{GameData, LegacyNamespacedRegistr
   */
 object WrappedTileEntityRegistry {
 
-    val wrapped: LegacyNamespacedRegistry[Class[_ <: TileEntity]] = GameData.getTileEntityRegistry
+    private val tileRegistry = new ObfMapping("net/minecraft/tileentity/TileEntity", "field_190562_f")
+
+    val wrapped: RegistryNamespaced[ResourceLocation, Class[_ <: TileEntity]] =
+        ReflectionManager.getField(tileRegistry, null, classOf[RegistryNamespaced[ResourceLocation, Class[_ <: TileEntity]]])
     val INSTANCE = new DuplicateValueRegistry(wrapped)
 
 
-    def init(): Unit = {
-        val gd = "net/minecraftforge/fml/common/registry/GameData"
-        val te = "net/minecraft/tileentity/TileEntity"
-        val lnsr = "net/minecraftforge/fml/common/registry/LegacyNamespacedRegistry"
-        val rns = "net/minecraft/util/registry/RegistryNamespaced"
-        val rs = "net/minecraft/util/registry/RegistrySimple"
-
-        var mapping = new ObfMapping(gd, "getMain", s"()L$gd;")
-
-        val gameData: GameData = ReflectionManager.callMethod(mapping, classOf[GameData], null)
-
-        mapping = new ObfMapping(rs, "field_82596_a")
-        ReflectionManager.setField(mapping, INSTANCE, ReflectionManager.getField(mapping, wrapped, classOf[Map[ResourceLocation, Class[_ <: TileEntity]]]))
-        mapping = new ObfMapping(rs, "field_186802_b")
-        ReflectionManager.setField(mapping, INSTANCE, null)
-        mapping = new ObfMapping(rns, "field_148759_a")
-        ReflectionManager.setField(mapping, INSTANCE, ReflectionManager.getField(mapping, wrapped, classOf[IntIdentityHashBiMap[Class[_ <: TileEntity]]]))
-        mapping = new ObfMapping(rns, "field_148758_b")
-        ReflectionManager.setField(mapping, INSTANCE, ReflectionManager.getField(mapping, wrapped, classOf[Map[Class[_ <: TileEntity], ResourceLocation]]))
-        mapping = new ObfMapping(lnsr, "legacy_names")
-        ReflectionManager.setField(mapping, INSTANCE, ReflectionManager.getField(mapping, wrapped, classOf[Map[ResourceLocation, ResourceLocation]]))
-        mapping = new ObfMapping(gd, "iTileEntityRegistry")
-        ReflectionManager.setField(mapping, gameData, INSTANCE)
-        mapping = new ObfMapping(te, "field_190562_f")
-        ReflectionManager.setField(mapping, null, INSTANCE)
+    def init() {
+        ReflectionManager.setField(tileRegistry, null, INSTANCE)
     }
 
-    def registerMapping(clazz: Class[_ <: TileEntity], key: ResourceLocation): Unit = {
+    def registerMapping(clazz: Class[_ <: TileEntity], key: ResourceLocation) {
         INSTANCE.addMapping(clazz, key)
     }
 }

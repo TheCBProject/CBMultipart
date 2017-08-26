@@ -146,7 +146,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
         updateMap.foreach(_._2.clear())
         for (p <- players if newWatchers.containsKey(p.getEntityId)) {
             for (c <- newWatchers(p.getEntityId)) {
-                val chunk = p.world.getChunkFromChunkCoords(c.chunkXPos, c.chunkZPos)
+                val chunk = p.world.getChunkFromChunkCoords(c.x, c.z)
                 val pkt = getDescPacket(chunk, chunk.getTileEntityMap.values.iterator)
                 if (pkt != null) pkt.sendToPlayer(p)
                 chunkWatchers.addBinding(p.getEntityId, c)
@@ -184,7 +184,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
         }
         if (num != 0) {
             val packet = new PacketCustom(channel, 2).compress()
-            packet.writeInt(chunk.xPosition).writeInt(chunk.zPosition)
+            packet.writeInt(chunk.x).writeInt(chunk.z)
                 .writeShort(num)
                 .writeArray(s.getBytes)
             return packet

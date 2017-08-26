@@ -7,7 +7,7 @@ import codechicken.lib.vec.Vector3._
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import codechicken.multipart.{TFacePart, TNormalOcclusionPart}
 import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.util.BlockRenderLayer
+import net.minecraft.util.{BlockRenderLayer, ResourceLocation}
 import org.lwjgl.opengl.GL11
 
 import scala.collection.JavaConversions._
@@ -47,7 +47,7 @@ object HollowMicroFactory extends CommonMicroFactory
         }
     }
 
-    def getName = "forgemicroblock:mcr_hllw"
+    def getName = new ResourceLocation("ccmb:mcr_hllw")
 
     def baseTrait = classOf[HollowMicroblock]
     def clientTrait = classOf[HollowMicroblockClient]

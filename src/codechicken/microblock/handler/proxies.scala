@@ -1,8 +1,10 @@
 package codechicken.microblock.handler
 
+import java.util.function.Supplier
 import java.util.{List => JList}
 
 import codechicken.lib.config.ConfigFile
+import codechicken.lib.gui.SimpleCreativeTab
 import codechicken.lib.model.ModelRegistryHelper
 import codechicken.lib.packet.PacketCustom
 import codechicken.microblock._
@@ -14,7 +16,7 @@ import net.minecraft.item.crafting.CraftingManager
 import net.minecraft.item.{Item, ItemStack}
 import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.fml.common.registry.GameRegistry
+import net.minecraftforge.fml.common.registry.{ForgeRegistries, GameRegistry}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import net.minecraftforge.oredict.{OreDictionary, ShapedOreRecipe}
 import org.apache.logging.log4j.{LogManager, Logger}
@@ -24,6 +26,10 @@ import scala.collection.mutable
 class MicroblockProxy_serverImpl
 {
     var logger: Logger = LogManager.getLogger("ForgeMicroBlockCBE")
+
+    var microTab = new SimpleCreativeTab("microblockcbe", new Supplier[ItemStack] {
+        override def get(): ItemStack = ItemMicroPart.create(0, 1, BlockMicroMaterial.materialKey(Blocks.STONE.getDefaultState))
+    })
 
     var itemMicro: ItemMicroPart = _
     var sawStone: Item = _
@@ -35,12 +41,13 @@ class MicroblockProxy_serverImpl
 
     def preInit() {
         itemMicro = new ItemMicroPart
-        GameRegistry.register(itemMicro.setRegistryName("microblock"))
+        ForgeRegistries.ITEMS.register(itemMicro.setRegistryName("microblock"))
+        itemMicro.setCreativeTab(microTab)
         sawStone = createSaw(config, "saw_stone", 1)
         sawIron = createSaw(config, "saw_iron", 2)
         sawDiamond = createSaw(config, "saw_diamond", 3)
         stoneRod = new Item().setUnlocalizedName("microblock:stone_rod")
-        GameRegistry.register(stoneRod.setRegistryName("stone_rod"))
+        ForgeRegistries.ITEMS.register(stoneRod.setRegistryName("stone_rod"))
 
         OreDictionary.registerOre("rodStone", stoneRod)
 
@@ -53,27 +60,27 @@ class MicroblockProxy_serverImpl
     def createSaw(config: ConfigFile, name: String, strength: Int) = {
         val saw = new ItemSaw(config.getTag(name).useBraces(), strength)
             .setUnlocalizedName("microblock:" + name)
-        GameRegistry.register(saw.setRegistryName(name))
+        ForgeRegistries.ITEMS.register(saw.setRegistryName(name))
         saws+=saw
         saw
     }
 
     def addSawRecipe(saw: Item, blade: Item) {
-        CraftingManager.getInstance.getRecipeList.add(
-            new ShapedOreRecipe(new ItemStack(saw),
-                "srr",
-                "sbr",
-                's': Character, "stickWood",
-                'r': Character, "rodStone",
-                'b': Character, blade))
+//        CraftingManager.getInstance.getRecipeList.add(
+//            new ShapedOreRecipe(new ItemStack(saw),
+//                "srr",
+//                "sbr",
+//                's': Character, "stickWood",
+//                'r': Character, "rodStone",
+//                'b': Character, blade))
     }
 
     def init() {
-        CraftingManager.getInstance.getRecipeList.add(MicroRecipe)
-        CraftingManager.getInstance.addRecipe(new ItemStack(stoneRod, 4), "s", "s", 's': Character, Blocks.STONE)
-        addSawRecipe(sawStone, Items.FLINT)
-        addSawRecipe(sawIron, Items.IRON_INGOT)
-        addSawRecipe(sawDiamond, Items.DIAMOND)
+//        CraftingManager.getInstance.getRecipeList.add(MicroRecipe)
+//        CraftingManager.getInstance.addRecipe(new ItemStack(stoneRod, 4), "s", "s", 's': Character, Blocks.STONE)
+//        addSawRecipe(sawStone, Items.FLINT)
+//        addSawRecipe(sawIron, Items.IRON_INGOT)
+//        addSawRecipe(sawDiamond, Items.DIAMOND)
     }
 
     def postInit() {

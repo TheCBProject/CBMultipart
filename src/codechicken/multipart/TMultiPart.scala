@@ -8,15 +8,13 @@ import codechicken.lib.raytracer.{CuboidRayTraceResult, IndexedCuboid6, RayTrace
 import codechicken.lib.render.CCRenderState
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import net.minecraft.client.particle.ParticleManager
-import net.minecraft.client.renderer.VertexBuffer
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.util.math.{RayTraceResult, Vec3d}
+import net.minecraft.util.math.Vec3d
 import net.minecraft.util.{BlockRenderLayer, EnumHand, ResourceLocation}
-import net.minecraftforge.common.property.{ExtendedBlockState, IExtendedBlockState}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
 import scala.collection.JavaConversions._
@@ -50,7 +48,7 @@ abstract class TMultiPart
       * Returns a unique identifier for the part. Convention dictates that this be formatted as:
       * "[modid]:[unique name]"
       */
-    def getType:String
+    def getType:ResourceLocation
 
     /**
       * Write all the data required to describe a client version of this part to the packet.

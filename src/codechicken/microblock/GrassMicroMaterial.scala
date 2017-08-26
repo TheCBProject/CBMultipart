@@ -9,7 +9,7 @@ import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
 import net.minecraft.util.BlockRenderLayer
 
-class GrassMicroMaterial extends BlockMicroMaterial(Blocks.GRASS.getDefaultState)
+class GrassMicroMaterial(val $materialID:String) extends BlockMicroMaterial(Blocks.GRASS.getDefaultState, $materialID)
 {
     var sideIconT:IconTransformation = _
 
@@ -36,9 +36,9 @@ class GrassMicroMaterial extends BlockMicroMaterial(Blocks.GRASS.getDefaultState
     }
 }
 
-class TopMicroMaterial($state:IBlockState) extends BlockMicroMaterial($state)
+class TopMicroMaterial($state:IBlockState, $materialID:String) extends BlockMicroMaterial($state, $materialID)
 {
-    def this(b:Block) = this(b.getDefaultState)
+    def this(b:Block) = this(b.getDefaultState, BlockMicroMaterial.materialKey(b))
 
     override def getMicroRenderOps(pos:Vector3, side:Int, layer:BlockRenderLayer, bounds:Cuboid6) =
     {

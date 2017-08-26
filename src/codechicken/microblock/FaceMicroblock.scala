@@ -5,7 +5,7 @@ import codechicken.lib.vec.Rotation._
 import codechicken.lib.vec.{Cuboid6, Rotation, Vector3}
 import codechicken.lib.vec.Vector3._
 import codechicken.multipart.TFacePart
-import net.minecraft.util.BlockRenderLayer
+import net.minecraft.util.{BlockRenderLayer, ResourceLocation}
 
 object FacePlacement extends PlacementProperties
 {
@@ -36,7 +36,7 @@ object FaceMicroFactory extends CommonMicroFactory
         }
     }
 
-    def getName = "forgemicroblock:mcr_face"
+    def getName = new ResourceLocation("ccmb:mcr_face")
 
     def itemSlot = 3
 

@@ -1,12 +1,12 @@
 package codechicken.multipart
 
-import java.util.{ArrayList => JArrayList, EnumSet => JEnumSet, List => JList, Random}
+import java.util.{Random, ArrayList => JArrayList, EnumSet => JEnumSet, List => JList}
 
 import codechicken.lib.raytracer.{CuboidRayTraceResult, RayTracer}
 import codechicken.lib.vec.Vector3
 import net.minecraft.block.Block
 import net.minecraft.block.material.Material
-import net.minecraft.block.state.IBlockState
+import net.minecraft.block.state.{BlockFaceShape, IBlockState}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.particle.ParticleManager
 import net.minecraft.entity.Entity
@@ -104,13 +104,13 @@ class BlockMultipart extends Block(Material.ROCK)
             case tile => tile.rayTraceAll(start, end)
         }
 
-    override def isBlockSolid(world:IBlockAccess, pos:BlockPos, side:EnumFacing) =
+    override def getBlockFaceShape(world:IBlockAccess, state: IBlockState, pos:BlockPos, side:EnumFacing) =
         getTile(world, pos) match {
-            case null => false
-            case tile => tile.isSolid(side.getIndex)
+            case null => BlockFaceShape.UNDEFINED
+            case tile =>  if (tile.isSolid(side.getIndex)) BlockFaceShape.SOLID else BlockFaceShape.UNDEFINED
         }
 
-    override def isSideSolid(state:IBlockState, world:IBlockAccess, pos:BlockPos, side:EnumFacing) = isBlockSolid(world, pos, side)
+    override def isSideSolid(state:IBlockState, world:IBlockAccess, pos:BlockPos, side:EnumFacing) = getBlockFaceShape(world, state, pos, side) == BlockFaceShape.SOLID
 
     override def canPlaceTorchOnTop(state:IBlockState, world:IBlockAccess, pos:BlockPos) =
         getTile(world, pos) match {
@@ -175,7 +175,7 @@ class BlockMultipart extends Block(Material.ROCK)
     override def getPickBlock(state:IBlockState, target:RayTraceResult, world:World, pos:BlockPos, player:EntityPlayer):ItemStack =
         (getTile(world, pos), retracePart(world, pos, player)) match {
             case (tile:TileMultipart, hit:PartRayTraceResult) => tile.getPickBlock(hit)
-            case _ => null
+            case _ => ItemStack.EMPTY
         }
 
     override def onBlockActivated(world:World, pos:BlockPos, state:IBlockState, player:EntityPlayer, hand:EnumHand, side:EnumFacing, hitX:Float, hitY:Float, hitZ:Float):Boolean =
