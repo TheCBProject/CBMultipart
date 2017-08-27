@@ -20,8 +20,8 @@ public class DuplicateValueRegistry extends RegistryNamespaced {
         this.wrapped = wrapped;
         {//Set the underlying maps of our instance to those of the wrapped instance, just in case people are dumb and access the field directly.
             ObfMapping registryObjects = new ObfMapping("net/minecraft/util/registry/RegistrySimple", "field_82596_a");
-            ObfMapping underlyingIMap = new ObfMapping("net/minecraft/util/registry/RegistrySimple", "field_148759_a");
-            ObfMapping iObjectReg = new ObfMapping("net/minecraft/util/registry/RegistrySimple", "field_148758_b");
+            ObfMapping underlyingIMap = new ObfMapping("net/minecraft/util/registry/RegistryNamespaced", "field_148759_a");
+            ObfMapping iObjectReg = new ObfMapping("net/minecraft/util/registry/RegistryNamespaced", "field_148758_b");
             ReflectionManager.setField(registryObjects, this, ReflectionManager.getField(registryObjects, wrapped, Map.class));
             ReflectionManager.setField(underlyingIMap, this, ReflectionManager.getField(underlyingIMap, wrapped, IntIdentityHashBiMap.class));
             ReflectionManager.setField(iObjectReg, this, ReflectionManager.getField(iObjectReg, wrapped, Map.class));
