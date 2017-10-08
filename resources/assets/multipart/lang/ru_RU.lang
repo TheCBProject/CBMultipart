@@ -1,10 +1,10 @@
 microblock.missing=Следующие микроблоки не установлены на этом клиенте: %s
 multipart.missing=Следующие микроблоки из модов не установлены на этом клиенте: %s
 
-item.microblock:saw_stone.name=Каменная пила
-item.microblock:saw_iron.name=Железная пила
-item.microblock:saw_diamond.name=Алмазная пила
-item.microblock:stone_rod.name=Каменная палка
+item.microblockcbe:saw_stone.name=Каменная пила
+item.microblockcbe:saw_iron.name=Железная пила
+item.microblockcbe:saw_diamond.name=Алмазная пила
+item.microblockcbe:stone_rod.name=Каменная палка
 
 mcr_face.1.name=Крышка из %s
 mcr_face.1.subset=Крышка

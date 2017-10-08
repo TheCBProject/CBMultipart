@@ -1,10 +1,10 @@
 microblock.missing=Následující mikrobloky nejsou nainstalované v tomto klientovi: %s
 multipart.missing=Následující multičástice nejsou nainstalované v tomto klientovi: %s
 
-item.microblock:saw_stone.name=Kamenná pila
-item.microblock:saw_iron.name=Železná pila
-item.microblock:saw_diamond.name=Diamantová pila
-item.microblock:stone_rod.name=Kamenná tyč
+item.microblockcbe:saw_stone.name=Kamenná pila
+item.microblockcbe:saw_iron.name=Železná pila
+item.microblockcbe:saw_diamond.name=Diamantová pila
+item.microblockcbe:stone_rod.name=Kamenná tyč
 
 mcr_face.1.name=%s kryt
 mcr_face.1.subset=Kryt

@@ -1,10 +1,10 @@
 microblock.missing=Os seguintes ´microblocks´ não estão instalados: %s
 multipart.missing=As seguintes ´multiparts´ não estão instaladas: %s
 
-item.microblock:saw_stone.name=Serra de Pedra
-item.microblock:saw_iron.name=Serra de Ferro
-item.microblock:saw_diamond.name=Serra de Diamante
-item.microblock:stone_rod.name=Vara de Pedra
+item.microblockcbe:saw_stone.name=Serra de Pedra
+item.microblockcbe:saw_iron.name=Serra de Ferro
+item.microblockcbe:saw_diamond.name=Serra de Diamante
+item.microblockcbe:stone_rod.name=Vara de Pedra
 
 mcr_face.1.name=Cobertura de %s
 mcr_face.1.subset=Cobertura

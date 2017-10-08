@@ -3,8 +3,10 @@ package codechicken.microblock.handler
 import codechicken.lib.render.RenderUtils
 import codechicken.microblock.{ItemMicroPartRenderer, MicroMaterialRegistry}
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.item.crafting.IRecipe
 import net.minecraft.util.math.RayTraceResult
 import net.minecraftforge.client.event.{DrawBlockHighlightEvent, TextureStitchEvent}
+import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.eventhandler.{EventPriority, SubscribeEvent}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
@@ -32,5 +34,10 @@ object MicroblockEventHandler
                     event.setCanceled(true)
             GlStateManager.popMatrix()
         }
+    }
+
+    @SubscribeEvent
+    def registerRecipes(event:RegistryEvent.Register[IRecipe]) {
+        MicroblockProxy.registerRecipes(event.getRegistry)
     }
 }

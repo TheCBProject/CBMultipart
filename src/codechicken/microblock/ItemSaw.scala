@@ -9,6 +9,7 @@ import codechicken.lib.vec.uv.UVTranslation
 import codechicken.lib.vec.SwapYZ
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
+import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.item.{Item, ItemStack}
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.common.model.IModelState
@@ -37,7 +38,7 @@ class ItemSaw(sawTag:ConfigTag, val harvestLevel:Int) extends Item with Saw
             setMaxDamage(maxDamage)
         setNoRepair()
         setMaxStackSize(1)
-        setCreativeTab(net.minecraft.creativetab.CreativeTabs.TOOLS)
+        setCreativeTab(CreativeTabs.TOOLS)
     }
 
     override def hasContainerItem = true

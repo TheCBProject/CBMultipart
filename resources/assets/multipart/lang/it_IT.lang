@@ -1,10 +1,10 @@
 microblock.missing=I seguenti microblock non sono installati su questo client: %s
 multipart.missing=I seguenti multipart non sono installati su questo client: %s
 
-item.microblock:saw_stone.name=Seghetto di pietra
-item.microblock:saw_iron.name=Seghetto di ferro
-item.microblock:saw_diamond.name=Seghetto di diamante
-item.microblock:stone_rod.name=Stecca di pietra
+item.microblockcbe:saw_stone.name=Seghetto di pietra
+item.microblockcbe:saw_iron.name=Seghetto di ferro
+item.microblockcbe:saw_diamond.name=Seghetto di diamante
+item.microblockcbe:stone_rod.name=Stecca di pietra
 
 mcr_face.1.name=Copertura di %s
 mcr_face.1.subset=Copertura

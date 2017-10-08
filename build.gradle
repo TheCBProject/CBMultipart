@@ -1,14 +1,14 @@
 buildscript {
-    repositories {
-        jcenter()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
-    }
+	repositories {
+		jcenter()
+		maven {
+			name = "forge"
+			url = "http://files.minecraftforge.net/maven"
+		}
+	}
+	dependencies {
+		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+	}
 }
 
 apply plugin: 'scala'
@@ -25,146 +25,162 @@ sourceCompatibility = "1.8"
 ext.configFile = file "build.properties"
 
 configFile.withReader {
-    // Load config.  It shall from now be referenced as simply config or project.config
-    def prop = new Properties()
-    prop.load(it)
-    project.ext.config = new ConfigSlurper().parse prop
+	// Load config.  It shall from now be referenced as simply config or project.config
+	def prop = new Properties()
+	prop.load(it)
+	project.ext.config = new ConfigSlurper().parse prop
+}
+
+configurations {
+	pack
+	compile {
+		extendsFrom pack
+	}
 }
 
 repositories {
-    maven {
-        name = "chickenbones"
-        url = "http://chickenbones.net/maven"
-    }
-    maven {
-        name = "JEI Maven."
-        url = "http://dvs1.progwml6.com/files/maven"
-    }
+	maven {
+		name = "chickenbones"
+		url = "http://chickenbones.net/maven"
+	}
+	maven {
+		name = "JEI Maven."
+		url = "http://dvs1.progwml6.com/files/maven"
+	}
 }
 
 dependencies {
-    compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
+	compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
+	pack "codechicken:ChickenASM:${config.mc_version}-${config.cc_asm_version}"
 }
 
-version =  "${project.config.mod_version}." + System.getenv("BUILD_NUMBER") ?: "1"
+version = "${project.config.mod_version}." + System.getenv("BUILD_NUMBER") ?: "1"
 
-println  config.mc_version + "-" + config.forge_version
+println config.mc_version + "-" + config.forge_version
 // Setup the forge minecraft plugin data. Specify the preferred forge/minecraft version here
 minecraft {
-    version = config.mc_version + "-" + config.forge_version
-    mappings = config.mappings
-    runDir = "run"
-    makeObfSourceJar = false
+	version = config.mc_version + "-" + config.forge_version
+	mappings = config.mappings
+	runDir = "run"
+	makeObfSourceJar = false
 }
 
 sourceSets {
-    main {
-        def root = project.projectDir
-        scala {
-            srcDir new File(root, "src")
-        }
-        resources {
-            srcDir new File(root, "resources")
-        }
-    }
+	main {
+		def root = project.projectDir
+		scala {
+			srcDir new File(root, "src")
+		}
+		resources {
+			srcDir new File(root, "resources")
+		}
+	}
 }
 processResources {
-    //redo task if any of these properties change
-    inputs.property "version", project.version
-    inputs.property "mc_version", config.mc_version
-    inputs.property "ccl_version", config.ccl_version
+	//redo task if any of these properties change
+	inputs.property "version", project.version
+	inputs.property "mc_version", config.mc_version
+	inputs.property "ccl_version", config.ccl_version
 
-    // Replace properties in info files
-    from(sourceSets.main.resources.srcDirs) {
-        include '*.info'
-        expand 'version':project.version,'mc_version':config.mc_version,'ccl_version':config.ccl_version
-    }
-    // Copy everything else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'assets/**/*.*'
-    }
+	// Replace properties in info files
+	from(sourceSets.main.resources.srcDirs) {
+		include '*.info'
+		expand 'version': project.version, 'mc_version': config.mc_version, 'ccl_version': config.ccl_version
+	}
+	// Copy everything else
+	from(sourceSets.main.resources.srcDirs) {
+		include 'assets/**/*.*'
+	}
 }
 
 version = "${project.minecraft.version}-${project.version}"
 
+def commonManifest = {
+	attributes 'ContainedDeps': "ChickenASM-${config.mc_version}-${config.cc_asm_version}.jar"
+}
+
 jar {
-    classifier = 'universal'
+	classifier = 'universal'
+	manifest commonManifest
+	from configurations.pack
 }
 
 task srcJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
+	from sourceSets.main.allSource
+	classifier = 'sources'
 }
 
 task deobfJar(type: Jar) {
-    from sourceSets.main.output
-    classifier = 'deobf'
+	classifier = 'deobf'
+	manifest commonManifest
+	from sourceSets.main.output
+	from configurations.pack
 }
 
 
 task signJar(type: SignJar, dependsOn: reobfJar) {
-    onlyIf { // Skip the task if our secret data isn't available
-        project.hasProperty('keyStore')
-    }
+	onlyIf { // Skip the task if our secret data isn't available
+		project.hasProperty('keyStore')
+	}
 
-    if(project.hasProperty('keyStore')) {
-        keyStore = project.keyStore // This needs to be a path to the keystore file
-        alias = project.keyStoreAlias
-        storePass = project.keyStorePass
-        keyPass = project.keyStoreKeyPass
-        inputFile = jar.archivePath
-        outputFile = jar.archivePath
-    }
+	if (project.hasProperty('keyStore')) {
+		keyStore = project.keyStore // This needs to be a path to the keystore file
+		alias = project.keyStoreAlias
+		storePass = project.keyStorePass
+		keyPass = project.keyStoreKeyPass
+		inputFile = jar.archivePath
+		outputFile = jar.archivePath
+	}
 }
 
 build.dependsOn signJar
 
 // Tell the artifact system about our extra jars
 artifacts {
-    archives srcJar, deobfJar
+	archives srcJar, deobfJar
 }
 
 // Configure an upload task.
 uploadArchives {
-    repositories {
-        mavenDeployer {
-            if (project.hasProperty("local_maven")) {
-                repository(url: "file://${local_maven}")
-                pom {
-                    groupId = project.group
-                    version = project.version
-                    artifactId = project.archivesBaseName
-                    project {
-                        name project.archivesBaseName
-                        packaging 'jar'
-                        description 'ForgeMultipart'
-                        url 'https://github.com/TheCBProject/ForgeMultipart'
-                        scm {
-                            url 'https://github.com/TheCBProject/ForgeMultipart'
-                            connection 'scm:git:git@github.com:TheCBProject/ForgeMultipart.git'
-                            developerConnection 'scm:git:git@github.com:TheCBProject/ForgeMultipart.git'
-                        }
-                        issueManagement {
-                            system 'github'
-                            url 'https://github.com/TheCBProject/ForgeMultipart/issues'
-                        }
-                        licenses {
-                            license {
-                                name 'GNU Lesser Public License (GPL), Version 2.1'
-                                url 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt'
-                                distribution 'repo'
-                            }
-                        }
-                        developers {
-                            developer {
-                                id 'chicken-bones'
-                                name 'chicken-bones'
-                                roles { role 'developer' }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+	repositories {
+		mavenDeployer {
+			if (project.hasProperty("local_maven")) {
+				repository(url: "file://${local_maven}")
+				pom {
+					groupId = project.group
+					version = project.version
+					artifactId = project.archivesBaseName
+					project {
+						name project.archivesBaseName
+						packaging 'jar'
+						description 'ForgeMultipart'
+						url 'https://github.com/TheCBProject/ForgeMultipart'
+						scm {
+							url 'https://github.com/TheCBProject/ForgeMultipart'
+							connection 'scm:git:git@github.com:TheCBProject/ForgeMultipart.git'
+							developerConnection 'scm:git:git@github.com:TheCBProject/ForgeMultipart.git'
+						}
+						issueManagement {
+							system 'github'
+							url 'https://github.com/TheCBProject/ForgeMultipart/issues'
+						}
+						licenses {
+							license {
+								name 'GNU Lesser Public License (GPL), Version 2.1'
+								url 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt'
+								distribution 'repo'
+							}
+						}
+						developers {
+							developer {
+								id 'chicken-bones'
+								name 'chicken-bones'
+								roles { role 'developer' }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }

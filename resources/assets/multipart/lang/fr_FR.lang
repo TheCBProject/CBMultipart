@@ -1,10 +1,10 @@
 microblock.missing=The following microblocks are not installed on this client: %s
 multipart.missing=The following multiparts are not installed on this client: %s
 
-item.microblock:saw_stone.name=Scie en pierre
-item.microblock:saw_iron.name=Scie en fer
-item.microblock:saw_diamond.name=Scie en diamant
-item.microblock:stone_rod.name=Bâtons en pierre
+item.microblockcbe:saw_stone.name=Scie en pierre
+item.microblockcbe:saw_iron.name=Scie en fer
+item.microblockcbe:saw_diamond.name=Scie en diamant
+item.microblockcbe:stone_rod.name=Bâtons en pierre
 
 mcr_face.1.name=Couvercle de %s
 mcr_face.1.subset=Couvercle

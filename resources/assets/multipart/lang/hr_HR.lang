@@ -1,10 +1,10 @@
 microblock.missing=Sljedeći mikroblokovi nisu instalirani na ovom klijentu: %s
 multipart.missing=Sljedeći višedjelni blokovi nisu instalirani na ovom klijentu: %s
 
-item.microblock:saw_stone.name=Kamena Pila
-item.microblock:saw_iron.name=Željezna Pila
-item.microblock:saw_diamond.name=Dijamantna Pila
-item.microblock:stone_rod.name=Kameni Štap
+item.microblockcbe:saw_stone.name=Kamena Pila
+item.microblockcbe:saw_iron.name=Željezna Pila
+item.microblockcbe:saw_diamond.name=Dijamantna Pila
+item.microblockcbe:stone_rod.name=Kameni Štap
 
 mcr_face.1.name=%si Pokrivač
 mcr_face.1.subset=Pokrivač

@@ -1,10 +1,10 @@
 microblock.missing=The following microblocks are not installed on this client: %s
 multipart.missing=The following multiparts are not installed on this client: %s
 
-item.microblock:saw_stone.name=石鋸子
-item.microblock:saw_iron.name=鐵鋸子
-item.microblock:saw_diamond.name=鑽石鋸子
-item.microblock:stone_rod.name=石棍
+item.microblockcbe:saw_stone.name=石鋸子
+item.microblockcbe:saw_iron.name=鐵鋸子
+item.microblockcbe:saw_diamond.name=鑽石鋸子
+item.microblockcbe:stone_rod.name=石棍
 
 mcr_face.1.name=%s 薄板
 mcr_face.1.subset=薄板

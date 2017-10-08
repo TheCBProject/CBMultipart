@@ -1,0 +1,25 @@
+{
+	"type" : "forge:ore_shaped",
+	"result" : {
+		"item" : "microblockcbe:saw_iron",
+		"data": 0
+	},
+	"pattern": [
+		"SRR",
+		"SBR"
+	],
+	"key": {
+		"S": {
+			"type": "forge:ore_dict",
+			"ore": "stickWood"
+		},
+		"R": {
+			"type": "forge:ore_dict",
+			"ore": "rodStone"
+		},
+		"B": {
+			"type": "forge:ore_dict",
+			"ore": "ingotIron"
+		}
+	}
+}

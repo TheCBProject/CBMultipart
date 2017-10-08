@@ -11,14 +11,16 @@ import codechicken.microblock._
 import codechicken.multipart.handler.MultipartProxy._
 import net.minecraft.client.renderer.ItemMeshDefinition
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
+import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.init.{Blocks, Items}
-import net.minecraft.item.crafting.CraftingManager
+import net.minecraft.item.crafting.{CraftingManager, IRecipe}
 import net.minecraft.item.{Item, ItemStack}
 import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.registry.{ForgeRegistries, GameRegistry}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import net.minecraftforge.oredict.{OreDictionary, ShapedOreRecipe}
+import net.minecraftforge.registries.IForgeRegistry
 import org.apache.logging.log4j.{LogManager, Logger}
 
 import scala.collection.mutable
@@ -46,7 +48,7 @@ class MicroblockProxy_serverImpl
         sawStone = createSaw(config, "saw_stone", 1)
         sawIron = createSaw(config, "saw_iron", 2)
         sawDiamond = createSaw(config, "saw_diamond", 3)
-        stoneRod = new Item().setUnlocalizedName("microblock:stone_rod")
+        stoneRod = new Item().setUnlocalizedName("microblockcbe:stone_rod").setCreativeTab(CreativeTabs.MATERIALS)
         ForgeRegistries.ITEMS.register(stoneRod.setRegistryName("stone_rod"))
 
         OreDictionary.registerOre("rodStone", stoneRod)
@@ -59,7 +61,7 @@ class MicroblockProxy_serverImpl
     protected var saws = mutable.MutableList[Item]()
     def createSaw(config: ConfigFile, name: String, strength: Int) = {
         val saw = new ItemSaw(config.getTag(name).useBraces(), strength)
-            .setUnlocalizedName("microblock:" + name)
+            .setUnlocalizedName("microblockcbe:" + name)
         ForgeRegistries.ITEMS.register(saw.setRegistryName(name))
         saws+=saw
         saw
@@ -73,6 +75,10 @@ class MicroblockProxy_serverImpl
 //                's': Character, "stickWood",
 //                'r': Character, "rodStone",
 //                'b': Character, blade))
+    }
+
+    def registerRecipes(registry: IForgeRegistry[IRecipe]) {
+        registry.register(MicroRecipe.setRegistryName("micro_recipe"))
     }
 
     def init() {

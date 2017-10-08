@@ -1,10 +1,10 @@
 microblock.missing=Następujące mikrobloki nie są zainstalowane na tym kliencie klienta: %s
 multipart.missing=Następujące wieloczęści nie są zainstalowane na tym kliencie klienta: %s
 
-item.microblock:saw_stone.name=Kamienna piła
-item.microblock:saw_iron.name=Żelazna piła
-item.microblock:saw_diamond.name=Diamentowa piła
-item.microblock:stone_rod.name=Kamienna Rod
+item.microblockcbe:saw_stone.name=Kamienna piła
+item.microblockcbe:saw_iron.name=Żelazna piła
+item.microblockcbe:saw_diamond.name=Diamentowa piła
+item.microblockcbe:stone_rod.name=Kamienna Rod
 
 mcr_face.1.name=Pokrywka z %s
 mcr_face.1.subset=Pokrywka
