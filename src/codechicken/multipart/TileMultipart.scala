@@ -402,6 +402,8 @@ class TileMultipart extends TileEntity with IChunkLoadTile
         operate(_.onChunkLoad())
     }
 
+    override def setWorldCreate(worldIn: World) = setWorld(worldIn)
+
     def onMoved()
     {
         operate(_.onMoved())

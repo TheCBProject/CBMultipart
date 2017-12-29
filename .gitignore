@@ -1,2 +1,26 @@
-/build/build
-/build/.gradle
+#Exclude all the things!
+/*
+
+
+#Add back the things that matter.
+# Gradle stuff
+!gradle/
+!gradlew
+!gradlew.bat
+!build.gradle
+!build.properties
+!settings.gradle
+
+# Other Files.
+!LICENSE.txt
+!README.md
+!curse_upload.json
+!name_textures.py
+
+# Include git important files
+!.gitmodules
+!.gitignore
+
+# Include Important Folders
+!src/
+!libs/
