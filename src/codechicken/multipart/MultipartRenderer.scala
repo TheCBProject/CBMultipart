@@ -69,6 +69,8 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] 
 
         //Reset MC Render state
         RenderHelper.enableStandardItemLighting()
+        GlStateManager.enableCull()
+        GlStateManager.disableBlend()
     }
 
     override def renderTileEntityFast(tile:TileMultipartClient, x:Double, y:Double, z:Double, frame:Float, destroyStage:Int, alpha: Float, buffer:BufferBuilder)
