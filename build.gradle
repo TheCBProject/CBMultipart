@@ -65,17 +65,6 @@ minecraft {
 	makeObfSourceJar = false
 }
 
-sourceSets {
-	main {
-		def root = project.projectDir
-		scala {
-			srcDir new File(root, "src")
-		}
-		resources {
-			srcDir new File(root, "resources")
-		}
-	}
-}
 processResources {
 	//redo task if any of these properties change
 	inputs.property "version", project.version
@@ -134,6 +123,8 @@ task signJar(type: SignJar, dependsOn: reobfJar) {
 }
 
 build.dependsOn signJar
+
+tasks.withType(ScalaCompile) { scalaCompileOptions.additionalParameters = ["-Xexperimental"] }
 
 // Tell the artifact system about our extra jars
 artifacts {
