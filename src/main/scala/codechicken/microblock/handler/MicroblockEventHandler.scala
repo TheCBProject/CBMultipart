@@ -10,34 +10,31 @@ import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.eventhandler.{EventPriority, SubscribeEvent}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
-object MicroblockEventHandler
-{
+object MicroblockEventHandler {
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
-    def postTextureStitch(event:TextureStitchEvent.Post)
-    {
+    def postTextureStitch(event: TextureStitchEvent.Post) {
         MicroMaterialRegistry.markIconReload()
     }
 
-    @SubscribeEvent (priority = EventPriority.HIGH)
+    @SubscribeEvent(priority = EventPriority.HIGH)
     @SideOnly(Side.CLIENT)
-    def drawBlockHighlight(event:DrawBlockHighlightEvent)
-    {
+    def drawBlockHighlight(event: DrawBlockHighlightEvent) {
         val currentItem = event.getPlayer.getHeldItemMainhand
 
-        if(!currentItem.isEmpty && currentItem.getItem == MicroblockProxy.itemMicro &&
-                event.getTarget != null && event.getTarget.typeOfHit == RayTraceResult.Type.BLOCK)
-        {
+        if (!currentItem.isEmpty && currentItem.getItem == MicroblockProxy.itemMicro &&
+            event.getTarget != null && event.getTarget.typeOfHit == RayTraceResult.Type.BLOCK) {
             GlStateManager.pushMatrix()
-                RenderUtils.translateToWorldCoords(event.getPlayer, event.getPartialTicks)
-                if(ItemMicroPartRenderer.renderHighlight(event.getPlayer, currentItem, event.getTarget))
-                    event.setCanceled(true)
+            RenderUtils.translateToWorldCoords(event.getPlayer, event.getPartialTicks)
+            if (ItemMicroPartRenderer.renderHighlight(event.getPlayer, currentItem, event.getTarget)) {
+                event.setCanceled(true)
+            }
             GlStateManager.popMatrix()
         }
     }
 
     @SubscribeEvent
-    def registerRecipes(event:RegistryEvent.Register[IRecipe]) {
+    def registerRecipes(event: RegistryEvent.Register[IRecipe]) {
         MicroblockProxy.registerRecipes(event.getRegistry)
     }
 }

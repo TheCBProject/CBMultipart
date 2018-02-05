@@ -15,12 +15,10 @@ import scala.collection.mutable.{HashMap => MHashMap}
 /**
  * A class that maintains a map server<->client of which players are holding the control (or placement modifier key) much like sneaking.
  */
-object ControlKeyModifer
-{
-    implicit def playerControlValue(p:EntityPlayer):ControlKeyValue = new ControlKeyValue(p)
+object ControlKeyModifer {
+    implicit def playerControlValue(p: EntityPlayer): ControlKeyValue = new ControlKeyValue(p)
 
-    class ControlKeyValue(p:EntityPlayer)
-    {
+    class ControlKeyValue(p: EntityPlayer) {
         def isControlDown = map(p)
     }
 
@@ -29,25 +27,25 @@ object ControlKeyModifer
     /**
      * Implicit static for Java users.
      */
-    def isControlDown(p:EntityPlayer) = p.isControlDown
+    def isControlDown(p: EntityPlayer) = p.isControlDown
 }
 
 /**
  * Key Handler implementation
  */
-object ControlKeyHandler extends KeyBinding("key.control", Keyboard.KEY_LCONTROL, "key.categories.gameplay")
-{
+object ControlKeyHandler extends KeyBinding("key.control", Keyboard.KEY_LCONTROL, "key.categories.gameplay") {
+
     import ControlKeyModifer._
+
     var wasPressed = false
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
-    def tick(event:ClientTickEvent) {
+    def tick(event: ClientTickEvent) {
         val pressed = isKeyDown
-        if(pressed != wasPressed) {
+        if (pressed != wasPressed) {
             wasPressed = pressed
-            if(Minecraft.getMinecraft.getConnection != null)
-            {
+            if (Minecraft.getMinecraft.getConnection != null) {
                 map.put(Minecraft.getMinecraft.player, pressed)
                 val packet = new PacketCustom(MultipartCPH.channel, 1)
                 packet.writeBoolean(pressed)

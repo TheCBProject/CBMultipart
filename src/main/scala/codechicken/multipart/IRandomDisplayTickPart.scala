@@ -7,10 +7,9 @@ import java.util.Random
  *
  * Marker interface for TRandomDisplayTickTile
  */
-trait IRandomDisplayTickPart
-{
+trait IRandomDisplayTickPart {
     /**
      * Called on a random display tick.
      */
-    def randomDisplayTick(random:Random)
+    def randomDisplayTick(random: Random)
 }

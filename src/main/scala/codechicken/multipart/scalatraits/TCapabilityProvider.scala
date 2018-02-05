@@ -12,8 +12,8 @@ import net.minecraftforge.items.{CapabilityItemHandler, IItemHandler}
 import scala.collection.JavaConversions._
 
 /**
-  * Created by covers1624 on 16/10/2017.
-  */
+ * Created by covers1624 on 16/10/2017.
+ */
 trait TCapabilityProvider extends TileMultipart {
 
     val ITEM_CAP = CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
@@ -26,7 +26,7 @@ trait TCapabilityProvider extends TileMultipart {
         super.copyFrom(that)
         that match {
             case other: TCapabilityProvider =>
-                 caps = other.caps
+                caps = other.caps
                 rebuildSlotMap()
             case _ =>
         }
@@ -102,8 +102,8 @@ trait TCapabilityProvider extends TileMultipart {
 }
 
 /**
-  * To handle scala Mixin compiler issues with generics.
-  */
+ * To handle scala Mixin compiler issues with generics.
+ */
 class JCapabilityProvider extends TileMultipart with TCapabilityProvider {
 }
 

@@ -22,16 +22,13 @@ import net.minecraft.world.chunk.Chunk
 import scala.collection.JavaConversions._
 import scala.collection.mutable.{HashMap => MHashMap, Map => MMap, MultiMap => MMultiMap, Set => MSet}
 
-class MultipartPH
-{
+class MultipartPH {
     val channel = MultipartMod
     val registryChannel = "ForgeMultipart"
 }
 
-object MultipartCPH extends MultipartPH with IClientPacketHandler
-{
-    def handlePacket(packet: PacketCustom, mc: Minecraft, netHandler:INetHandlerPlayClient)
-    {
+object MultipartCPH extends MultipartPH with IClientPacketHandler {
+    def handlePacket(packet: PacketCustom, mc: Minecraft, netHandler: INetHandlerPlayClient) {
         try {
             packet.getType match {
                 case 1 => handlePartRegistration(packet, netHandler)
@@ -40,28 +37,26 @@ object MultipartCPH extends MultipartPH with IClientPacketHandler
             }
         }
         catch {
-            case e:RuntimeException if e.getMessage != null && e.getMessage.startsWith("DC: ") =>
+            case e: RuntimeException if e.getMessage != null && e.getMessage.startsWith("DC: ") =>
                 netHandler.handleDisconnect(new SPacketDisconnect(new TextComponentString(e.getMessage.substring(4))))
         }
     }
 
-    def handlePartRegistration(packet:PacketCustom, netHandler: INetHandlerPlayClient)
-    {
+    def handlePartRegistration(packet: PacketCustom, netHandler: INetHandlerPlayClient) {
         val missing = MultiPartRegistry.readIDMap(packet)
-        if (missing.nonEmpty)
+        if (missing.nonEmpty) {
             netHandler.handleDisconnect(new SPacketDisconnect(new TextComponentTranslation("multipart.missing", missing.mkString(", "))))
+        }
     }
 
-    def handleCompressedTileDesc(packet:PacketCustom, world:World)
-    {
+    def handleCompressedTileDesc(packet: PacketCustom, world: World) {
         val cc = new ChunkPos(packet.readInt, packet.readInt)
         val num = packet.readUShort
         for (i <- 0 until num)
             TileMultipart.handleDescPacket(world, indexInChunk(cc, packet.readShort), packet)
     }
 
-    def handleCompressedTileData(packet:PacketCustom, world: World)
-    {
+    def handleCompressedTileData(packet: PacketCustom, world: World) {
         var x = packet.readInt
         while (x != Int.MaxValue) {
             val pos = new BlockPos(x, packet.readInt, packet.readInt)
@@ -75,10 +70,9 @@ object MultipartCPH extends MultipartPH with IClientPacketHandler
     }
 }
 
-object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshakeHandler
-{
-    class MCByteStream(bout:ByteArrayOutputStream) extends MCDataOutputWrapper(new DataOutputStream(bout))
-    {
+object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshakeHandler {
+
+    class MCByteStream(bout: ByteArrayOutputStream) extends MCDataOutputWrapper(new DataOutputStream(bout)) {
         def getBytes = bout.toByteArray
     }
 
@@ -89,30 +83,29 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
     private val chunkWatchers = new MHashMap[Int, MSet[ChunkPos]] with MMultiMap[Int, ChunkPos]
     private val newWatchers = MMap[Int, JLinkedList[ChunkPos]]()
 
-    def handlePacket(packet: PacketCustom, sender: EntityPlayerMP, netHandler:INetHandlerPlayServer)
-    {
+    def handlePacket(packet: PacketCustom, sender: EntityPlayerMP, netHandler: INetHandlerPlayServer) {
         packet.getType match {
             case 1 => ControlKeyModifer.map.put(sender, packet.readBoolean)
         }
     }
 
-    def handshakeReceived(netHandler:NetHandlerPlayServer)
-    {
+    def handshakeReceived(netHandler: NetHandlerPlayServer) {
         val packet = new PacketCustom(registryChannel, 1)
         MultiPartRegistry.writeIDMap(packet)
         netHandler.sendPacket(packet.toPacket)
     }
 
-    def onWorldUnload(world: World)
-    {
-        if (!world.isRemote)
+    def onWorldUnload(world: World) {
+        if (!world.isRemote) {
             updateMap.remove(world)
+        }
     }
 
-    def getTileStream(world:World, pos: BlockPos) =
+    def getTileStream(world: World, pos: BlockPos) =
         updateMap.getOrElseUpdate(world, {
-            if (world.isRemote)
+            if (world.isRemote) {
                 throw new IllegalArgumentException("Cannot use MultipartSPH on a client world")
+            }
             MMap()
         }).getOrElseUpdate(pos, {
             val s = new MCByteStream(new ByteArrayOutputStream)
@@ -120,8 +113,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
             s
         })
 
-    def onTickEnd(players:Seq[EntityPlayerMP])
-    {
+    def onTickEnd(players: Seq[EntityPlayerMP]) {
         PacketScheduler.sendScheduled()
 
         for (p <- players if chunkWatchers.containsKey(p.getEntityId)) {
@@ -131,7 +123,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
                     val packet = new PacketCustom(channel, 3).compress()
 
                     var send = false
-                    for ((pos, stream) <- m if chunks(new ChunkPos(pos.getX>>4, pos.getZ>>4))) {
+                    for ((pos, stream) <- m if chunks(new ChunkPos(pos.getX >> 4, pos.getZ >> 4))) {
                         send = true
                         packet.writeArray(stream.getBytes)
                         packet.writeByte(255) //terminator
@@ -155,13 +147,11 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
         newWatchers.clear()
     }
 
-    def onChunkWatch(p:EntityPlayer, c:ChunkPos)
-    {
+    def onChunkWatch(p: EntityPlayer, c: ChunkPos) {
         newWatchers.getOrElseUpdate(p.getEntityId, new JLinkedList).add(c)
     }
 
-    def onChunkUnWatch(p:EntityPlayer, c:ChunkPos)
-    {
+    def onChunkUnWatch(p: EntityPlayer, c: ChunkPos) {
         newWatchers.get(p.getEntityId) match {
             case Some(chunks) => chunks.remove(c)
             case _ =>
@@ -169,8 +159,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
         chunkWatchers.removeBinding(p.getEntityId, c)
     }
 
-    def getDescPacket(chunk: Chunk, it:JIterator[TileEntity]):PacketCustom =
-    {
+    def getDescPacket(chunk: Chunk, it: JIterator[TileEntity]): PacketCustom = {
         val s = new MCByteStream(new ByteArrayOutputStream)
 
         var num = 0

@@ -17,162 +17,151 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-public class ButtonPart extends McSidedMetaPart implements IFaceRedstonePart
-{
-    public static BlockButton stoneButton = (BlockButton) Blocks.STONE_BUTTON;
-    public static BlockButton woodenButton = (BlockButton) Blocks.WOODEN_BUTTON;
+public class ButtonPart extends McSidedMetaPart implements IFaceRedstonePart {
 
-    public ButtonPart()
-    {
-        state = stoneButton.getDefaultState();
-    }
+	public static BlockButton stoneButton = (BlockButton) Blocks.STONE_BUTTON;
+	public static BlockButton woodenButton = (BlockButton) Blocks.WOODEN_BUTTON;
 
-    public ButtonPart(IBlockState state)
-    {
-        super(state);
-    }
+	public ButtonPart() {
+		state = stoneButton.getDefaultState();
+	}
 
-    @Override
-    public ResourceLocation getType()
-    {
-        return new ResourceLocation("minecraft:button");
-    }
+	public ButtonPart(IBlockState state) {
+		super(state);
+	}
 
-    @Override
-    public byte getMeta()
-    {
-        int m = getBlock().getMetaFromState(state);
-        if (sensitive()) m |= 1<<7;
-        return (byte) m;
-    }
+	@Override
+	public ResourceLocation getType() {
+		return new ResourceLocation("minecraft:button");
+	}
 
-    @Override
-    public void setMeta(byte meta)
-    {
-        state = ((meta&1<<7) != 0 ? woodenButton : stoneButton).getStateFromMeta(meta&0x7F);
-    }
+	@Override
+	public byte getMeta() {
+		int m = getBlock().getMetaFromState(state);
+		if (sensitive()) {
+			m |= 1 << 7;
+		}
+		return (byte) m;
+	}
 
-    @Override
-    public Block getBlock()
-    {
-        return sensitive() ? woodenButton : stoneButton;
-    }
+	@Override
+	public void setMeta(byte meta) {
+		state = ((meta & 1 << 7) != 0 ? woodenButton : stoneButton).getStateFromMeta(meta & 0x7F);
+	}
 
-    @Override
-    public int getSideFromState()
-    {
-        return state.getValue(BlockButton.FACING).getOpposite().ordinal();
-    }
+	@Override
+	public Block getBlock() {
+		return sensitive() ? woodenButton : stoneButton;
+	}
 
-    public int delay()
-    {
-        return sensitive() ? 30 : 20;
-    }
+	@Override
+	public int getSideFromState() {
+		return state.getValue(BlockButton.FACING).getOpposite().ordinal();
+	}
 
-    public boolean sensitive()
-    {
-        return state.getBlock() == woodenButton;
-    }
+	public int delay() {
+		return sensitive() ? 30 : 20;
+	}
 
-    @Override
-    public void setStateOnPlacement(World world, BlockPos pos, EnumFacing facing, Vec3d hitVec, EntityLivingBase placer, ItemStack held)
-    {
-        Block heldBlock = Block.getBlockFromItem(held.getItem());
-        if (!(heldBlock instanceof  BlockButton))
-            throw new RuntimeException("Invalid placement of Button Part");
-        state = heldBlock.getStateForPlacement(world, pos, facing, (float)hitVec.x, (float)hitVec.y, (float)hitVec.z, 0, placer);
-    }
+	public boolean sensitive() {
+		return state.getBlock() == woodenButton;
+	}
 
-    @Override
-    public boolean activate(EntityPlayer player, CuboidRayTraceResult hit, ItemStack item, EnumHand hand)
-    {
-        if(pressed())
-            return false;
+	@Override
+	public void setStateOnPlacement(World world, BlockPos pos, EnumFacing facing, Vec3d hitVec, EntityLivingBase placer, ItemStack held) {
+		Block heldBlock = Block.getBlockFromItem(held.getItem());
+		if (!(heldBlock instanceof BlockButton)) {
+			throw new RuntimeException("Invalid placement of Button Part");
+		}
+		state = heldBlock.getStateForPlacement(world, pos, facing, (float) hitVec.x, (float) hitVec.y, (float) hitVec.z, 0, placer);
+	}
 
-        if(!world().isRemote)
-            toggle();
+	@Override
+	public boolean activate(EntityPlayer player, CuboidRayTraceResult hit, ItemStack item, EnumHand hand) {
+		if (pressed()) {
+			return false;
+		}
 
-        return true;
-    }
+		if (!world().isRemote) {
+			toggle();
+		}
 
-    @Override
-    public void scheduledTick()
-    {
-        if(pressed())
-            updateState();
-    }
+		return true;
+	}
 
-    public boolean pressed()
-    {
-        return state.getValue(BlockButton.POWERED);
-    }
+	@Override
+	public void scheduledTick() {
+		if (pressed()) {
+			updateState();
+		}
+	}
 
-    @Override
-    public void onEntityCollision(Entity entity)
-    {
-        if(!pressed() && !world().isRemote && entity instanceof EntityArrow)
-            updateState();
-    }
+	public boolean pressed() {
+		return state.getValue(BlockButton.POWERED);
+	}
 
-    private void toggle()
-    {
-        state = state.cycleProperty(BlockButton.POWERED);
+	@Override
+	public void onEntityCollision(Entity entity) {
+		if (!pressed() && !world().isRemote && entity instanceof EntityArrow) {
+			updateState();
+		}
+	}
 
-        boolean on = pressed();
+	private void toggle() {
+		state = state.cycleProperty(BlockButton.POWERED);
 
-        SoundEvent sound = sensitive() ? (on ? SoundEvents.BLOCK_WOOD_BUTTON_CLICK_ON : SoundEvents.BLOCK_WOOD_BUTTON_CLICK_OFF) :
-                (on ? SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON : SoundEvents.BLOCK_STONE_BUTTON_CLICK_OFF);
+		boolean on = pressed();
 
-        world().playSound(null, pos(), sound, SoundCategory.BLOCKS, 0.3F, on ? 0.6F : 0.5F);
+		SoundEvent sound = sensitive() ? (on ? SoundEvents.BLOCK_WOOD_BUTTON_CLICK_ON : SoundEvents.BLOCK_WOOD_BUTTON_CLICK_OFF) : (on ? SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON : SoundEvents.BLOCK_STONE_BUTTON_CLICK_OFF);
 
-        if(on)
-            scheduleTick(delay());
+		world().playSound(null, pos(), sound, SoundCategory.BLOCKS, 0.3F, on ? 0.6F : 0.5F);
 
-        sendDescUpdate();
-        tile().markDirty();
-        tile().notifyPartChange(this);
-        tile().notifyNeighborChange(getSideFromState());
-    }
+		if (on) {
+			scheduleTick(delay());
+		}
 
-    private void updateState()
-    {
-        boolean arrows = sensitive() && !world().getEntitiesWithinAABB(EntityArrow.class,
-                getBounds().add(pos()).aabb()).isEmpty();
-        boolean pressed = pressed();
+		sendDescUpdate();
+		tile().markDirty();
+		tile().notifyPartChange(this);
+		tile().notifyNeighborChange(getSideFromState());
+	}
 
-        if(arrows != pressed)
-            toggle();
-        if(arrows && pressed)
-            scheduleTick(delay());
-    }
+	private void updateState() {
+		boolean arrows = sensitive() && !world().getEntitiesWithinAABB(EntityArrow.class, getBounds().add(pos()).aabb()).isEmpty();
+		boolean pressed = pressed();
 
-    @Override
-    public void onRemoved()
-    {
-        if(pressed())
-            tile().notifyNeighborChange(getSideFromState());
-    }
+		if (arrows != pressed) {
+			toggle();
+		}
+		if (arrows && pressed) {
+			scheduleTick(delay());
+		}
+	}
 
-    @Override
-    public int weakPowerLevel(int side)
-    {
-        return pressed() ? 15 : 0;
-    }
+	@Override
+	public void onRemoved() {
+		if (pressed()) {
+			tile().notifyNeighborChange(getSideFromState());
+		}
+	}
 
-    @Override
-    public int strongPowerLevel(int side)
-    {
-        return pressed() && side == getSideFromState() ? 15 : 0;
-    }
+	@Override
+	public int weakPowerLevel(int side) {
+		return pressed() ? 15 : 0;
+	}
 
-    @Override
-    public boolean canConnectRedstone(int side)
-    {
-        return true;
-    }
+	@Override
+	public int strongPowerLevel(int side) {
+		return pressed() && side == getSideFromState() ? 15 : 0;
+	}
 
-    @Override
-    public int getFace() {
-        return getSideFromState();
-    }
+	@Override
+	public boolean canConnectRedstone(int side) {
+		return true;
+	}
+
+	@Override
+	public int getFace() {
+		return getSideFromState();
+	}
 }

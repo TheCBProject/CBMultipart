@@ -23,8 +23,7 @@ import scala.collection.mutable.{Map => MMap}
  *
  * There are several mixin traits that come with the API included in the scalatraits package. TPartialOcclusionTile is defined as class instead of trait to give an example for Java programmers.
  */
-object MultipartGenerator extends ScratchBitSet
-{
+object MultipartGenerator extends ScratchBitSet {
     private val tileTraitMap = MMap[Class[_], JBitSet]()
     private val interfaceTraitMap_c = MMap[String, String]()
     private val interfaceTraitMap_s = MMap[String, String]()
@@ -32,16 +31,17 @@ object MultipartGenerator extends ScratchBitSet
     private val partTraitMap_s = MMap[Class[_], JBitSet]()
     private val clientTraitId = MultipartMixinFactory.registerTrait(classOf[TileMultipartClient])
 
-    private def partTraitMap(client:Boolean) = if(client) partTraitMap_c else partTraitMap_s
-    private def interfaceTraitMap(client:Boolean) = if(client) interfaceTraitMap_c else interfaceTraitMap_s
+    private def partTraitMap(client: Boolean) = if (client) partTraitMap_c else partTraitMap_s
 
-    private def traitsForPart(part:TMultiPart, client:Boolean) =
+    private def interfaceTraitMap(client: Boolean) = if (client) interfaceTraitMap_c else interfaceTraitMap_s
+
+    private def traitsForPart(part: TMultiPart, client: Boolean) =
         partTraitMap(client).getOrElseUpdate(part.getClass, {
-            def heirachy(clazz:Class[_]):Seq[Class[_]] =
-            {
-                var superClasses:Seq[Class[_]] = clazz.getInterfaces.flatMap(c => heirachy(c)):+clazz
-                if(clazz.getSuperclass != null)
-                    superClasses = superClasses++heirachy(clazz.getSuperclass)
+            def heirachy(clazz: Class[_]): Seq[Class[_]] = {
+                var superClasses: Seq[Class[_]] = clazz.getInterfaces.flatMap(c => heirachy(c)) :+ clazz
+                if (clazz.getSuperclass != null) {
+                    superClasses = superClasses ++ heirachy(clazz.getSuperclass)
+                }
                 superClasses
             }
 
@@ -53,12 +53,12 @@ object MultipartGenerator extends ScratchBitSet
             bitset
         })
 
-    private def setTraits(part:TMultiPart, client:Boolean):JBitSet = setTraits(Seq(part), client)
+    private def setTraits(part: TMultiPart, client: Boolean): JBitSet = setTraits(Seq(part), client)
 
-    private def setTraits(parts:Iterable[TMultiPart], client:Boolean) = {
+    private def setTraits(parts: Iterable[TMultiPart], client: Boolean) = {
         val bitset = freshBitSet
         parts.foreach(p => bitset.or(traitsForPart(p, client)))
-        if(client) bitset.set(clientTraitId)
+        if (client) bitset.set(clientTraitId)
         bitset
     }
 
@@ -66,25 +66,25 @@ object MultipartGenerator extends ScratchBitSet
      * Check if part adds any new interfaces to tile, if so, replace tile with a new copy and call tile.addPart(part)
      * returns true if tile was replaced
      */
-    private[multipart] def addPart(world:World, pos:BlockPos, part:TMultiPart):TileMultipart =
-    {
+    private[multipart] def addPart(world: World, pos: BlockPos, part: TMultiPart): TileMultipart = {
         val (tile, converted) = TileMultipart.getOrConvertTile2(world, pos)
         val bitset = setTraits(part, world.isRemote)
 
         var ntile = tile
-        if(ntile != null) {
-            if(converted) {//perform client conversion
+        if (ntile != null) {
+            if (converted) {
+                //perform client conversion
                 ntile.partList(0).invalidateConvertedTile()
                 world.setBlockState(pos, MultipartProxy.block.getDefaultState, 0)
                 silentAddTile(world, pos, ntile)
-                PacketCustom.sendToChunk(new SPacketBlockChange(world, pos), world, pos.getX>>4, pos.getZ>>4)
+                PacketCustom.sendToChunk(new SPacketBlockChange(world, pos), world, pos.getX >> 4, pos.getZ >> 4)
                 ntile.partList(0).onConverted()
                 ntile.writeAddPart(ntile.partList(0))
             }
 
             val tileTraits = tileTraitMap(tile.getClass)
             bitset.andNot(tileTraits)
-            if(!bitset.isEmpty) {
+            if (!bitset.isEmpty) {
                 bitset.or(tileTraits)
                 ntile = MultipartMixinFactory.construct(bitset)
                 tile.setValid(false)
@@ -104,29 +104,31 @@ object MultipartGenerator extends ScratchBitSet
     /**
      * Adds a tile entity to the world without notifying neighbor blocks or adding it to the tick list
      */
-    def silentAddTile(world:World, pos:BlockPos, tile:TileEntity) {
-    	val chunk = world.getChunkFromBlockCoords(pos)
-    	if(chunk != null)
-    		chunk.addTileEntity(pos, tile)
+    def silentAddTile(world: World, pos: BlockPos, tile: TileEntity) {
+        val chunk = world.getChunkFromBlockCoords(pos)
+        if (chunk != null) {
+            chunk.addTileEntity(pos, tile)
+        }
     }
 
     /**
      * Check if tile satisfies all the interfaces required by parts. If not, return a new generated copy of tile
      */
-    private[multipart] def generateCompositeTile(tile:TileEntity, parts:Iterable[TMultiPart], client:Boolean) = {
+    private[multipart] def generateCompositeTile(tile: TileEntity, parts: Iterable[TMultiPart], client: Boolean) = {
         val bitset = setTraits(parts, client)
-        if(tile != null && tile.isInstanceOf[TileMultipart] && bitset == tileTraitMap(tile.getClass))
+        if (tile != null && tile.isInstanceOf[TileMultipart] && bitset == tileTraitMap(tile.getClass)) {
             tile.asInstanceOf[TileMultipart]
-        else
+        } else {
             MultipartMixinFactory.construct(bitset)
+        }
     }
 
     /**
      * Check if there are any redundant interfaces on tile, if so, replace tile with new copy
      */
-    private[multipart] def partRemoved(tile:TileMultipart) = {
+    private[multipart] def partRemoved(tile: TileMultipart) = {
         val ntile = generateCompositeTile(tile, tile.partList, tile.getWorld.isRemote)
-        if(ntile != tile) {
+        if (ntile != tile) {
             tile.setValid(false)
             silentAddTile(tile.getWorld, tile.getPos, ntile)
             ntile.from(tile)
@@ -138,31 +140,32 @@ object MultipartGenerator extends ScratchBitSet
     /**
      * register s_trait to be applied to tiles containing parts implementing s_interface
      */
-    def registerTrait(s_interface:String, s_trait:String):Unit = registerTrait(s_interface, s_trait, s_trait)
+    def registerTrait(s_interface: String, s_trait: String): Unit = registerTrait(s_interface, s_trait, s_trait)
 
     /**
      * register traits to be applied to tiles containing parts implementing s_interface
      * c_trait for client worlds (may be null)
      * s_trait for server worlds (may be null)
      */
-    def registerTrait(s_interface$:String, c_trait$:String, s_trait$:String) {
+    def registerTrait(s_interface$: String, c_trait$: String, s_trait$: String) {
         val s_interface = nodeName(s_interface$)
         val c_trait = nodeName(c_trait$)
         val s_trait = nodeName(s_trait$)
 
-        def registerSide(map:MMap[String, String], traitName:String) = if(traitName != null) {
-            if(map.contains(s_interface))
-                logger.error("Trait already registered for "+s_interface)
-            else {
+        def registerSide(map: MMap[String, String], traitName: String) = if (traitName != null) {
+            if (map.contains(s_interface)) {
+                logger.error("Trait already registered for " + s_interface)
+            } else {
                 map.put(s_interface, traitName)
                 MultipartMixinFactory.registerTrait(traitName)
             }
         }
+
         registerSide(interfaceTraitMap_c, c_trait)
         registerSide(interfaceTraitMap_s, s_trait)
     }
 
-    def registerPassThroughInterface(s_interface:String):Unit = registerPassThroughInterface(s_interface, true, true)
+    def registerPassThroughInterface(s_interface: String): Unit = registerPassThroughInterface(s_interface, true, true)
 
     /**
      * A passthrough interface, is an interface to be implemented on the container tile instance, for which all calls are passed directly to the single implementing part.
@@ -171,17 +174,18 @@ object MultipartGenerator extends ScratchBitSet
      *  2. occlusionTest is overriden to prevent more than one part with s_interface existing in the block space
      *  3. implementing s_interface and passing all calls directly to the part instance.
      *
-     *  This allows compatibility with APIs that expect interfaces on the tile entity.
+     * This allows compatibility with APIs that expect interfaces on the tile entity.
      */
-    def registerPassThroughInterface(s_interface:String, client:Boolean, server:Boolean) {
+    def registerPassThroughInterface(s_interface: String, client: Boolean, server: Boolean) {
         val tType = MultipartMixinFactory.generatePassThroughTrait(s_interface)
-        if(tType == null)
+        if (tType == null) {
             return
+        }
 
-        registerTrait(s_interface, if(client) tType else null, if(server) tType else null)
+        registerTrait(s_interface, if (client) tType else null, if (server) tType else null)
     }
 
-    private[multipart] def registerTileClass(clazz:Class[_ <: TileMultipart], traits:JBitSet) {
+    private[multipart] def registerTileClass(clazz: Class[_ <: TileMultipart], traits: JBitSet) {
         tileTraitMap.put(clazz, traits.copy)
         MultipartProxy.onTileClassBuilt(clazz)
     }

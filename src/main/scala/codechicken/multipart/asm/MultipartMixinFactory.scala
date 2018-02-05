@@ -13,12 +13,9 @@ import org.objectweb.asm.{FieldVisitor, Label, MethodVisitor}
 
 import scala.collection.JavaConversions._
 
-object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart])
-{
-    override protected def autoCompleteJavaTrait(cnode: ClassNode)
-    {
-        if(!cnode.fields.isEmpty && findMethod(new ObfMapping(cnode.name, "copyFrom", "(Lcodechicken/multipart/TileMultipart;)V"), cnode) == null)
-        {
+object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart]) {
+    override protected def autoCompleteJavaTrait(cnode: ClassNode) {
+        if (!cnode.fields.isEmpty && findMethod(new ObfMapping(cnode.name, "copyFrom", "(Lcodechicken/multipart/TileMultipart;)V"), cnode) == null) {
             val mv = cnode.visitMethod(ACC_PUBLIC, "copyFrom", "(Lcodechicken/multipart/TileMultipart;)V", null, null)
             mv.visitVarInsn(ALOAD, 0)
             mv.visitVarInsn(ALOAD, 1)
@@ -29,7 +26,7 @@ object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart])
             val end = new Label()
             mv.visitJumpInsn(IFEQ, end)
 
-            cnode.fields.foreach{ f =>
+            cnode.fields.foreach { f =>
                 mv.visitVarInsn(ALOAD, 0)
                 mv.visitVarInsn(ALOAD, 1)
                 mv.visitFieldInsn(GETFIELD, cnode.name, f.name, f.desc)
@@ -42,30 +39,29 @@ object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart])
         }
     }
 
-    def generatePassThroughTrait(s_interface:String):String =
-    {
+    def generatePassThroughTrait(s_interface: String): String = {
         val iname = nodeName(s_interface)
         val tname = {
-            var simpleName = iname.substring(iname.lastIndexOf('/')+1)
-            if(simpleName.startsWith("I")) simpleName = simpleName.substring(1)
+            var simpleName = iname.substring(iname.lastIndexOf('/') + 1)
+            if (simpleName.startsWith("I")) simpleName = simpleName.substring(1)
             "T" + simpleName + "$$PassThrough"
         }
         val vname = "impl"
-        val idesc = "L"+iname+";"
+        val idesc = "L" + iname + ";"
 
         val inode = classNode(s_interface)
-        if(inode == null) {
+        if (inode == null) {
             //logger.error("Unable to generate pass through trait for: "+s_interface+" class not found.")
-            throw new ClassNotFoundException("Unable to generate pass through trait for: "+s_interface+" class not found.")
+            throw new ClassNotFoundException("Unable to generate pass through trait for: " + s_interface + " class not found.")
             //return null
         }
-        if((inode.access&ACC_INTERFACE) == 0) throw new IllegalArgumentException(s_interface+" is not an interface.")
+        if ((inode.access & ACC_INTERFACE) == 0) throw new IllegalArgumentException(s_interface + " is not an interface.")
 
         val cw = new CC_ClassWriter(0)
-        var mv:MethodVisitor = null
-        var fv:FieldVisitor = null
+        var mv: MethodVisitor = null
+        var fv: FieldVisitor = null
 
-        cw.visit(V1_6, ACC_PUBLIC|ACC_SUPER, tname, null, "codechicken/multipart/TileMultipart", Array(iname))
+        cw.visit(V1_6, ACC_PUBLIC | ACC_SUPER, tname, null, "codechicken/multipart/TileMultipart", Array(iname))
 
         {
             fv = cw.visitField(ACC_PRIVATE, vname, idesc, null, null)
@@ -149,18 +145,17 @@ object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart])
             mv.visitEnd()
         }
 
-        def methods(cnode:ClassNode):Map[String, MethodNode] =
-        {
-            val m = cnode.methods.map(m => (m.name+m.desc, m)).toMap
-            if(cnode.interfaces != null)
-                m++cnode.interfaces.flatMap(i => methods(classNode(i)))
-            else
+        def methods(cnode: ClassNode): Map[String, MethodNode] = {
+            val m = cnode.methods.map(m => (m.name + m.desc, m)).toMap
+            if (cnode.interfaces != null) {
+                m ++ cnode.interfaces.flatMap(i => methods(classNode(i)))
+            } else {
                 m
+            }
         }
 
-        def generatePassThroughMethod(m:MethodNode)
-        {
-            mv = cw.visitMethod(ACC_PUBLIC, m.name, m.desc, m.signature, Array(m.exceptions:_*))
+        def generatePassThroughMethod(m: MethodNode) {
+            mv = cw.visitMethod(ACC_PUBLIC, m.name, m.desc, m.signature, Array(m.exceptions: _*))
             mv.visitVarInsn(ALOAD, 0)
             mv.visitFieldInsn(GETFIELD, tname, vname, idesc)
             finishBridgeCall(mv, m.desc, INVOKEINTERFACE, iname, m.name, m.desc)
@@ -174,6 +169,6 @@ object MultipartMixinFactory extends ASMMixinFactory(classOf[TileMultipart])
         return tname
     }
 
-    override protected def onCompiled(clazz: Class[_ <: TileMultipart], traitSet:BitSet) =
+    override protected def onCompiled(clazz: Class[_ <: TileMultipart], traitSet: BitSet) =
         MultipartGenerator.registerTileClass(clazz, traitSet)
 }

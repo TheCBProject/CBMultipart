@@ -8,63 +8,55 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 
-public abstract class McSidedMetaPart extends McMetaPart implements TFacePart
-{
-    public McSidedMetaPart()
-    {
-    }
+public abstract class McSidedMetaPart extends McMetaPart implements TFacePart {
 
-    public McSidedMetaPart(IBlockState state)
-    {
-        super(state);
-    }
+	public McSidedMetaPart() {
+	}
 
-    public abstract int getSideFromState();
+	public McSidedMetaPart(IBlockState state) {
+		super(state);
+	}
 
-    @Override
-    public void onNeighborChanged()
-    {
-        if(!world().isRemote)
-            dropIfCantStay();
-    }
+	public abstract int getSideFromState();
 
-    public boolean canStay()
-    {
-        EnumFacing facing = EnumFacing.VALUES[getSideFromState()];
-        BlockPos pos = new BlockPos(tile().getPos()).offset(facing);
-        return world().isSideSolid(pos, facing);
-    }
+	@Override
+	public void onNeighborChanged() {
+		if (!world().isRemote) {
+			dropIfCantStay();
+		}
+	}
 
-    public boolean dropIfCantStay()
-    {
-        if(!canStay()) {
-            drop();
-            return true;
-        }
-        return false;
-    }
+	public boolean canStay() {
+		EnumFacing facing = EnumFacing.VALUES[getSideFromState()];
+		BlockPos pos = new BlockPos(tile().getPos()).offset(facing);
+		return world().isSideSolid(pos, facing);
+	}
 
-    public void drop()
-    {
-        TileMultipart.dropItem(new ItemStack(getBlock()), world(), Vector3.fromTileCenter(tile()));
-        tile().remPart(this);
-    }
+	public boolean dropIfCantStay() {
+		if (!canStay()) {
+			drop();
+			return true;
+		}
+		return false;
+	}
 
-    @Override
-    public int getSlotMask()
-    {
-        return 1<<getSideFromState();
-    }
+	public void drop() {
+		TileMultipart.dropItem(new ItemStack(getBlock()), world(), Vector3.fromTileCenter(tile()));
+		tile().remPart(this);
+	}
 
-    @Override
-    public boolean solid(int side)
-    {
-        return false;
-    }
+	@Override
+	public int getSlotMask() {
+		return 1 << getSideFromState();
+	}
 
-    @Override
-    public int redstoneConductionMap()
-    {
-        return 0x1F;
-    }
+	@Override
+	public boolean solid(int side) {
+		return false;
+	}
+
+	@Override
+	public int redstoneConductionMap() {
+		return 0x1F;
+	}
 }

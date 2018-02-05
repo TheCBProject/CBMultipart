@@ -5,7 +5,6 @@ import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.raytracer.CuboidRayTraceResult;
 import codechicken.lib.texture.TextureUtils;
 import codechicken.lib.vec.Cuboid6;
-import codechicken.multipart.BlockMultipart;
 import codechicken.multipart.IModelRenderPart;
 import codechicken.multipart.IconHitEffects;
 import net.minecraft.block.state.BlockStateContainer;
@@ -26,126 +25,107 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public abstract class McMetaPart extends McBlockPart implements IModelRenderPart
-{
-    public IBlockState state;
+public abstract class McMetaPart extends McBlockPart implements IModelRenderPart {
 
-    public McMetaPart()
-    {
-    }
+	public IBlockState state;
 
-    public McMetaPart(IBlockState state)
-    {
-        this.state = state;
-    }
+	public McMetaPart() {
+	}
 
-    @Override
-    public void save(NBTTagCompound tag)
-    {
-        tag.setByte("meta", getMeta());
-    }
+	public McMetaPart(IBlockState state) {
+		this.state = state;
+	}
 
-    @Override
-    public void load(NBTTagCompound tag)
-    {
-        setMeta(tag.getByte("meta"));
-    }
+	@Override
+	public void save(NBTTagCompound tag) {
+		tag.setByte("meta", getMeta());
+	}
 
-    @Override
-    public void writeDesc(MCDataOutput packet)
-    {
-        packet.writeByte(getMeta());
-    }
+	@Override
+	public void load(NBTTagCompound tag) {
+		setMeta(tag.getByte("meta"));
+	}
 
-    @Override
-    public void readDesc(MCDataInput packet)
-    {
-        setMeta(packet.readByte());
-    }
+	@Override
+	public void writeDesc(MCDataOutput packet) {
+		packet.writeByte(getMeta());
+	}
 
-    public byte getMeta()
-    {
-        return (byte) getBlock().getMetaFromState(state);
-    }
+	@Override
+	public void readDesc(MCDataInput packet) {
+		setMeta(packet.readByte());
+	}
 
-    public void setMeta(byte meta)
-    {
-        state = getBlock().getStateFromMeta(meta);
-    }
+	public byte getMeta() {
+		return (byte) getBlock().getMetaFromState(state);
+	}
 
-    @Override
-    public ResourceLocation getModelPath()
-    {
-        return null;
-    }
+	public void setMeta(byte meta) {
+		state = getBlock().getStateFromMeta(meta);
+	}
 
-    @Override
-    public boolean canRenderInLayer(BlockRenderLayer layer)
-    {
-        return getBlock().canRenderInLayer(state, layer);
-    }
+	@Override
+	public ResourceLocation getModelPath() {
+		return null;
+	}
 
-    @Override
-    public BlockStateContainer createBlockStateContainer()
-    {
-        return getBlock().getBlockState();
-    }
+	@Override
+	public boolean canRenderInLayer(BlockRenderLayer layer) {
+		return getBlock().canRenderInLayer(state, layer);
+	}
 
-    @Override
-    public IBlockState getCurrentState(IBlockState state)
-    {
-        return this.state;
-    }
+	@Override
+	public BlockStateContainer createBlockStateContainer() {
+		return getBlock().getBlockState();
+	}
 
-    public void setStateOnPlacement(World world, BlockPos pos, EnumFacing facing, Vec3d hitVec, EntityLivingBase placer, ItemStack held)
-    {
-        state = getBlock().getStateForPlacement(world, pos, facing, (float)hitVec.x, (float)hitVec.y, (float)hitVec.z, 0, placer);
-    }
+	@Override
+	public IBlockState getCurrentState(IBlockState state) {
+		return this.state;
+	}
 
-    @Override
-    public float getStrength(EntityPlayer player, CuboidRayTraceResult hit)
-    {
-        return ForgeHooks.blockStrength(state, player, world(), new BlockPos(0, -1, 0));
-    }
+	public void setStateOnPlacement(World world, BlockPos pos, EnumFacing facing, Vec3d hitVec, EntityLivingBase placer, ItemStack held) {
+		state = getBlock().getStateForPlacement(world, pos, facing, (float) hitVec.x, (float) hitVec.y, (float) hitVec.z, 0, placer);
+	}
 
-    @Override
-    public int getLightValue()
-    {
-        return state.getLightValue();
-    }
+	@Override
+	public float getStrength(EntityPlayer player, CuboidRayTraceResult hit) {
+		return ForgeHooks.blockStrength(state, player, world(), new BlockPos(0, -1, 0));
+	}
 
-    @Override
-    public Cuboid6 getBounds()
-    {
-        if (tile() != null)
-            return new Cuboid6(getBlock().getBoundingBox(state, world(), pos()));
-        else
-            return new Cuboid6(getBlock().getBoundingBox(state, null, null));
-    }
+	@Override
+	public int getLightValue() {
+		return state.getLightValue();
+	}
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public TextureAtlasSprite getBreakingIcon(CuboidRayTraceResult hit)
-    {
-        return getBrokenIcon(hit.sideHit.ordinal());
-    }
+	@Override
+	public Cuboid6 getBounds() {
+		if (tile() != null) {
+			return new Cuboid6(getBlock().getBoundingBox(state, world(), pos()));
+		} else {
+			return new Cuboid6(getBlock().getBoundingBox(state, null, null));
+		}
+	}
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public TextureAtlasSprite getBrokenIcon(int side)
-    {
-        return TextureUtils.getParticleIconForBlock(state);
-    }
+	@Override
+	@SideOnly (Side.CLIENT)
+	public TextureAtlasSprite getBreakingIcon(CuboidRayTraceResult hit) {
+		return getBrokenIcon(hit.sideHit.ordinal());
+	}
 
-    @Override
-    public void addHitEffects(CuboidRayTraceResult hit, ParticleManager manager)
-    {
-        IconHitEffects.addHitEffects(this, hit, manager);
-    }
+	@Override
+	@SideOnly (Side.CLIENT)
+	public TextureAtlasSprite getBrokenIcon(int side) {
+		return TextureUtils.getParticleIconForBlock(state);
+	}
 
-    @Override
-    public void addDestroyEffects(CuboidRayTraceResult hit, ParticleManager manager)
-    {
-        IconHitEffects.addDestroyEffects(this, manager, false);
-    }
+	@Override
+	public void addHitEffects(CuboidRayTraceResult hit, ParticleManager manager) {
+		IconHitEffects.addHitEffects(this, hit, manager);
+	}
+
+	@Override
+	public void addDestroyEffects(CuboidRayTraceResult hit, ParticleManager manager) {
+		IconHitEffects.addDestroyEffects(this, manager, false);
+	}
 }

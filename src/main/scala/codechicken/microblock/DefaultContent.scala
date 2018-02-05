@@ -1,14 +1,12 @@
 package codechicken.microblock
 
 import codechicken.microblock.BlockMicroMaterial._
+import codechicken.microblock.MicroMaterialRegistry._
 import net.minecraft.block._
 import net.minecraft.init.Blocks._
-import MicroMaterialRegistry._
 
-object DefaultContent
-{
-    def load()
-    {
+object DefaultContent {
+    def load() {
         FaceMicroFactory.register(0)
         HollowMicroFactory.register(1)
         CornerMicroFactory.register(2)

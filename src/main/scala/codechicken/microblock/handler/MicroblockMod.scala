@@ -10,8 +10,7 @@ import net.minecraftforge.fml.common.event.{FMLInitializationEvent, FMLPostIniti
 import scala.collection.JavaConversions._
 
 @Mod(modid = "microblockcbe", acceptedMinecraftVersions = CodeChickenLib.MC_VERSION_DEP, dependencies = "required-after:forgemultipartcbe", modLanguage = "scala")
-object MicroblockMod
-{
+object MicroblockMod {
     @EventHandler
     def preInit(event: FMLPreInitializationEvent) {
         MicroblockProxy.preInit()
@@ -20,24 +19,24 @@ object MicroblockMod
     }
 
     @EventHandler
-    def init(event:FMLInitializationEvent) {
+    def init(event: FMLInitializationEvent) {
         MicroblockProxy.init()
         ConfigContent.load()
     }
 
     @EventHandler
-    def postInit(event:FMLPostInitializationEvent) {
+    def postInit(event: FMLPostInitializationEvent) {
         MicroMaterialRegistry.setupIDMap()
         MicroblockProxy.postInit()
     }
 
     @EventHandler
-    def beforeServerStart(event:FMLServerAboutToStartEvent) {
+    def beforeServerStart(event: FMLServerAboutToStartEvent) {
         MicroMaterialRegistry.setupIDMap()
     }
 
     @EventHandler
-    def handleIMC(event:IMCEvent) {
+    def handleIMC(event: IMCEvent) {
         ConfigContent.handleIMC(event.getMessages)
     }
 }

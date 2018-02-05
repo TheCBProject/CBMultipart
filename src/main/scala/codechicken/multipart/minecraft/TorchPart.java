@@ -11,53 +11,47 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.Random;
 
-public class TorchPart extends McSidedMetaPart implements IRandomDisplayTickPart
-{
-    public static BlockTorch torch = (BlockTorch) Blocks.TORCH;
+public class TorchPart extends McSidedMetaPart implements IRandomDisplayTickPart {
 
-    public TorchPart()
-    {
-        state = torch.getDefaultState();
-    }
+	public static BlockTorch torch = (BlockTorch) Blocks.TORCH;
 
-    public TorchPart(IBlockState state)
-    {
-        super(state);
-    }
+	public TorchPart() {
+		state = torch.getDefaultState();
+	}
 
-    @Override
-    public Block getBlock()
-    {
-        return torch;
-    }
+	public TorchPart(IBlockState state) {
+		super(state);
+	}
 
-    @Override
-    public ResourceLocation getType()
-    {
-        return new ResourceLocation("minecraft:torch");
-    }
+	@Override
+	public Block getBlock() {
+		return torch;
+	}
 
-    @Override
-    public int getSideFromState()
-    {
-        return state.getValue(BlockTorch.FACING).getOpposite().ordinal();
-    }
+	@Override
+	public ResourceLocation getType() {
+		return new ResourceLocation("minecraft:torch");
+	}
 
-    @Override
-    public boolean canStay()
-    {
-        if (getSideFromState() == 0) {
-            BlockPos offset = pos().offset(EnumFacing.DOWN);
-            IBlockState state = world().getBlockState(offset);
-            if (state.getBlock().canPlaceTorchOnTop(state, world(), offset))
-                return true;
-        }
-        return super.canStay();
-    }
+	@Override
+	public int getSideFromState() {
+		return state.getValue(BlockTorch.FACING).getOpposite().ordinal();
+	}
 
-    @Override
-    public void randomDisplayTick(Random random)
-    {
-        getBlock().randomDisplayTick(state, world(), pos(), random);
-    }
+	@Override
+	public boolean canStay() {
+		if (getSideFromState() == 0) {
+			BlockPos offset = pos().offset(EnumFacing.DOWN);
+			IBlockState state = world().getBlockState(offset);
+			if (state.getBlock().canPlaceTorchOnTop(state, world(), offset)) {
+				return true;
+			}
+		}
+		return super.canStay();
+	}
+
+	@Override
+	public void randomDisplayTick(Random random) {
+		getBlock().randomDisplayTick(state, world(), pos(), random);
+	}
 }

@@ -7,9 +7,9 @@ import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.common.registry.GameRegistry
 
 /**
-  * Contains the holder tile that is loaded from NBT.
-  * The holder tile saves the nbt from readFromNBT and uses it in onLoad to replace the tile in world with the ASM generated composite tile.
-  */
+ * Contains the holder tile that is loaded from NBT.
+ * The holder tile saves the nbt from readFromNBT and uses it in onLoad to replace the tile in world with the ASM generated composite tile.
+ */
 object MultipartSaveLoad {
 
     val TILE_ID: ResourceLocation = new ResourceLocation("ccmp:saved_multipart")

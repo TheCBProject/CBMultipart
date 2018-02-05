@@ -11,54 +11,49 @@ import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
 import scala.collection.JavaConversions._
 
-object MultipartEventHandler
-{
+object MultipartEventHandler {
     @SubscribeEvent
-    def worldUnLoad(event:WorldEvent.Unload)
-    {
+    def worldUnLoad(event: WorldEvent.Unload) {
         MultipartSPH.onWorldUnload(event.getWorld)
-        if(event.getWorld.isRemote)
+        if (event.getWorld.isRemote) {
             TileCache.clear()
+        }
     }
 
     @SubscribeEvent
-    def chunkWatch(event:ChunkWatchEvent.Watch)
-    {
+    def chunkWatch(event: ChunkWatchEvent.Watch) {
         MultipartSPH.onChunkWatch(event.getPlayer, event.getChunk)
     }
 
     @SubscribeEvent
-    def chunkUnWatch(event:ChunkWatchEvent.UnWatch)
-    {
+    def chunkUnWatch(event: ChunkWatchEvent.UnWatch) {
         MultipartSPH.onChunkUnWatch(event.getPlayer, event.getChunk)
     }
 
     @SubscribeEvent
-    def serverTick(event:TickEvent.ServerTickEvent)
-    {
-        if(event.phase == TickEvent.Phase.END)
+    def serverTick(event: TickEvent.ServerTickEvent) {
+        if (event.phase == TickEvent.Phase.END) {
             MultipartSPH.onTickEnd(FMLCommonHandler.instance().getMinecraftServerInstance.getPlayerList.getPlayers)
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     @SideOnly(Side.CLIENT)
-    def drawBlockHighlight(event:DrawBlockHighlightEvent)
-    {
-        if(event.getTarget != null && event.getTarget.typeOfHit == RayTraceResult.Type.BLOCK &&
-            event.getPlayer.world.getTileEntity(event.getTarget.getBlockPos).isInstanceOf[TileMultipart])
-        {
-            if(BlockMultipart.drawHighlight(event.getPlayer.world, event.getPlayer, event.getTarget, event.getPartialTicks))
+    def drawBlockHighlight(event: DrawBlockHighlightEvent) {
+        if (event.getTarget != null && event.getTarget.typeOfHit == RayTraceResult.Type.BLOCK &&
+            event.getPlayer.world.getTileEntity(event.getTarget.getBlockPos).isInstanceOf[TileMultipart]) {
+            if (BlockMultipart.drawHighlight(event.getPlayer.world, event.getPlayer, event.getTarget, event.getPartialTicks)) {
                 event.setCanceled(true)
+            }
         }
     }
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
-    def onModelBake(event:ModelBakeEvent)
-    {
-//        event.getModelRegistry.putObject(
-//            new ModelResourceLocation(Block.REGISTRY.getNameForObject(MultipartProxy.block).toString),
-//            MultipartTileModel
-//        )
+    def onModelBake(event: ModelBakeEvent) {
+        //        event.getModelRegistry.putObject(
+        //            new ModelResourceLocation(Block.REGISTRY.getNameForObject(MultipartProxy.block).toString),
+        //            MultipartTileModel
+        //        )
     }
 }

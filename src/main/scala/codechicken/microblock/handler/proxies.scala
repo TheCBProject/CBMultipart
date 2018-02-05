@@ -12,21 +12,20 @@ import codechicken.multipart.handler.MultipartProxy._
 import net.minecraft.client.renderer.ItemMeshDefinition
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.creativetab.CreativeTabs
-import net.minecraft.init.{Blocks, Items}
-import net.minecraft.item.crafting.{CraftingManager, IRecipe}
+import net.minecraft.init.Blocks
+import net.minecraft.item.crafting.IRecipe
 import net.minecraft.item.{Item, ItemStack}
 import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.fml.common.registry.{ForgeRegistries, GameRegistry}
+import net.minecraftforge.fml.common.registry.ForgeRegistries
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
-import net.minecraftforge.oredict.{OreDictionary, ShapedOreRecipe}
+import net.minecraftforge.oredict.OreDictionary
 import net.minecraftforge.registries.IForgeRegistry
 import org.apache.logging.log4j.{LogManager, Logger}
 
 import scala.collection.mutable
 
-class MicroblockProxy_serverImpl
-{
+class MicroblockProxy_serverImpl {
     var logger: Logger = LogManager.getLogger("ForgeMicroBlockCBE")
 
     var microTab = new SimpleCreativeTab("microblockcbe", new Supplier[ItemStack] {
@@ -59,22 +58,23 @@ class MicroblockProxy_serverImpl
     }
 
     protected var saws = mutable.MutableList[Item]()
+
     def createSaw(config: ConfigFile, name: String, strength: Int) = {
         val saw = new ItemSaw(config.getTag(name).useBraces(), strength)
             .setUnlocalizedName("microblockcbe:" + name)
         ForgeRegistries.ITEMS.register(saw.setRegistryName(name))
-        saws+=saw
+        saws += saw
         saw
     }
 
     def addSawRecipe(saw: Item, blade: Item) {
-//        CraftingManager.getInstance.getRecipeList.add(
-//            new ShapedOreRecipe(new ItemStack(saw),
-//                "srr",
-//                "sbr",
-//                's': Character, "stickWood",
-//                'r': Character, "rodStone",
-//                'b': Character, blade))
+        //        CraftingManager.getInstance.getRecipeList.add(
+        //            new ShapedOreRecipe(new ItemStack(saw),
+        //                "srr",
+        //                "sbr",
+        //                's': Character, "stickWood",
+        //                'r': Character, "rodStone",
+        //                'b': Character, blade))
     }
 
     def registerRecipes(registry: IForgeRegistry[IRecipe]) {
@@ -82,11 +82,11 @@ class MicroblockProxy_serverImpl
     }
 
     def init() {
-//        CraftingManager.getInstance.getRecipeList.add(MicroRecipe)
-//        CraftingManager.getInstance.addRecipe(new ItemStack(stoneRod, 4), "s", "s", 's': Character, Blocks.STONE)
-//        addSawRecipe(sawStone, Items.FLINT)
-//        addSawRecipe(sawIron, Items.IRON_INGOT)
-//        addSawRecipe(sawDiamond, Items.DIAMOND)
+        //        CraftingManager.getInstance.getRecipeList.add(MicroRecipe)
+        //        CraftingManager.getInstance.addRecipe(new ItemStack(stoneRod, 4), "s", "s", 's': Character, Blocks.STONE)
+        //        addSawRecipe(sawStone, Items.FLINT)
+        //        addSawRecipe(sawIron, Items.IRON_INGOT)
+        //        addSawRecipe(sawDiamond, Items.DIAMOND)
     }
 
     def postInit() {
@@ -95,11 +95,9 @@ class MicroblockProxy_serverImpl
     }
 }
 
-class MicroblockProxy_clientImpl extends MicroblockProxy_serverImpl
-{
+class MicroblockProxy_clientImpl extends MicroblockProxy_serverImpl {
     @SideOnly(Side.CLIENT)
-    override def preInit()
-    {
+    override def preInit() {
         super.preInit()
 
         ModelRegistryHelper.registerItemRenderer(itemMicro, ItemMicroPartRenderer)
@@ -109,7 +107,7 @@ class MicroblockProxy_clientImpl extends MicroblockProxy_serverImpl
     }
 
     @SideOnly(Side.CLIENT)
-    def registerFMPItemModel(item :Item){
+    def registerFMPItemModel(item: Item) {
         val loc = item.getRegistryName
         val mLoc = new ModelResourceLocation("microblockcbe:items", s"type=${loc.getResourcePath}")
         ModelLoader.setCustomModelResourceLocation(item, 0, mLoc)
@@ -119,13 +117,11 @@ class MicroblockProxy_clientImpl extends MicroblockProxy_serverImpl
     }
 
     @SideOnly(Side.CLIENT)
-    override def postInit()
-    {
+    override def postInit() {
         super.postInit()
         PacketCustom.assignHandler(MicroblockCPH.registryChannel, MicroblockCPH)
     }
 }
 
-object MicroblockProxy extends MicroblockProxy_clientImpl
-{
+object MicroblockProxy extends MicroblockProxy_clientImpl {
 }

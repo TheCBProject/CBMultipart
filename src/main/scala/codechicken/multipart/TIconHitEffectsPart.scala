@@ -1,7 +1,7 @@
 package codechicken.multipart
 
 import codechicken.lib.raytracer.CuboidRayTraceResult
-import codechicken.lib.render.particle.{CustomParticleHandler, DigIconParticle}
+import codechicken.lib.render.particle.CustomParticleHandler
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import net.minecraft.client.particle.ParticleManager
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
@@ -17,28 +17,27 @@ import net.minecraftforge.fml.relauncher.{Side, SideOnly}
  * which can then override the functions in TMultipart and call the static methods in IconHitEffects with 'this' as the first parameter
  * TIconHitEffects is a trait for scala implementors that does includes the overrides/static calls that Java programmers need to include themselves.
  */
-object IconHitEffects
-{
-    def addHitEffects(part:TIconHitEffectsPart, hit:CuboidRayTraceResult, manager:ParticleManager)
-    {
+object IconHitEffects {
+    def addHitEffects(part: TIconHitEffectsPart, hit: CuboidRayTraceResult, manager: ParticleManager) {
         CustomParticleHandler.addBlockHitEffects(part.tile.getWorld,
             part.getBounds.copy.add(Vector3.fromTile(part.tile)),
             hit.sideHit, part.getBreakingIcon(hit), manager)
     }
 
-    def addDestroyEffects(part:TIconHitEffectsPart, manager:ParticleManager)
-    {
+    def addDestroyEffects(part: TIconHitEffectsPart, manager: ParticleManager) {
         addDestroyEffects(part, manager, true)
     }
 
-    def addDestroyEffects(part:TIconHitEffectsPart, manager:ParticleManager, scaleDensity:Boolean)
-    {
+    def addDestroyEffects(part: TIconHitEffectsPart, manager: ParticleManager, scaleDensity: Boolean) {
         val icons = new Array[TextureAtlasSprite](6)
-        for(i <- 0 until 6)
+        for (i <- 0 until 6)
             icons(i) = part.getBrokenIcon(i)
         val bounds =
-            if(scaleDensity) part.getBounds.copy
-            else Cuboid6.full.copy
+            if (scaleDensity) {
+                part.getBounds.copy
+            } else {
+                Cuboid6.full.copy
+            }
 
         CustomParticleHandler.addBlockDestroyEffects(part.tile.getWorld,
             bounds.add(Vector3.fromTile(part.tile)), icons, manager)
@@ -46,29 +45,26 @@ object IconHitEffects
 }
 
 /**
-  * Part interface that contain callbacks for particle rendering. Be sure to
-  * manually override addHitEffects and addDestoyEffects as done below if you
-  * are using this in Java.
-  */
-trait TIconHitEffectsPart extends TMultiPart
-{
-    def getBounds:Cuboid6
+ * Part interface that contain callbacks for particle rendering. Be sure to
+ * manually override addHitEffects and addDestoyEffects as done below if you
+ * are using this in Java.
+ */
+trait TIconHitEffectsPart extends TMultiPart {
+    def getBounds: Cuboid6
 
     @SideOnly(Side.CLIENT)
-    def getBreakingIcon(hit:CuboidRayTraceResult):TextureAtlasSprite
+    def getBreakingIcon(hit: CuboidRayTraceResult): TextureAtlasSprite
 
     @SideOnly(Side.CLIENT)
-    def getBrokenIcon(side:Int):TextureAtlasSprite
+    def getBrokenIcon(side: Int): TextureAtlasSprite
 
     @SideOnly(Side.CLIENT)
-    override def addHitEffects(hit:CuboidRayTraceResult, manager:ParticleManager)
-    {
+    override def addHitEffects(hit: CuboidRayTraceResult, manager: ParticleManager) {
         IconHitEffects.addHitEffects(this, hit, manager)
     }
 
     @SideOnly(Side.CLIENT)
-    override def addDestroyEffects(hit:CuboidRayTraceResult, manager:ParticleManager)
-    {
+    override def addDestroyEffects(hit: CuboidRayTraceResult, manager: ParticleManager) {
         IconHitEffects.addDestroyEffects(this, manager)
     }
 }

@@ -8,9 +8,9 @@ import net.minecraft.util.ITickable
 import scala.collection.JavaConversions._
 
 /**
-  * Mixin Trait for parts implementing ITickable. Allows parts
-  * to receive update calls every tick.
-  */
+ * Mixin Trait for parts implementing ITickable. Allows parts
+ * to receive update calls every tick.
+ */
 trait TTickableTile extends TileMultipart with ITickable {
 
     private var doesTick = false
@@ -80,16 +80,17 @@ trait TTickableTile extends TileMultipart with ITickable {
         doesTick = tick
 
         if (getWorld != null && getWorld.getTileEntity(getPos) == this) {
-            if (tick)
+            if (tick) {
                 getWorld.addTileEntity(this)
-            else
+            } else {
                 getWorld.tickableTileEntities.remove(this)
+            }
         }
     }
 }
 
 /**
-  * To handle obfuscation issues, this is registered as a java trait.
-  */
+ * To handle obfuscation issues, this is registered as a java trait.
+ */
 class JTickableTile extends TileMultipart with TTickableTile {
 }

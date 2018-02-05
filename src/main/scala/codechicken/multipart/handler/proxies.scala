@@ -6,7 +6,6 @@ import codechicken.lib.config.ConfigFile
 import codechicken.lib.packet.PacketCustom
 import codechicken.lib.world.{TileChunkLoadHook, WorldExtensionManager}
 import codechicken.multipart._
-import codechicken.multipart.handler.MultipartSaveLoad.TileNBTContainer
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.ResourceLocation
@@ -16,18 +15,16 @@ import net.minecraftforge.client.model.ModelLoader
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.client.registry.ClientRegistry
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.registry.{ForgeRegistries, GameRegistry}
+import net.minecraftforge.fml.common.registry.ForgeRegistries
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import org.apache.logging.log4j.{LogManager, Logger}
 
-class MultipartProxy_serverImpl
-{
-    var block:BlockMultipart = _
-    var config:ConfigFile = _
-    var logger:Logger = LogManager.getLogger("ForgeMultiPartCBE")
+class MultipartProxy_serverImpl {
+    var block: BlockMultipart = _
+    var config: ConfigFile = _
+    var logger: Logger = LogManager.getLogger("ForgeMultiPartCBE")
 
-    def preInit(cfgdir: File)
-    {
+    def preInit(cfgdir: File) {
         config = new ConfigFile(new File(cfgdir, "multipart.cfg"))
             .setComment("Multipart API config file")
 
@@ -49,10 +46,9 @@ class MultipartProxy_serverImpl
         MultipartSaveLoad.load()
     }
 
-    def init(){}
+    def init() {}
 
-    def postInit()
-    {
+    def postInit() {
         MinecraftForge.EVENT_BUS.register(MultipartEventHandler)
         PacketCustom.assignHandler(MultipartSPH.channel, MultipartSPH)
         PacketCustom.assignHandshakeHandler(MultipartSPH.registryChannel, MultipartSPH)
@@ -63,33 +59,28 @@ class MultipartProxy_serverImpl
         MultipartCompatiblity.load()
     }
 
-    def onTileClassBuilt(t: Class[_ <: TileEntity])
-    {
+    def onTileClassBuilt(t: Class[_ <: TileEntity]) {
         MultipartSaveLoad.registerTileClass(t)
     }
 }
 
-class MultipartProxy_clientImpl extends MultipartProxy_serverImpl
-{
+class MultipartProxy_clientImpl extends MultipartProxy_serverImpl {
     @SideOnly(Side.CLIENT)
-    override def preInit(cfgdir:File)
-    {
+    override def preInit(cfgdir: File) {
         super.preInit(cfgdir)
 
         ModelLoader.setCustomStateMapper(block, MultipartStateMapper)
     }
 
     @SideOnly(Side.CLIENT)
-    override def init()
-    {
+    override def init() {
         super.init()
 
         MinecraftForge.EVENT_BUS.register(this)
     }
 
     @SideOnly(Side.CLIENT)
-    override def postInit()
-    {
+    override def postInit() {
         super.postInit()
 
         PacketCustom.assignHandler(MultipartCPH.channel, MultipartCPH)
@@ -102,8 +93,7 @@ class MultipartProxy_clientImpl extends MultipartProxy_serverImpl
     }
 
     @SideOnly(Side.CLIENT)
-    override def onTileClassBuilt(t:Class[_ <: TileEntity])
-    {
+    override def onTileClassBuilt(t: Class[_ <: TileEntity]) {
         super.onTileClassBuilt(t)
         ClientRegistry.bindTileEntitySpecialRenderer(t.asInstanceOf[Class[TileEntity]],
             MultipartRenderer.asInstanceOf[TileEntitySpecialRenderer[TileEntity]])
@@ -111,17 +101,16 @@ class MultipartProxy_clientImpl extends MultipartProxy_serverImpl
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
-    def onModelBakeEvent(event:ModelBakeEvent)
-    {
-//        event.getModelRegistry.putObject(
-//            new ModelResourceLocation(block.getRegistryName.toString),
-//            MultipartTileModel
-//        )
+    def onModelBakeEvent(event: ModelBakeEvent) {
+        //        event.getModelRegistry.putObject(
+        //            new ModelResourceLocation(block.getRegistryName.toString),
+        //            MultipartTileModel
+        //        )
     }
 }
 
-object MultipartProxy extends MultipartProxy_clientImpl
-{
-    def indexInChunk(cc:ChunkPos, i: Int) = new BlockPos(cc.x << 4 | i & 0xF, (i >> 8) & 0xFF, cc.z << 4 | (i & 0xF0) >> 4)
-    def indexInChunk(pos:BlockPos) = pos.getX & 0xF | pos.getY << 8 | (pos.getZ & 0xF) << 4
+object MultipartProxy extends MultipartProxy_clientImpl {
+    def indexInChunk(cc: ChunkPos, i: Int) = new BlockPos(cc.x << 4 | i & 0xF, (i >> 8) & 0xFF, cc.z << 4 | (i & 0xF0) >> 4)
+
+    def indexInChunk(pos: BlockPos) = pos.getX & 0xF | pos.getY << 8 | (pos.getZ & 0xF) << 4
 }

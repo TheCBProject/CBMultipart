@@ -7,22 +7,22 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = MinecraftMultipartMod.modID, acceptedMinecraftVersions= CodeChickenLib.MC_VERSION_DEP)
-public class MinecraftMultipartMod
-{
-    public static final String modID = "minecraftmultipartcbe";
+@Mod (modid = MinecraftMultipartMod.modID, acceptedMinecraftVersions = CodeChickenLib.MC_VERSION_DEP)
+public class MinecraftMultipartMod {
 
-    @Mod.Instance(modID)
-    public static MinecraftMultipartMod instance;
+	public static final String modID = "minecraftmultipartcbe";
 
-    @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event)
-    {
-        new Content().init();
-        MinecraftForge.EVENT_BUS.register(new EventHandler());
-        PacketCustom.assignHandler(McMultipartSPH.channel, new McMultipartSPH());
-        if(FMLCommonHandler.instance().getSide().isClient())
-            PacketCustom.assignHandler(McMultipartCPH.channel, new McMultipartCPH());
+	@Mod.Instance (modID)
+	public static MinecraftMultipartMod instance;
 
-    }
+	@Mod.EventHandler
+	public void preInit(FMLPreInitializationEvent event) {
+		new Content().init();
+		MinecraftForge.EVENT_BUS.register(new EventHandler());
+		PacketCustom.assignHandler(McMultipartSPH.channel, new McMultipartSPH());
+		if (FMLCommonHandler.instance().getSide().isClient()) {
+			PacketCustom.assignHandler(McMultipartCPH.channel, new McMultipartCPH());
+		}
+
+	}
 }

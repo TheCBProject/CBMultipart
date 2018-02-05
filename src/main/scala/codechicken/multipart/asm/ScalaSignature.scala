@@ -7,47 +7,55 @@ import org.objectweb.asm.tree.{AnnotationNode, ClassNode}
 
 import scala.collection.JavaConversions._
 
-object ScalaSignature
-{
-    object Bytes
-    {
-        def apply(arr: Array[Byte]):Bytes = Bytes(arr, 0, arr.length)
+object ScalaSignature {
+
+    object Bytes {
+        def apply(arr: Array[Byte]): Bytes = Bytes(arr, 0, arr.length)
     }
 
-    case class Bytes(arr: Array[Byte], pos: Int, len: Int)
-    {
+    case class Bytes(arr: Array[Byte], pos: Int, len: Int) {
         def reader = new ByteCodeReader(this)
+
         def section = arr.drop(pos).take(len)
     }
 
-    trait Flags
-    {
+    trait Flags {
         def hasFlag(flag: Int): Boolean
 
         def isPrivate = hasFlag(0x00000004)
+
         def isProtected = hasFlag(0x00000008)
+
         def isAbstract = hasFlag(0x00000080)
+
         def isDeferred = hasFlag(0x00000100)
+
         //abstract for methods
         def isMethod = hasFlag(0x00000200)
+
         def isModule = hasFlag(0x00000400)
+
         //object module class
         def isInterface = hasFlag(0x00000800)
+
         def isParam = hasFlag(0x00002000)
+
         def isStatic = hasFlag(0x00800000)
+
         def isTrait = hasFlag(0x02000000)
+
         def isAccessor = hasFlag(0x08000000)
     }
+
 }
 
-class ScalaSignature(val bytes: Bytes)
-{
+class ScalaSignature(val bytes: Bytes) {
     val major = bytes.arr(0).toInt
     val minor = bytes.arr(1).toInt
     val table = {
         val bcr = bytes.reader
         bcr.pos = 2
-        Array.tabulate(bcr.readNat){ i =>
+        Array.tabulate(bcr.readNat) { i =>
             val start = bcr.pos
             val tpe = bcr.readByte
             val len = bcr.readNat
@@ -55,82 +63,90 @@ class ScalaSignature(val bytes: Bytes)
         }
     }
 
-    trait SymbolRef extends Flags
-    {
+    trait SymbolRef extends Flags {
         def full: String
+
         def flags: Int
+
         def hasFlag(flag: Int) = (flags & flag) != 0
     }
 
-    trait ClassSymbolRef extends SymbolRef
-    {
+    trait ClassSymbolRef extends SymbolRef {
         def name: String
+
         def owner: SymbolRef
+
         def flags: Int
+
         def infoId: Int
 
         def full = owner.full + "." + name
+
         override def toString = getClass.getName.replaceAll(".+\\$", "") +
             "(" + name + "," + owner + "," + flags.toHexString + "," + infoId + ")"
 
         def isObject = false
+
         def info: ClassType = evalT(infoId)
+
         def jParent = info.parent.jName
+
         def jInterfaces = info.interfaces.map(_.jName)
     }
 
     case class ClassSymbol(name: String, owner: SymbolRef, flags: Int, infoId: Int) extends ClassSymbolRef
 
-    case class ObjectSymbol(name: String, owner: SymbolRef, flags: Int, infoId: Int) extends ClassSymbolRef
-    {
+    case class ObjectSymbol(name: String, owner: SymbolRef, flags: Int, infoId: Int) extends ClassSymbolRef {
         override def isObject = true
     }
 
-    case class MethodSymbol(name: String, owner: SymbolRef, flags: Int, infoId: Int) extends SymbolRef
-    {
+    case class MethodSymbol(name: String, owner: SymbolRef, flags: Int, infoId: Int) extends SymbolRef {
         override def toString = "MethodSymbol(" + name + "," + owner + "," + flags.toHexString + "," + infoId + ")"
+
         def full = owner.full + "." + name
 
         def info: TMethodType = evalT(infoId)
+
         def jDesc = info.jDesc
     }
 
-    case class ExternalSymbol(name: String) extends SymbolRef
-    {
+    case class ExternalSymbol(name: String) extends SymbolRef {
         override def toString = name
+
         def full = name
+
         def flags = 0
     }
 
-    case object NoSymbol extends SymbolRef
-    {
+    case object NoSymbol extends SymbolRef {
         def full = "<no symbol>"
+
         def flags = 0
     }
 
-    trait TMethodType
-    {
+    trait TMethodType {
         def jDesc = "(" + params.map(m => m.info.returnType.jDesc).mkString + ")" + returnType.jDesc
+
         def returnType: TypeRef
+
         def params: List[MethodSymbol]
     }
 
-    case class ClassType(owner: SymbolRef, parents: List[TypeRef])
-    {
+    case class ClassType(owner: SymbolRef, parents: List[TypeRef]) {
         def parent = parents.head
+
         def interfaces = parents.drop(1)
     }
 
     case class MethodType(returnType: TypeRef, params: List[MethodSymbol]) extends TMethodType
 
-    case class ParameterlessType(returnType: TypeRef) extends TMethodType
-    {
+    case class ParameterlessType(returnType: TypeRef) extends TMethodType {
         def params = List()
     }
 
-    trait TypeRef
-    {
+    trait TypeRef {
         def sym: SymbolRef
+
         def name = sym.full
 
         def jName = name.replace('.', '/') match {
@@ -152,8 +168,7 @@ class ScalaSignature(val bytes: Bytes)
         }
     }
 
-    case class TypeRefType(owner: TypeRef, sym: SymbolRef, typArgs: List[TypeRef]) extends TMethodType with TypeRef
-    {
+    case class TypeRefType(owner: TypeRef, sym: SymbolRef, typArgs: List[TypeRef]) extends TMethodType with TypeRef {
         def params = List()
 
         def returnType = this
@@ -166,48 +181,58 @@ class ScalaSignature(val bytes: Bytes)
 
     case class ThisType(sym: SymbolRef) extends TypeRef
 
-    case class SingleType(owner: TypeRef, sym: SymbolRef) extends TypeRef
-    {
+    case class SingleType(owner: TypeRef, sym: SymbolRef) extends TypeRef {
         override def jName = super.jName + "$"
     }
 
-    case object NoType extends TypeRef
-    {
+    case object NoType extends TypeRef {
         def sym = null
+
         override def name = "<no type>"
     }
 
-    case class SigEntry(index:Int, start: Int, bytes: Bytes)
-    {
+    case class SigEntry(index: Int, start: Int, bytes: Bytes) {
         def id = bytes.arr(start)
+
         def delete() = bytes.arr(start) = 3
-        override def toString = "SigEntry("+index+","+id+","+bytes.len+" bytes)"
+
+        override def toString = "SigEntry(" + index + "," + id + "," + bytes.len + " bytes)"
     }
 
-    trait Literal
-    {
-        def value:Any
+    trait Literal {
+        def value: Any
     }
-    case class BooleanLiteral(value:Boolean) extends Literal
-    case class ByteLiteral(value:Byte) extends Literal
-    case class ShortLiteral(value:Short) extends Literal
-    case class CharLiteral(value:Char) extends Literal
-    case class IntLiteral(value:Int) extends Literal
-    case class LongLiteral(value:Long) extends Literal
-    case class FloatLiteral(value:Float) extends Literal
-    case class DoubleLiteral(value:Double) extends Literal
-    case object NullLiteral extends Literal
-    {
+
+    case class BooleanLiteral(value: Boolean) extends Literal
+
+    case class ByteLiteral(value: Byte) extends Literal
+
+    case class ShortLiteral(value: Short) extends Literal
+
+    case class CharLiteral(value: Char) extends Literal
+
+    case class IntLiteral(value: Int) extends Literal
+
+    case class LongLiteral(value: Long) extends Literal
+
+    case class FloatLiteral(value: Float) extends Literal
+
+    case class DoubleLiteral(value: Double) extends Literal
+
+    case object NullLiteral extends Literal {
         override def value = null
     }
-    case class StringLiteral(value:String) extends Literal
-    case class TypeLiteral(value:TypeRef) extends Literal
-    case class EnumLiteral(value:ExternalSymbol) extends Literal
-    case class ArrayLiteral(value:List[_]) extends Literal
 
-    case class AnnotationInfo(owner:SymbolRef, annType:TypeRef, values:Map[String, Literal])
-    {
-        def getValue[T](name:String) = values(name).asInstanceOf[T]
+    case class StringLiteral(value: String) extends Literal
+
+    case class TypeLiteral(value: TypeRef) extends Literal
+
+    case class EnumLiteral(value: ExternalSymbol) extends Literal
+
+    case class ArrayLiteral(value: List[_]) extends Literal
+
+    case class AnnotationInfo(owner: SymbolRef, annType: TypeRef, values: Map[String, Literal]) {
+        def getValue[T](name: String) = values(name).asInstanceOf[T]
     }
 
     def evalS(i: Int): String = {
@@ -219,8 +244,9 @@ class ScalaSignature(val bytes: Bytes)
             case 3 => NoSymbol.full
             case 9 | 10 =>
                 var s = evalS(bcr.readNat)
-                if (bc.pos + bc.len > bcr.pos)
+                if (bc.pos + bc.len > bcr.pos) {
                     s = evalS(bcr.readNat) + "." + s
+                }
                 s
         }
     }
@@ -240,8 +266,11 @@ class ScalaSignature(val bytes: Bytes)
         val bcr = e.bytes.reader
 
         def nat = bcr.readNat
+
         def evalS = this.evalS(nat)
+
         def evalT[T] = this.evalT[T](nat)
+
         def evalList[T] = this.evalList[T](bcr)
 
         e.id match {
@@ -281,11 +310,11 @@ class ScalaSignature(val bytes: Bytes)
     }
 
     def findObject(name: String) = collect[ObjectSymbol](7).find(_.full == name)
+
     def findClass(name: String) = collect[ClassSymbol](6).find(c => !c.isModule && c.full == name)
 }
 
-class ByteCodeReader(val bc: Bytes)
-{
+class ByteCodeReader(val bc: Bytes) {
     var pos = bc.pos
 
     def more = pos < bc.pos + bc.len
@@ -307,7 +336,7 @@ class ByteCodeReader(val bc: Bytes)
 
     def readLong = {
         var l = 0L
-        while(more) {
+        while (more) {
             l <<= 8
             l |= readByte & 0xFF
         }
@@ -315,15 +344,15 @@ class ByteCodeReader(val bc: Bytes)
     }
 
     def advance[A](len: Int)(r: A) = {
-        if (pos + len > bc.pos + bc.len)
+        if (pos + len > bc.pos + bc.len) {
             throw new IllegalArgumentException("Ran off the end of bytecode")
+        }
         pos += len
         r
     }
 }
 
-object ScalaSigReader
-{
+object ScalaSigReader {
     def decode(s: String) = {
         val bytes = s.getBytes
         bytes take ByteCodecs.decode(bytes)

@@ -2,8 +2,7 @@ package codechicken.multipart.asm
 
 import java.util.{BitSet => JBitSet}
 
-trait ScratchBitSet
-{
+trait ScratchBitSet {
     private val bitSets = new ThreadLocal[JBitSet]
 
     def getBitSet = bitSets.get match {

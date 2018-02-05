@@ -48,8 +48,9 @@ class MaterialRenderHelper {
     }
 
     def lighting() = {
-        if (layer != null)
+        if (layer != null) {
             builder += CCRenderState.instance().lightMatrix
+        }
         this
     }
 
@@ -57,8 +58,8 @@ class MaterialRenderHelper {
 }
 
 /**
-  * Standard micro material class suitable for most blocks.
-  */
+ * Standard micro material class suitable for most blocks.
+ */
 class BlockMicroMaterial(val state: IBlockState, val materialID: String) extends IMicroMaterial {
     val blockKey = state.getPropertyKeys
 
@@ -155,8 +156,8 @@ class BlockMicroMaterial(val state: IBlockState, val materialID: String) extends
 }
 
 /**
-  * Utility functions for cleaner registry code
-  */
+ * Utility functions for cleaner registry code
+ */
 object BlockMicroMaterial {
     def materialKey(block: Block): String =
         materialKey(block.getDefaultState)
@@ -171,8 +172,9 @@ object BlockMicroMaterial {
             while (properties.hasNext) {
                 val (p, v) = properties.next()
                 key += p.getName + "=" + v.toString
-                if (properties.hasNext)
+                if (properties.hasNext) {
                     key += ","
+                }
             }
             key += "]"
         }

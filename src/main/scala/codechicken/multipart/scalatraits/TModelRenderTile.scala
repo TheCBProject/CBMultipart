@@ -13,67 +13,60 @@ import net.minecraftforge.client.ForgeHooksClient
 import scala.collection.mutable.ListBuffer
 
 /**
-  * Mixin implementation for IModelRenderPart.
-  */
-trait TModelRenderTile extends TileMultipartClient
-{
+ * Mixin implementation for IModelRenderPart.
+ */
+trait TModelRenderTile extends TileMultipartClient {
     private var modelPartList = ListBuffer[IModelRenderPart]()
 
-    override def copyFrom(that:TileMultipart)
-    {
+    override def copyFrom(that: TileMultipart) {
         super.copyFrom(that)
         that match {
-            case mt:TModelRenderTile => modelPartList = mt.modelPartList
+            case mt: TModelRenderTile => modelPartList = mt.modelPartList
             case _ =>
         }
     }
 
-    override def bindPart(part:TMultiPart)
-    {
+    override def bindPart(part: TMultiPart) {
         super.bindPart(part)
         part match {
-            case mp:IModelRenderPart => modelPartList += mp
+            case mp: IModelRenderPart => modelPartList += mp
             case _ =>
         }
     }
 
-    override def clearParts()
-    {
+    override def clearParts() {
         super.clearParts()
         modelPartList.clear()
     }
 
-    override def partRemoved(part:TMultiPart, p:Int)
-    {
+    override def partRemoved(part: TMultiPart, p: Int) {
         super.partRemoved(part, p)
         part match {
-            case mp:IModelRenderPart => modelPartList -= mp
+            case mp: IModelRenderPart => modelPartList -= mp
             case _ =>
         }
     }
 
-    override def renderStatic(pos:Vector3, layer:BlockRenderLayer, ccrs:CCRenderState) =
-    {
+    override def renderStatic(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState) = {
         var r = super.renderStatic(pos, layer, ccrs)
 
-        renderModel(modelPartList.filter(_.canRenderInLayer(layer)), {(model, state) =>
+        renderModel(modelPartList.filter(_.canRenderInLayer(layer)), { (model, state) =>
             Minecraft.getMinecraft.getBlockRendererDispatcher.getBlockModelRenderer
-                    .renderModel(getWorld, model, state, getPos, ccrs.getBuffer, true)
+                .renderModel(getWorld, model, state, getPos, ccrs.getBuffer, true)
             r |= true
         })
 
         r
     }
 
-    override def renderDamage(pos:Vector3, texture:TextureAtlasSprite, ccrs:CCRenderState)
-    {
+    override def renderDamage(pos: Vector3, texture: TextureAtlasSprite, ccrs: CCRenderState) {
         Minecraft.getMinecraft.objectMouseOver match {
-            case hit:PartRayTraceResult => partList(hit.partIndex) match {
-                case p:IModelRenderPart =>
-                    renderModel(ListBuffer(p), {(model, state) =>
+            case hit: PartRayTraceResult => partList(hit.partIndex) match {
+                case p: IModelRenderPart =>
+                    renderModel(ListBuffer(p), { (model, state) =>
                         val dm = ForgeHooksClient.getDamageModel(model, texture, state, getWorld, getPos)
                         Minecraft.getMinecraft.getBlockRendererDispatcher.getBlockModelRenderer
-                                .renderModel(getWorld, dm, state, getPos, ccrs.getBuffer, true)
+                            .renderModel(getWorld, dm, state, getPos, ccrs.getBuffer, true)
                     })
                 case _ =>
                     super.renderDamage(pos, texture, ccrs)
@@ -82,8 +75,7 @@ trait TModelRenderTile extends TileMultipartClient
         }
     }
 
-    private def renderModel(list:ListBuffer[IModelRenderPart], f:(IBakedModel, IBlockState) => Unit)
-    {
+    private def renderModel(list: ListBuffer[IModelRenderPart], f: (IBakedModel, IBlockState) => Unit) {
         import MultiPartRegistryClient._
         for (mp <- list) {
             val container = getModelPartContainer(mp)

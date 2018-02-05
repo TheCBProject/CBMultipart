@@ -1,6 +1,6 @@
 package codechicken.microblock
 
-import java.io.{BufferedReader, File, FileReader, IOException, PrintWriter}
+import java.io._
 import java.lang.{Iterable => JIterable}
 
 import codechicken.microblock.BlockMicroMaterial.{createAndRegister, materialKey}
@@ -11,17 +11,17 @@ import net.minecraftforge.fml.common.event.FMLInterModComms.IMCMessage
 import scala.collection.JavaConversions._
 import scala.collection.mutable.{Map => MMap}
 
-object ConfigContent
-{
+object ConfigContent {
     private val nameMap = MMap[String, Seq[Int]]()
 
     def parse(cfgDir: File) {
         val cfgFile = new File(cfgDir, "microblocks.cfg")
         try {
-            if (!cfgFile.exists())
+            if (!cfgFile.exists()) {
                 generateDefault(cfgFile)
-            else
+            } else {
                 loadLines(cfgFile)
+            }
         }
         catch {
             case e: IOException => logger.error("Error parsing config", e)
@@ -39,29 +39,35 @@ object ConfigContent
     }
 
     def loadLine(line: String) {
-        if (line.startsWith("#") || line.length < 3)
+        if (line.startsWith("#") || line.length < 3) {
             return
+        }
 
-        if(line.charAt(0) != '\"')
+        if (line.charAt(0) != '\"') {
             throw new IllegalArgumentException("Line must begin with a quote")
+        }
         val q2 = line.indexOf('\"', 1)
-        if(q2 < 0)
+        if (q2 < 0) {
             throw new IllegalArgumentException("Unmatched quotes")
+        }
 
         var name = line.substring(1, q2)
-        if(!name.contains('.') && !name.contains(':'))
-            name = "minecraft:"+name
+        if (!name.contains('.') && !name.contains(':')) {
+            name = "minecraft:" + name
+        }
 
         var metas = Seq(0)
-        if(line.length > q2+1) {
-            if(line.charAt(q2+1) != ':')
+        if (line.length > q2 + 1) {
+            if (line.charAt(q2 + 1) != ':') {
                 throw new IllegalArgumentException("Name must be followed by a colon separator")
+            }
 
-            metas = line.substring(q2+2).split(",").flatMap{s =>
+            metas = line.substring(q2 + 2).split(",").flatMap { s =>
                 if (s.contains("-")) {
                     val split2 = s.split("-")
-                    if (split2.length != 2)
+                    if (split2.length != 2) {
                         throw new IllegalArgumentException("Invalid - separated range")
+                    }
                     split2(0).toInt to split2(1).toInt
                 }
                 else {
@@ -94,7 +100,7 @@ object ConfigContent
     }
 
     def load() {
-        for(block <- Block.REGISTRY.asInstanceOf[JIterable[Block]]) {
+        for (block <- Block.REGISTRY.asInstanceOf[JIterable[Block]]) {
             val metas = Seq(block.getRegistryName.toString).flatMap(nameMap.remove).flatten
             metas.foreach { m =>
                 val state = block.getStateFromMeta(m)
@@ -103,11 +109,11 @@ object ConfigContent
                     createAndRegister(state)
                     logger.debug("Adding micro material from config: " + materialKey(state))
                 }
-               catch {
+                catch {
                     case e: IllegalStateException => logger.error("Unable to register micro material: " +
                         materialKey(state) + "\n\t" + e.getMessage)
                     case e: Exception =>
-                       logger.error("Unable to register micro material: " + materialKey(state), e)
+                        logger.error("Unable to register micro material: " + materialKey(state), e)
                 }
             }
         }
@@ -122,15 +128,15 @@ object ConfigContent
                 logger.error("Invalid microblock IMC message from " + msg.getSender + ": " + s)
             }
 
-            if (msg.getMessageType != classOf[ItemStack])
+            if (msg.getMessageType != classOf[ItemStack]) {
                 error("value is not an instanceof ItemStack")
-            else {
+            } else {
                 val stack = msg.getItemStackValue
-                if (!Block.REGISTRY.containsKey(stack.getItem.getRegistryName))
+                if (!Block.REGISTRY.containsKey(stack.getItem.getRegistryName)) {
                     error("Invalid Block: " + stack.getItem)
-                else if (stack.getItemDamage < 0 || stack.getItemDamage >= 16)
+                } else if (stack.getItemDamage < 0 || stack.getItemDamage >= 16) {
                     error("Invalid metadata: " + stack.getItemDamage)
-                else {
+                } else {
 
                     val state = Block.getBlockFromItem(stack.getItem).getStateFromMeta(stack.getItemDamage)
 
