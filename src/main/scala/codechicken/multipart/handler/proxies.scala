@@ -6,6 +6,7 @@ import codechicken.lib.config.ConfigFile
 import codechicken.lib.packet.PacketCustom
 import codechicken.lib.world.{TileChunkLoadHook, WorldExtensionManager}
 import codechicken.multipart._
+import codechicken.multipart.scalatraits.TTESRRenderTile
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.ResourceLocation
@@ -34,7 +35,6 @@ class MultipartProxy_serverImpl {
         MultipartGenerator.registerTrait("net.minecraft.util.ITickable", "codechicken.multipart.scalatraits.JTickableTile")
         MultipartGenerator.registerTrait("codechicken.multipart.TSlottedPart", "codechicken.multipart.scalatraits.TSlottedTile")
         MultipartGenerator.registerTrait("net.minecraftforge.common.capabilities.ICapabilityProvider", "codechicken.multipart.scalatraits.JCapabilityProvider")
-        //MultipartGenerator.registerTrait("net.minecraftforge.fluids.IFluidHandler", "codechicken.multipart.scalatraits.TFluidHandlerTile")
         MultipartGenerator.registerTrait("net.minecraft.inventory.IInventory", "codechicken.multipart.scalatraits.JInventoryTile")
         MultipartGenerator.registerTrait("net.minecraft.inventory.ISidedInventory", "codechicken.multipart.scalatraits.JInventoryTile")
         MultipartGenerator.registerTrait("codechicken.multipart.TPartialOcclusionPart", "codechicken.multipart.scalatraits.TPartialOcclusionTile")
@@ -42,6 +42,8 @@ class MultipartProxy_serverImpl {
         MultipartGenerator.registerTrait("codechicken.multipart.IRandomDisplayTickPart", "codechicken.multipart.scalatraits.TRandomDisplayTickTile", null)
         MultipartGenerator.registerTrait("codechicken.multipart.INeighborTileChangePart", null, "codechicken.multipart.scalatraits.TTileChangeTile")
         MultipartGenerator.registerTrait("codechicken.multipart.IModelRenderPart", "codechicken.multipart.scalatraits.TModelRenderTile", null)
+        MultipartGenerator.registerTrait("codechicken.multipart.TDynamicRenderPart", "codechicken.multipart.scalatraits.TTESRRenderTile", null)
+        MultipartGenerator.registerTrait("codechicken.multipart.TFastRenderPart", "codechicken.multipart.scalatraits.TTESRRenderTile", null)
 
         MultipartSaveLoad.load()
     }
@@ -89,14 +91,15 @@ class MultipartProxy_clientImpl extends MultipartProxy_serverImpl {
         MinecraftForge.EVENT_BUS.register(ControlKeyHandler)
         ClientRegistry.registerKeyBinding(ControlKeyHandler)
 
-        MultipartRenderer.register()
+        MultipartRenderer.init()
     }
 
     @SideOnly(Side.CLIENT)
     override def onTileClassBuilt(t: Class[_ <: TileEntity]) {
         super.onTileClassBuilt(t)
-        ClientRegistry.bindTileEntitySpecialRenderer(t.asInstanceOf[Class[TileEntity]],
-            MultipartRenderer.asInstanceOf[TileEntitySpecialRenderer[TileEntity]])
+        if(classOf[TTESRRenderTile].isAssignableFrom(t)) {
+            ClientRegistry.bindTileEntitySpecialRenderer(t.asInstanceOf[Class[TileEntity]], MultipartRenderer.asInstanceOf[TileEntitySpecialRenderer[TileEntity]])
+        }
     }
 
     @SubscribeEvent

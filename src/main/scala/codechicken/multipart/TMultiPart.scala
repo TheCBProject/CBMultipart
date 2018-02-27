@@ -275,11 +275,6 @@ abstract class TMultiPart {
     def scheduleTick(ticks: Int) = TickScheduler.scheduleTick(this, ticks)
 
     /**
-     * @return A Cuboid6 bounding the render of this part for frustum culling. The bounds are relative to the tile coordinates.
-     */
-    def getRenderBounds = Cuboid6.full
-
-    /**
      * Add particles and other effects when a player is mining this part
      *
      * @param hit An instance of ExtendedMOP from collisionRayTrace
@@ -294,58 +289,6 @@ abstract class TMultiPart {
      */
     @SideOnly(Side.CLIENT)
     def addDestroyEffects(hit: CuboidRayTraceResult, manager: ParticleManager) {}
-
-    /**
-     * If true, this entity will be bulk-rendered through renderFast. Otherwise,
-     * it will be rendererd through renderDynamic
-     */
-    def canRenderFast = false
-
-    /**
-     * Render the dynamic, changing faces of this part as in a FastTESR. You can
-     * use this only if you dont need to mess with the GL state. Otherwise, use
-     * the renderDynamic method instead. This method is only called if canRenderFast
-     * returns true.
-     *
-     * CCRenderState is set up as follows should you wish to use it:
-     *  - CCRenderState.reset() has been called
-     *  - The current buffer is bound
-     *
-     * Otherwise an instance of the VertexBuffer can be retrieved from
-     * CCRenderState via CCRenderState.getBuffer()
-     *
-     * NOTE: The tessellator is already drawing. DO NOT make draw calls or
-     * mess with the GL state
-     *
-     * This may be called on a ChunkBatching thread. Please make sure
-     * Everything you do is Thread Safe.
-     *
-     * @param pos   The position of this block space relative to the renderer, same as x, y, z passed to TESR.
-     * @param pass  The render pass, 1 or 0
-     * @param frame The partial interpolation frame value for animations between ticks
-     * @param ccrs  The instance of CCRenderState to use.
-     */
-    @SideOnly(Side.CLIENT)
-    def renderFast(pos: Vector3, pass: Int, frame: Float, ccrs: CCRenderState) {}
-
-    /**
-     * Render the dynamic, changing faces of this part and other gfx as in a TESR.
-     * If you do not need to mess with GL states, you can use the renderFast method
-     * instead. This method is only called if canRenderFast returns false.
-     *
-     * CCRenderState is set up as follows should you wish to use it:
-     *  - CCRenderState.reset() has been called
-     *  - The current buffer is bound
-     *
-     * NOTE: The tessellator is not drawing. You need to start it and make draw calls
-     * if it is to be used.
-     *
-     * @param pos   The position of this block space relative to the renderer, same as x, y, z passed to TESR.
-     * @param pass  The render pass, 1 or 0
-     * @param frame The partial interpolation frame value for animations between ticks
-     */
-    @SideOnly(Side.CLIENT)
-    def renderDynamic(pos: Vector3, pass: Int, frame: Float) {}
 
     /**
      * Render the static, unmoving faces of this part into the world renderer.

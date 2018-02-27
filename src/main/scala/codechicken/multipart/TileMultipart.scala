@@ -518,7 +518,6 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
 }
 
 trait TileMultipartClient extends TileMultipart {
-    override def hasFastRenderer = partList.forall(_.canRenderFast)
 
     def renderStatic(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState) = partList.count(_.renderStatic(pos, layer, ccrs)) > 0
 
@@ -528,14 +527,6 @@ trait TileMultipartClient extends TileMultipart {
                 partList(hit.partIndex).renderBreaking(pos, texture, ccrs)
             case _ =>
         }
-    }
-
-    def renderFast(pos: Vector3, pass: Int, frame: Float, ccrs: CCRenderState) {
-        partList.filter(_.canRenderFast).foreach(_.renderFast(pos, pass, frame, ccrs))
-    }
-
-    def renderDynamic(pos: Vector3, pass: Int, frame: Float) {
-        partList.filter(!_.canRenderFast).foreach(_.renderDynamic(pos, pass, frame))
     }
 
     def randomDisplayTick(random: Random) {}
@@ -562,14 +553,6 @@ trait TileMultipartClient extends TileMultipart {
             case null =>
             case part => part.addDestroyEffects(hit, manager)
         }
-    }
-
-    override def shouldRenderInPass(pass: Int) = true
-
-    override def getRenderBoundingBox = {
-        val c = Cuboid6.full.copy
-        partList.foreach(part => c.enclose(part.getRenderBounds))
-        c.add(Vector3.fromTile(this)).aabb
     }
 }
 

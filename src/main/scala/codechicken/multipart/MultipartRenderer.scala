@@ -2,75 +2,85 @@ package codechicken.multipart
 
 import java.util.{HashMap => JHashMap, Map => JMap}
 
+import codechicken.lib.reflect.{ObfMapping, ReflectionManager}
 import codechicken.lib.render.CCRenderState
 import codechicken.lib.render.block.{BlockRenderingRegistry, ICCBlockRenderer}
 import codechicken.lib.texture.TextureUtils
 import codechicken.lib.vec.Vector3
 import codechicken.multipart.BlockMultipart._
+import codechicken.multipart.scalatraits.TTESRRenderTile
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.block.model._
 import net.minecraft.client.renderer.block.statemap.DefaultStateMapper
 import net.minecraft.client.renderer.texture.{TextureAtlasSprite, TextureMap}
-import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
+import net.minecraft.client.renderer.tileentity.{TileEntityRendererDispatcher, TileEntitySpecialRenderer}
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
-import net.minecraft.client.renderer.{BufferBuilder, GlStateManager, RenderHelper}
+import net.minecraft.client.renderer.{BufferBuilder, GlStateManager, RenderHelper, Tessellator}
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IBlockAccess
 import net.minecraftforge.client.MinecraftForgeClient
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import org.lwjgl.opengl.GL11
 
+import scala.collection.JavaConversions._
+
 /**
  * Internal class for rendering callbacks. Should be moved to the handler package
  */
 @SideOnly(Side.CLIENT)
-object MultipartRenderer extends TileEntitySpecialRenderer[TileMultipartClient] with ICCBlockRenderer {
+object MultipartRenderer extends TileEntitySpecialRenderer[TTESRRenderTile] with ICCBlockRenderer {
     val renderType = BlockRenderingRegistry.createRenderType("fmpcbe_mpblock")
+    var batchBuffer: Tessellator = null
 
-    def register() {
+    def init() {
         BlockRenderingRegistry.registerRenderer(renderType, this)
+        val mapping = new ObfMapping("net/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher", "batchBuffer", "net/minecraft/client/renderer/Tessellator")
+        batchBuffer = ReflectionManager.getField(mapping, TileEntityRendererDispatcher.instance, classOf[Tessellator])
     }
 
 
-    override def render(tile: TileMultipartClient, x: Double, y: Double, z: Double, frame: Float, destroyStage: Int, alpha: Float) {
-        if (tile.partList.isEmpty) {
-            return
-        }
+    override def render(tile: TTESRRenderTile, x: Double, y: Double, z: Double, delta: Float, destroyStage: Int, alpha: Float) {
+        val pos = new Vector3(x, y, z)
+        val pass = MinecraftForgeClient.getRenderPass
         val ccrs = CCRenderState.instance()
         ccrs.reset()
-        tile.renderDynamic(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame)
+        if (tile.fastRenderParts.nonEmpty) {
+            //Whoo batch buffer is drawing, Lets use that.
+            if (batchBuffer != null && batchBuffer.getBuffer.isDrawing) {
+                ccrs.bind(batchBuffer.getBuffer)
+                tile.renderFast(pos, pass, delta, ccrs)
+            } else { //K.. Emulate the fast tesr.
+                //Set GL state
+                import GL11._
+                GlStateManager.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+                GlStateManager.enableBlend()
+                GlStateManager.disableCull()
+                GlStateManager.shadeModel(if (Minecraft.isAmbientOcclusionEnabled) GL_SMOOTH else GL_FLAT)
 
-        //Simulate fast render
-        import GL11._
+                //Set MC Render state
+                RenderHelper.disableStandardItemLighting()
+                TextureUtils.bindBlockTexture()
 
-        //Set GL state
-        GlStateManager.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        GlStateManager.enableBlend()
-        GlStateManager.disableCull()
-        GlStateManager.shadeModel(if (Minecraft.isAmbientOcclusionEnabled) GL_SMOOTH else GL_FLAT)
+                //Render through CC render pipeline
+                ccrs.reset()
+                ccrs.startDrawing(GL_QUADS, DefaultVertexFormats.BLOCK)
+                tile.renderFast(pos, pass, delta, ccrs)
+                ccrs.getBuffer.setTranslation(0, 0, 0)
+                ccrs.draw()
 
-        //Set MC Render state
-        RenderHelper.disableStandardItemLighting()
-        TextureUtils.bindBlockTexture()
-
-        //Render through CC render pipeline
-        ccrs.reset()
-        ccrs.startDrawing(GL_QUADS, DefaultVertexFormats.BLOCK)
-        tile.renderFast(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame, ccrs)
-        ccrs.getBuffer.setTranslation(0, 0, 0)
-        ccrs.draw()
-
-        //Reset MC Render state
-        RenderHelper.enableStandardItemLighting()
-        GlStateManager.enableCull()
-        GlStateManager.disableBlend()
+                //Reset MC Render state
+                RenderHelper.enableStandardItemLighting()
+                GlStateManager.enableCull()
+                GlStateManager.disableBlend()
+            }
+        }
+        if (tile.dynamicRenderParts.nonEmpty) {
+            tile.renderDynamic(pos, pass, delta)
+        }
     }
 
-    override def renderTileEntityFast(tile: TileMultipartClient, x: Double, y: Double, z: Double, frame: Float, destroyStage: Int, alpha: Float, buffer: BufferBuilder) {
-        if (tile.partList.isEmpty) {
-            return
-        }
+    override def renderTileEntityFast(tile: TTESRRenderTile, x: Double, y: Double, z: Double, frame: Float, destroyStage: Int, alpha: Float, buffer: BufferBuilder) {
         val ccrs = CCRenderState.instance()
         ccrs.reset()
         ccrs.bind(buffer)
