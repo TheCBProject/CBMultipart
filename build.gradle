@@ -51,7 +51,7 @@ repositories {
 
 dependencies {
 	compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
-	pack "codechicken:ChickenASM:${config.mc_version}-${config.cc_asm_version}"
+	pack "codechicken:ChickenASM:1.12-${config.cc_asm_version}"
 }
 
 version = "${project.config.mod_version}." + System.getenv("BUILD_NUMBER") ?: "1"
@@ -85,7 +85,7 @@ processResources {
 version = "${project.minecraft.version}-${project.version}"
 
 def commonManifest = {
-	attributes 'ContainedDeps': "ChickenASM-${config.mc_version}-${config.cc_asm_version}.jar"
+	attributes 'ContainedDeps': "ChickenASM-1.12-${config.cc_asm_version}.jar"
 }
 
 jar {
