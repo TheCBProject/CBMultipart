@@ -17,6 +17,7 @@ import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable.{ListBuffer, Map => MMap}
 
 /**
@@ -43,14 +44,18 @@ object MultiPartRegistry {
     /**
      * Registers an IPartFactory for an array of types it is capable of instantiating. Must be called before postInit
      */
-    def registerParts(partFactory: IPartFactory, types: Array[ResourceLocation]) {
+    def registerParts(partFactory: IPartFactory, types: collection.Iterable[ResourceLocation]) {
         registerParts(partFactory.createPart _, types)
+    }
+
+    def registerParts(partFactory: IPartFactory, types: Iterable[ResourceLocation]) {
+        registerParts(partFactory.createPart _, types.asScala)
     }
 
     /**
      * Scala functional version of registerParts. Must be called before postInit
      */
-    def registerParts(partFactory: (ResourceLocation, Boolean) => TMultiPart, types: Array[ResourceLocation]) {
+    def registerParts(partFactory: (ResourceLocation, Boolean) => TMultiPart, types: collection.Iterable[ResourceLocation]) {
         registerParts(new IDynamicPartFactory {
             override def createPartServer(name: ResourceLocation, tag: NBTTagCompound) = partFactory(name, false)
 
@@ -58,10 +63,14 @@ object MultiPartRegistry {
         }, types)
     }
 
+    def registerParts(partFactory: (ResourceLocation, Boolean) => TMultiPart, types: Iterable[ResourceLocation]) {
+        registerParts(partFactory, types.asScala)
+    }
+
     /**
      * Registers an IDynamicPartFactory with an array of types it is capable of instantiating. Must be called before postInit
      */
-    def registerParts(partFactory: IDynamicPartFactory, types: Array[ResourceLocation]) {
+    def registerParts(partFactory: IDynamicPartFactory, types: collection.Iterable[ResourceLocation]) {
         if (loaded) {
             throw new IllegalStateException("Parts must be registered in the init methods.")
         }
@@ -79,6 +88,10 @@ object MultiPartRegistry {
 
             nameToFactory.put(s, partFactory)
         }
+    }
+
+    def registerParts(partFactory: IDynamicPartFactory, types: Iterable[ResourceLocation]) {
+        registerParts(partFactory, types.asScala)
     }
 
     /**

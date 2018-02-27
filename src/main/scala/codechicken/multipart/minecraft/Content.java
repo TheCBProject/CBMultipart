@@ -12,13 +12,18 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
 public class Content implements IPartFactory, IPartConverter {
 
-	private static final ResourceLocation TORCH = new ResourceLocation("minecraft:torch");
-	private static final ResourceLocation LEVER = new ResourceLocation("minecraft:lever");
-	private static final ResourceLocation BUTTON = new ResourceLocation("minecraft:button");
-	private static final ResourceLocation REDTORCH = new ResourceLocation("minecraft:redtorch");
-	//@formatter:off
+    private static final ResourceLocation TORCH = new ResourceLocation("minecraft:torch");
+    private static final ResourceLocation LEVER = new ResourceLocation("minecraft:lever");
+    private static final ResourceLocation BUTTON = new ResourceLocation("minecraft:button");
+    private static final ResourceLocation REDTORCH = new ResourceLocation("minecraft:redtorch");
+    private static final Map<ResourceLocation, Supplier<TMultiPart>> parts = new HashMap<>();
+    //@formatter:off
     private static final Block[] supported_blocks = {
             Blocks.TORCH,
             Blocks.LEVER,
@@ -27,51 +32,48 @@ public class Content implements IPartFactory, IPartConverter {
     };
     //@formatter:on
 
-	@Override
-	public TMultiPart createPart(ResourceLocation name, boolean client) {
-		if (name.equals(TORCH)) {
-			return new TorchPart();
-		}
-		if (name.equals(LEVER)) {
-			return new LeverPart();
-		}
-		if (name.equals(BUTTON)) {
-			return new ButtonPart();
-		}
-		if (name.equals(REDTORCH)) {
-			return new RedstoneTorchPart();
-		}
+    static {
+        parts.put(TORCH, TorchPart::new);
+        parts.put(LEVER, LeverPart::new);
+        parts.put(BUTTON, ButtonPart::new);
+        parts.put(REDTORCH, RedstoneTorchPart::new);
+    }
 
-		return null;
-	}
+    @Override
+    public TMultiPart createPart(ResourceLocation name, boolean client) {
+        if (parts.containsKey(name)) {
+            return parts.get(name).get();
+        }
+        return null;
+    }
 
-	public void init() {
-		MultiPartRegistry.registerConverter(this);
-		MultiPartRegistry.registerParts(this, new ResourceLocation[] { TORCH, LEVER, BUTTON, REDTORCH });
-	}
+    public void init() {
+        MultiPartRegistry.registerConverter(this);
+        MultiPartRegistry.registerParts(this, parts.keySet());
+    }
 
-	@Override
-	public boolean canConvert(World world, BlockPos pos, IBlockState state) {
-		return ArrayUtils.contains(supported_blocks, state.getBlock());
-	}
+    @Override
+    public boolean canConvert(World world, BlockPos pos, IBlockState state) {
+        return ArrayUtils.contains(supported_blocks, state.getBlock());
+    }
 
-	@Override
-	public TMultiPart convert(World world, BlockPos pos, IBlockState state) {
-		Block b = state.getBlock();
+    @Override
+    public TMultiPart convert(World world, BlockPos pos, IBlockState state) {
+        Block b = state.getBlock();
 
-		if (b == Blocks.TORCH) {
-			return new TorchPart(state);
-		}
-		if (b == Blocks.LEVER) {
-			return new LeverPart(state);
-		}
-		if (b == Blocks.STONE_BUTTON || b == Blocks.WOODEN_BUTTON) {
-			return new ButtonPart(state);
-		}
-		if (b == Blocks.REDSTONE_TORCH || b == Blocks.UNLIT_REDSTONE_TORCH) {
-			return new RedstoneTorchPart(state);
-		}
+        if (b == Blocks.TORCH) {
+            return new TorchPart(state);
+        }
+        if (b == Blocks.LEVER) {
+            return new LeverPart(state);
+        }
+        if (b == Blocks.STONE_BUTTON || b == Blocks.WOODEN_BUTTON) {
+            return new ButtonPart(state);
+        }
+        if (b == Blocks.REDSTONE_TORCH || b == Blocks.UNLIT_REDSTONE_TORCH) {
+            return new RedstoneTorchPart(state);
+        }
 
-		return null;
-	}
+        return null;
+    }
 }
