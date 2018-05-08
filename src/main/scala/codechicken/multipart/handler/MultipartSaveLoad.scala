@@ -25,7 +25,7 @@ object MultipartSaveLoad {
         override def writeToNBT(compound: NBTTagCompound) = super.writeToNBT(tag)
 
         override def onLoad() {
-            val newTile = TileMultipart.createFromNBT(tag)
+            val newTile = TileMultipart.createFromNBT(tag, world)
             world.setTileEntity(pos, newTile)
         }
     }

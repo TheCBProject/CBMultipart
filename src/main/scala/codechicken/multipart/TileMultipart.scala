@@ -685,7 +685,9 @@ object TileMultipart {
     /**
      * Creates this tile from an NBT tag
      */
-    def createFromNBT(tag: NBTTagCompound): TileMultipart = {
+    @deprecated("Use world sensitive version bellow.")
+    def createFromNBT(tag: NBTTagCompound) = createFromNBT(tag, null)
+    def createFromNBT(tag: NBTTagCompound, world:World): TileMultipart = {
         val partList = tag.getTagList("parts", 10)
         val parts = ListBuffer[TMultiPart]()
 
@@ -702,6 +704,7 @@ object TileMultipart {
         if (parts.isEmpty) return null
 
         val tmb = MultipartGenerator.generateCompositeTile(null, parts, false)
+        tmb.setWorldCreate(world)
         tmb.readFromNBT(tag)
         tmb.loadParts(parts)
         tmb
