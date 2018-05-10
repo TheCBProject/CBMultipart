@@ -704,7 +704,6 @@ object TileMultipart {
         if (parts.isEmpty) return null
 
         val tmb = MultipartGenerator.generateCompositeTile(null, parts, false)
-        tmb.setWorldCreate(world)
         tmb.readFromNBT(tag)
         tmb.loadParts(parts)
         tmb

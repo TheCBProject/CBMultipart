@@ -26,6 +26,7 @@ object MultipartSaveLoad {
 
         override def onLoad() {
             val newTile = TileMultipart.createFromNBT(tag, world)
+            newTile.validate()
             world.setTileEntity(pos, newTile)
         }
     }
