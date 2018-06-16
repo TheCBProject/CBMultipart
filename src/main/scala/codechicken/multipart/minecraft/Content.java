@@ -18,11 +18,11 @@ import java.util.function.Supplier;
 
 public class Content implements IPartFactory, IPartConverter {
 
-    private static final ResourceLocation TORCH = new ResourceLocation("minecraft:torch");
-    private static final ResourceLocation LEVER = new ResourceLocation("minecraft:lever");
-    private static final ResourceLocation BUTTON = new ResourceLocation("minecraft:button");
-    private static final ResourceLocation REDTORCH = new ResourceLocation("minecraft:redtorch");
-    private static final Map<ResourceLocation, Supplier<TMultiPart>> parts = new HashMap<>();
+    public static final ResourceLocation TORCH = new ResourceLocation("minecraft:torch");
+    public static final ResourceLocation LEVER = new ResourceLocation("minecraft:lever");
+    public static final ResourceLocation BUTTON = new ResourceLocation("minecraft:button");
+    public static final ResourceLocation REDTORCH = new ResourceLocation("minecraft:redtorch");
+    public static final Map<ResourceLocation, Supplier<TMultiPart>> parts = new HashMap<>();
     //@formatter:off
     private static final Block[] supported_blocks = {
             Blocks.TORCH,

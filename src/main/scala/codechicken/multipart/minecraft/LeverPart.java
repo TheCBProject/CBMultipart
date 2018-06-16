@@ -47,7 +47,7 @@ public class LeverPart extends McSidedMetaPart implements IFaceRedstonePart {
 
 	@Override
 	public ResourceLocation getType() {
-		return new ResourceLocation("minecraft:lever");
+		return Content.LEVER;
 	}
 
 	public boolean active() {

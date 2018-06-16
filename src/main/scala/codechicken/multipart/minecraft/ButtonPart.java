@@ -32,7 +32,7 @@ public class ButtonPart extends McSidedMetaPart implements IFaceRedstonePart {
 
 	@Override
 	public ResourceLocation getType() {
-		return new ResourceLocation("minecraft:button");
+		return Content.BUTTON;
 	}
 
 	@Override

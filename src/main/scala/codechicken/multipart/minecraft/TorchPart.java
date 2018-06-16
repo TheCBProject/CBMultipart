@@ -30,7 +30,7 @@ public class TorchPart extends McSidedMetaPart implements IRandomDisplayTickPart
 
 	@Override
 	public ResourceLocation getType() {
-		return new ResourceLocation("minecraft:torch");
+		return Content.TORCH;
 	}
 
 	@Override

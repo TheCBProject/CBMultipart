@@ -72,6 +72,8 @@ object MultipartCPH extends MultipartPH with IClientPacketHandler {
 
 object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshakeHandler {
 
+    @Deprecated
+    //Now exists in CCL.
     class MCByteStream(bout: ByteArrayOutputStream) extends MCDataOutputWrapper(new DataOutputStream(bout)) {
         def getBytes = bout.toByteArray
     }

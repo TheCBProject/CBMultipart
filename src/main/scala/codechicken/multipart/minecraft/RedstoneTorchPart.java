@@ -42,7 +42,7 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
 
 	@Override
 	public ResourceLocation getType() {
-		return new ResourceLocation("minecraft:redstone_torch");
+		return Content.REDTORCH;
 	}
 
 	@Override
