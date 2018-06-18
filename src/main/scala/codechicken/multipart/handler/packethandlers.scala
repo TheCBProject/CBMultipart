@@ -74,8 +74,8 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
 
     @Deprecated
     //Now exists in CCL.
-    class MCByteStream(bout: ByteArrayOutputStream) extends MCDataOutputWrapper(new DataOutputStream(bout)) {
-        def getBytes = bout.toByteArray
+    class MCByteStream(bout: ByteArrayOutputStream) extends codechicken.lib.data.MCByteStream(bout) {
+        override def getBytes = bout.toByteArray
     }
 
     private val updateMap = MMap[World, MMap[BlockPos, MCByteStream]]()
