@@ -66,7 +66,7 @@ object TickScheduler extends WorldExtensionInstantiator {
         def saveDir: File = {
             if (world.provider.getDimension == 0) //Calling DimensionManager.getCurrentSaveRootDirectory too early breaks game saves, we have a world reference, use it
             {
-                return world.getSaveHandler.asInstanceOf[SaveHandler].getWorldDirectory
+                return world.getSaveHandler.getWorldDirectory
             }
 
             return new File(DimensionManager.getCurrentSaveRootDirectory, world.provider.getSaveFolder)
