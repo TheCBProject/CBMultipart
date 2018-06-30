@@ -48,8 +48,11 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TTESRRenderTile] with
         if (tile.fastRenderParts.nonEmpty) {
             //Whoo batch buffer is drawing, Lets use that.
             if (batchBuffer != null && batchBuffer.getBuffer.isDrawing) {
-                ccrs.bind(batchBuffer.getBuffer)
+                val buffer = batchBuffer.getBuffer
+                buffer.setTranslation(0, 0, 0)
+                ccrs.bind(buffer)
                 tile.renderFast(pos, pass, delta, ccrs)
+                buffer.setTranslation(0, 0, 0)
             } else { //K.. Emulate the fast tesr.
                 //Set GL state
                 import GL11._
@@ -83,8 +86,10 @@ object MultipartRenderer extends TileEntitySpecialRenderer[TTESRRenderTile] with
     override def renderTileEntityFast(tile: TTESRRenderTile, x: Double, y: Double, z: Double, frame: Float, destroyStage: Int, alpha: Float, buffer: BufferBuilder) {
         val ccrs = CCRenderState.instance()
         ccrs.reset()
+        buffer.setTranslation(0, 0, 0)
         ccrs.bind(buffer)
         tile.renderFast(new Vector3(x, y, z), MinecraftForgeClient.getRenderPass, frame, ccrs)
+        buffer.setTranslation(0, 0, 0)
     }
 
     override def renderBlock(world: IBlockAccess, pos: BlockPos, state: IBlockState, buffer: BufferBuilder) =
