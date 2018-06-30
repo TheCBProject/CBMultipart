@@ -61,7 +61,7 @@ trait TModelRenderTile extends TileMultipartClient {
 
     override def renderDamage(pos: Vector3, texture: TextureAtlasSprite, ccrs: CCRenderState) {
         Minecraft.getMinecraft.objectMouseOver match {
-            case hit: PartRayTraceResult => partList(hit.partIndex) match {
+            case hit: PartRayTraceResult if partList.isDefinedAt(hit.partIndex) => partList(hit.partIndex) match {
                 case p: IModelRenderPart =>
                     renderModel(ListBuffer(p), { (model, state) =>
                         val dm = ForgeHooksClient.getDamageModel(model, texture, state, getWorld, getPos)

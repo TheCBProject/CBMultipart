@@ -523,7 +523,7 @@ trait TileMultipartClient extends TileMultipart {
 
     def renderDamage(pos: Vector3, texture: TextureAtlasSprite, ccrs: CCRenderState) {
         Minecraft.getMinecraft.objectMouseOver match {
-            case hit: PartRayTraceResult =>
+            case hit: PartRayTraceResult if partList.isDefinedAt(hit.partIndex) =>
                 partList(hit.partIndex).renderBreaking(pos, texture, ccrs)
             case _ =>
         }
