@@ -211,7 +211,7 @@ class BlockMultipart extends Block(Material.ROCK) {
     override def onNeighborChange(world: IBlockAccess, pos: BlockPos, neighbor: BlockPos) {
         getTile(world, pos) match {
             case null =>
-            case tile => tile.onNeighborTileChange(pos)
+            case tile => tile.onNeighborTileChange(neighbor)
         }
     }
 
