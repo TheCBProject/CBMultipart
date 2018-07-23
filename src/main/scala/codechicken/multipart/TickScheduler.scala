@@ -4,11 +4,10 @@ import java.io.{DataOutputStream, File, FileInputStream, FileOutputStream}
 
 import codechicken.lib.world.{ChunkExtension, WorldExtension, WorldExtensionInstantiator}
 import net.minecraft.nbt.{CompressedStreamTools, NBTTagCompound, NBTTagList}
+import net.minecraft.server.MinecraftServer
 import net.minecraft.util.math.ChunkPos
 import net.minecraft.world.World
 import net.minecraft.world.chunk.Chunk
-import net.minecraft.world.storage.SaveHandler
-import net.minecraftforge.common.DimensionManager
 
 import scala.collection.mutable.{HashSet, ListBuffer}
 
@@ -19,6 +18,12 @@ import scala.collection.mutable.{HashSet, ListBuffer}
  * These parts should not depend on a state of another part that may have changed before/after them.
  */
 object TickScheduler extends WorldExtensionInstantiator {
+
+    var serverDir:File = _
+
+    def onServerStarting(server:MinecraftServer) {
+        serverDir = server.getActiveAnvilConverter.getFile(server.getFolderName, "")
+    }
 
     class PartTickEntry(val part: TMultiPart, var time: Long, var random: Boolean) {
         def this(part: TMultiPart, ticks: Int) = this(part, ticks, false)
@@ -64,12 +69,10 @@ object TickScheduler extends WorldExtensionInstantiator {
         }
 
         def saveDir: File = {
-            if (world.provider.getDimension == 0) //Calling DimensionManager.getCurrentSaveRootDirectory too early breaks game saves, we have a world reference, use it
-            {
-                return world.getSaveHandler.getWorldDirectory
+            if (world.provider.getDimension == 0) {
+                return serverDir
             }
-
-            return new File(DimensionManager.getCurrentSaveRootDirectory, world.provider.getSaveFolder)
+            new File(serverDir, world.provider.getSaveFolder)
         }
 
         def saveFile: File = new File(saveDir, "multipart.dat")

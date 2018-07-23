@@ -1,7 +1,7 @@
 package codechicken.multipart.handler
 
 import codechicken.lib.CodeChickenLib
-import codechicken.multipart.{MultiPartRegistry, WrappedTileEntityRegistry}
+import codechicken.multipart.{MultiPartRegistry, TickScheduler, WrappedTileEntityRegistry}
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.common.event._
@@ -32,6 +32,7 @@ object MultipartMod {
 
     @EventHandler
     def beforeServerStart(event: FMLServerAboutToStartEvent) {
+        TickScheduler.onServerStarting(event.getServer)
         MultiPartRegistry.beforeServerStart()
     }
 }
