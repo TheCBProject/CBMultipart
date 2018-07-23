@@ -2,7 +2,7 @@ package codechicken.multipart.handler
 
 import codechicken.multipart.{BlockMultipart, TileCache, TileMultipart}
 import net.minecraft.util.math.RayTraceResult
-import net.minecraftforge.client.event.{DrawBlockHighlightEvent, ModelBakeEvent}
+import net.minecraftforge.client.event.DrawBlockHighlightEvent
 import net.minecraftforge.event.world._
 import net.minecraftforge.fml.common.FMLCommonHandler
 import net.minecraftforge.fml.common.eventhandler.{EventPriority, SubscribeEvent}
@@ -12,6 +12,7 @@ import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import scala.collection.JavaConversions._
 
 object MultipartEventHandler {
+
     @SubscribeEvent
     def worldUnLoad(event: WorldEvent.Unload) {
         MultipartSPH.onWorldUnload(event.getWorld)
@@ -46,14 +47,5 @@ object MultipartEventHandler {
                 event.setCanceled(true)
             }
         }
-    }
-
-    @SubscribeEvent
-    @SideOnly(Side.CLIENT)
-    def onModelBake(event: ModelBakeEvent) {
-        //        event.getModelRegistry.putObject(
-        //            new ModelResourceLocation(Block.REGISTRY.getNameForObject(MultipartProxy.block).toString),
-        //            MultipartTileModel
-        //        )
     }
 }
