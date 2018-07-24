@@ -34,17 +34,22 @@ trait TCapabilityProvider extends TileMultipart {
 
     override def bindPart(part: TMultiPart) {
         super.bindPart(part)
-        var rebuild = false
         part match {
             case p: ICapabilityProvider =>
                 caps += p
-                rebuild = true
+                rebuildSlotMap()
 
             case _ =>
         }
+    }
 
-        if (rebuild) {
-            rebuildSlotMap()
+    override def partRemoved(part: TMultiPart, p: Int) {
+        part match {
+            case p: ICapabilityProvider =>
+                caps -= p
+                rebuildSlotMap()
+
+            case _ =>
         }
     }
 
@@ -63,6 +68,7 @@ trait TCapabilityProvider extends TileMultipart {
                 if (p.hasCapability(ITEM_CAP, f)) {
                     val list = invMap.getOrElse(f, new JLinkedList[IItemHandler]())
                     list.add(ITEM_CAP.cast(p.getCapability(ITEM_CAP, f)))
+                    invMap += f -> list
                 }
             }
             if (p.hasCapability(ITEM_CAP, null)) {
@@ -76,16 +82,12 @@ trait TCapabilityProvider extends TileMultipart {
     }
 
     override def hasCapability(capability: Capability[_], side: EnumFacing): Boolean = {
-        if (capability == ITEM_CAP) {
-            true
-        } else {
-            for (c <- caps) {
-                if (c.hasCapability(capability, side)) {
-                    return true
-                }
+        for (c <- caps) {
+            if (c.hasCapability(capability, side)) {
+                return true
             }
-            super.hasCapability(capability, side)
         }
+        super.hasCapability(capability, side)
     }
 
     override def getCapability[T](capability: Capability[T], side: EnumFacing): T = capability match {
