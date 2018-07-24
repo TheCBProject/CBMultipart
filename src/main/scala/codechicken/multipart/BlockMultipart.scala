@@ -4,6 +4,7 @@ import java.util.{Random, ArrayList => JArrayList, EnumSet => JEnumSet, List => 
 
 import codechicken.lib.raytracer.{CuboidRayTraceResult, RayTracer}
 import codechicken.lib.vec.Vector3
+import codechicken.multipart.handler.MultipartSaveLoad.TileNBTContainer
 import net.minecraft.block.Block
 import net.minecraft.block.material.Material
 import net.minecraft.block.state.{BlockFaceShape, IBlockState}
@@ -63,6 +64,8 @@ class BlockMultipart extends Block(Material.ROCK) {
     import BlockMultipart._
 
     override def hasTileEntity(state: IBlockState) = true
+
+    override def createTileEntity(world: World, state: IBlockState) = if(!world.isRemote) new TileNBTContainer else null
 
     override def isBlockNormalCube(state: IBlockState) = false
 

@@ -13,6 +13,11 @@ import scala.collection.JavaConversions._
 
 object MultipartEventHandler {
 
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    def chunkDataLoad(event:ChunkDataEvent.Load) {
+        MultipartSaveLoad.loadTiles(event.getChunk)
+    }
+
     @SubscribeEvent
     def worldUnLoad(event: WorldEvent.Unload) {
         MultipartSPH.onWorldUnload(event.getWorld)
