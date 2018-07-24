@@ -52,6 +52,7 @@ repositories {
 dependencies {
 	compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
 	pack "codechicken:ChickenASM:1.12-${config.cc_asm_version}"
+    compile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
 }
 
 version = "${project.config.mod_version}." + System.getenv("BUILD_NUMBER") ?: "1"

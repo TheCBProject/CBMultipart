@@ -39,6 +39,7 @@ class MicroblockProxy_serverImpl {
     var stoneRod: Item = _
 
     var useSawIcons: Boolean = _
+    var showAllMicroparts:Boolean = _
 
     def preInit() {
         itemMicro = new ItemMicroPart
@@ -55,6 +56,7 @@ class MicroblockProxy_serverImpl {
         MinecraftForge.EVENT_BUS.register(MicroblockEventHandler)
 
         useSawIcons = config.getTag("useSawIcons").setComment("Set to true to use mc style icons for the saw instead of the 3D model").getBooleanValue(false)
+        showAllMicroparts = config.getTag("showAllMicroparts").setComment("Set this to true to show all MicroParts in JEI. By default only Stone is shown.").getBooleanValue(false)
     }
 
     protected var saws = mutable.MutableList[Item]()
