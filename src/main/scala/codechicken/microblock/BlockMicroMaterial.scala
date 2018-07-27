@@ -75,7 +75,7 @@ class BlockMicroMaterial(val state: IBlockState, val materialID: String) extends
         def getSideIcon(state: IBlockState, s: Int): TextureAtlasSprite = {
             val side = EnumFacing.VALUES(s)
             val model = Minecraft.getMinecraft.getBlockRendererDispatcher.getModelForState(state)
-            var winner = TextureUtils.getMissingSprite
+            var winner = if(model.getParticleTexture == null) TextureUtils.getMissingSprite else model.getParticleTexture
             if (model != null) {
                 val quads = new JLinkedList[BakedQuad]
                 quads.addAll(model.getQuads(state, side, 0))
