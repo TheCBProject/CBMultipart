@@ -71,15 +71,13 @@ object MultipartSaveLoad {
                         }
                     }
                 } else {
+                    ticks += 1
                     if ((ticks % 600) == 0) {
                         failed = true
                         multipart.logger.warn(s"SavedMultipart at $pos still exists after $ticks!")
-                        world.tickableTileEntities.remove(this)
                     }
-                    ticks += 1
                 }
             }
-
         }
     }
 
