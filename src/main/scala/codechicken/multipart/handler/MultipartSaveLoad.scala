@@ -44,14 +44,17 @@ object MultipartSaveLoad {
         var loaded = false
         //The NBT of the tile.
         //We save this back out in case something breaks.
-        var tag: NBTTagCompound = _
+        var tag: NBTTagCompound = new NBTTagCompound()
 
         override def readFromNBT(t: NBTTagCompound) {
             super.readFromNBT(t)
             tag = t
         }
 
-        override def writeToNBT(compound: NBTTagCompound) = super.writeToNBT(tag)
+        override def writeToNBT(compound: NBTTagCompound) = {
+            compound.merge(tag)
+            super.writeToNBT(compound)
+        }
 
         override def update() {
             if (!failed && !loaded) {
@@ -74,7 +77,7 @@ object MultipartSaveLoad {
                     ticks += 1
                     if ((ticks % 600) == 0) {
                         failed = true
-                        multipart.logger.warn(s"SavedMultipart at $pos still exists after $ticks!")
+                        multipart.logger.warn(s"SavedMultipart at $pos still exists after $ticks ticks!")
                     }
                 }
             }
