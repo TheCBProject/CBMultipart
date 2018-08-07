@@ -686,6 +686,8 @@ object TileMultipart {
      * Creates this tile from an NBT tag
      */
     def createFromNBT(tag: NBTTagCompound): TileMultipart = {
+        if (tag == null) return null
+
         val partList = tag.getTagList("parts", 10)
         val parts = ListBuffer[TMultiPart]()
 
