@@ -44,7 +44,7 @@ object MultipartSaveLoad {
         var loaded = false
         //The NBT of the tile.
         //We save this back out in case something breaks.
-        var tag: NBTTagCompound = new NBTTagCompound()
+        var tag: NBTTagCompound = _
 
         override def readFromNBT(t: NBTTagCompound) {
             super.readFromNBT(t)
@@ -52,26 +52,30 @@ object MultipartSaveLoad {
         }
 
         override def writeToNBT(compound: NBTTagCompound) = {
-            compound.merge(tag)
+            if (tag != null) {
+                compound.merge(tag)
+            }
             super.writeToNBT(compound)
         }
 
         override def update() {
+            if (world.isRemote) return
+
             if (!failed && !loaded) {
                 if (tag != null) {
-                    if (!world.isRemote && tag != null) {
-                        val newTile = TileMultipart.createFromNBT(tag)
-                        val chunk = world.getChunkFromBlockCoords(pos)
-                        if (newTile != null) {
-                            newTile.validate()
-                            world.setTileEntity(pos, newTile)
-                            newTile.notifyTileChange()
-                            val packet = MultipartSPH.getDescPacket(chunk, Collections.singleton[TileEntity](newTile).iterator)
-                            packet.sendToChunk(world, chunk.getPos.x, chunk.getPos.z)
-                            loaded = true
-                        } else {
-                            world.removeTileEntity(pos)
-                        }
+                    val newTile = TileMultipart.createFromNBT(tag)
+                    val chunk = world.getChunkFromBlockCoords(pos)
+                    if (newTile != null) {
+                        newTile.validate()
+                        world.setTileEntity(pos, newTile)
+                        newTile.notifyTileChange()
+                        val packet = MultipartSPH.getDescPacket(chunk, Collections.singleton[TileEntity](newTile).iterator)
+                        packet.sendToChunk(world, chunk.getPos.x, chunk.getPos.z)
+                        loaded = true
+                    } else {
+                        multipart.logger.error(s"Couldn't load SavedMultipart at $pos, removing")
+                        world.removeTileEntity(pos)
+                        failed = true
                     }
                 } else {
                     ticks += 1
