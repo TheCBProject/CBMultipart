@@ -1,13 +1,16 @@
 package codechicken.multipart
 
 import java.util.{Random, ArrayList => JArrayList, EnumSet => JEnumSet, List => JList}
+import java.lang.{Boolean => JBool}
 
 import codechicken.lib.raytracer.{CuboidRayTraceResult, RayTracer}
 import codechicken.lib.vec.Vector3
+import codechicken.multipart.handler.MultipartProxy
 import codechicken.multipart.handler.MultipartSaveLoad.TileNBTContainer
 import net.minecraft.block.Block
 import net.minecraft.block.material.Material
-import net.minecraft.block.state.{BlockFaceShape, IBlockState}
+import net.minecraft.block.properties.PropertyBool
+import net.minecraft.block.state.{BlockFaceShape, BlockStateContainer, IBlockState}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.particle.ParticleManager
 import net.minecraft.entity.Entity
@@ -27,6 +30,12 @@ class PartRayTraceResult(val partIndex: Int, crtr: CuboidRayTraceResult)
     extends CuboidRayTraceResult(new Vector3(crtr.hitVec), crtr.getBlockPos, crtr.sideHit, crtr.cuboid6, crtr.dist)
 
 object BlockMultipart {
+
+    //Used to check if we are in the default state and return a TileNBTContainer.
+    val DEFAULT_PROP = PropertyBool.create("default")
+
+    def getRuntimeState = MultipartProxy.block.getDefaultState.withProperty(BlockMultipart.DEFAULT_PROP, JBool.FALSE)
+
     def getTile(world: IBlockAccess, pos: BlockPos) = world.getTileEntity(pos) match {
         case t: TileMultipart if t.partList.nonEmpty => t
         case _ => null
@@ -62,10 +71,21 @@ object BlockMultipart {
 class BlockMultipart extends Block(Material.ROCK) {
 
     import BlockMultipart._
+    setDefaultState(getDefaultState.withProperty(DEFAULT_PROP, JBool.TRUE))
 
     override def hasTileEntity(state: IBlockState) = true
 
-    override def createTileEntity(world: World, state: IBlockState) = if(!world.isRemote) new TileNBTContainer else null
+    override def createTileEntity(world: World, state: IBlockState) = {
+        if(world.isRemote || !state.getProperties.containsKey(DEFAULT_PROP) || !state.getValue(DEFAULT_PROP)) {
+            null
+        } else {
+            new TileNBTContainer
+        }
+    }
+
+    override def getMetaFromState(state: IBlockState) = 0
+
+    override protected def createBlockState() = new BlockStateContainer(this, DEFAULT_PROP)
 
     override def isBlockNormalCube(state: IBlockState) = false
 

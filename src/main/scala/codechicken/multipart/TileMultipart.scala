@@ -10,6 +10,7 @@ import codechicken.lib.render.{CCRenderState, RenderUtils}
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import codechicken.lib.world.IChunkLoadTile
 import codechicken.multipart.handler.{MultipartCompatiblity, MultipartProxy, MultipartSPH}
+import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
 import net.minecraft.client.particle.ParticleManager
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
@@ -515,6 +516,8 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
         val pos = Vector3.fromTileCenter(this)
         items.foreach(item => TileMultipart.dropItem(item, world, pos))
     }
+
+    override def shouldRefresh(world: World, pos: BlockPos, oldState: IBlockState, newState: IBlockState) = oldState.getBlock != newState.getBlock
 }
 
 trait TileMultipartClient extends TileMultipart {

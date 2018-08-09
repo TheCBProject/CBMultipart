@@ -3,10 +3,13 @@ package codechicken.multipart.handler
 import java.util.Collections
 
 import codechicken.multipart
-import codechicken.multipart.{TileMultipart, WrappedTileEntityRegistry}
+import codechicken.multipart.{BlockMultipart, TileMultipart, WrappedTileEntityRegistry}
+import net.minecraft.block.state.IBlockState
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.tileentity.TileEntity
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.{ITickable, ResourceLocation}
+import net.minecraft.world.World
 import net.minecraft.world.chunk.Chunk
 import net.minecraftforge.fml.common.registry.GameRegistry
 
@@ -44,7 +47,7 @@ object MultipartSaveLoad {
         var loaded = false
         //The NBT of the tile.
         //We save this back out in case something breaks.
-        var tag: NBTTagCompound = new NBTTagCompound()
+        var tag: NBTTagCompound = _
 
         override def readFromNBT(t: NBTTagCompound) {
             super.readFromNBT(t)
@@ -52,36 +55,40 @@ object MultipartSaveLoad {
         }
 
         override def writeToNBT(compound: NBTTagCompound) = {
-            compound.merge(tag)
+            if (tag != null) {
+                compound.merge(tag)
+            }
             super.writeToNBT(compound)
         }
 
         override def update() {
             if (!failed && !loaded) {
                 if (tag != null) {
-                    if (!world.isRemote && tag != null) {
-                        val newTile = TileMultipart.createFromNBT(tag)
-                        val chunk = world.getChunkFromBlockCoords(pos)
-                        if (newTile != null) {
-                            newTile.validate()
-                            world.setTileEntity(pos, newTile)
-                            newTile.notifyTileChange()
-                            val packet = MultipartSPH.getDescPacket(chunk, Collections.singleton[TileEntity](newTile).iterator)
-                            packet.sendToChunk(world, chunk.getPos.x, chunk.getPos.z)
-                            loaded = true
-                        } else {
-                            world.removeTileEntity(pos)
-                        }
+                    val newTile = TileMultipart.createFromNBT(tag)
+                    val chunk = world.getChunkFromBlockCoords(pos)
+                    chunk.setBlockState(pos, BlockMultipart.getRuntimeState)
+                    if (newTile != null) {
+                        newTile.validate()
+                        world.setTileEntity(pos, newTile)
+                        newTile.notifyTileChange()
+                        val packet = MultipartSPH.getDescPacket(chunk, Collections.singleton[TileEntity](newTile).iterator)
+                        packet.sendToChunk(world, chunk.getPos.x, chunk.getPos.z)
+                    } else {
+                        world.setBlockToAir(pos)
                     }
+                    loaded = true
                 } else {
                     ticks += 1
                     if ((ticks % 600) == 0) {
                         failed = true
                         multipart.logger.warn(s"SavedMultipart at $pos still exists after $ticks ticks!")
+                        world.setBlockToAir(pos)
                     }
                 }
             }
         }
+
+        override def shouldRefresh(world: World, pos: BlockPos, oldState: IBlockState, newState: IBlockState) = oldState.getBlock != newState.getBlock
     }
 
     def load() {
@@ -100,6 +107,7 @@ object MultipartSaveLoad {
             t.getValue match {
                 case container: TileNBTContainer =>
                     val newTile = TileMultipart.createFromNBT(container.tag)
+                    chunk.setBlockState(container.getPos, BlockMultipart.getRuntimeState)
                     if (newTile != null) {
                         newTile.setWorld(chunk.getWorld)
                         newTile.validate()
