@@ -1,12 +1,13 @@
 package codechicken.multipart.asm
 
-import java.io.File
+import java.io.{File, FileOutputStream}
 import java.lang.reflect.{Method, Modifier}
 import java.util.{Set => JSet}
 
 import codechicken.asm.ASMHelper._
-import codechicken.asm.{ASMHelper, InsnComparator, InsnListSection}
+import codechicken.asm.{ASMHelper, InsnComparator, InsnListSection, ModularASMTransformer}
 import codechicken.lib.reflect.ObfMapping
+import codechicken.lib.util.ResourceUtils
 import codechicken.multipart.asm.ASMImplicits._
 import codechicken.multipart.handler.MultipartProxy
 import net.minecraft.launchwrapper.LaunchClassLoader
@@ -22,7 +23,8 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.{ListBuffer => MList, Map => MMap, Set => MSet}
 
 object DebugPrinter {
-    val debug = MultipartProxy.config.getTag("debug_asm").getBooleanValue(!ObfMapping.obfuscated)
+    MultipartProxy.config.removeTag("debug_asm")
+    val debug = ModularASMTransformer.DEBUG
     val logger = LogManager.getLogger("Multipart ASM")
 
     private var permGenUsed = 0
@@ -36,7 +38,16 @@ object DebugPrinter {
     }
 
     def dump(name: String, bytes: Array[Byte]) {
-        if (debug) ASMHelper.dump(bytes, new File(dir, name.replace('/', '#') + ".txt"), false, false)
+        val fName = name.replace('/', '#')
+        if(ModularASMTransformer.DUMP_RAW) {
+            val file = ResourceUtils.ensureExists(new File(dir, fName + ".class"))
+            val fos = new FileOutputStream(file)
+            fos.write(bytes)
+            fos.flush()
+            fos.close()
+        } else if (ModularASMTransformer.DUMP_TEXT) {
+            ASMHelper.dump(bytes, new File(dir, fName + ".txt"), false, false)
+        }
     }
 
     def defined(name: String, bytes: Array[Byte]) {

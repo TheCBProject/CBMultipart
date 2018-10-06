@@ -14,7 +14,7 @@ import scala.collection.JavaConversions._
 /**
  * Created by covers1624 on 16/10/2017.
  */
-trait TCapabilityProvider extends TileMultipart {
+trait TCapabilityProvider extends TileMultipart with ICapabilityProvider {
 
     val ITEM_CAP = CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
     var caps = new JLinkedList[ICapabilityProvider]()
@@ -81,26 +81,26 @@ trait TCapabilityProvider extends TileMultipart {
         genericItemCap.rebuildSlotMap(generic_invList)
     }
 
-    override def hasCapability(capability: Capability[_], side: EnumFacing): Boolean = {
-        for (c <- caps) {
-            if (c.hasCapability(capability, side)) {
-                return true
-            }
-        }
-        super.hasCapability(capability, side)
-    }
-
-    override def getCapability[T](capability: Capability[T], side: EnumFacing): T = capability match {
-        case ITEM_CAP =>
-            ITEM_CAP.cast(if (side == null) genericItemCap else itemCaps(side.ordinal))
-        case _ =>
-            for (c <- caps) {
-                if (c.hasCapability(capability, side)) {
-                    return capability.cast(c.getCapability(capability, side))
-                }
-            }
-            super.getCapability(capability, side)
-    }
+//    override def hasCapability(capability: Capability[_], side: EnumFacing): Boolean = {
+//        for (c <- caps) {
+//            if (c.hasCapability(capability, side)) {
+//                return true
+//            }
+//        }
+//        super.hasCapability(capability, side)
+//    }
+//
+//    override def getCapability[T](capability: Capability[T], side: EnumFacing): T = capability match {
+//        case ITEM_CAP =>
+//            ITEM_CAP.cast(if (side == null) genericItemCap else itemCaps(side.ordinal))
+//        case _ =>
+//            for (c <- caps) {
+//                if (c.hasCapability(capability, side)) {
+//                    return capability.cast(c.getCapability(capability, side))
+//                }
+//            }
+//            super.getCapability(capability, side)
+//    }
 }
 
 /**

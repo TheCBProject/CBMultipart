@@ -3,9 +3,11 @@ package codechicken.multipart.handler
 import java.io.File
 
 import codechicken.lib.config.ConfigFile
+import codechicken.lib.inventory.InventoryUtils
 import codechicken.lib.packet.PacketCustom
 import codechicken.lib.world.{TileChunkLoadHook, WorldExtensionManager}
 import codechicken.multipart._
+import codechicken.multipart.capability.ItemCapMerger
 import codechicken.multipart.scalatraits.TTESRRenderTile
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer
 import net.minecraft.tileentity.TileEntity
@@ -34,7 +36,6 @@ class MultipartProxy_serverImpl {
 
         MultipartGenerator.registerTrait("net.minecraft.util.ITickable", "codechicken.multipart.scalatraits.JTickableTile")
         MultipartGenerator.registerTrait("codechicken.multipart.TSlottedPart", "codechicken.multipart.scalatraits.TSlottedTile")
-        MultipartGenerator.registerTrait("net.minecraftforge.common.capabilities.ICapabilityProvider", "codechicken.multipart.scalatraits.JCapabilityProvider")
         MultipartGenerator.registerTrait("net.minecraft.inventory.IInventory", "codechicken.multipart.scalatraits.JInventoryTile")
         MultipartGenerator.registerTrait("net.minecraft.inventory.ISidedInventory", "codechicken.multipart.scalatraits.JInventoryTile")
         MultipartGenerator.registerTrait("codechicken.multipart.TPartialOcclusionPart", "codechicken.multipart.scalatraits.TPartialOcclusionTile")
@@ -44,6 +45,8 @@ class MultipartProxy_serverImpl {
         MultipartGenerator.registerTrait("codechicken.multipart.IModelRenderPart", "codechicken.multipart.scalatraits.TModelRenderTile", null)
         MultipartGenerator.registerTrait("codechicken.multipart.TDynamicRenderPart", "codechicken.multipart.scalatraits.TTESRRenderTile", null)
         MultipartGenerator.registerTrait("codechicken.multipart.TFastRenderPart", "codechicken.multipart.scalatraits.TTESRRenderTile", null)
+
+        MultipartCapRegistry.registerSCapMerger(InventoryUtils.ITEM_HANDLER, ItemCapMerger.merge)
 
         MultipartSaveLoad.load()
     }

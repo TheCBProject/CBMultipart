@@ -1,7 +1,7 @@
 package codechicken.multipart
 
 import java.lang.{Iterable => JIterable}
-import java.util.{Random, ArrayList => JArrayList, Collection => JCollection, List => JList}
+import java.util.{Random, ArrayList => JArrayList, Collection => JCollection, LinkedList => JLinkedList, List => JList}
 
 import codechicken.lib.data.MCDataOutput
 import codechicken.lib.packet.PacketCustom
@@ -9,6 +9,7 @@ import codechicken.lib.raytracer.{CuboidRayTraceResult, DistanceRayTraceResult}
 import codechicken.lib.render.{CCRenderState, RenderUtils}
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import codechicken.lib.world.IChunkLoadTile
+import codechicken.multipart.capability.CapHolder
 import codechicken.multipart.handler.{MultipartCompatiblity, MultipartProxy, MultipartSPH}
 import net.minecraft.block.state.IBlockState
 import net.minecraft.client.Minecraft
@@ -23,6 +24,7 @@ import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.math.{AxisAlignedBB, BlockPos, Vec3d}
 import net.minecraft.util.{BlockRenderLayer, EnumFacing, EnumHand, ResourceLocation}
 import net.minecraft.world.{EnumSkyBlock, World}
+import net.minecraftforge.common.capabilities.{Capability, ICapabilityProvider}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
@@ -52,6 +54,8 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
      */
     def copyFrom(that: TileMultipart) {
         partList = that.partList
+        capParts = that.capParts
+        resetCapCache()
     }
 
     /**
@@ -78,6 +82,8 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
      */
     def clearParts() {
         partList = Seq()
+        capParts = new JLinkedList[ICapabilityProvider]()
+        resetCapCache()
     }
 
     /**
@@ -223,6 +229,12 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
 
         partList = partList :+ part
         bindPart(part)
+        part match {
+            case p: ICapabilityProvider =>
+                capParts += p
+                resetCapCache()
+            case _ =>
+        }
         part.bind(this)
     }
 
@@ -260,6 +272,12 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
         if (sendPacket) getWriteStream.writeByte(254).writeByte(r)
 
         partRemoved(part, r)
+        part match {
+            case p: ICapabilityProvider =>
+                capParts -= p
+                resetCapCache()
+            case _ =>
+        }
         part.onRemoved()
         part.tile = null
 
@@ -518,6 +536,61 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
     }
 
     override def shouldRefresh(world: World, pos: BlockPos, oldState: IBlockState, newState: IBlockState) = oldState.getBlock != newState.getBlock
+
+    /** Capability handling */
+
+    private var capParts = new JLinkedList[ICapabilityProvider]()
+    private var calculatedCaps = Set[Capability[_]]()
+    private var capMap = Map.empty[Capability[_], CapHolder[_]]
+
+    private def resetCapCache() {
+        capMap = Map()
+        calculatedCaps = Set()
+    }
+
+    private def calculateCap(cap: Capability[_]) {
+        if (calculatedCaps.contains(cap)) {
+            return
+        }
+        calculatedCaps += cap
+        val holder = new CapHolder[Any]
+        val genericValid = capParts.filter(_.hasCapability(cap, null))
+        if (genericValid.nonEmpty) {
+            holder.generic = MultipartCapRegistry.merge(cap, genericValid.map(_.getCapability(cap, null).asInstanceOf[Object]))
+        }
+        for (side <- EnumFacing.VALUES) {
+            val sidedValid = capParts.filter(_.hasCapability(cap, side))
+            if (sidedValid.nonEmpty) {
+                holder.sided += side -> MultipartCapRegistry.merge(cap, sidedValid.map(_.getCapability(cap, side).asInstanceOf[Object]))
+            }
+        }
+        if (holder.generic != null || holder.sided.nonEmpty) {
+            capMap += cap -> holder
+        }
+    }
+
+    override final def hasCapability(capability: Capability[_], facing: EnumFacing) = {
+        calculateCap(capability)
+        capMap.get(capability) match {
+            case Some(holder) => (facing == null && holder.generic != null) || (facing != null && holder.sided.contains(facing))
+            case None => super.hasCapability(capability, facing)
+        }
+    }
+
+    override final def getCapability[T](capability: Capability[T], facing: EnumFacing) = {
+        val cap = capability.asInstanceOf[Capability[Any]]
+        calculateCap(cap)
+        capMap.get(capability) match {
+            case Some(holder) =>
+                if (facing == null) {
+                    cap.cast(holder.generic)
+                } else {
+                    cap.cast(holder.sided.get(facing))
+                }
+            case None => super.getCapability(capability, facing)
+        }
+    }
+
 }
 
 trait TileMultipartClient extends TileMultipart {
