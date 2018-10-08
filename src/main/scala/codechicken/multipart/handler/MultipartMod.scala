@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.event._
 @Mod(modid = MultipartMod.modID, dependencies = MultipartMod.deps, acceptedMinecraftVersions = CodeChickenLib.MC_VERSION_DEP, modLanguage = "scala", certificateFingerprint = "f1850c39b2516232a2108a7bd84d1cb5df93b261")
 object MultipartMod {
     final val modID = "forgemultipartcbe"
-    final val deps = CodeChickenLib.MOD_VERSION_DEP
+    final val deps = CodeChickenLib.MOD_VERSION_DEP + "required-after:forge@[14.23.5.2768,)"
 
     @EventHandler
     def preInit(event: FMLPreInitializationEvent) {
