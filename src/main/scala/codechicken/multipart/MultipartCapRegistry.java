@@ -2,6 +2,7 @@ package codechicken.multipart;
 
 import com.google.common.base.Preconditions;
 import net.minecraftforge.common.capabilities.Capability;
+import scala.Function1;
 import scala.collection.Iterable;
 import scala.collection.JavaConverters;
 
@@ -23,14 +24,14 @@ public class MultipartCapRegistry {
 
     /**
      * Registers a Java based Capability Merger.
-     * This is the same as {@link #registerSCapMerger(Capability, Function)} except with a Java Iterable.
+     * This is the same as {@link #registerSCapMerger(Capability, Function1)} except with a Java Iterable.
      *
      * @param cap  The capability.
      * @param func The function to merge the capabilities together.
      * @param <T>  Type.
      */
     public static <T> void registerCapMerger(Capability<T> cap, Function<java.lang.Iterable<T>, T> func) {
-        registerSCapMerger(cap, iter -> func.apply(JavaConverters.asJavaIterableConverter(iter).asJava()));
+        mergers.putIfAbsent(cap, (Function<Iterable<T>, T>)iter -> func.apply(JavaConverters.asJavaIterableConverter(iter).asJava()));
     }
 
     /**
@@ -41,8 +42,8 @@ public class MultipartCapRegistry {
      * @param func The function to merge the capabilities together.
      * @param <T>  Type.
      */
-    public static <T> void registerSCapMerger(Capability<T> cap, Function<Iterable<T>, T> func) {
-        mergers.putIfAbsent(cap, func);
+    public static <T> void registerSCapMerger(Capability<T> cap, Function1<Iterable<T>, T> func) {
+        mergers.putIfAbsent(cap, (Function<Iterable<T>, T>) func::apply);
     }
 
     /**
