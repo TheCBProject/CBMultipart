@@ -543,7 +543,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
     private var calculatedCaps = Set[Capability[_]]()
     private var capMap = Map.empty[Capability[_], CapHolder[_]]
 
-    private def resetCapCache() {
+    def resetCapCache() {
         capMap = Map()
         calculatedCaps = Set()
     }
