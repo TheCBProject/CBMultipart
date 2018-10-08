@@ -31,11 +31,6 @@ class PartRayTraceResult(val partIndex: Int, crtr: CuboidRayTraceResult)
 
 object BlockMultipart {
 
-    //Used to check if we are in the default state and return a TileNBTContainer.
-    val DEFAULT_PROP = PropertyBool.create("default")
-
-    def getRuntimeState = MultipartProxy.block.getDefaultState.withProperty(BlockMultipart.DEFAULT_PROP, JBool.FALSE)
-
     def getTile(world: IBlockAccess, pos: BlockPos) = world.getTileEntity(pos) match {
         case t: TileMultipart if t.partList.nonEmpty => t
         case _ => null
@@ -71,12 +66,11 @@ object BlockMultipart {
 class BlockMultipart extends Block(Material.ROCK) {
 
     import BlockMultipart._
-    setDefaultState(getDefaultState.withProperty(DEFAULT_PROP, JBool.TRUE))
 
     override def hasTileEntity(state: IBlockState) = true
 
     override def createTileEntity(world: World, state: IBlockState) = {
-        if(world.isRemote || !state.getProperties.containsKey(DEFAULT_PROP) || !state.getValue(DEFAULT_PROP)) {
+        if(world.isRemote) {
             null
         } else {
             new TileNBTContainer
@@ -84,8 +78,6 @@ class BlockMultipart extends Block(Material.ROCK) {
     }
 
     override def getMetaFromState(state: IBlockState) = 0
-
-    override protected def createBlockState() = new BlockStateContainer(this, DEFAULT_PROP)
 
     override def isBlockNormalCube(state: IBlockState) = false
 

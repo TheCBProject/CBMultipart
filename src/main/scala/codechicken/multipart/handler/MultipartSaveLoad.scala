@@ -66,7 +66,6 @@ object MultipartSaveLoad {
                 if (tag != null) {
                     val newTile = TileMultipart.createFromNBT(tag)
                     val chunk = world.getChunkFromBlockCoords(pos)
-                    chunk.setBlockState(pos, BlockMultipart.getRuntimeState)
                     if (newTile != null) {
                         newTile.validate()
                         world.setTileEntity(pos, newTile)
@@ -107,7 +106,6 @@ object MultipartSaveLoad {
             t.getValue match {
                 case container: TileNBTContainer =>
                     val newTile = TileMultipart.createFromNBT(container.tag)
-                    chunk.setBlockState(container.getPos, BlockMultipart.getRuntimeState)
                     if (newTile != null) {
                         newTile.setWorld(chunk.getWorld)
                         newTile.validate()

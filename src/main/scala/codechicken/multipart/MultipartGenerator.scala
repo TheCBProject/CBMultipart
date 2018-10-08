@@ -75,7 +75,7 @@ object MultipartGenerator extends ScratchBitSet {
             if (converted) {
                 //perform client conversion
                 ntile.partList(0).invalidateConvertedTile()
-                world.setBlockState(pos, BlockMultipart.getRuntimeState, 0)
+                world.setBlockState(pos, MultipartProxy.block.getDefaultState, 0)
                 silentAddTile(world, pos, ntile)
                 PacketCustom.sendToChunk(new SPacketBlockChange(world, pos), world, pos.getX >> 4, pos.getZ >> 4)
                 ntile.partList(0).onConverted()
@@ -93,7 +93,7 @@ object MultipartGenerator extends ScratchBitSet {
             }
         }
         else {
-            world.setBlockState(pos, BlockMultipart.getRuntimeState, 0)
+            world.setBlockState(pos, MultipartProxy.block.getDefaultState, 0)
             ntile = MultipartMixinFactory.construct(bitset)
             silentAddTile(world, pos, ntile)
         }
