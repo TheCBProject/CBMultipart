@@ -13,7 +13,7 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.util.math.Vec3d
+import net.minecraft.util.math.{BlockPos, Vec3d}
 import net.minecraft.util.{BlockRenderLayer, EnumHand, ResourceLocation}
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 
@@ -256,7 +256,10 @@ abstract class TMultiPart {
     /**
      * Called when a neighbor block changed
      */
+    @Deprecated//Use pos sensitive version bellow, onNeighborBlockChanged.
     def onNeighborChanged() {}
+
+    def onNeighborBlockChanged(from:BlockPos) {}
 
     /**
      * Called when a part is added or removed from this block space.

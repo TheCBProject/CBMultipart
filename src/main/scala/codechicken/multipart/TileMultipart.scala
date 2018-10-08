@@ -443,8 +443,13 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
         operate(_.onEntityStanding(entity))
     }
 
+    @Deprecated
     def onNeighborBlockChange() {
         operate(_.onNeighborChanged())
+    }
+
+    def onNeighborBlockChanged(pos:BlockPos) {
+        operate(_.onNeighborBlockChanged(pos))
     }
 
     /**
