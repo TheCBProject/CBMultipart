@@ -11,7 +11,6 @@ import codechicken.multipart.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import java.util.Arrays;
@@ -19,52 +18,52 @@ import java.util.Collections;
 
 public abstract class McBlockPart extends TMultiPart implements TCuboidPart, TNormalOcclusionPart, TIconHitEffectsPart {
 
-	public abstract Block getBlock();
+    public abstract Block getBlock();
 
-	@Override
-	public Iterable<IndexedCuboid6> getSubParts() {
-		return Arrays.asList(new IndexedCuboid6(0, getBounds()));
-	}
+    @Override
+    public Iterable<IndexedCuboid6> getSubParts() {
+        return Arrays.asList(new IndexedCuboid6(0, getBounds()));
+    }
 
-	public Iterable<Cuboid6> getCollisionBoxes() {
-		return Collections.emptyList();
-	}
+    public Iterable<Cuboid6> getCollisionBoxes() {
+        return Collections.emptyList();
+    }
 
-	@Override
-	public void renderBreaking(Vector3 pos, TextureAtlasSprite texture, CCRenderState ccrs) {
-		ccrs.setPipeline(pos.translation(), new IconTransformation(texture));
-		BlockRenderer.renderCuboid(ccrs, getBounds(), 0);
-	}
+    @Override
+    public void renderBreaking(Vector3 pos, TextureAtlasSprite texture, CCRenderState ccrs) {
+        ccrs.setPipeline(pos.translation(), new IconTransformation(texture));
+        BlockRenderer.renderCuboid(ccrs, getBounds(), 0);
+    }
 
-	@Override
-	public Iterable<Cuboid6> getOcclusionBoxes() {
-		return Arrays.asList(getBounds());
-	}
+    @Override
+    public Iterable<Cuboid6> getOcclusionBoxes() {
+        return Arrays.asList(getBounds());
+    }
 
-	@Override
-	public boolean occlusionTest(TMultiPart npart) {
-		return NormalOcclusionTest.apply(this, npart);
-	}
+    @Override
+    public boolean occlusionTest(TMultiPart npart) {
+        return NormalOcclusionTest.apply(this, npart);
+    }
 
-	@Override
-	public Iterable<ItemStack> getDrops() {
-		return Arrays.asList(getDropStack());
-	}
+    @Override
+    public Iterable<ItemStack> getDrops() {
+        return Arrays.asList(getDropStack());
+    }
 
-	@Override
-	public ItemStack pickItem(CuboidRayTraceResult hit) {
-		return getDropStack();
-	}
+    @Override
+    public ItemStack pickItem(CuboidRayTraceResult hit) {
+        return getDropStack();
+    }
 
-	public ItemStack getDropStack() {
-		return new ItemStack(getBlock());
-	}
+    public ItemStack getDropStack() {
+        return new ItemStack(getBlock());
+    }
 
     @Override
     public SoundType getPlacementSound(ItemStack stack) {
-	    Block block = Block.getBlockFromItem(stack.getItem());
-	    if(block != null) {
-	        return block.getSoundType();
+        Block block = Block.getBlockFromItem(stack.getItem());
+        if (block != null) {
+            return block.getSoundType();
         }
         return super.getPlacementSound(stack);
     }
