@@ -18,7 +18,6 @@ public class MinecraftMultipartMod {
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		new Content().init();
-		MinecraftForge.EVENT_BUS.register(new EventHandler());
 		PacketCustom.assignHandler(McMultipartSPH.channel, new McMultipartSPH());
 		if (FMLCommonHandler.instance().getSide().isClient()) {
 			PacketCustom.assignHandler(McMultipartCPH.channel, new McMultipartCPH());

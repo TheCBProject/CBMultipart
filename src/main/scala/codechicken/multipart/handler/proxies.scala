@@ -55,6 +55,7 @@ class MultipartProxy_serverImpl {
 
     def postInit() {
         MinecraftForge.EVENT_BUS.register(MultipartEventHandler)
+        MinecraftForge.EVENT_BUS.register(ItemPlacementHelper)
         PacketCustom.assignHandler(MultipartSPH.channel, MultipartSPH)
         PacketCustom.assignHandshakeHandler(MultipartSPH.registryChannel, MultipartSPH)
 

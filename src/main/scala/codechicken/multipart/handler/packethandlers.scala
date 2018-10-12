@@ -7,13 +7,14 @@ import codechicken.lib.data.MCDataOutputWrapper
 import codechicken.lib.packet.ICustomPacketHandler.{IClientPacketHandler, IServerPacketHandler}
 import codechicken.lib.packet.{IHandshakeHandler, PacketCustom}
 import codechicken.multipart.handler.MultipartProxy._
-import codechicken.multipart.{ControlKeyModifer, MultiPartRegistry, PacketScheduler, TileMultipart}
+import codechicken.multipart._
 import net.minecraft.client.Minecraft
 import net.minecraft.entity.player.{EntityPlayer, EntityPlayerMP}
 import net.minecraft.network.NetHandlerPlayServer
 import net.minecraft.network.play.server.SPacketDisconnect
 import net.minecraft.network.play.{INetHandlerPlayClient, INetHandlerPlayServer}
 import net.minecraft.tileentity.TileEntity
+import net.minecraft.util.EnumHand
 import net.minecraft.util.math.{BlockPos, ChunkPos}
 import net.minecraft.util.text.{TextComponentString, TextComponentTranslation}
 import net.minecraft.world.World
@@ -88,6 +89,7 @@ object MultipartSPH extends MultipartPH with IServerPacketHandler with IHandshak
     def handlePacket(packet: PacketCustom, sender: EntityPlayerMP, netHandler: INetHandlerPlayServer) {
         packet.getType match {
             case 1 => ControlKeyModifer.map.put(sender, packet.readBoolean)
+            case 10 => ItemPlacementHelper.place(sender, if(packet.readBoolean()) EnumHand.MAIN_HAND else EnumHand.OFF_HAND, sender.world)
         }
     }
 

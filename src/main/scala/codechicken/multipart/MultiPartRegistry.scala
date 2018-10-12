@@ -6,12 +6,15 @@ import java.util.{Map => JMap}
 
 import codechicken.lib.data.{MCDataInput, MCDataOutput}
 import codechicken.lib.packet.PacketCustom
-import codechicken.multipart.api.{IDynamicPartFactory, IPartConverter, IPartFactory}
+import codechicken.multipart.api.{IDynamicPartFactory, IPartConverter, IPartFactory, IPlacementConverter}
 import net.minecraft.block.state.{BlockStateContainer, IBlockState}
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
+import net.minecraft.entity.EntityLivingBase
+import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.util.ResourceLocation
-import net.minecraft.util.math.BlockPos
+import net.minecraft.util.{EnumFacing, EnumHand, ResourceLocation}
+import net.minecraft.util.math.{BlockPos, Vec3d}
 import net.minecraft.world.World
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
@@ -30,6 +33,7 @@ object MultiPartRegistry {
     private var idToName: Array[ResourceLocation] = _
     private val idWriter = new IDWriter
     private val converters = new util.HashSet[IPartConverter]()
+    private val placementConverters = new util.HashSet[IPlacementConverter]()
 
     /**
      * The state of the registry. 0 = no parts, 1 = registering, 2 = registered
@@ -99,6 +103,10 @@ object MultiPartRegistry {
      */
     def registerConverter(c: IPartConverter) {
         converters.add(c)
+    }
+
+    def registerPlacementConverter(c:IPlacementConverter) {
+        placementConverters.add(c)
     }
 
     private[multipart] def beforeServerStart() {
@@ -181,6 +189,13 @@ object MultiPartRegistry {
         converters.find(_.canConvert(world, pos, state)) match {
             case Some(p) => p.convertToParts(world, pos, state)
             case None => Seq()
+        }
+    }
+
+    def convertItem(stack:ItemStack, world:World, pos:BlockPos, sideHit:EnumFacing, hitVec:Vec3d, entityPlayer:EntityLivingBase, hand:EnumHand) = {
+        placementConverters.find(_.canConvert(stack)) match {
+            case Some(p) => p.convert(stack, world, pos, sideHit, hitVec, entityPlayer, hand)
+            case None => null
         }
     }
 }

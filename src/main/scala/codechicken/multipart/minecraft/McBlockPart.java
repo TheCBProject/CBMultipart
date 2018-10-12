@@ -9,7 +9,9 @@ import codechicken.lib.vec.Vector3;
 import codechicken.lib.vec.uv.IconTransformation;
 import codechicken.multipart.*;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import java.util.Arrays;
@@ -57,4 +59,13 @@ public abstract class McBlockPart extends TMultiPart implements TCuboidPart, TNo
 	public ItemStack getDropStack() {
 		return new ItemStack(getBlock());
 	}
+
+    @Override
+    public SoundType getPlacementSound(ItemStack stack) {
+	    Block block = Block.getBlockFromItem(stack.getItem());
+	    if(block != null) {
+	        return block.getSoundType();
+        }
+        return super.getPlacementSound(stack);
+    }
 }

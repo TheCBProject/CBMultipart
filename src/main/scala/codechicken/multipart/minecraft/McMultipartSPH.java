@@ -15,9 +15,6 @@ public class McMultipartSPH implements IServerPacketHandler {
 	@Override
 	public void handlePacket(PacketCustom packet, EntityPlayerMP sender, INetHandlerPlayServer netHandler) {
 		switch (packet.getType()) {
-			case 1:
-				EventHandler.place(sender, packet.readBoolean() ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND, sender.world);
-				break;
 		}
 	}
 
