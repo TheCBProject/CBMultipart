@@ -448,7 +448,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
         operate(_.onNeighborChanged())
     }
 
-    def onNeighborBlockChanged(pos:BlockPos) {
+    def onNeighborBlockChanged(pos: BlockPos) {
         operate(_.onNeighborBlockChanged(pos))
     }
 
@@ -590,7 +590,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
                 if (facing == null) {
                     cap.cast(holder.generic)
                 } else {
-                    cap.cast(holder.sided.get(facing))
+                    cap.cast(holder.sided(facing))
                 }
             case None => super.getCapability(capability, facing)
         }
