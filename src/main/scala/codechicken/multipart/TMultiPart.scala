@@ -7,6 +7,7 @@ import codechicken.lib.data.{MCDataInput, MCDataOutput}
 import codechicken.lib.raytracer.{CuboidRayTraceResult, IndexedCuboid6, RayTracer}
 import codechicken.lib.render.CCRenderState
 import codechicken.lib.vec.{Cuboid6, Vector3}
+import net.minecraft.block.SoundType
 import net.minecraft.client.particle.ParticleManager
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.entity.Entity
@@ -171,6 +172,23 @@ abstract class TMultiPart {
      * @param hit An instance of ExtendedMOP from collisionRayTrace
      */
     def getStrength(player: EntityPlayer, hit: CuboidRayTraceResult): Float = 1 / 30f
+
+    /**
+     * Used to get the sound on placement.
+     * YOUR PART MAY NOT BE IN THE WORLD YET!
+     *
+     * Weird place for this, but handles conversion placement
+     * and direct placement.
+     *
+     * @param stack The stack used to place the part.
+     * @return The sound
+     */
+    def getPlacementSound(stack:ItemStack):SoundType = {
+        stack.getItem match {
+            case i:TItemMultiPart => i.getPlacementSound(stack)
+            case _ => null
+        }
+    }
 
     /**
      * Called when this part is added to the block space

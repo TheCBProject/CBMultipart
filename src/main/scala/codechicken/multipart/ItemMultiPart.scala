@@ -33,7 +33,7 @@ trait TItemMultiPart extends Item {
 
             if (!world.isRemote) {
                 TileMultipart.addPart(world, pos, part)
-                val sound = getPlacementSound(stack)
+                val sound = part.getPlacementSound(stack)
                 if (sound != null) {
                     world.playSound(null, bpos, sound.getPlaceSound,
                         SoundCategory.BLOCKS, (sound.getVolume + 1.0F) / 2.0F, sound.getPitch * 0.8F)
@@ -57,5 +57,6 @@ trait TItemMultiPart extends Item {
     /**
      * Optionally return a sound event here to have it played on a successful placement.
      */
+    @Deprecated// Use TMultiPart.getPlacementSound.
     def getPlacementSound(item: ItemStack): SoundType = null
 }
