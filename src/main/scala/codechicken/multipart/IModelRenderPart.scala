@@ -42,8 +42,8 @@ trait IModelRenderPart {
 
     /**
      * Used to mutate the default state that is passed in into the current state of the part.
-     * You must set both normal and unlisted properties here, as there is no separate method
-     * for unlisted properties as with normal blocks.
+     * This is used for model lookup, you must set only normal properties here.
+     * Use getExtendedState for unlisted properties.
      *
      * Note that this data is used for rendering only. Do not store data here. Nothing
      * inside these states will be saved.
@@ -52,4 +52,13 @@ trait IModelRenderPart {
      * @return The current state of this part, with all properties assigned to proper values
      */
     def getCurrentState(state: IBlockState): IBlockState
+
+
+    /**
+     * Used to add Unlisted properties to the state. getCurrentState is used for model lookup.
+     *
+     * @param state The state from getCurrentState.
+     * @return The state with any unlisted properties added.
+     */
+    def getExtendedState(state: IBlockState): IBlockState
 }

@@ -84,7 +84,15 @@ trait TModelRenderTile extends TileMultipartClient {
 
             disp.getBlockModelShapes.getModelForState(state) match {
                 case null =>
-                case model => f(model, state)
+                case model =>
+                    //TODO remove try in 1.13.
+                    //Try is here for binary compat.
+                    val exState = try {
+                        mp.getExtendedState(state)
+                    } catch {
+                        case _: Throwable => state
+                    }
+                    f(model, exState)
             }
         }
     }
