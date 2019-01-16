@@ -3,7 +3,7 @@ package codechicken.multipart.handler
 import java.util.Collections
 
 import codechicken.multipart
-import codechicken.multipart.{BlockMultipart, TileMultipart, WrappedTileEntityRegistry}
+import codechicken.multipart.{TileMultipart, WrappedTileEntityRegistry}
 import net.minecraft.block.state.IBlockState
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.tileentity.TileEntity
@@ -51,7 +51,9 @@ object MultipartSaveLoad {
 
         override def readFromNBT(t: NBTTagCompound) {
             super.readFromNBT(t)
-            tag = t
+            if (t != null) {
+                tag = t.copy()
+            }
         }
 
         override def writeToNBT(compound: NBTTagCompound) = {
