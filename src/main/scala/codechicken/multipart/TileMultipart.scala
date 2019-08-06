@@ -589,7 +589,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
             case Some(holder) =>
                 if (facing == null) {
                     cap.cast(holder.generic)
-                } else {
+                } else if (holder.sided.contains(facing)) {
                     cap.cast(holder.sided(facing))
                 }
             case None => super.getCapability(capability, facing)
