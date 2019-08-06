@@ -582,7 +582,7 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
         }
     }
 
-    override final def getCapability[T](capability: Capability[T], facing: EnumFacing) = {
+    override final def getCapability[T](capability: Capability[T], facing: EnumFacing): T = {
         val cap = capability.asInstanceOf[Capability[Any]]
         calculateCap(cap)
         capMap.get(capability) match {
@@ -591,6 +591,8 @@ class TileMultipart extends TileEntity with IChunkLoadTile {
                     cap.cast(holder.generic)
                 } else if (holder.sided.contains(facing)) {
                     cap.cast(holder.sided(facing))
+                } else {
+                    cap.cast(null)
                 }
             case None => super.getCapability(capability, facing)
         }
