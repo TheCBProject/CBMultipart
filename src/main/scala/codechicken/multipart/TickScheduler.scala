@@ -19,9 +19,9 @@ import scala.collection.mutable.{HashSet, ListBuffer}
  */
 object TickScheduler extends WorldExtensionInstantiator {
 
-    var serverDir:File = _
+    var serverDir: File = _
 
-    def onServerStarting(server:MinecraftServer) {
+    def onServerStarting(server: MinecraftServer) {
         serverDir = server.getActiveAnvilConverter.getFile(server.getFolderName, "")
     }
 
@@ -45,8 +45,10 @@ object TickScheduler extends WorldExtensionInstantiator {
 
         def _scheduleTick(part: TMultiPart, time: Long, random: Boolean) {
             if (part.tile != null) {
-                getChunkExtension(part.tile.getPos.getX >> 4, part.tile.getPos.getZ >> 4)
-                    .asInstanceOf[ChunkTickScheduler].scheduleTick(part, time, random)
+                val ext = getChunkExtension(part.tile.getPos.getX >> 4, part.tile.getPos.getZ >> 4)
+                if (ext != null) {
+                    ext.asInstanceOf[ChunkTickScheduler].scheduleTick(part, time, random)
+                }
             }
         }
 
@@ -57,7 +59,7 @@ object TickScheduler extends WorldExtensionInstantiator {
         }
 
         override def postTick() {
-            if (!tickChunks.isEmpty) {
+            if (tickChunks.nonEmpty) {
                 tickChunks = tickChunks.filter(_.processTicks())
             }
 
@@ -154,7 +156,7 @@ object TickScheduler extends WorldExtensionInstantiator {
 
         def processTicks(): Boolean = {
             tickList = tickList.filter(processTick)
-            return !tickList.isEmpty
+            tickList.nonEmpty
         }
 
         def processTick(e: PartTickEntry): Boolean = {

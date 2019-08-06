@@ -23,7 +23,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.{ListBuffer => MList, Map => MMap, Set => MSet}
 
 object DebugPrinter {
-    MultipartProxy.config.removeTag("debug_asm")
+    if(MultipartProxy.config != null) MultipartProxy.config.removeTag("debug_asm")
     val debug = ModularASMTransformer.DEBUG
     val logger = LogManager.getLogger("Multipart ASM")
 
