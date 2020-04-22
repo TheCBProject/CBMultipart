@@ -1,11 +1,10 @@
-package codechicken.multipart.asm
+package codechicken.mixin.scala
 
 import org.objectweb.asm.Opcodes._
 import org.objectweb.asm.Type
 import org.objectweb.asm.Type._
 import org.objectweb.asm.tree._
 
-import scala.collection.JavaConversions._
 import scala.collection.mutable.{ListBuffer => MList, Map => MMap}
 
 object StackAnalyser {
@@ -14,6 +13,8 @@ object StackAnalyser {
     def width(s: String): Int = width(Type.getType(s))
 
     def width(it: Iterable[Type]): Int = it.foldLeft(0)(_ + width(_))
+
+    def width(it: Array[Type]): Int = it.foldLeft(0)(_ + width(_))
 
     abstract class StackEntry(implicit val insn: AbstractInsnNode) {
         def getType: Type
@@ -126,7 +127,7 @@ class StackAnalyser(val owner: Type, val m: MethodNode) {
         for (i <- 0 until ptypes.length)
             pushL(Param(i, ptypes(i)))
 
-        m.tryCatchBlocks.foreach(b => catchHandlers.put(b.handler, b))
+        m.tryCatchBlocks.forEach(b => catchHandlers.put(b.handler, b))
     }
 
     def pushL(entry: LocalEntry) = setL(locals.size, entry)
@@ -272,10 +273,10 @@ class StackAnalyser(val owner: Type, val m: MethodNode) {
                     push(Invoke(ainsn.getOpcode, popArgs(minsn.desc), null, minsn))
             }
             case tinsn: TypeInsnNode => ainsn.getOpcode match {
-                case NEW => push(New(getType(tinsn.desc)))
-                case NEWARRAY => push(NewArray(pop(), getType(tinsn.desc)))
+                case NEW => push(New(getObjectType(tinsn.desc)))
+                case NEWARRAY => push(NewArray(pop(), getObjectType(tinsn.desc)))
                 case ANEWARRAY => push(NewArray(pop(), getType("[" + tinsn.desc)))
-                case CHECKCAST => push(Cast(pop(), getType(tinsn.desc)))
+                case CHECKCAST => push(Cast(pop(), getObjectType(tinsn.desc)))
                 case INSTANCEOF => push(UnaryOp(INSTANCEOF, pop()))
             }
             case mainsn: MultiANewArrayInsnNode =>
@@ -293,7 +294,7 @@ class StackAnalyser(val owner: Type, val m: MethodNode) {
             }*/
             case lnode: LabelNode =>
                 catchHandlers.get(lnode) match {
-                    case Some(tcblock) => push(CaughtException(Type.getType(tcblock.`type`)))
+                    case Some(tcblock) => push(CaughtException(Type.getObjectType(tcblock.`type`)))
                     case None =>
                 }
             case _ =>

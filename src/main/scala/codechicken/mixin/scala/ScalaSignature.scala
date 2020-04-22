@@ -1,12 +1,11 @@
-package codechicken.multipart.asm
+package codechicken.mixin.scala
 
-import java.util.{List => JList}
-
-import codechicken.multipart.asm.ScalaSignature._
+import codechicken.mixin.scala.ScalaSignature._
 import org.objectweb.asm.tree.{AnnotationNode, ClassNode}
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
+//Future reference: scala.tools.nsc.util.ShowPickled from scala-compiler.
 object ScalaSignature {
 
     object Bytes {
@@ -16,7 +15,7 @@ object ScalaSignature {
     case class Bytes(arr: Array[Byte], pos: Int, len: Int) {
         def reader = new ByteCodeReader(this)
 
-        def section = arr.drop(pos).take(len)
+        def section = arr.slice(pos, pos + len)
     }
 
     trait Flags {
@@ -59,7 +58,7 @@ class ScalaSignature(val bytes: Bytes) {
             val start = bcr.pos
             val tpe = bcr.readByte
             val len = bcr.readNat
-            bcr.advance(len)(new SigEntry(i, start, Bytes(bytes.arr, bcr.pos, len)))
+            bcr.advance(len)(SigEntry(i, start, Bytes(bytes.arr, bcr.pos, len)))
         }
     }
 
@@ -98,6 +97,8 @@ class ScalaSignature(val bytes: Bytes) {
 
     case class ObjectSymbol(name: String, owner: SymbolRef, flags: Int, infoId: Int) extends ClassSymbolRef {
         override def isObject = true
+
+        override def info = evalT[TypeRefType](infoId).sym.asInstanceOf[ClassSymbol].info
     }
 
     case class MethodSymbol(name: String, owner: SymbolRef, flags: Int, infoId: Int) extends SymbolRef {
@@ -151,10 +152,11 @@ class ScalaSignature(val bytes: Bytes) {
 
         def jName = name.replace('.', '/') match {
             case "scala/AnyRef" | "scala/Any" => "java/lang/Object"
+            case "scala/Predef/String" => "java/lang/String"
             case s => s
         }
 
-        def jDesc = name match {
+        def jDesc: String = name match {
             case "scala.Array" => null
             case "scala.Long" => "J"
             case "scala.Int" => "I"
@@ -173,8 +175,8 @@ class ScalaSignature(val bytes: Bytes) {
 
         def returnType = this
 
-        override def jDesc = name match {
-            case "scala.Array" => "[" + typArgs(0).jDesc
+        override def jDesc: String = name match {
+            case "scala.Array" => "[" + typArgs.head.jDesc
             case _ => super.jDesc
         }
     }
@@ -299,13 +301,13 @@ class ScalaSignature(val bytes: Bytes) {
             case 34 => NullLiteral
             case 35 => TypeLiteral(evalT)
             case 36 => EnumLiteral(evalT)
-            case 40 => AnnotationInfo(evalT, evalT, evalList.grouped(2).map(g => (g(0), g(1))).toMap)
+            case 40 => AnnotationInfo(evalT, evalT, evalList.grouped(2).map(g => (g.head, g(1))).toMap)
             case 44 => ArrayLiteral(evalList)
             case _ => e
         }
     }
 
-    def collect[T](id: Int) = (0 until table.length).collect {
+    def collect[T](id: Int) = table.indices.collect {
         case i if table(i).id == id => evalT(i): T
     }
 
@@ -319,7 +321,7 @@ class ByteCodeReader(val bc: Bytes) {
 
     def more = pos < bc.pos + bc.len
 
-    def readString(len: Int) = advance(len)(new String(bc.arr.drop(pos).take(len)))
+    def readString(len: Int) = advance(len)(new String(bc.arr.slice(pos, pos + len)))
 
     def readByte = advance(1)(bc.arr(pos))
 
@@ -374,6 +376,6 @@ object ScalaSigReader {
 
     def ann(cnode: ClassNode): Option[AnnotationNode] = cnode.visibleAnnotations match {
         case null => None
-        case a => a.find(ann => ann.desc.equals("Lscala/reflect/ScalaSignature;"))
+        case a => a.asScala.find(ann => ann.desc.equals("Lscala/reflect/ScalaSignature;"))
     }
 }
