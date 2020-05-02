@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import net.minecraftforge.fml.relauncher.{Side, SideOnly}
 import org.lwjgl.input.Keyboard
 
-import scala.collection.mutable.{HashMap => MHashMap}
+import scala.collection.mutable.{WeakHashMap => MHashMap}
 
 /**
  * A class that maintains a map server<->client of which players are holding the control (or placement modifier key) much like sneaking.
