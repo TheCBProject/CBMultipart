@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "Steinsäge",
+  "item.cb_microblock.iron_saw": "Eisensäge",
+  "item.cb_microblock.diamond_saw": "Diamantsäge",
+  "item.cb_microblock.stone_rod": "Steinstab",
+  "item.cb_microblock.face.1": "%s-Cover",
+  "item.cb_microblock.face.2": "%s-Platte",
+  "item.cb_microblock.face.4": "%s-Scheibe",
+  "item.cb_microblock.hollow.1": "Hohles %s-Cover",
+  "item.cb_microblock.hollow.2": "Hohles %s-Platte",
+  "item.cb_microblock.hollow.4": "Hohle %s-Scheibe",
+  "item.cb_microblock.edge.1": "%s-Streifen",
+  "item.cb_microblock.edge.2": "%s-Pfosten",
+  "item.cb_microblock.edge.4": "%s-Pfeiler",
+  "item.cb_microblock.corner.1": "%s-Stückchen",
+  "item.cb_microblock.corner.2": "%s-Ecke",
+  "item.cb_microblock.corner.4": "%s-Kerbe"
+}

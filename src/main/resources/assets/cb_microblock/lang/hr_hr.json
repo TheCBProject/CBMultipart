@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "Kamena Pila",
+  "item.cb_microblock.iron_saw": "Željezna Pila",
+  "item.cb_microblock.diamond_saw": "Dijamantna Pila",
+  "item.cb_microblock.stone_rod": "Kameni Štap",
+  "item.cb_microblock.face.1": "%si Pokrivač",
+  "item.cb_microblock.face.2": "%si Panel",
+  "item.cb_microblock.face.4": "%sa Ploča",
+  "item.cb_microblock.hollow.1": "Izdubljen %si Pokrivač",
+  "item.cb_microblock.hollow.2": "Izdubljen %si Panel",
+  "item.cb_microblock.hollow.4": "Izdubljena %sa Ploča",
+  "item.cb_microblock.edge.1": "%sa Pruga",
+  "item.cb_microblock.edge.2": "%si Post",
+  "item.cb_microblock.edge.4": "%si Stup",
+  "item.cb_microblock.corner.1": "%si Kutak",
+  "item.cb_microblock.corner.2": "%si Ugao",
+  "item.cb_microblock.corner.4": "%si Usjek"
+}

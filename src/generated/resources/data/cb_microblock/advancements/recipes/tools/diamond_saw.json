@@ -1,0 +1,54 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "cb_microblock:diamond_saw"
+    ]
+  },
+  "criteria": {
+    "has_sticks": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:rods/wooden"
+          }
+        ]
+      }
+    },
+    "has_stone_rod": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:rods/stone"
+          }
+        ]
+      }
+    },
+    "has_diamond": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:gems/diamond"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "cb_microblock:diamond_saw"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_sticks",
+      "has_stone_rod",
+      "has_diamond",
+      "has_the_recipe"
+    ]
+  ]
+}

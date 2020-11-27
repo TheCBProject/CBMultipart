@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "Serra de Pedra",
+  "item.cb_microblock.iron_saw": "Serra de Ferro",
+  "item.cb_microblock.diamond_saw": "Serra de Diamante",
+  "item.cb_microblock.stone_rod": "Vara de Pedra",
+  "item.cb_microblock.face.1": "Cobertura de %s",
+  "item.cb_microblock.face.2": "Painel de %s",
+  "item.cb_microblock.face.4": "Laje de %s",
+  "item.cb_microblock.hollow.1": "Cobertura Furada %s",
+  "item.cb_microblock.hollow.2": "Painel Furado de %s",
+  "item.cb_microblock.hollow.4": "Laje Furada de %s",
+  "item.cb_microblock.edge.1": "Tira de %s",
+  "item.cb_microblock.edge.2": "Estaca de %s",
+  "item.cb_microblock.edge.4": "Pilar de %s",
+  "item.cb_microblock.corner.1": "Cantinho de %s",
+  "item.cb_microblock.corner.2": "Canto de %s",
+  "item.cb_microblock.corner.4": "Entalhe de %s"
+}

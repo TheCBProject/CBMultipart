@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "Kamenná pila",
+  "item.cb_microblock.iron_saw": "Železná pila",
+  "item.cb_microblock.diamond_saw": "Diamantová pila",
+  "item.cb_microblock.stone_rod": "Kamenná tyč",
+  "item.cb_microblock.face.1": "%s kryt",
+  "item.cb_microblock.face.2": "%s panel",
+  "item.cb_microblock.face.4": "%s deska",
+  "item.cb_microblock.hollow.1": "Dutý %s kryt",
+  "item.cb_microblock.hollow.2": "Dutý %s panel",
+  "item.cb_microblock.hollow.4": "Dutá %s deska",
+  "item.cb_microblock.edge.1": "%s pás",
+  "item.cb_microblock.edge.2": "%s stojan",
+  "item.cb_microblock.edge.4": "%s sloup",
+  "item.cb_microblock.corner.1": "%s kout",
+  "item.cb_microblock.corner.2": "%s roh",
+  "item.cb_microblock.corner.4": "%s zářez"
+}

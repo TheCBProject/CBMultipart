@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "Stone Saw",
+  "item.cb_microblock.iron_saw": "Iron Saw",
+  "item.cb_microblock.diamond_saw": "Diamond Saw",
+  "item.cb_microblock.stone_rod": "Stone Rod",
+  "item.cb_microblock.face.1": "%s Cover",
+  "item.cb_microblock.face.2": "%s Panel",
+  "item.cb_microblock.face.4": "%s Slab",
+  "item.cb_microblock.hollow.1": "Hollow %s Cover",
+  "item.cb_microblock.hollow.2": "Hollow %s Panel",
+  "item.cb_microblock.hollow.4": "Hollow %s Slab",
+  "item.cb_microblock.edge.1": "%s Strip",
+  "item.cb_microblock.edge.2": "%s Post",
+  "item.cb_microblock.edge.4": "%s Pillar",
+  "item.cb_microblock.corner.1": "%s Nook",
+  "item.cb_microblock.corner.2": "%s Corner",
+  "item.cb_microblock.corner.4": "%s Notch"
+}

@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "Seghetto di pietra",
+  "item.cb_microblock.iron_saw": "Seghetto di ferro",
+  "item.cb_microblock.diamond_saw": "Seghetto di diamante",
+  "item.cb_microblock.stone_rod": "Stecca di pietra",
+  "item.cb_microblock.face.1": "Copertura di %s",
+  "item.cb_microblock.face.2": "Pannello di %s",
+  "item.cb_microblock.face.4": "Lastra di %s",
+  "item.cb_microblock.hollow.1": "Copertura cava di %s",
+  "item.cb_microblock.hollow.2": "Pannello cavo di %s",
+  "item.cb_microblock.hollow.4": "Lastra cava di %s",
+  "item.cb_microblock.edge.1": "Striscia di %s",
+  "item.cb_microblock.edge.2": "Palo di %s",
+  "item.cb_microblock.edge.4": "Pilastro di %s",
+  "item.cb_microblock.corner.1": "Angolino di %s",
+  "item.cb_microblock.corner.2": "Angoletto di %s",
+  "item.cb_microblock.corner.4": "Angolo di %s"
+}

@@ -1,40 +1,46 @@
 package codechicken.microblock.handler
 
 import codechicken.lib.render.RenderUtils
-import codechicken.microblock.{ItemMicroPartRenderer, MicroMaterialRegistry}
-import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.item.crafting.IRecipe
-import net.minecraft.util.math.RayTraceResult
-import net.minecraftforge.client.event.{DrawBlockHighlightEvent, TextureStitchEvent}
-import net.minecraftforge.event.RegistryEvent
-import net.minecraftforge.fml.common.eventhandler.{EventPriority, SubscribeEvent}
-import net.minecraftforge.fml.relauncher.{Side, SideOnly}
+import codechicken.microblock.{ItemMicroBlockRenderer, MicroMaterialRegistry}
+import com.mojang.blaze3d.platform.GlStateManager
+import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.util.Hand
+import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
+import net.minecraftforge.client.event.DrawHighlightEvent.HighlightBlock
+import net.minecraftforge.client.event.TextureStitchEvent
+import net.minecraftforge.eventbus.api.{EventPriority, SubscribeEvent}
 
 object MicroblockEventHandler {
     @SubscribeEvent
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     def postTextureStitch(event: TextureStitchEvent.Post) {
         MicroMaterialRegistry.markIconReload()
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    @SideOnly(Side.CLIENT)
-    def drawBlockHighlight(event: DrawBlockHighlightEvent) {
-        val currentItem = event.getPlayer.getHeldItemMainhand
+    @OnlyIn(Dist.CLIENT)
+    def drawBlockHighlight(event: HighlightBlock) {
 
-        if (!currentItem.isEmpty && currentItem.getItem == MicroblockProxy.itemMicro &&
-            event.getTarget != null && event.getTarget.typeOfHit == RayTraceResult.Type.BLOCK) {
-            GlStateManager.pushMatrix()
-            RenderUtils.translateToWorldCoords(event.getPlayer, event.getPartialTicks)
-            if (ItemMicroPartRenderer.renderHighlight(event.getPlayer, currentItem, event.getTarget)) {
-                event.setCanceled(true)
-            }
-            GlStateManager.popMatrix()
+        event.getInfo.getRenderViewEntity match {
+            case player: PlayerEntity =>
+                val currentItem = player.getHeldItemMainhand
+
+                if (!currentItem.isEmpty && currentItem.getItem == MicroblockModContent.itemMicroBlock) {
+                    val mStack = event.getMatrix
+                    val info = event.getInfo
+                    mStack.push()
+                    mStack.translate(-info.getProjectedView.x, -info.getProjectedView.y, -info.getProjectedView.z)
+                    if (ItemMicroBlockRenderer.renderHighlight(player, Hand.MAIN_HAND ,currentItem, event.getTarget, mStack, event.getBuffers, event.getPartialTicks)) {
+                        event.setCanceled(true)
+                    }
+                    mStack.pop()
+                }
+            case _ =>
         }
     }
 
-    @SubscribeEvent
-    def registerRecipes(event: RegistryEvent.Register[IRecipe]) {
-        MicroblockProxy.registerRecipes(event.getRegistry)
-    }
+    //    @SubscribeEvent
+    //    def registerRecipes(event: RegistryEvent.Register[IRecipe]) {
+    //        MicroblockProxy.registerRecipes(event.getRegistry)
+    //    }
 }

@@ -1,16 +1,20 @@
 package codechicken.microblock
 
-import codechicken.lib.raytracer.{CuboidRayTraceResult, IndexedCuboid6}
+import codechicken.lib.raytracer.{IndexedCuboid6, SubHitVoxelShape, VoxelShapeCache}
 import codechicken.lib.render.{CCRenderState, RenderUtils}
 import codechicken.lib.vec.Rotation._
 import codechicken.lib.vec.Vector3._
-import codechicken.lib.vec.{Cuboid6, Vector3}
-import codechicken.multipart.{TFacePart, TNormalOcclusionPart}
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.util.{BlockRenderLayer, ResourceLocation}
+import codechicken.lib.vec.{Cuboid6, Matrix4, Vector3}
+import codechicken.microblock.api.{ISidedHollowConnect, MicroMaterial}
+import codechicken.microblock.handler.MicroblockModContent
+import codechicken.multipart.api.part.{TFacePart, TNormalOcclusionPart}
+import codechicken.multipart.util.PartRayTraceResult
+import com.mojang.blaze3d.matrix.MatrixStack
+import net.minecraft.client.renderer.{ActiveRenderInfo, IRenderTypeBuffer, RenderType}
+import net.minecraft.util.math.shapes.{VoxelShape, VoxelShapes}
 import org.lwjgl.opengl.GL11
 
-import scala.collection.JavaConversions._
+import scala.jdk.CollectionConverters._
 
 object HollowPlacement extends PlacementProperties {
 
@@ -29,9 +33,10 @@ object HollowPlacement extends PlacementProperties {
 
 object HollowMicroFactory extends CommonMicroFactory {
     var pBoxes: Array[Seq[Cuboid6]] = new Array(256)
+    var pShape: Array[VoxelShape] = new Array(256)
     var occBounds: Array[Cuboid6] = new Array(256)
     for (s <- 0 until 6) {
-        val transform = sideRotations(s).at(center)
+        val transform = sideRotations(s).at(CENTER)
         for (t <- 1 until 8) {
             val d = t / 8D
             val w1 = 1 / 8D
@@ -43,20 +48,21 @@ object HollowMicroFactory extends CommonMicroFactory {
                 new Cuboid6(w1, 0, 1 - w1, 1 - w1, d, 1))
                 .map(_.apply(transform))
             occBounds(t << 4 | s) = new Cuboid6(1 / 8D, 0, 1 / 8D, 7 / 8D, d, 7 / 8D).apply(transform)
+            pShape(t << 4 | s) = pBoxes(t << 4 | s).map(VoxelShapeCache.getShape).reduce(VoxelShapes.or)
         }
     }
 
-    def getName = new ResourceLocation("ccmb:mcr_hllw")
+    override def getType = MicroblockModContent.hollowMultiPartType
 
-    def baseTrait = classOf[HollowMicroblock]
+    override def baseTrait = classOf[HollowMicroblock]
 
-    def clientTrait = classOf[HollowMicroblockClient]
+    override def clientTrait = classOf[HollowMicroblockClient]
 
-    def itemSlot = 3
+    override def itemSlot = 3
 
-    def placementProperties = HollowPlacement
+    override def placementProperties = HollowPlacement
 
-    def getResistanceFactor = 1
+    override def getResistanceFactor = 1
 }
 
 trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClient {
@@ -67,15 +73,7 @@ trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClien
         renderMask = renderMask & 0xFF | getHollowSize << 8
     }
 
-    //    override def drawBreaking(renderBlocks:RenderBlocks) {
-    //        CCRenderState.reset()
-    //        CCRenderState.setPipeline(new Translation(x, y, z), new IconTransformation(renderBlocks.overrideBlockTexture))
-    //        renderHollow(null, 0, getBounds, 0, false,
-    //            (pos: Vector3, mat: IMicroMaterial, pass: Int, c: Cuboid6, sideMask: Int) =>
-    //                BlockRenderer.renderCuboid(c, sideMask))
-    //    }
-
-    override def render(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState) {
+    override def render(pos: Vector3, layer: RenderType, ccrs: CCRenderState) {
         if (layer == null) {
             renderHollow(pos, ccrs, layer, getBounds, 0, false, MicroblockRender.renderCuboid)
         } else if (isTransparent) {
@@ -86,7 +84,7 @@ trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClien
         }
     }
 
-    def renderHollow(pos: Vector3, ccrs: CCRenderState, layer: BlockRenderLayer, c: Cuboid6, sideMask: Int, face: Boolean, f: (Vector3, CCRenderState, IMicroMaterial, BlockRenderLayer, Cuboid6, Int) => Unit) {
+    def renderHollow(pos: Vector3, ccrs: CCRenderState, layer: RenderType, c: Cuboid6, sideMask: Int, face: Boolean, f: (Vector3, CCRenderState, MicroMaterial, RenderType, Cuboid6, Int) => Unit) {
         val mat = getIMaterial
         val size = renderMask >> 8
         val d1 = 0.5 - size / 32D
@@ -139,41 +137,30 @@ trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClien
         }
     }
 
-    override def drawHighlight(player: EntityPlayer, hit: CuboidRayTraceResult, frame: Float) = {
+    override def drawHighlight(hit: PartRayTraceResult, info: ActiveRenderInfo, mStack: MatrixStack, getter: IRenderTypeBuffer, partialTicks: Float) = {
         val size = getHollowSize
         val d1 = 0.5 - size / 32D
         val d2 = 0.5 + size / 32D
         val t = (shape >> 4) / 8D
 
-        import GL11._
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glDisable(GL_TEXTURE_2D)
-        glColor4f(0, 0, 0, 0.4F)
-        glLineWidth(2)
-        glDepthMask(false)
-        glPushMatrix()
-        RenderUtils.translateToWorldCoords(player, frame)
-        glTranslated(pos.getX, pos.getY, pos.getZ)
-        sideRotations(shape & 0xF).at(center).glApply()
-
-        RenderUtils.drawCuboidOutline(new Cuboid6(0, 0, 0, 1, t, 1).expand(0.001))
-        RenderUtils.drawCuboidOutline(new Cuboid6(d1, 0, d1, d2, t, d2).expand(-0.001))
-        glPopMatrix()
-        glDepthMask(true)
-        glEnable(GL_TEXTURE_2D)
-        glDisable(GL_BLEND)
-
+        val mat = new Matrix4(mStack)
+        mat.translate(hit.getPos)
+        mat.translate(-info.getProjectedView.x, -info.getProjectedView.y, -info.getProjectedView.z)
+        mat.apply(sideRotations(shape & 0xF).at(Vector3.CENTER))
+        RenderUtils.bufferHitBox(mat, getter, new Cuboid6(0, 0, 0, 1, t, 1).expand(0.001))
+        RenderUtils.bufferHitBox(mat, getter, new Cuboid6(d1, 0, d1, d2, t, d2).expand(-0.001))
         true
     }
 }
 
 trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclusionPart {
-    def microFactory = HollowMicroFactory
+    override def microFactory = HollowMicroFactory
 
-    def getBounds: Cuboid6 = FaceMicroFactory.aBounds(shape)
+    override def getBounds: Cuboid6 = FaceMicroFactory.aBounds(shape)
 
-    override def getPartialOcclusionBoxes = HollowMicroFactory.pBoxes(shape)
+    override def getOutlineShape: VoxelShape = getCollisionShape
+
+    override def getPartialOcclusionShape = HollowMicroFactory.pShape(shape)
 
     def getHollowSize = tile match {
         case null => 8
@@ -183,7 +170,8 @@ trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclu
         }
     }
 
-    def getOcclusionBoxes = {
+    //TODO, Cache.
+    def getOcclusionShape = {
         val size = getHollowSize
         val c = HollowMicroFactory.occBounds(shape)
         val d1 = 0.5 - size / 32D
@@ -201,26 +189,33 @@ trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclu
                     new Cuboid6(x1, y1, d1, d1, y2, d2),
                     new Cuboid6(x1, y1, d2, x2, y2, z2),
                     new Cuboid6(x1, y1, z1, x2, y2, d1))
+                    .map(VoxelShapeCache.getShape)
+                    .reduce(VoxelShapes.or)
             case 2 | 3 =>
                 Seq(new Cuboid6(d1, d2, z1, d2, y2, z2),
                     new Cuboid6(d1, y1, z1, d2, d1, z2),
                     new Cuboid6(d2, y1, z1, x2, y2, z2),
                     new Cuboid6(x1, y1, z1, d1, y2, z2))
+                    .map(VoxelShapeCache.getShape)
+                    .reduce(VoxelShapes.or)
             case 4 | 5 =>
                 Seq(new Cuboid6(x1, d1, d2, x2, d2, z2),
                     new Cuboid6(x1, d1, z1, x2, d2, d1),
                     new Cuboid6(x1, d2, z1, x2, y2, z2),
                     new Cuboid6(x1, y1, z1, x2, d1, z2))
+                    .map(VoxelShapeCache.getShape)
+                    .reduce(VoxelShapes.or)
         }
     }
 
-    override def getCollisionBoxes = {
+    //TODO, Cache.
+    def getCollisionBoxes = {
         val size = getHollowSize
         val d1 = 0.5 - size / 32D
         val d2 = 0.5 + size / 32D
         val t = (shape >> 4) / 8D
 
-        val tr = sideRotations(shape & 0xF).at(center)
+        val tr = sideRotations(shape & 0xF).at(CENTER)
         Seq(new Cuboid6(0, 0, 0, 1, t, d1),
             new Cuboid6(0, 0, d2, 1, t, 1),
             new Cuboid6(0, 0, d1, d1, t, d2),
@@ -228,7 +223,9 @@ trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclu
             .map(c => c.apply(tr))
     }
 
-    override def getSubParts = getCollisionBoxes.map(c => new IndexedCuboid6(0, c))
+    override def getCollisionShape = getCollisionBoxes.map(VoxelShapeCache.getShape).reduce(VoxelShapes.or)
+
+    override def getRayTraceShape = new SubHitVoxelShape(getCollisionShape, getCollisionBoxes.map(c => new IndexedCuboid6(0, c)).asJava)
 
     override def allowCompleteOcclusion = true
 

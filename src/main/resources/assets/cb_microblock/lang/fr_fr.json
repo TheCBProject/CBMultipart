@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "Scie en pierre",
+  "item.cb_microblock.iron_saw": "Scie en fer",
+  "item.cb_microblock.diamond_saw": "Scie en diamant",
+  "item.cb_microblock.stone_rod": "Bâtons en pierre",
+  "item.cb_microblock.face.1": "Couvercle de %s",
+  "item.cb_microblock.face.2": "Panneau de %s",
+  "item.cb_microblock.face.4": "Dalle de %s",
+  "item.cb_microblock.hollow.1": "Couvercle creux de %s",
+  "item.cb_microblock.hollow.2": "Panneau creux de %s",
+  "item.cb_microblock.hollow.4": "Dalle creuse de %s",
+  "item.cb_microblock.edge.1": "Bande de %s",
+  "item.cb_microblock.edge.2": "Pieu de %s",
+  "item.cb_microblock.edge.4": "Pilier de %s",
+  "item.cb_microblock.corner.1": "Coin de %s",
+  "item.cb_microblock.corner.2": "Bordure de %s",
+  "item.cb_microblock.corner.4": "Entaille de %s"
+}

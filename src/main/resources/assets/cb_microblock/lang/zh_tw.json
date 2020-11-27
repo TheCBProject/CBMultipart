@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "石鋸子",
+  "item.cb_microblock.iron_saw": "鐵鋸子",
+  "item.cb_microblock.diamond_saw": "鑽石鋸子",
+  "item.cb_microblock.stone_rod": "石棍",
+  "item.cb_microblock.face.1": "%s 薄板",
+  "item.cb_microblock.face.2": "%s 面板",
+  "item.cb_microblock.face.4": "%s 厚板",
+  "item.cb_microblock.hollow.1": "凹 %s 薄板",
+  "item.cb_microblock.hollow.2": "凹 %s 面板",
+  "item.cb_microblock.hollow.4": "凹 %s 厚板",
+  "item.cb_microblock.edge.1": "%s 條",
+  "item.cb_microblock.edge.2": "%s 柱",
+  "item.cb_microblock.edge.4": "%s 支柱",
+  "item.cb_microblock.corner.1": "%s 角",
+  "item.cb_microblock.corner.2": "%s 棱角",
+  "item.cb_microblock.corner.4": "%s 切口"
+}

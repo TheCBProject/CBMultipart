@@ -1,57 +1,98 @@
 package codechicken.multipart.minecraft;
 
-import codechicken.multipart.IRandomDisplayTickPart;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockTorch;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
+import codechicken.lib.raytracer.VoxelShapeCache;
+import codechicken.lib.vec.Cuboid6;
+import codechicken.lib.vec.Rotation;
+import codechicken.lib.vec.Vector3;
+import codechicken.multipart.api.MultiPartType;
+import codechicken.multipart.api.part.AnimateTickPart;
+import codechicken.multipart.api.part.TMultiPart;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.HorizontalBlock;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.IWorldReader;
 
+import java.util.Collections;
 import java.util.Random;
 
-public class TorchPart extends McSidedMetaPart implements IRandomDisplayTickPart {
+public class TorchPart extends McSidedStatePart implements AnimateTickPart {
 
-    public static BlockTorch torch = (BlockTorch) Blocks.TORCH;
+    public static VoxelShape STANDING_OCCLUSION;
+    public static VoxelShape[] WALL_OCCLUSION = new VoxelShape[4];
 
-    public TorchPart() {
-        state = torch.getDefaultState();
+    //Old style 1.12 and prior boxes for occlusion.
+    // They more accurately represent the torches size.
+    static {
+        STANDING_OCCLUSION = VoxelShapeCache.getShape(new Cuboid6(0.4D, 0.0D, 0.4D, 0.6D, 0.6D, 0.6D));
+        Cuboid6 wall = new Cuboid6(0.35D, 0.2D, 0.7D, 0.65D, 0.8D, 1.0D);
+        for (int i = 0; i < 4; i++) {
+            WALL_OCCLUSION[i] = VoxelShapeCache.getShape(wall.copy().apply(Rotation.quarterRotations[i].at(Vector3.CENTER)));
+        }
     }
 
-    public TorchPart(IBlockState state) {
+    public TorchPart() {
+    }
+
+    public TorchPart(BlockState state) {
         super(state);
     }
 
     @Override
-    public Block getBlock() {
-        return torch;
+    public BlockState getDefaultState() {
+        return Blocks.TORCH.getDefaultState();
     }
 
     @Override
-    public ResourceLocation getType() {
-        return Content.TORCH;
+    public ItemStack getDropStack() {
+        return new ItemStack(Items.TORCH);
     }
 
     @Override
-    public int getSideFromState() {
-        return state.getValue(BlockTorch.FACING).getOpposite().ordinal();
+    public MultiPartType<?> getType() {
+        return ModContent.torchPartType;
     }
 
     @Override
-    public boolean canStay() {
-        if (getSideFromState() == 0) {
-            BlockPos offset = pos().offset(EnumFacing.DOWN);
-            IBlockState state = world().getBlockState(offset);
-            if (state.getBlock().canPlaceTorchOnTop(state, world(), offset)) {
-                return true;
+    public Direction getSide() {
+        return state.getBlock() == Blocks.TORCH ? Direction.DOWN : state.get(HorizontalBlock.HORIZONTAL_FACING).getOpposite();
+    }
+
+    @Override
+    public VoxelShape getOcclusionShape() {
+        if (state.getBlock() == Blocks.TORCH) {
+            return STANDING_OCCLUSION;
+        }
+        return WALL_OCCLUSION[getSide().getHorizontalIndex()];
+    }
+
+    @Override
+    public TMultiPart setStateOnPlacement(BlockItemUseContext context) {
+        BlockState wallState = Blocks.WALL_TORCH.getStateForPlacement(context);
+
+        IWorldReader world = context.getWorld();
+        BlockPos pos = context.getPos();
+
+        for (Direction dir : context.getNearestLookingDirections()) {
+            if (dir != Direction.UP) {
+                BlockState state = dir == Direction.DOWN ? Blocks.TORCH.getStateForPlacement(context) : wallState;
+                if (state != null && state.isValidPosition(world, pos)) {
+                    this.state = state;
+                    return this;
+                }
             }
         }
-        return super.canStay();
+
+        return null;
     }
 
     @Override
-    public void randomDisplayTick(Random random) {
-        getBlock().randomDisplayTick(state, world(), pos(), random);
+    public void animateTick(Random random) {
+        state.getBlock().animateTick(state, world(), pos(), random);
     }
 }

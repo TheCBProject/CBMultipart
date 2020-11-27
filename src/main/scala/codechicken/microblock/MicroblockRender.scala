@@ -1,53 +1,47 @@
 package codechicken.microblock
 
 import java.util.function.Supplier
-import java.util.{ArrayList => JArrayList}
 
 import codechicken.lib.render.BlockRenderer.BlockFace
 import codechicken.lib.render.CCRenderState
-import codechicken.lib.render.buffer.BakingVertexBuffer
-import codechicken.lib.texture.TextureUtils
-import codechicken.lib.vec.{Cuboid6, Vector3}
-import net.minecraft.client.renderer.block.model.BakedQuad
+import codechicken.lib.render.buffer.TransformingVertexBuilder
+import codechicken.lib.vec.{Cuboid6, Matrix4, Scale, Vector3}
+import codechicken.microblock.api.MicroMaterial
+import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.util.BlockRenderLayer
-import net.minecraft.util.math.RayTraceResult
-import org.lwjgl.opengl.GL11._
-
-import scala.collection.JavaConversions._
+import net.minecraft.client.renderer.{IRenderTypeBuffer, RenderState, RenderType}
+import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.util.Hand
+import net.minecraft.util.math.BlockRayTraceResult
 
 object MicroblockRender {
-    def renderHighlight(player: EntityPlayer, hit: RayTraceResult, mcrFactory: CommonMicroFactory, size: Int, material: Int) {
-        mcrFactory.placementProperties.placementGrid.render(new Vector3(hit.hitVec), hit.sideHit.ordinal)
 
-        val placement = MicroblockPlacement(player, hit, size, material, !player.capabilities.isCreativeMode, mcrFactory.placementProperties)
+    def renderHighlight(player: PlayerEntity, hand:Hand, hit: BlockRayTraceResult, mcrFactory: CommonMicroFactory, size: Int, material: Int, mStack: MatrixStack, getter: IRenderTypeBuffer, partialTicks: Float) {
+        mcrFactory.placementProperties.placementGrid.render(new Vector3(hit.getHitVec), hit.getFace.ordinal, mStack, getter)
+
+        val placement = MicroblockPlacement(player, hand, hit, size, material, !player.abilities.isCreativeMode, mcrFactory.placementProperties)
         if (placement == null) {
             return
         }
         val pos = placement.pos
         val part = placement.part.asInstanceOf[MicroblockClient]
 
-        glPushMatrix()
-        glTranslated(pos.getX + 0.5, pos.getY + 0.5, pos.getZ + 0.5)
-        glScaled(1.002, 1.002, 1.002)
-        glTranslated(-0.5, -0.5, -0.5)
+        val mat = new Matrix4(mStack)
+        mat.translate(pos)
+        mat.apply(new Scale(1.002, 1.002, 1.002).at(Vector3.CENTER))
 
-        glEnable(GL_BLEND)
-        glDepthMask(false)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        val state = RenderType.State.getBuilder
+            .texture(RenderState.BLOCK_SHEET)
+            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
+            .build(false)
+        val rType = RenderType.makeType("testing", DefaultVertexFormats.BLOCK, 7, 255, state)
 
         val ccrs = CCRenderState.instance()
-        TextureUtils.bindBlockTexture()
         ccrs.reset()
+        ccrs.bind(rType, getter)
+        ccrs.r = new TransformingVertexBuilder(ccrs.r, mat)
         ccrs.alphaOverride = 80
-        ccrs.startDrawing(GL_QUADS, DefaultVertexFormats.ITEM)
-        part.render(Vector3.zero, null, ccrs)
-        ccrs.draw()
-
-        glDisable(GL_BLEND)
-        glDepthMask(true)
-        glPopMatrix()
+        part.render(Vector3.ZERO, null, ccrs)
     }
 
     private val instances = ThreadLocal.withInitial(new Supplier[BlockFace] {
@@ -56,43 +50,16 @@ object MicroblockRender {
 
     def face = instances.get()
 
-    def renderCuboid(pos: Vector3, ccrs: CCRenderState, mat: IMicroMaterial, layer: BlockRenderLayer, c: Cuboid6, faces: Int) {
+    def renderCuboid(pos: Vector3, ccrs: CCRenderState, mat: MicroMaterial, layer: RenderType, c: Cuboid6, faces: Int) {
         MicroMaterialRegistry.loadIcons()
 
-        val f = face
+        val f = new BlockFace
         ccrs.setModel(f)
         for (s <- 0 until 6 if (faces & 1 << s) == 0) {
-            f.loadCuboidFace(c, s)
+            f.loadCuboidFace(c, s).computeLightCoords()
             val ops = mat.getMicroRenderOps(pos, s, layer, c)
             for (opSet <- ops)
                 ccrs.render(opSet: _*)
         }
-    }
-
-    @Deprecated
-    def getQuadsList(pos: Vector3, mat: IMicroMaterial, layer: BlockRenderLayer, c: Cuboid6, faces: Int) = {
-        val list = Seq.newBuilder[BakedQuad]
-
-        val ccrs = CCRenderState.instance
-        val buffer = BakingVertexBuffer.create
-        val f = face
-
-
-        for (s <- 0 until 6 if (faces & 1 << s) == 0) {
-            f.loadCuboidFace(c, s)
-            val ops = mat.getMicroRenderOps(pos, s, layer, c)
-            for (opSet <- ops) {
-                ccrs.reset()
-                buffer.reset()
-                buffer.begin(0x07, DefaultVertexFormats.ITEM)
-                ccrs.bind(buffer)
-                ccrs.setPipeline(f, 0, f.getVertices.length, opSet: _*)
-                ccrs.render()
-                buffer.finishDrawing()
-                list ++= buffer.bake()
-            }
-        }
-
-        list.result()
     }
 }

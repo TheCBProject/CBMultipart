@@ -1,19 +1,26 @@
 buildscript {
-	repositories {
-		jcenter()
-		maven {
-			name = "forge"
-			url = "http://files.minecraftforge.net/maven"
-		}
-	}
-	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-	}
+    repositories {
+        mavenLocal()
+        jcenter()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
+    }
 }
 
-apply plugin: 'scala'
-apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'maven'
+plugins {
+    id 'java'
+    id 'scala'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id "net.covers1624.signing" version '1.1.3'
+}
+
+apply plugin: 'net.minecraftforge.gradle'
 
 group = "codechicken"
 archivesBaseName = "ForgeMultipart"
@@ -21,156 +28,258 @@ archivesBaseName = "ForgeMultipart"
 targetCompatibility = "1.8"
 sourceCompatibility = "1.8"
 
-// Define properties file
-ext.configFile = file "build.properties"
+sourceSets.main.resources.srcDirs += "src/generated/resources"
 
-configFile.withReader {
-	// Load config.  It shall from now be referenced as simply config or project.config
-	def prop = new Properties()
-	prop.load(it)
-	project.ext.config = new ConfigSlurper().parse prop
+file('build.properties').withReader {
+    def prop = new Properties()
+    prop.load(it)
+    project.ext.config = new ConfigSlurper().parse prop
+}
+
+def signProps = [:]
+if (System.getenv("KEY_STORE")) {
+    println "Using Env variables for jar signing."
+    signProps['keyStore'] = System.getenv("KEY_STORE")
+    file(System.getenv("KEY_STORE_PROPS")).withReader {
+        def props = new Properties()
+        props.load(it)
+        signProps.putAll(props)
+    }
+} else if (project.hasProperty('keyStore')) {
+    println "Using Project properties for jar signing."
+    signProps['keyStore'] = project.getProperty('keyStore')
+    signProps['storePass'] = project.getProperty('keyStorePass')
+    signProps['alias'] = project.getProperty('keyStoreAlias')
+    signProps['keyPass'] = project.getProperty('keyStoreKeyPass')
+} else {
+    println 'No signing secrets found, build will not be signed.'
+}
+
+version = "${project.config.mod_version}." + (System.getenv("BUILD_NUMBER") ?: "1")
+println "Starting build of ${archivesBaseName}, Version: ${version}"
+println "Using Forge: ${config.forge_version}, for Minecraft: ${config.mc_version}, with Mappings: ${config.mappings}"
+
+minecraft {
+    mappings channel: 'snapshot', version: config.mappings
+    accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
+    runs {
+        client {
+            workingDirectory file('run')
+            mods { cb_multipart { source sourceSets.main } }
+            mods { cb_microblock { source sourceSets.main } }
+        }
+        server {
+            workingDirectory file('run')
+            mods { cb_multipart { source sourceSets.main } }
+            mods { cb_microblock { source sourceSets.main } }
+        }
+        data {
+            workingDirectory file('run')
+            args '--mod', 'cb_multipart', '--mod', 'cb_microblock', '--all', '--output', file("src/generated/resources")
+            mods { cb_multipart { source sourceSets.main } }
+            mods { cb_microblock { source sourceSets.main } }
+        }
+    }
 }
 
 configurations {
-	pack
-	compile {
-		extendsFrom pack
-	}
+    shadow
+    compile.extendsFrom shadow
 }
 
 repositories {
-	maven {
-		name = "chickenbones"
-		url = "http://chickenbones.net/maven"
-	}
-	maven {
-		name = "JEI Maven."
-		url = "http://dvs1.progwml6.com/files/maven"
-	}
+    mavenLocal()
+    maven { url = "https://maven.covers1624.net/" }
+    maven { url = "https://dvs1.progwml6.com/files/maven" }
 }
 
 dependencies {
-	compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
-	pack "codechicken:ChickenASM:1.12-${config.cc_asm_version}"
-    compile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
+    minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
+
+    //Scala
+    compile "org.scala-lang:scala-compiler:${config.scala_version}"
+    compile "org.scala-lang:scala-library:${config.scala_version}"
+    compile "org.scala-lang.modules:scala-java8-compat_${config.scala_compat_version}"
+    compile "net.minecraftforge:Scorge:${config.scorge_version}"
+
+    //Mod deps
+    compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
+    compileOnly fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}")
+
+    //Packed into built jar.
+    shadow "codechicken:TraitMixinCompiler:${config.mixin_version}"
+    shadow "codechicken:TraitMixinCompiler:${config.mixin_version}:forge"
+    shadow "codechicken:TraitMixinCompiler:${config.mixin_version}:scala"
+    shadow "codechicken:ChickenASM:${config.chicken_asm_version}:modlauncher"
+
+    testCompile 'org.junit.jupiter:junit-jupiter-api:5.0.0'
 }
 
-version = "${project.config.mod_version}." + System.getenv("BUILD_NUMBER") ?: "1"
-
-println config.mc_version + "-" + config.forge_version
-// Setup the forge minecraft plugin data. Specify the preferred forge/minecraft version here
-minecraft {
-	version = config.mc_version + "-" + config.forge_version
-	mappings = config.mappings
-	runDir = "run"
-	makeObfSourceJar = false
+reobf {
+    shadowJar {}
+    jar {//Disable reobfJar
+        enabled = false
+    }
 }
 
-processResources {
-	//redo task if any of these properties change
-	inputs.property "version", project.version
-	inputs.property "mc_version", config.mc_version
-	inputs.property "ccl_version", config.ccl_version
+signing {
+    if (!signProps.empty) {
+        jars {
+            sign shadowJar
+            after reobfShadowJar
 
-	// Replace properties in info files
-	from(sourceSets.main.resources.srcDirs) {
-		include '*.info'
-		expand 'version': project.version, 'mc_version': config.mc_version, 'ccl_version': config.ccl_version
-	}
-    rename '(.+_at.cfg)', 'META-INF/$1'
+            keyStore = signProps.keyStore
+            alias = signProps.alias
+            storePass = signProps.storePass
+            keyPass = signProps.keyPass
+        }
+    }
 }
 
-version = "${project.minecraft.version}-${project.version}"
+processResources { task ->
+    inputs.property "version", version
+    inputs.property "mc_version", config.mc_version
 
-def commonManifest = {
-	attributes 'ContainedDeps': "ChickenASM-1.12-${config.cc_asm_version}.jar"
-    attributes 'FMLAT': 'fmp_at.cfg'
+    from(sourceSets.main.resources.srcDirs) { spec ->
+        spec.include 'META-INF/mods.toml'
+        task.doFirst {
+            spec.expand 'version': version,
+                    'mc_version': config.mc_version,
+                    'ccl_version': resolve("CodeChickenLib")
+        }
+    }
 }
 
-jar {
-	classifier = 'universal'
-	manifest commonManifest
-	from configurations.pack
+version = "${config.mc_version}-${version}"
+jar.enabled = false//Disable normal jar, is replaced by ShadowJar.
+shadowJar {
+    finalizedBy 'reobfShadowJar'
+    classifier 'universal'
+    manifest {
+        attributes 'Specification-Title': archivesBaseName
+        attributes 'Specification-Vendor': 'covers1624'
+        attributes 'Specification-Version': "1"
+        attributes 'Implementation-Title': archivesBaseName
+        attributes 'Implementation-Vendor': 'covers1624'
+        attributes 'Implementation-Version': version
+        attributes 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+    }
+
+    configurations = [project.configurations.shadow]
+    dependencies {
+        include(dependency("codechicken:TraitMixinCompiler:"))
+        include(dependency("codechicken:ChickenASM:"))
+    }
+    mergeServiceFiles()
+    exclude 'module-info.class'
+    //Transitives are flattened for some stupid reason..
+    exclude 'javax/**'
+    exclude 'org/apache/**'
+    exclude 'org/objectweb/**'
+    exclude 'com/google/**'
+    exclude 'NOTICE'
+    exclude 'LICENSE'
+    exclude 'Log4j-charsets.properties'
+    exclude 'META-INF/NOTICE'
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/versions/**'
+    exclude 'META-INF/services/org.apache.**'
 }
+
 
 task srcJar(type: Jar) {
-	from sourceSets.main.allSource
-	classifier = 'sources'
+    from sourceSets.main.allSource
+    classifier = 'sources'
 }
 
-task deobfJar(type: Jar) {
-	classifier = 'deobf'
-	manifest commonManifest
-	from sourceSets.main.output
-	from configurations.pack
+build.dependsOn shadowJar
+
+publishing {
+    repositories {
+        if (System.getenv('MAVEN_PASS')) {
+            maven {
+                url "https://maven-upload.covers1624.net/"
+                credentials {
+                    username 'covers1624'
+                    password System.getenv('MAVEN_PASS')
+                }
+            }
+        }
+    }
+    publications {
+        Multipart(MavenPublication) {
+            groupId project.group
+            artifactId project.archivesBaseName
+            version project.version
+            artifact shadowJar
+            artifact srcJar
+
+            pom {
+                name = archivesBaseName
+                description = archivesBaseName
+                //The publish plugin doesnt like GString's here apparently..
+                url = "https://github.com/TheCBProject/${archivesBaseName}".toString()
+                scm {
+                    url = "https://github.com/TheCBProject/${archivesBaseName}".toString()
+                    connection = "scm:git:git://github.com/TheCBProject/${archivesBaseName}.git".toString()
+                    connection = "scm:git:git@github.com:TheCBProject/${archivesBaseName}.git".toString()
+                }
+
+                issueManagement {
+                    system = 'github'
+                    url = "https://github.com/TheCBProject/${archivesBaseName}/issues".toString()
+                }
+                licenses {
+                    license {
+                        name = "GNU Lesser Public License (GPL), Version 2.1"
+                        url = "https://raw.githubusercontent.com/TheCBProject/${archivesBaseName}/master/LICENSE.txt".toString()
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'covers1624'
+                        name = 'covers1624'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'chicken-bones'
+                        name = 'chicken-bones'
+                    }
+                }
+            }
+        }
+    }
 }
 
-
-task signJar(type: SignJar, dependsOn: reobfJar) {
-	onlyIf { // Skip the task if our secret data isn't available
-		project.hasProperty('keyStore')
-	}
-
-	if (project.hasProperty('keyStore')) {
-		keyStore = project.keyStore // This needs to be a path to the keystore file
-		alias = project.keyStoreAlias
-		storePass = project.keyStorePass
-		keyPass = project.keyStoreKeyPass
-		inputFile = jar.archivePath
-		outputFile = jar.archivePath
-	}
-}
-
-build.dependsOn signJar
-
-tasks.withType(ScalaCompile) { scalaCompileOptions.additionalParameters = ["-Xexperimental"] }
-
-// Tell the artifact system about our extra jars
-artifacts {
-	archives srcJar, deobfJar
-}
-
-// Configure an upload task.
-uploadArchives {
-	repositories {
-		mavenDeployer {
-			if (project.hasProperty("local_maven")) {
-				repository(url: "file://${local_maven}")
-				pom {
-					groupId = project.group
-					version = project.version
-					artifactId = project.archivesBaseName
-					project {
-						name project.archivesBaseName
-						packaging 'jar'
-						description 'ForgeMultipart'
-						url 'https://github.com/TheCBProject/ForgeMultipart'
-						scm {
-							url 'https://github.com/TheCBProject/ForgeMultipart'
-							connection 'scm:git:git@github.com:TheCBProject/ForgeMultipart.git'
-							developerConnection 'scm:git:git@github.com:TheCBProject/ForgeMultipart.git'
-						}
-						issueManagement {
-							system 'github'
-							url 'https://github.com/TheCBProject/ForgeMultipart/issues'
-						}
-						licenses {
-							license {
-								name 'GNU Lesser Public License (GPL), Version 2.1'
-								url 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt'
-								distribution 'repo'
-							}
-						}
-						developers {
-							developer {
-								id 'chicken-bones'
-								name 'chicken-bones'
-								roles { role 'developer' }
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+/**
+ * Polls the 'compile' configuration for a dependency with the given module name
+ * and resolves, and returns its version. E.g: '1.2.+' will resolve to '1.2.3.4'
+ *
+ * @param module The module to search for.
+ * @param chop If the string should be chopped on the last '-' in its string.
+ * @param configuration The name of the configuration to search.
+ * @param errorMissing If an error should be thrown if it can't be found.
+ * @return The version string, '0' if 'errorMissing' is false and nothing was found.
+ */
+def resolve(module, chop = true, configuration = 'compile', errorMissing = true) {
+    //Copy and lenient resolve the configuration, Forge cant be resolved at this time so lenient is required.
+    def filtered = configurations.getByName(configuration).copy().incoming.artifactView({ it.lenient = true }).artifacts
+            .findAll { it.id.componentIdentifier.module == module }
+            .collect { it.id.componentIdentifier.version }
+    if (filtered.size() > 1) {
+        println "WARNING: Found ${filtered.size()} Dependencies with ModuleName '${module}' in configuration '${configuration.name}'"
+    }
+    if (errorMissing && filtered.isEmpty()) {
+        throw new RuntimeException("Failed resolve dependency version for '${module}'")
+    }
+    if (filtered.isEmpty()) return "0"
+    def version = filtered.first() as String
+    if (chop) {
+        def idx = version.lastIndexOf('-')
+        return version.substring(idx + 1)
+    }
+    return version
 }

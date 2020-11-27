@@ -1,0 +1,105 @@
+modLoader="scorge"
+loaderVersion="[1,)"
+issueTrackerURL="https://github.com/TheCBProject/ForgeMultipart"
+#CBMultipart
+[[mods]]
+	modId="cb_multipart"
+	displayName="CBMultipart"
+	entryClass="codechicken.multipart.CBMultipart"
+	version="${version}"
+
+    updateJSONURL="https://version-check.covers1624.net/check/?mod=CBMultipart&mc=${mc_version}"
+    displayURL="https://github.com/TheCBProject/ForgeMultipart"
+    authors="ChickenBones, covers1624"
+    description="Open source library for facilitation of multiple functional parts in the one block space."
+
+[[dependencies.cb_multipart]]
+	modId="forge"
+	mandatory=true
+	versionRange="[28,)"
+	ordering="NONE"
+	side="BOTH"
+[[dependencies.cb_multipart]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.15.2]"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.cb_multipart]]
+    modId="codechickenlib"
+    mandatory=true
+    versionRange="[${ccl_version},)"
+    ordering="AFTER"
+    side="BOTH"
+
+#CBMicroblocks
+[[mods]]
+	modId="cb_microblock"
+	displayName="CBMicroblock"
+	entryClass="codechicken.microblock.handler.MicroblockMod"
+	version="${version}"
+
+    displayURL="https://github.com/TheCBProject/ForgeMultipart"
+    authors="ChickenBones, covers1624"
+    description="Microblocks for CBMultipart."
+
+[[dependencies.cb_microblock]]
+	modId="forge"
+	mandatory=true
+	versionRange="[28,)"
+	ordering="NONE"
+	side="BOTH"
+[[dependencies.cb_microblock]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.15.2]"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.cb_microblock]]
+    modId="codechickenlib"
+    mandatory=true
+    versionRange="[${ccl_version},)"
+    ordering="AFTER"
+    side="BOTH"
+[[dependencies.cb_microblock]]
+    modId="cb_multipart"
+    mandatory=true
+    versionRange="[${version},)"
+    ordering="AFTER"
+    side="BOTH"
+
+#CBMultipartMinecraft
+[[mods]]
+    modId="cb_multipart_minecraft"
+    displayName="CBMultipart Minecraft"
+    entryClass="codechicken.multipart.minecraft.MinecraftMultipart"
+    version="${version}"
+
+    displayURL="https://github.com/TheCBProject/ForgeMultipart"
+    authors="ChickenBones, covers1624"
+    description="Provides multipart versions of some vanilla blocks like torches and buttons."
+
+[[dependencies.cb_multipart_minecraft]]
+    modId="forge"
+    mandatory=true
+    versionRange="[28,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.cb_multipart_minecraft]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.15.2]"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.cb_multipart_minecraft]]
+    modId="codechickenlib"
+    mandatory=true
+    versionRange="[${ccl_version},)"
+    ordering="AFTER"
+    side="BOTH"
+[[dependencies.cb_multipart_minecraft]]
+    modId="cb_multipart"
+    mandatory=true
+    versionRange="[${version},)"
+    ordering="AFTER"
+    side="BOTH"

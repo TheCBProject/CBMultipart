@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SRR",
+    "SMR"
+  ],
+  "key": {
+    "S": {
+      "tag": "forge:rods/wooden"
+    },
+    "R": {
+      "tag": "forge:rods/stone"
+    },
+    "M": {
+      "tag": "forge:ingots/iron"
+    }
+  },
+  "result": {
+    "item": "cb_microblock:iron_saw"
+  }
+}

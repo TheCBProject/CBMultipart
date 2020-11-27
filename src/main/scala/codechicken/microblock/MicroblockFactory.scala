@@ -1,36 +1,34 @@
 package codechicken.microblock
 
 import codechicken.lib.data.MCDataInput
-import codechicken.multipart.MultiPartRegistry
-import codechicken.multipart.api.IDynamicPartFactory
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.util.ResourceLocation
-import net.minecraftforge.fml.relauncher.{Side, SideOnly}
+import codechicken.multipart.api.MultiPartType
+import net.minecraft.nbt.CompoundNBT
+import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 
-abstract class MicroblockFactory extends IDynamicPartFactory {
-    def getName: ResourceLocation
+abstract class MicroblockFactory extends MultiPartType[Microblock] {
+
+    def getType: MultiPartType[_]
 
     def baseTrait: Class[_ <: Microblock]
 
-    @SideOnly(Side.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     def clientTrait: Class[_ <: MicroblockClient]
 
     def getResistanceFactor: Float
 
-    val baseTraitId = MicroblockGenerator.registerTrait(baseTrait)
+    val baseTraitKey = MicroBlockGenerator.registerTrait(baseTrait)
 
-    @SideOnly(Side.CLIENT)
-    lazy val clientTraitId = MicroblockGenerator.registerTrait(clientTrait)
+    @OnlyIn(Dist.CLIENT)
+    lazy val clientTraitKey = MicroBlockGenerator.registerTrait(clientTrait)
 
     def register() {
-        MultiPartRegistry.registerParts(this, Array(getName))
     }
 
-    def create(client: Boolean, material: Int) = MicroblockGenerator.create(this, material, client)
+    def create(client: Boolean, material: Int) = MicroBlockGenerator.create(this, material, client)
 
-    override def createPartClient(name: ResourceLocation, packet: MCDataInput) = create(true, if (packet != null) MicroMaterialRegistry.readMaterialID(packet) else 0)
+    override def createPartClient(packet: MCDataInput) = create(true, if (packet != null) packet.readVarInt() else 0)
 
-    override def createPartServer(name: ResourceLocation, nbt: NBTTagCompound) = create(false, if (nbt != null) MicroMaterialRegistry.materialID(nbt.getString("material")) else 0)
+    override def createPartServer(tag: CompoundNBT) = create(false, if (tag != null) MicroMaterialRegistry.getMaterialID(tag.getString("material")) else 0)
 }
 
 /**
@@ -56,7 +54,7 @@ object CommonMicroFactory {
 
     def registerMicroFactory(factory: CommonMicroFactory, id: Int) {
         if (factories(id) != null) {
-            throw new IllegalArgumentException("Microblock factory id " + id + " is already taken by " + factories(id).getName + " when adding " + factory.getName)
+            throw new IllegalArgumentException("Microblock factory id " + id + " is already taken by " + factories(id).getType.getRegistryName + " when adding " + factory.getType.getRegistryName)
         }
 
         factories(id) = factory

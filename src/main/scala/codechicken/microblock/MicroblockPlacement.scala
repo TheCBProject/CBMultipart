@@ -1,38 +1,38 @@
 package codechicken.microblock
 
 import codechicken.lib.vec.{Rotation, Vector3}
-import codechicken.multipart.ControlKeyModifer._
-import codechicken.multipart.{PartRayTraceResult, TileMultipart}
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.item.ItemStack
-import net.minecraft.util.EnumFacing
-import net.minecraft.util.math.{BlockPos, RayTraceResult}
+import codechicken.multipart.TileMultipart
+import codechicken.multipart.util.{ControlKeyModifier, MultiPartHelper, PartRayTraceResult}
+import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.item.{ItemStack, ItemUseContext}
+import net.minecraft.util.math.{BlockPos, BlockRayTraceResult}
+import net.minecraft.util.{Direction, Hand}
 import net.minecraft.world.World
 
 abstract class ExecutablePlacement(val pos: BlockPos, val part: Microblock) {
-    def place(world: World, player: EntityPlayer, item: ItemStack)
+    def place(world: World, player: PlayerEntity, item: ItemStack): Unit
 
-    def consume(world: World, player: EntityPlayer, item: ItemStack)
+    def consume(world: World, player: PlayerEntity, item: ItemStack): Unit
 }
 
 class AdditionPlacement($pos: BlockPos, $part: Microblock) extends ExecutablePlacement($pos, $part) {
-    def place(world: World, player: EntityPlayer, item: ItemStack) {
+    def place(world: World, player: PlayerEntity, item: ItemStack) {
         TileMultipart.addPart(world, pos, part)
     }
 
-    def consume(world: World, player: EntityPlayer, item: ItemStack) {
+    def consume(world: World, player: PlayerEntity, item: ItemStack) {
         item.shrink(1)
     }
 }
 
 class ExpandingPlacement($pos: BlockPos, $part: Microblock, opart: Microblock) extends ExecutablePlacement($pos, $part) {
-    def place(world: World, player: EntityPlayer, item: ItemStack) {
+    def place(world: World, player: PlayerEntity, item: ItemStack) {
         opart.shape = part.shape
         opart.tile.notifyPartChange(opart)
         opart.sendShapeUpdate()
     }
 
-    def consume(world: World, player: EntityPlayer, item: ItemStack) {
+    def consume(world: World, player: PlayerEntity, item: ItemStack) {
         item.shrink(1)
     }
 }
@@ -52,26 +52,26 @@ abstract class PlacementProperties {
 }
 
 object MicroblockPlacement {
-    def apply(player: EntityPlayer, hit: RayTraceResult, size: Int, material: Int, checkMaterial: Boolean, pp: PlacementProperties): ExecutablePlacement =
-        new MicroblockPlacement(player, hit, size, material, checkMaterial, pp).apply()
+    def apply(player: PlayerEntity, hand: Hand, hit: BlockRayTraceResult, size: Int, material: Int, checkMaterial: Boolean, pp: PlacementProperties): ExecutablePlacement =
+        new MicroblockPlacement(player, hand, hit, size, material, checkMaterial, pp).apply()
 }
 
-class MicroblockPlacement(val player: EntityPlayer, val hit: RayTraceResult, val size: Int, val material: Int, val checkMaterial: Boolean, val pp: PlacementProperties) {
+class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: BlockRayTraceResult, val size: Int, val material: Int, val checkMaterial: Boolean, val pp: PlacementProperties) {
     val world = player.world
     val mcrFactory = pp.microFactory
-    val pos = new BlockPos(hit.getBlockPos)
-    val vhit = new Vector3(hit.hitVec).add(-pos.getX, -pos.getY, -pos.getZ)
-    val gtile = TileMultipart.getOrConvertTile2(world, pos)
-    val htile = gtile._1
-    val slot = pp.placementGrid.getHitSlot(vhit, hit.sideHit.ordinal)
-    val oslot = pp.opposite(slot, hit.sideHit.ordinal)
+    val pos = hit.getPos
+    val vhit = new Vector3(hit.getHitVec).add(-pos.getX, -pos.getY, -pos.getZ)
+    val gtile = MultiPartHelper.getOrConvertTile2(world, pos)
+    val htile = gtile.getLeft
+    val slot = pp.placementGrid.getHitSlot(vhit, hit.getFace.ordinal)
+    val oslot = pp.opposite(slot, hit.getFace.ordinal)
 
-    val d = getHitDepth(vhit, hit.sideHit.ordinal)
-    val useOppMod = pp.sneakOpposite(slot, hit.sideHit.ordinal)
-    val oppMod = player.isControlDown
+    val d = getHitDepth(vhit, hit.getFace.ordinal)
+    val useOppMod = pp.sneakOpposite(slot, hit.getFace.ordinal)
+    val oppMod = ControlKeyModifier.isControlDown(player)
     val internal = d < 1 && htile != null
-    val doExpand = internal && !gtile._2 && !player.isSneaking && !(oppMod && useOppMod) && pp.expand(slot, hit.sideHit.ordinal)
-    val side = hit.sideHit.ordinal
+    val doExpand = internal && !gtile.getRight && !player.isCrouching && !(oppMod && useOppMod) && pp.expand(slot, hit.getFace.ordinal)
+    val side = hit.getFace.ordinal
 
     def apply(): ExecutablePlacement = {
         val customPlacement = pp.customPlacement(this)
@@ -85,7 +85,7 @@ class MicroblockPlacement(val player: EntityPlayer, val hit: RayTraceResult, val
 
         if (doExpand) {
             val hpart = htile.partList(hit.asInstanceOf[PartRayTraceResult].partIndex)
-            if (hpart.getType == mcrFactory.getName) {
+            if (hpart.getType == mcrFactory.getType) {
                 val mpart = hpart.asInstanceOf[CommonMicroblock]
                 if (mpart.material == material && mpart.getSize + size < 8) {
                     return expand(mpart)
@@ -141,8 +141,8 @@ class MicroblockPlacement(val player: EntityPlayer, val hit: RayTraceResult, val
     def externalPlacement(slot: Int): ExecutablePlacement = externalPlacement(create(size, slot, material))
 
     def externalPlacement(npart: Microblock): ExecutablePlacement = {
-        val pos = this.pos.offset(EnumFacing.VALUES.apply(side))
-        if (TileMultipart.canPlacePart(world, pos, npart)) {
+        val pos = this.pos.offset(Direction.BY_INDEX.apply(side))
+        if (TileMultipart.canPlacePart(new ItemUseContext(player, hand, hit), npart)) {
             return new AdditionPlacement(pos, npart)
         }
         null

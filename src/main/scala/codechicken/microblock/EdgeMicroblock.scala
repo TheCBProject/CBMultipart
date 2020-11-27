@@ -1,26 +1,31 @@
 package codechicken.microblock
 
+import java.util.Collections
+
 import codechicken.lib.data.MCDataInput
+import codechicken.lib.raytracer.VoxelShapeCache
 import codechicken.lib.render.CCRenderState
 import codechicken.lib.vec.Rotation._
 import codechicken.lib.vec.Vector3._
 import codechicken.lib.vec._
+import codechicken.microblock.api.MicroOcclusion
+import codechicken.microblock.handler.MicroblockModContent
 import codechicken.multipart._
-import net.minecraft.util.{BlockRenderLayer, ResourceLocation}
-
-import scala.collection.JavaConversions._
+import codechicken.multipart.api.part.{TEdgePart, TMultiPart, TNormalOcclusionPart, TPartialOcclusionPart}
+import codechicken.multipart.util.PartRayTraceResult
+import net.minecraft.client.renderer.RenderType
+import net.minecraft.util.math.shapes.VoxelShape
 
 object EdgePlacement extends PlacementProperties {
 
-    import codechicken.multipart.PartMap._
+    import codechicken.multipart.util.PartMap._
 
-    def microFactory = EdgeMicroFactory
+    override def microFactory = EdgeMicroFactory
 
-    def placementGrid = EdgePlacementGrid
+    override def placementGrid = EdgePlacementGrid
 
-    def opposite(slot: Int, side: Int): Int = {
-        if (slot < 0) //custom placement
-        {
+    override def opposite(slot: Int, side: Int): Int = {
+        if (slot < 0) { //custom placement
             return slot
         }
         val e = slot - 15
@@ -31,10 +36,10 @@ object EdgePlacement extends PlacementProperties {
         if (pmt.size % 2 == 1) return null
 
         val part = PostMicroFactory.create(pmt.world.isRemote, pmt.material)
-        part.setShape(pmt.size, pmt.hit.sideHit.ordinal >> 1)
+        part.setShape(pmt.size, pmt.hit.getFace.ordinal >> 1)
         if (pmt.doExpand) {
             val hpart = pmt.htile.partList(pmt.hit.asInstanceOf[PartRayTraceResult].partIndex)
-            if (hpart.getType == PostMicroFactory.getName) {
+            if (hpart.getType == PostMicroFactory.getType) {
                 val mpart = hpart.asInstanceOf[Microblock]
                 if (mpart.material == pmt.material && mpart.getSize + pmt.size < 8) {
                     part.shape = ((mpart.getSize + pmt.size) << 4 | mpart.getShapeSlot).toByte
@@ -61,7 +66,7 @@ object EdgeMicroFactory extends CommonMicroFactory {
     for (s <- 0 until 12) {
         val rx = if ((s & 2) != 0) -1 else 1
         val rz = if ((s & 1) != 0) -1 else 1
-        val transform = new TransformationList(new Scale(new Vector3(rx, 1, rz)), AxisCycle.cycles(s >> 2)).at(center)
+        val transform = new TransformationList(new Scale(new Vector3(rx, 1, rz)), AxisCycle.cycles(s >> 2)).at(CENTER)
 
         for (t <- 1 until 8) {
             val d = t / 8D
@@ -71,53 +76,55 @@ object EdgeMicroFactory extends CommonMicroFactory {
 
     override def itemSlot = 15
 
-    def getName = new ResourceLocation("ccmb:mcr_edge")
+    override def getType = MicroblockModContent.edgeMultiPartType
 
-    def baseTrait = classOf[EdgeMicroblock]
+    override def baseTrait = classOf[EdgeMicroblock]
 
-    def clientTrait = classOf[CommonMicroblockClient]
+    override def clientTrait = classOf[CommonMicroblockClient]
 
-    def placementProperties = EdgePlacement
+    override def placementProperties = EdgePlacement
 
-    def getResistanceFactor = 0.5F
+    override def getResistanceFactor = 0.5F
 }
 
 trait EdgeMicroblock extends CommonMicroblock with TEdgePart {
     override def setShape(size: Int, slot: Int) = shape = (size << 4 | (slot - 15)).toByte
 
-    def microFactory = EdgeMicroFactory
+    override def microFactory = EdgeMicroFactory
 
-    def getBounds = EdgeMicroFactory.aBounds(shape)
+    override def getBounds = EdgeMicroFactory.aBounds(shape)
 
     override def getSlot = getShapeSlot + 15
 }
 
 object PostMicroFactory extends MicroblockFactory {
     var aBounds: Array[Cuboid6] = new Array(256)
+    var aShapes: Array[VoxelShape] = new Array(256)
 
     for (s <- 0 until 3) {
-        val transform = sideRotations(s << 1).at(center)
+        val transform = sideRotations(s << 1).at(CENTER)
         for (t <- 2 until 8 by 2) {
             val d1 = 0.5 - t / 16D
             val d2 = 0.5 + t / 16D
             aBounds(t << 4 | s) = new Cuboid6(d1, 0, d1, d2, 1, d2).apply(transform)
+            aShapes(t << 4 | s) = VoxelShapeCache.getShape(aBounds(t << 4 | s))
         }
     }
 
-    def getName = new ResourceLocation("ccmb:mcr_post")
+    override def getType = MicroblockModContent.postMultiPartType
 
-    def baseTrait = classOf[PostMicroblock]
+    override def baseTrait = classOf[PostMicroblock]
 
-    def clientTrait = classOf[PostMicroblockClient]
+    override def clientTrait = classOf[PostMicroblockClient]
 
-    def getResistanceFactor = 0.5F
+    override def getResistanceFactor = 0.5F
 }
 
 trait PostMicroblockClient extends PostMicroblock with MicroblockClient {
     var renderBounds1: Cuboid6 = _
     var renderBounds2: Cuboid6 = _
 
-    override def render(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState) {
+    override def render(pos: Vector3, layer: RenderType, ccrs: CCRenderState): Unit = {
         val mat = getIMaterial
         if (layer == null) {
             MicroblockRender.renderCuboid(pos, ccrs, mat, layer, getBounds, 0)
@@ -129,21 +136,21 @@ trait PostMicroblockClient extends PostMicroblock with MicroblockClient {
         }
     }
 
-    override def onPartChanged(part: TMultiPart) {
+    override def onPartChanged(part: TMultiPart): Unit = {
         recalcBounds()
     }
 
-    override def onAdded() {
+    override def onAdded(): Unit = {
         super.onAdded()
         recalcBounds()
     }
 
-    override def read(packet: MCDataInput) {
-        super.read(packet)
+    override def readUpdate(packet: MCDataInput): Unit = {
+        super.readUpdate(packet)
         recalcBounds()
     }
 
-    def recalcBounds() {
+    def recalcBounds(): Unit = {
         renderBounds1 = getBounds.copy
         renderBounds2 = null
 
@@ -157,14 +164,14 @@ trait PostMicroblockClient extends PostMicroblock with MicroblockClient {
         }
     }
 
-    def shrinkFace(fside: Int) {
+    def shrinkFace(fside: Int): Unit = {
         val part = tile.partMap(fside)
         if (part != null && part.isInstanceOf[FaceMicroblock]) {
             MicroOcclusion.shrink(renderBounds1, part.asInstanceOf[CommonMicroblock].getBounds, fside)
         }
     }
 
-    def shrinkPost(post: PostMicroblock) {
+    def shrinkPost(post: PostMicroblock): Unit = {
         if (post == this) {
             return
         }
@@ -186,13 +193,15 @@ trait PostMicroblockClient extends PostMicroblock with MicroblockClient {
 }
 
 trait PostMicroblock extends Microblock with TPartialOcclusionPart with TNormalOcclusionPart {
-    def microFactory = PostMicroFactory
+    override def microFactory = PostMicroFactory
 
-    def getBounds = PostMicroFactory.aBounds(shape)
+    override def getBounds = PostMicroFactory.aBounds(shape)
 
-    def getOcclusionBoxes = Seq(getBounds)
+    override def getOutlineShape = PostMicroFactory.aShapes(shape)
 
-    def getPartialOcclusionBoxes = getOcclusionBoxes
+    override def getOcclusionShape = PostMicroFactory.aShapes(shape)
+
+    override def getPartialOcclusionShape = getOcclusionShape
 
     override def itemFactoryID = EdgeMicroFactory.getFactoryID
 

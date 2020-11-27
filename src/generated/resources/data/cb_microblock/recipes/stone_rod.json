@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "S",
+    "S"
+  ],
+  "key": {
+    "S": {
+      "tag": "forge:cobblestone"
+    }
+  },
+  "result": {
+    "item": "cb_microblock:stone_rod"
+  }
+}

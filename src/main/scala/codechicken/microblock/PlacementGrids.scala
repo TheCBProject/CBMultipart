@@ -1,72 +1,84 @@
 package codechicken.microblock
 
+import java.util.OptionalDouble
+
+import codechicken.lib.render.buffer.TransformingVertexBuilder
 import codechicken.lib.vec.Rotation._
-import codechicken.lib.vec.{Rotation, Vector3}
-import codechicken.multipart.PartMap
-import org.lwjgl.opengl.GL11._
+import codechicken.lib.vec.{Matrix4, Rotation, Vector3}
+import codechicken.multipart.util.PartMap
+import com.mojang.blaze3d.matrix.MatrixStack
+import com.mojang.blaze3d.vertex.IVertexBuilder
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats
+import net.minecraft.client.renderer.{IRenderTypeBuffer, RenderState, RenderType}
 
 trait PlacementGrid {
     def getHitSlot(vhit: Vector3, side: Int): Int
 
-    def render(hit: Vector3, side: Int) {
-        glTransformFace(hit, side)
-        glLineWidth(2)
-        glColor4f(0, 0, 0, 1)
-        glBegin(GL_LINES)
-        drawLines()
-        glEnd()
-        glPopMatrix()
+    def render(hit: Vector3, side: Int, mStack: MatrixStack, getter: IRenderTypeBuffer) {
+        val mat = new Matrix4(mStack)
+        transformFace(hit, side, mat)
+        val builder = new TransformingVertexBuilder(getter.getBuffer(PlacementGrid.lineType), mat)
+        drawLines(builder)
     }
 
-    def drawLines() {}
+    def drawLines(builder: IVertexBuilder) {}
 
-    def glTransformFace(hit: Vector3, side: Int) {
+    def transformFace(hit: Vector3, side: Int, mat: Matrix4) {
         val pos = hit.copy.floor()
-        glPushMatrix()
-        glTranslated(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5)
-        sideRotations(side).glApply()
+        mat.translate(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5)
+        mat.apply(sideRotations(side))
         val rhit = new Vector3(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5).subtract(hit).apply(sideRotations(side ^ 1).inverse)
-        glTranslated(0, rhit.y - 0.002, 0)
+        mat.translate(0, rhit.y - 0.002, 0)
     }
 }
 
+object PlacementGrid {
+    val lineType = RenderType.makeType("placement_lines", DefaultVertexFormats.POSITION_COLOR, 1, 256, RenderType.State.getBuilder
+        .line(new RenderState.LineState(OptionalDouble.of(2.0)))
+        .layer(RenderState.PROJECTION_LAYERING)
+        .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
+        .writeMask(RenderState.COLOR_WRITE)
+        .build(false)
+    )
+}
+
 class FaceEdgeGrid(size: Double) extends PlacementGrid {
-    override def drawLines() {
-        glVertex3d(-0.5, 0, -0.5)
-        glVertex3d(-0.5, 0, 0.5)
+    override def drawLines(builder: IVertexBuilder) {
+        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(-0.5, 0, 0.5)
-        glVertex3d(0.5, 0, 0.5)
+        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(0.5, 0, 0.5)
-        glVertex3d(0.5, 0, -0.5)
+        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(0.5, 0, -0.5)
-        glVertex3d(-0.5, 0, -0.5)
+        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(0.5, 0, 0.5)
-        glVertex3d(size, 0, size)
+        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(-0.5, 0, 0.5)
-        glVertex3d(-size, 0, size)
+        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(-size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(0.5, 0, -0.5)
-        glVertex3d(size, 0, -size)
+        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(-0.5, 0, -0.5)
-        glVertex3d(-size, 0, -size)
+        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(-size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(-size, 0, -size)
-        glVertex3d(-size, 0, size)
+        builder.pos(-size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(-size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(-size, 0, size)
-        glVertex3d(size, 0, size)
+        builder.pos(-size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(size, 0, size)
-        glVertex3d(size, 0, -size)
+        builder.pos(size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(size, 0, -size)
-        glVertex3d(-size, 0, -size)
+        builder.pos(size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(-size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
     }
 
     def getHitSlot(vhit: Vector3, side: Int) = {
@@ -86,24 +98,24 @@ class FaceEdgeGrid(size: Double) extends PlacementGrid {
 object FacePlacementGrid extends FaceEdgeGrid(1 / 4D)
 
 object CornerPlacementGrid extends PlacementGrid {
-    override def drawLines() {
-        glVertex3d(-0.5, 0, -0.5)
-        glVertex3d(-0.5, 0, 0.5)
+    override def drawLines(builder: IVertexBuilder) {
+        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(-0.5, 0, 0.5)
-        glVertex3d(0.5, 0, 0.5)
+        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(0.5, 0, 0.5)
-        glVertex3d(0.5, 0, -0.5)
+        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(0.5, 0, -0.5)
-        glVertex3d(-0.5, 0, -0.5)
+        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(0, 0, -0.5)
-        glVertex3d(0, 0, 0.5)
+        builder.pos(0, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(0, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(-0.5, 0, 0)
-        glVertex3d(0.5, 0, 0)
+        builder.pos(-0.5, 0, 0).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(0.5, 0, 0).color(0f, 0f, 0f, 1f).endVertex()
     }
 
     def getHitSlot(vhit: Vector3, side: Int): Int = {
@@ -124,30 +136,30 @@ object CornerPlacementGrid extends PlacementGrid {
 }
 
 object EdgePlacementGrid extends PlacementGrid {
-    override def drawLines() {
-        glVertex3d(-0.5, 0, -0.5)
-        glVertex3d(-0.5, 0, 0.5)
+    override def drawLines(builder: IVertexBuilder) {
+        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(-0.5, 0, 0.5)
-        glVertex3d(0.5, 0, 0.5)
+        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(0.5, 0, 0.5)
-        glVertex3d(0.5, 0, -0.5)
+        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(0.5, 0, -0.5)
-        glVertex3d(-0.5, 0, -0.5)
+        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(0.25, 0, -0.5)
-        glVertex3d(0.25, 0, 0.5)
+        builder.pos(0.25, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(0.25, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(-0.25, 0, -0.5)
-        glVertex3d(-0.25, 0, 0.5)
+        builder.pos(-0.25, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(-0.25, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(-0.5, 0, 0.25)
-        glVertex3d(0.5, 0, 0.25)
+        builder.pos(-0.5, 0, 0.25).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(0.5, 0, 0.25).color(0f, 0f, 0f, 1f).endVertex()
 
-        glVertex3d(-0.5, 0, -0.25)
-        glVertex3d(0.5, 0, -0.25)
+        builder.pos(-0.5, 0, -0.25).color(0f, 0f, 0f, 1f).endVertex()
+        builder.pos(0.5, 0, -0.25).color(0f, 0f, 0f, 1f).endVertex()
     }
 
     override def getHitSlot(vhit: Vector3, side: Int): Int = {

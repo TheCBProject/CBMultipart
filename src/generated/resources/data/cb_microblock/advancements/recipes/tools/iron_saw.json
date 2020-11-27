@@ -1,0 +1,54 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "cb_microblock:iron_saw"
+    ]
+  },
+  "criteria": {
+    "has_sticks": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:rods/wooden"
+          }
+        ]
+      }
+    },
+    "has_stone_rod": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:rods/stone"
+          }
+        ]
+      }
+    },
+    "has_iron": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:ingots/iron"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "cb_microblock:iron_saw"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_sticks",
+      "has_stone_rod",
+      "has_iron",
+      "has_the_recipe"
+    ]
+  ]
+}

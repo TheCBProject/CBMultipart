@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "돌 톱",
+  "item.cb_microblock.iron_saw": "철 톱",
+  "item.cb_microblock.diamond_saw": "다이아몬드 톱",
+  "item.cb_microblock.stone_rod": "돌 막대",
+  "item.cb_microblock.face.1": "%s 덮개",
+  "item.cb_microblock.face.2": "%s 판",
+  "item.cb_microblock.face.4": "%s 반블럭",
+  "item.cb_microblock.hollow.1": "구멍 뚫린 %s 덮개",
+  "item.cb_microblock.hollow.2": "구멍 뚫린 %s 판",
+  "item.cb_microblock.hollow.4": "구멍 뚫린 %s 반블럭",
+  "item.cb_microblock.edge.1": "%s 조각",
+  "item.cb_microblock.edge.2": "%s 말뚝",
+  "item.cb_microblock.edge.4": "%s 기둥",
+  "item.cb_microblock.corner.1": "%s 녹",
+  "item.cb_microblock.corner.2": "%s 코너",
+  "item.cb_microblock.corner.4": "%s 노치"
+}

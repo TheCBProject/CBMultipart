@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "cb_microblock:item/stone_rod"
+  }
+}

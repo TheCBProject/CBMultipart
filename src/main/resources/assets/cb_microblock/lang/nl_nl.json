@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "Stenen Zaag",
+  "item.cb_microblock.iron_saw": "IJzeren Zaag",
+  "item.cb_microblock.diamond_saw": "Diamanten Zaag",
+  "item.cb_microblock.stone_rod": "Stenen Stok",
+  "item.cb_microblock.face.1": "%s Bedekking",
+  "item.cb_microblock.face.2": "%s Paneel",
+  "item.cb_microblock.face.4": "%s Plaat",
+  "item.cb_microblock.hollow.1": "Holle %s Bedekking",
+  "item.cb_microblock.hollow.2": "Hol %s Paneel",
+  "item.cb_microblock.hollow.4": "Holle %s Plaat",
+  "item.cb_microblock.edge.1": "%s Strook",
+  "item.cb_microblock.edge.2": "%s Paal",
+  "item.cb_microblock.edge.4": "%s Pilaar",
+  "item.cb_microblock.corner.1": "%s Hoekje",
+  "item.cb_microblock.corner.2": "%s Hoek",
+  "item.cb_microblock.corner.4": "%s Inkeping"
+}

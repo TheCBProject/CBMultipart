@@ -1,154 +1,120 @@
 package codechicken.multipart
 
-import java.util.{Random, ArrayList => JArrayList, EnumSet => JEnumSet, List => JList}
-import java.lang.{Boolean => JBool}
+import java.util.{Random, ArrayList => JArrayList, List => JList}
 
-import codechicken.lib.raytracer.{CuboidRayTraceResult, RayTracer}
+import codechicken.lib.raytracer.{DistanceRayTraceResult, RayTracer}
 import codechicken.lib.vec.Vector3
-import codechicken.multipart.handler.MultipartProxy
-import codechicken.multipart.handler.MultipartSaveLoad.TileNBTContainer
-import net.minecraft.block.Block
+import codechicken.multipart.util.MultiPartLoadHandler.TileNBTContainer
+import codechicken.multipart.util.PartRayTraceResult
+import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.block.material.Material
-import net.minecraft.block.properties.PropertyBool
-import net.minecraft.block.state.{BlockFaceShape, BlockStateContainer, IBlockState}
+import net.minecraft.block.{Block, BlockState}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.particle.ParticleManager
+import net.minecraft.client.renderer.{ActiveRenderInfo, IRenderTypeBuffer}
 import net.minecraft.entity.Entity
-import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.fluid.IFluidState
 import net.minecraft.item.ItemStack
-import net.minecraft.util.math.{AxisAlignedBB, BlockPos, RayTraceResult, Vec3d}
-import net.minecraft.util.{BlockRenderLayer, EnumFacing, EnumHand}
-import net.minecraft.world.{Explosion, IBlockAccess, World}
-import net.minecraftforge.fml.relauncher.{Side, SideOnly}
-
-import scala.collection.JavaConversions._
-
-/**
- * Internal RayTracing class that can save parts as part of their hit data
- */
-class PartRayTraceResult(val partIndex: Int, crtr: CuboidRayTraceResult)
-    extends CuboidRayTraceResult(new Vector3(crtr.hitVec), crtr.getBlockPos, crtr.sideHit, crtr.cuboid6, crtr.dist)
+import net.minecraft.util.math._
+import net.minecraft.util.math.shapes.{ISelectionContext, VoxelShapes}
+import net.minecraft.util.{ActionResultType, Direction, Hand}
+import net.minecraft.world._
+import net.minecraft.world.storage.loot.{LootContext, LootParameters}
+import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 
 object BlockMultipart {
 
-    def getTile(world: IBlockAccess, pos: BlockPos) = world.getTileEntity(pos) match {
+    def getTile(world: IBlockReader, pos: BlockPos) = world.getTileEntity(pos) match {
         case t: TileMultipart if t.partList.nonEmpty => t
         case _ => null
     }
 
-    def getClientTile(world: IBlockAccess, pos: BlockPos) = world.getTileEntity(pos) match {
+    def getClientTile(world: IBlockReader, pos: BlockPos) = world.getTileEntity(pos) match {
         case t: TileMultipartClient if t.partList.nonEmpty => t
         case _ => null
     }
 
-    def getPart(world: IBlockAccess, pos: BlockPos, slot: Int) = world.getTileEntity(pos) match {
+    def getPart(world: IBlockReader, pos: BlockPos, slot: Int) = world.getTileEntity(pos) match {
         case t: TileMultipart => t.partMap(slot)
         case _ => null
     }
 
-    def retracePart(world: World, pos: BlockPos, player: EntityPlayer) =
+    def retracePart(world: IBlockReader, pos: BlockPos, player: PlayerEntity) =
         RayTracer.retraceBlock(world, player, pos) match {
             case partHit: PartRayTraceResult => partHit
             case _ => null
         }
-
-    def drawHighlight(world: World, player: EntityPlayer, hit: RayTraceResult, frame: Float): Boolean = {
-        (getClientTile(world, hit.getBlockPos), hit) match {
-            case (null, _) => false
-            case (tile, pHit: PartRayTraceResult) => tile.drawHighlight(player, pHit, frame)
-        }
-    }
 }
 
 /**
  * Block class for all multiparts, should be internal use only.
  */
-class BlockMultipart extends Block(Material.ROCK) {
+class BlockMultipart extends Block(Block.Properties.create(Material.ROCK)) {
 
     import BlockMultipart._
 
-    override def hasTileEntity(state: IBlockState) = true
+    override def hasTileEntity(state: BlockState) = true
 
-    override def createTileEntity(world: World, state: IBlockState) = {
-        if(world.isRemote) {
-            null
-        } else {
-            new TileNBTContainer
+    override def createTileEntity(state: BlockState, world: IBlockReader) = {
+        world match {
+            case world: IWorldReader =>
+                if (world.isRemote) {
+                    null
+                } else {
+                    new TileNBTContainer
+                }
+            case _ => null
         }
     }
 
-    override def getMetaFromState(state: IBlockState) = 0
+    override def ticksRandomly(state: BlockState) = true
 
-    override def isBlockNormalCube(state: IBlockState) = false
-
-    override def isOpaqueCube(state: IBlockState) = false
-
-    override def isFullCube(state: IBlockState) = false
-
-    override def isFullBlock(state: IBlockState) = false
-
-    override def getTickRandomly = true
-
-    override def isAir(state: IBlockState, world: IBlockAccess, pos: BlockPos) = isReplaceable(world, pos)
-
-    override def isReplaceable(world: IBlockAccess, pos: BlockPos) =
+    override def isAir(state: BlockState, world: IBlockReader, pos: BlockPos) =
         getTile(world, pos) match {
             case null => true
             case tile => tile.partList.isEmpty
         }
 
-    override def addCollisionBoxToList(state: IBlockState, world: World, pos: BlockPos, entityBox: AxisAlignedBB, collidingBoxes: JList[AxisAlignedBB], entity: Entity, flag: Boolean) {
-        getTile(world, pos) match {
-            case null =>
-            case tile => tile.addCollisionBoxToList(entityBox, collidingBoxes)
-        }
+    override def getShape(state: BlockState, world: IBlockReader, pos: BlockPos, context: ISelectionContext) = getTile(world, pos) match {
+        case null => VoxelShapes.empty()
+        case tile => tile.getOutlineShape
     }
 
-    override def collisionRayTrace(state: IBlockState, world: World, pos: BlockPos, start: Vec3d, end: Vec3d): PartRayTraceResult =
-        getTile(world, pos) match {
-            case null => null
-            case tile => tile.collisionRayTrace(start, end)
-        }
+    override def getCollisionShape(state: BlockState, world: IBlockReader, pos: BlockPos, context: ISelectionContext) = getTile(world, pos) match {
+        case null => VoxelShapes.empty()
+        case tile => tile.getCollisionShape
+    }
 
-    def rayTraceAll(world: World, pos: BlockPos, start: Vec3d, end: Vec3d): Iterable[PartRayTraceResult] =
-        getTile(world, pos) match {
-            case null => Seq()
-            case tile => tile.rayTraceAll(start, end)
-        }
+    override def getRenderShape(state: BlockState, world: IBlockReader, pos: BlockPos) = getTile(world, pos) match {
+        case null => VoxelShapes.empty()
+        case tile => tile.getCullingShape
+    }
 
-    override def getBlockFaceShape(world: IBlockAccess, state: IBlockState, pos: BlockPos, side: EnumFacing) =
-        getTile(world, pos) match {
-            case null => BlockFaceShape.UNDEFINED
-            case tile => if (tile.isSolid(side.getIndex)) BlockFaceShape.SOLID else BlockFaceShape.UNDEFINED
-        }
+    override def getRaytraceShape(state: BlockState, world: IBlockReader, pos: BlockPos) = getTile(world, pos) match {
+        case null => VoxelShapes.empty()
+        case tile => tile.getRayTraceShape
+    }
 
-    override def isSideSolid(state: IBlockState, world: IBlockAccess, pos: BlockPos, side: EnumFacing) = getBlockFaceShape(world, state, pos, side) == BlockFaceShape.SOLID
-
-    override def canPlaceTorchOnTop(state: IBlockState, world: IBlockAccess, pos: BlockPos) =
-        getTile(world, pos) match {
-            case null => false
-            case tile => tile.canPlaceTorchOnTop
-        }
-
-    override def getExplosionResistance(world: World, pos: BlockPos, exploder: Entity, explosion: Explosion) =
+    override def getExplosionResistance(state: BlockState, world: IWorldReader, pos: BlockPos, exploder: Entity, explosion: Explosion) =
         getTile(world, pos) match {
             case null => 0F
             case tile => tile.getExplosionResistance(exploder)
         }
 
-    override def getLightValue(state: IBlockState, world: IBlockAccess, pos: BlockPos): Int =
+    override def getLightValue(state: BlockState, world: IBlockReader, pos: BlockPos): Int =
         getTile(world, pos) match {
             case null => 0
             case tile => tile.getLightValue
         }
 
-    override def getPlayerRelativeBlockHardness(state: IBlockState, player: EntityPlayer, world: World, pos: BlockPos): Float =
+    override def getPlayerRelativeBlockHardness(state: BlockState, player: PlayerEntity, world: IBlockReader, pos: BlockPos): Float =
         (getTile(world, pos), retracePart(world, pos, player)) match {
             case (tile: TileMultipart, hit: PartRayTraceResult) => tile.getPlayerRelativeBlockHardness(player, hit)
             case _ => 1 / 100F
         }
 
-    override def removedByPlayer(state: IBlockState, world: World, pos: BlockPos, player: EntityPlayer, willHarvest: Boolean): Boolean = {
+    override def removedByPlayer(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, willHarvest: Boolean, fluid: IFluidState): Boolean = {
         val hit = retracePart(world, pos, player)
         val tile = getTile(world, pos)
 
@@ -158,7 +124,7 @@ class BlockMultipart extends Block(Material.ROCK) {
         }
 
         if (world.isRemote && tile.isInstanceOf[TileMultipartClient]) {
-            tile.asInstanceOf[TileMultipartClient].addDestroyEffects(hit, Minecraft.getMinecraft.effectRenderer)
+            tile.asInstanceOf[TileMultipartClient].addDestroyEffects(hit, Minecraft.getInstance.particles)
             return true
         }
 
@@ -166,120 +132,112 @@ class BlockMultipart extends Block(Material.ROCK) {
         world.getTileEntity(pos) == null
     }
 
-    def dropAndDestroy(world: World, pos: BlockPos, state: IBlockState) {
+    def dropAndDestroy(world: World, pos: BlockPos, state: BlockState): Unit = {
         val tile = getTile(world, pos)
         if (tile != null && !world.isRemote) {
-            tile.dropItems(getDrops(world, pos, state, 0))
+            tile.dropItems(tile.getDrops)
         }
 
-        world.setBlockToAir(pos)
+        world.removeBlock(pos, false)
     }
 
-    override def quantityDropped(state: IBlockState, fortune: Int, random: Random) = 0
-
-    override def getDrops(world: IBlockAccess, pos: BlockPos, state: IBlockState, fortune: Int): JArrayList[ItemStack] =
-        getTile(world, pos) match {
+    override def getDrops(state: BlockState, builder: LootContext.Builder): JList[ItemStack] =
+        getTile(builder.getWorld, builder.get(LootParameters.POSITION)) match {
             case null => new JArrayList[ItemStack]()
             case tile => tile.getDrops
         }
 
-    override def getPickBlock(state: IBlockState, target: RayTraceResult, world: World, pos: BlockPos, player: EntityPlayer): ItemStack =
+    override def getPickBlock(state: BlockState, target: RayTraceResult, world: IBlockReader, pos: BlockPos, player: PlayerEntity): ItemStack =
         (getTile(world, pos), retracePart(world, pos, player)) match {
             case (tile: TileMultipart, hit: PartRayTraceResult) => tile.getPickBlock(hit)
             case _ => ItemStack.EMPTY
         }
 
-    override def onBlockActivated(world: World, pos: BlockPos, state: IBlockState, player: EntityPlayer, hand: EnumHand, side: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean =
+    override def onBlockActivated(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockRayTraceResult): ActionResultType =
         (getTile(world, pos), retracePart(world, pos, player)) match {
             case (tile: TileMultipart, hit: PartRayTraceResult) => tile.onBlockActivated(player, hit, hand)
-            case _ => false
+            case _ => ActionResultType.FAIL
         }
 
-    override def onBlockClicked(world: World, pos: BlockPos, player: EntityPlayer) {
+    override def onBlockClicked(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity): Unit = {
         (getTile(world, pos), retracePart(world, pos, player)) match {
             case (tile: TileMultipart, hit: PartRayTraceResult) => tile.onBlockClicked(player, hit)
             case _ =>
         }
     }
 
-    override def onEntityCollidedWithBlock(world: World, pos: BlockPos, state: IBlockState, entity: Entity) {
+    override def onEntityCollision(state: BlockState, world: World, pos: BlockPos, entity: Entity): Unit = {
         getTile(world, pos) match {
             case null =>
             case tile => tile.onEntityCollision(entity)
         }
     }
 
-    override def onEntityWalk(world: World, pos: BlockPos, entity: Entity) {
+    override def onEntityWalk(world: World, pos: BlockPos, entity: Entity): Unit = {
         getTile(world, pos) match {
             case null =>
             case tile => tile.onEntityStanding(entity)
         }
     }
 
-    override def neighborChanged(state: IBlockState, world: World, pos: BlockPos, neighborBlock: Block, fromPos: BlockPos) {
+    override def neighborChanged(state: BlockState, world: World, pos: BlockPos, blockIn: Block, fromPos: BlockPos, isMoving: Boolean): Unit = {
         getTile(world, pos) match {
             case null =>
             case tile =>
-                tile.onNeighborBlockChange()
                 tile.onNeighborBlockChanged(fromPos)
         }
     }
 
-    override def onNeighborChange(world: IBlockAccess, pos: BlockPos, neighbor: BlockPos) {
+    override def onNeighborChange(state: BlockState, world: IWorldReader, pos: BlockPos, neighbor: BlockPos): Unit = {
         getTile(world, pos) match {
             case null =>
             case tile => tile.onNeighborTileChange(neighbor)
         }
     }
 
-    override def getWeakChanges(world: IBlockAccess, pos: BlockPos): Boolean =
+    override def getWeakChanges(state: BlockState, world: IWorldReader, pos: BlockPos): Boolean =
         getTile(world, pos) match {
             case null => false
             case tile => tile.getWeakChanges
         }
 
-    override def canProvidePower(state: IBlockState) = true
+    override def canProvidePower(state: BlockState) = true
 
-    override def canConnectRedstone(state: IBlockState, world: IBlockAccess, pos: BlockPos, side: EnumFacing): Boolean =
+    override def canConnectRedstone(state: BlockState, world: IBlockReader, pos: BlockPos, side: Direction): Boolean =
         getTile(world, pos) match {
             case null => false
             case tile => side != null && tile.canConnectRedstone(side.getIndex ^ 1) //'side' is respect to connecting block, we want with respect to this block
         }
 
-    override def getStrongPower(state: IBlockState, world: IBlockAccess, pos: BlockPos, side: EnumFacing): Int =
+    override def getStrongPower(state: BlockState, world: IBlockReader, pos: BlockPos, side: Direction): Int =
         getTile(world, pos) match {
             case null => 0
             case tile => tile.strongPowerLevel(side.getIndex ^ 1) //'side' is respect to connecting block, we want with respect to this block
         }
 
-    override def getWeakPower(state: IBlockState, world: IBlockAccess, pos: BlockPos, side: EnumFacing): Int =
+    override def getWeakPower(state: BlockState, world: IBlockReader, pos: BlockPos, side: Direction): Int =
         getTile(world, pos) match {
             case null => 0
             case tile => tile.weakPowerLevel(side.getIndex ^ 1) //'side' is respect to connecting block, we want with respect to this block
         }
 
-    @SideOnly(Side.CLIENT)
-    override def getRenderType(state: IBlockState) = MultipartRenderer.renderType
-
-    override def canRenderInLayer(state: IBlockState, layer: BlockRenderLayer) = true
-
-    @SideOnly(Side.CLIENT)
-    override def randomDisplayTick(state: IBlockState, world: World, pos: BlockPos, rand: Random) {
+    @OnlyIn(Dist.CLIENT)
+    override def animateTick(state: BlockState, world: World, pos: BlockPos, rand: Random): Unit = {
         getClientTile(world, pos) match {
             case null =>
-            case tile => tile.randomDisplayTick(rand)
+            case tile => tile.animateTick(rand)
         }
     }
 
-    @SideOnly(Side.CLIENT)
-    override def addHitEffects(state: IBlockState, world: World, hit: RayTraceResult, manager: ParticleManager) = {
-        (getClientTile(world, hit.getBlockPos), hit) match {
+    @OnlyIn(Dist.CLIENT)
+    override def addHitEffects(state: BlockState, world: World, hit: RayTraceResult, manager: ParticleManager) = {
+        (getClientTile(world, hit.asInstanceOf[BlockRayTraceResult].getPos), hit) match {
             case (tile: TileMultipartClient, pHit: PartRayTraceResult) => tile.addHitEffects(pHit, manager)
             case _ =>
         }
         true
     }
 
-    @SideOnly(Side.CLIENT)
-    override def addDestroyEffects(world: World, pos: BlockPos, manager: ParticleManager) = true
+    //    @OnlyIn(Dist.CLIENT)
+    //    override def addDestroyEffects(world: World, pos: BlockPos, manager: ParticleManager) = true
 }

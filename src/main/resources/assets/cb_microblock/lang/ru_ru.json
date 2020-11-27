@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "Каменная пила",
+  "item.cb_microblock.iron_saw": "Железная пила",
+  "item.cb_microblock.diamond_saw": "Алмазная пила",
+  "item.cb_microblock.stone_rod": "Каменная палка",
+  "item.cb_microblock.face.1": "Крышка из %s",
+  "item.cb_microblock.face.2": "Панель из %s",
+  "item.cb_microblock.face.4": "Плита из %s",
+  "item.cb_microblock.hollow.1": "Крышка из %s с выемкой",
+  "item.cb_microblock.hollow.2": "Панель из %s с выемкой",
+  "item.cb_microblock.hollow.4": "Плита из %s с выемкой",
+  "item.cb_microblock.edge.1": "Полоса из %s",
+  "item.cb_microblock.edge.2": "Столб %s",
+  "item.cb_microblock.edge.4": "Колонна из %s",
+  "item.cb_microblock.corner.1": "Уголок из %s",
+  "item.cb_microblock.corner.2": "Угол из %s",
+  "item.cb_microblock.corner.4": "Большой угол из %s"
+}

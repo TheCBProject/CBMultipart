@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "cb_microblock:stone_rod"
+    ]
+  },
+  "criteria": {
+    "has_cobble": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:cobblestone"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "cb_microblock:stone_rod"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_cobble",
+      "has_the_recipe"
+    ]
+  ]
+}

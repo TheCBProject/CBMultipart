@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "Sierra de Piedra",
+  "item.cb_microblock.iron_saw": "Sierra de Hierro",
+  "item.cb_microblock.diamond_saw": "Sierra de Diamante",
+  "item.cb_microblock.stone_rod": "Palo de Piedra",
+  "item.cb_microblock.face.1": "Cubierta de %s",
+  "item.cb_microblock.face.2": "Panel de %s",
+  "item.cb_microblock.face.4": "Losa de %s",
+  "item.cb_microblock.hollow.1": "Cubierta Hueca de %s",
+  "item.cb_microblock.hollow.2": "Panel Hueco de %s",
+  "item.cb_microblock.hollow.4": "Losa Hueca de %s",
+  "item.cb_microblock.edge.1": "Listón de %s",
+  "item.cb_microblock.edge.2": "Poste de %s",
+  "item.cb_microblock.edge.4": "Pilar de %s",
+  "item.cb_microblock.corner.1": "Punta de %s",
+  "item.cb_microblock.corner.2": "Esquina de %s",
+  "item.cb_microblock.corner.4": "Cuarto de %s"
+}

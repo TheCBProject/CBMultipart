@@ -1,18 +1,21 @@
 package codechicken.microblock
 
+import codechicken.lib.raytracer.VoxelShapeCache
 import codechicken.lib.render.CCRenderState
 import codechicken.lib.vec.Rotation._
 import codechicken.lib.vec.Vector3._
 import codechicken.lib.vec.{Cuboid6, Vector3}
-import codechicken.multipart.TFacePart
-import net.minecraft.util.{BlockRenderLayer, ResourceLocation}
+import codechicken.microblock.handler.MicroblockModContent
+import codechicken.multipart.api.part.TFacePart
+import net.minecraft.client.renderer.RenderType
+import net.minecraft.util.math.shapes.VoxelShape
 
 object FacePlacement extends PlacementProperties {
-    def microFactory = FaceMicroFactory
+    override def microFactory = FaceMicroFactory
 
-    def placementGrid = FacePlacementGrid
+    override def placementGrid = FacePlacementGrid
 
-    def opposite(slot: Int, side: Int) = slot ^ 1
+    override def opposite(slot: Int, side: Int) = slot ^ 1
 
     override def expand(slot: Int, side: Int) = sneakOpposite(slot, side)
 
@@ -23,30 +26,32 @@ class FaceMicroFactory
 
 object FaceMicroFactory extends CommonMicroFactory {
     var aBounds: Array[Cuboid6] = new Array(256)
+    var aShapes: Array[VoxelShape] = new Array(256)
 
     for (s <- 0 until 6) {
-        val transform = sideRotations(s).at(center)
+        val transform = sideRotations(s).at(CENTER)
         for (t <- 1 until 8) {
             val d = t / 8D
             aBounds(t << 4 | s) = new Cuboid6(0, 0, 0, 1, d, 1).apply(transform)
+            aShapes(t << 4 | s) = VoxelShapeCache.getShape(aBounds(t << 4 | s))
         }
     }
 
-    def getName = new ResourceLocation("ccmb:mcr_face")
+    override def getType = MicroblockModContent.faceMultiPartType
 
-    def itemSlot = 3
+    override def itemSlot = 3
 
-    def baseTrait = classOf[FaceMicroblock]
+    override def baseTrait = classOf[FaceMicroblock]
 
-    def clientTrait = classOf[FaceMicroblockClient]
+    override def clientTrait = classOf[FaceMicroblockClient]
 
-    def placementProperties = FacePlacement
+    override def placementProperties = FacePlacement
 
-    def getResistanceFactor = 1
+    override def getResistanceFactor = 1
 }
 
 trait FaceMicroblockClient extends CommonMicroblockClient {
-    override def render(pos: Vector3, layer: BlockRenderLayer, ccrs: CCRenderState) {
+    override def render(pos: Vector3, layer: RenderType, ccrs: CCRenderState) {
         if (layer == null) {
             MicroblockRender.renderCuboid(pos, ccrs, getIMaterial, layer, getBounds, 0)
         } else if (isTransparent) {
@@ -60,9 +65,9 @@ trait FaceMicroblockClient extends CommonMicroblockClient {
 }
 
 trait FaceMicroblock extends CommonMicroblock with TFacePart {
-    def microFactory = FaceMicroFactory
+    override def microFactory = FaceMicroFactory
 
-    def getBounds = FaceMicroFactory.aBounds(shape)
+    override def getBounds = FaceMicroFactory.aBounds(shape)
 
     override def solid(side: Int) = getIMaterial.isSolid
 }

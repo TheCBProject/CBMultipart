@@ -1,42 +1,76 @@
 package codechicken.microblock.handler
 
-import codechicken.lib.CodeChickenLib
-import codechicken.microblock.{ConfigContent, DefaultContent, MicroMaterialRegistry}
-import net.minecraftforge.fml.common.Mod
-import net.minecraftforge.fml.common.Mod.EventHandler
-import net.minecraftforge.fml.common.event.FMLInterModComms.IMCEvent
-import net.minecraftforge.fml.common.event.{FMLInitializationEvent, FMLPostInitializationEvent, FMLPreInitializationEvent, FMLServerAboutToStartEvent}
+import java.io.File
+import java.nio.file.Paths
 
-import scala.collection.JavaConversions._
+import codechicken.lib.config.{ConfigTag, StandardConfigFile}
+import codechicken.microblock.handler.MicroblockMod._
+import codechicken.microblock.{ConfigContent, MicroMaterialRegistry}
+import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.minecraftforge.fml.DistExecutor
+import net.minecraftforge.fml.event.lifecycle.{FMLClientSetupEvent, FMLCommonSetupEvent, FMLDedicatedServerSetupEvent, FMLLoadCompleteEvent}
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent
+import net.minecraftforge.scorge.lang.ScorgeModLoadingContext
 
-@Mod(modid = "microblockcbe", acceptedMinecraftVersions = CodeChickenLib.MC_VERSION_DEP, dependencies = "required-after:forgemultipartcbe", modLanguage = "scala")
 object MicroblockMod {
-    @EventHandler
-    def preInit(event: FMLPreInitializationEvent) {
-        MicroblockProxy.preInit()
-        DefaultContent.load()
-        ConfigContent.parse(event.getModConfigurationDirectory)
+    final val modId = "cb_microblock"
+    private var instance: MicroblockMod = _
+
+    def config = instance.config
+
+    def proxy = instance.proxy
+}
+
+class MicroblockMod {
+
+    instance = this
+
+    final val config: ConfigTag = new StandardConfigFile(Paths.get("config", "CBMicroblock.cfg")).load()
+    final val proxy: MicroblockProxy = DistExecutor.runForDist(
+        () => () => new MicroblockProxyClient().asInstanceOf[MicroblockProxy],
+        () => () => new MicroblockProxyServer().asInstanceOf[MicroblockProxy]
+    )
+
+    MicroMaterialRegistry.init(ScorgeModLoadingContext.get.getModEventBus)
+    ScorgeModLoadingContext.get.getModEventBus.register(this)
+    ScorgeModLoadingContext.get.getModEventBus.register(MicroblockModContent)
+    ScorgeModLoadingContext.get.getModEventBus.register(DataGenerators)
+    MinecraftForge.EVENT_BUS.register(this)
+
+
+    @SubscribeEvent
+    def onCommonSetup(event: FMLCommonSetupEvent) {
+        proxy.commonSetup(event)
+        //DefaultContent.load()
+        ConfigContent.parse(new File("./config"))
+        //ConfigContent.load();
     }
 
-    @EventHandler
-    def init(event: FMLInitializationEvent) {
-        MicroblockProxy.init()
-        ConfigContent.load()
+    @SubscribeEvent
+    def onClientSetup(event: FMLClientSetupEvent) {
+        proxy.clientSetup(event)
     }
 
-    @EventHandler
-    def postInit(event: FMLPostInitializationEvent) {
-        MicroMaterialRegistry.setupIDMap()
-        MicroblockProxy.postInit()
+    @SubscribeEvent
+    def onServerSetup(event: FMLDedicatedServerSetupEvent) {
+        proxy.serverSetup(event)
     }
 
-    @EventHandler
+
+    @SubscribeEvent
+    def onLoadComplete(event: FMLLoadCompleteEvent) {
+        proxy.loadComplete(event)
+        //MicroMaterialRegistry.setupIDMap()
+    }
+
+    //    @SubscribeEvent
+    //    def handleIMC(event: IMCEvent) {
+    //        ConfigContent.handleIMC(event.getMessages)
+    //    }
+
+    @SubscribeEvent
     def beforeServerStart(event: FMLServerAboutToStartEvent) {
-        MicroMaterialRegistry.setupIDMap()
-    }
-
-    @EventHandler
-    def handleIMC(event: IMCEvent) {
-        ConfigContent.handleIMC(event.getMessages)
+        //MicroMaterialRegistry.setupIDMap()
     }
 }

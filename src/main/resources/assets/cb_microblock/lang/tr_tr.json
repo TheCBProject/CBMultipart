@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "Taş Testere",
+  "item.cb_microblock.iron_saw": "Demir Testere",
+  "item.cb_microblock.diamond_saw": "Elmas Testere",
+  "item.cb_microblock.stone_rod": "Taş Çubuk",
+  "item.cb_microblock.face.1": "%s Kapak",
+  "item.cb_microblock.face.2": "%s Panel",
+  "item.cb_microblock.face.4": "Kalın %s",
+  "item.cb_microblock.hollow.1": "Ortası Boş %s Kapak",
+  "item.cb_microblock.hollow.2": "Ortası Boş %s Panel",
+  "item.cb_microblock.hollow.4": "Ortası Boş Kalın %s",
+  "item.cb_microblock.edge.1": "%s Şerit",
+  "item.cb_microblock.edge.2": "Kalın Şerit %s",
+  "item.cb_microblock.edge.4": "%s Sütun",
+  "item.cb_microblock.corner.1": "%s Köşe",
+  "item.cb_microblock.corner.2": "Orta Köşe %s",
+  "item.cb_microblock.corner.4": "Kalın Köşe %s"
+}

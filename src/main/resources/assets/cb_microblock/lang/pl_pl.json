@@ -1,0 +1,19 @@
+{
+  "itemGroup.cb_microblock": "CB MicroBlocks",
+  "item.cb_microblock.stone_saw": "Kamienna piła",
+  "item.cb_microblock.iron_saw": "Żelazna piła",
+  "item.cb_microblock.diamond_saw": "Diamentowa piła",
+  "item.cb_microblock.stone_rod": "Kamienna Rod",
+  "item.cb_microblock.face.1": "Pokrywka z %s",
+  "item.cb_microblock.face.2": "Panel z %s",
+  "item.cb_microblock.face.4": "Płyta z %s",
+  "item.cb_microblock.hollow.1": "Pusta pokrywka z %s",
+  "item.cb_microblock.hollow.2": "Pusty panel z %s",
+  "item.cb_microblock.hollow.4": "Pusta płyta z %s",
+  "item.cb_microblock.edge.1": "Pasek z %s",
+  "item.cb_microblock.edge.2": "Słup z %s",
+  "item.cb_microblock.edge.4": "Filar z %s",
+  "item.cb_microblock.corner.1": "Kąt z %s",
+  "item.cb_microblock.corner.2": "Róg z %s",
+  "item.cb_microblock.corner.4": "Karb z %s"
+}
