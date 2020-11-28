@@ -123,7 +123,7 @@ reobf {
 }
 
 signing {
-    if (!signProps.empty) {
+    if (!signProps.isEmpty()) {
         jars {
             sign shadowJar
             after reobfShadowJar
