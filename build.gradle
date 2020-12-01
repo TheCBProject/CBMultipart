@@ -126,6 +126,7 @@ signing {
     if (!signProps.isEmpty()) {
         jars {
             sign shadowJar
+            sign deobfJar
             after reobfShadowJar
 
             keyStore = signProps.keyStore
