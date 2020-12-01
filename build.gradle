@@ -23,7 +23,7 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle'
 
 group = "codechicken"
-archivesBaseName = "ForgeMultipart"
+archivesBaseName = "CBMultipart"
 
 targetCompatibility = "1.8"
 sourceCompatibility = "1.8"
@@ -193,6 +193,43 @@ task srcJar(type: Jar) {
     classifier = 'sources'
 }
 
+task deobfJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+    build.dependsOn it
+    from sourceSets.main.output
+    classifier = 'deobf'
+
+    manifest {
+        attributes 'Specification-Title': archivesBaseName
+        attributes 'Specification-Vendor': 'covers1624'
+        attributes 'Specification-Version': "1"
+        attributes 'Implementation-Title': archivesBaseName
+        attributes 'Implementation-Vendor': 'covers1624'
+        attributes 'Implementation-Version': version
+        attributes 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+    }
+
+    configurations = [project.configurations.shadow]
+    dependencies {
+        include(dependency("codechicken:TraitMixinCompiler:"))
+        include(dependency("codechicken:ChickenASM:"))
+    }
+    mergeServiceFiles()
+    exclude 'module-info.class'
+    //Transitives are flattened for some stupid reason..
+    exclude 'javax/**'
+    exclude 'org/apache/**'
+    exclude 'org/objectweb/**'
+    exclude 'com/google/**'
+    exclude 'NOTICE'
+    exclude 'LICENSE'
+    exclude 'Log4j-charsets.properties'
+    exclude 'META-INF/NOTICE'
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/versions/**'
+    exclude 'META-INF/services/org.apache.**'
+}
+
 build.dependsOn shadowJar
 
 publishing {
@@ -214,6 +251,7 @@ publishing {
             version project.version
             artifact shadowJar
             artifact srcJar
+            artifact deobfJar
 
             pom {
                 name = archivesBaseName
