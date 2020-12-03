@@ -55,8 +55,9 @@ if (System.getenv("KEY_STORE")) {
     println 'No signing secrets found, build will not be signed.'
 }
 
-version = "${project.config.mod_version}." + (System.getenv("BUILD_NUMBER") ?: "1")
-println "Starting build of ${archivesBaseName}, Version: ${version}"
+config.mod_version = "${config.mod_version}." + (System.getenv("BUILD_NUMBER") ?: "1")
+version = "${config.mc_version}-${config.mod_version}"
+println "Starting build of ${archivesBaseName}, Version: ${config.mod_version}"
 println "Using Forge: ${config.forge_version}, for Minecraft: ${config.mc_version}, with Mappings: ${config.mappings}"
 
 minecraft {
@@ -138,7 +139,7 @@ signing {
 }
 
 processResources { task ->
-    inputs.property "version", version
+    inputs.property "mod_version", config.mod_version
     inputs.property "mc_version", config.mc_version
 
     from(sourceSets.main.resources.srcDirs) { spec ->
@@ -151,7 +152,6 @@ processResources { task ->
     }
 }
 
-version = "${config.mc_version}-${version}"
 jar.enabled = false//Disable normal jar, is replaced by ShadowJar.
 shadowJar {
     finalizedBy 'reobfShadowJar'
