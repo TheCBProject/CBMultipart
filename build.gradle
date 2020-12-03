@@ -144,7 +144,7 @@ processResources { task ->
     from(sourceSets.main.resources.srcDirs) { spec ->
         spec.include 'META-INF/mods.toml'
         task.doFirst {
-            spec.expand 'version': version,
+            spec.expand 'version': config.mod_version,
                     'mc_version': config.mc_version,
                     'ccl_version': resolve("CodeChickenLib")
         }
