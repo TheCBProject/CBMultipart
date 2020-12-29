@@ -16,7 +16,12 @@ import net.minecraft.util.math.BlockRayTraceResult
 
 object MicroblockRender {
 
-    def renderHighlight(player: PlayerEntity, hand:Hand, hit: BlockRayTraceResult, mcrFactory: CommonMicroFactory, size: Int, material: Int, mStack: MatrixStack, getter: IRenderTypeBuffer, partialTicks: Float) {
+    val highlighRenderType = RenderType.makeType("cbmp_highlight", DefaultVertexFormats.BLOCK, 7, 255, RenderType.State.getBuilder
+        .texture(RenderState.BLOCK_SHEET)
+        .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
+        .build(false))
+
+    def renderHighlight(player: PlayerEntity, hand:Hand, hit: BlockRayTraceResult, mcrFactory: CommonMicroFactory, size: Int, material: MicroMaterial, mStack: MatrixStack, getter: IRenderTypeBuffer, partialTicks: Float) {
         mcrFactory.placementProperties.placementGrid.render(new Vector3(hit.getHitVec), hit.getFace.ordinal, mStack, getter)
 
         val placement = MicroblockPlacement(player, hand, hit, size, material, !player.abilities.isCreativeMode, mcrFactory.placementProperties)
@@ -30,18 +35,11 @@ object MicroblockRender {
         mat.translate(pos)
         mat.apply(new Scale(1.002, 1.002, 1.002).at(Vector3.CENTER))
 
-        val state = RenderType.State.getBuilder
-            .texture(RenderState.BLOCK_SHEET)
-            .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
-            .build(false)
-        val rType = RenderType.makeType("testing", DefaultVertexFormats.BLOCK, 7, 255, state)
-
         val ccrs = CCRenderState.instance()
         ccrs.reset()
-        ccrs.bind(rType, getter)
-        ccrs.r = new TransformingVertexBuilder(ccrs.r, mat)
+        ccrs.bind(highlighRenderType, getter, mat)
         ccrs.alphaOverride = 80
-        part.render(Vector3.ZERO, null, ccrs)
+        part.render(null, ccrs)
     }
 
     private val instances = ThreadLocal.withInitial(new Supplier[BlockFace] {
@@ -50,14 +48,14 @@ object MicroblockRender {
 
     def face = instances.get()
 
-    def renderCuboid(pos: Vector3, ccrs: CCRenderState, mat: MicroMaterial, layer: RenderType, c: Cuboid6, faces: Int) {
+    def renderCuboid(ccrs: CCRenderState, mat: MicroMaterial, layer: RenderType, c: Cuboid6, faces: Int) {
         MicroMaterialRegistry.loadIcons()
 
         val f = new BlockFace
         ccrs.setModel(f)
         for (s <- 0 until 6 if (faces & 1 << s) == 0) {
             f.loadCuboidFace(c, s).computeLightCoords()
-            val ops = mat.getMicroRenderOps(pos, s, layer, c)
+            val ops = mat.getMicroRenderOps(s, layer, c)
             for (opSet <- ops)
                 ccrs.render(opSet: _*)
         }

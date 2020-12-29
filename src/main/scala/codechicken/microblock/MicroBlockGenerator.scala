@@ -10,21 +10,20 @@ import com.google.common.collect.ImmutableSet
 /**
  * Created by covers1624 on 4/18/20.
  */
-object MicroBlockGenerator extends SidedGenerator[Microblock, MicroMaterial](MultiPartGenerator.MIXIN_COMPILER, classOf[Microblock], "cmb", classOf[Int]) {
+object MicroBlockGenerator extends SidedGenerator[Microblock, MicroMaterial](MultiPartGenerator.MIXIN_COMPILER, classOf[Microblock], "cmb", classOf[MicroMaterial]) {
 
     def loadAnnotations() {
         loadAnnotations(classOf[MicroBlockTrait], classOf[TraitList])
     }
 
-    def create(factory: MicroblockFactory, material: Int, client: Boolean): Microblock = {
-        val microMaterial = MicroMaterialRegistry.getMaterial(material)
+    def create(factory: MicroblockFactory, material: MicroMaterial, client: Boolean): Microblock = {
         val traitBuilder = ImmutableSet.builder[MixinFactory.TraitKey]()
-        traitBuilder.addAll(getTraitsForObject(microMaterial, client))
+        traitBuilder.addAll(getTraitsForObject(material, client))
         traitBuilder.add(factory.baseTraitKey)
         if (client) {
             traitBuilder.add(factory.clientTraitKey)
         }
-        construct(traitBuilder.build(), material: Integer)
+        construct(traitBuilder.build(), material: MicroMaterial)
     }
 
 }

@@ -47,13 +47,12 @@ abstract class MicroMaterial extends ForgeRegistryEntry[MicroMaterial] {
      * This function must return a list of vertex operations, one set for each
      * rendering pass on the preloaded model.
      *
-     * @param pos    The current position to render the cuboid
      * @param side   The side that is being rendered as EnumFacing indexes
      * @param layer  The current render layer, null for inventory rendering
      * @param bounds The cuboid bounds of the face being rendered
      */
     @OnlyIn(Dist.CLIENT)
-    def getMicroRenderOps(pos: Vector3, side: Int, layer: RenderType, bounds: Cuboid6): Seq[Seq[IVertexOperation]]
+    def getMicroRenderOps(side: Int, layer: RenderType, bounds: Cuboid6): Seq[Seq[IVertexOperation]]
 
     /**
      * Get the render pass for which this material renders in.

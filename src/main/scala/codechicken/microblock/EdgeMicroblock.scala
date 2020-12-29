@@ -124,14 +124,13 @@ trait PostMicroblockClient extends PostMicroblock with MicroblockClient {
     var renderBounds1: Cuboid6 = _
     var renderBounds2: Cuboid6 = _
 
-    override def render(pos: Vector3, layer: RenderType, ccrs: CCRenderState): Unit = {
-        val mat = getIMaterial
+    override def render(layer: RenderType, ccrs: CCRenderState): Unit = {
         if (layer == null) {
-            MicroblockRender.renderCuboid(pos, ccrs, mat, layer, getBounds, 0)
+            MicroblockRender.renderCuboid(ccrs, getMaterial, layer, getBounds, 0)
         } else {
-            MicroblockRender.renderCuboid(pos, ccrs, mat, layer, renderBounds1, 0)
+            MicroblockRender.renderCuboid(ccrs, getMaterial, layer, renderBounds1, 0)
             if (renderBounds2 != null) {
-                MicroblockRender.renderCuboid(pos, ccrs, mat, layer, renderBounds2, 0)
+                MicroblockRender.renderCuboid(ccrs, getMaterial, layer, renderBounds2, 0)
             }
         }
     }

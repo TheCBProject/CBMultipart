@@ -22,7 +22,7 @@ import net.minecraft.util.text.{StringTextComponent, TranslationTextComponent}
 class ItemMicroBlock(properties: Item.Properties) extends Item(properties) {
 
     override def getDisplayName(stack: ItemStack) = {
-        val material = getMaterial(stack)
+        val material = getMaterialFromStack(stack)
         val mcrFactory = getFactory(stack)
         val size = getSize(stack)
         if (material == null || mcrFactory == null) {
@@ -48,10 +48,10 @@ class ItemMicroBlock(properties: Item.Properties) extends Item(properties) {
         val player = context.getPlayer
         val world = context.getWorld
         val stack = player.getHeldItem(context.getHand)
-        val material = getMaterialID(stack)
+        val material = getMaterialFromStack(stack)
         val mcrFactory = getFactory(stack)
         val size = getSize(stack)
-        if (material < 0 || mcrFactory == null) {
+        if (material == null || mcrFactory == null) {
             return ActionResultType.FAIL
         }
 
@@ -67,7 +67,7 @@ class ItemMicroBlock(properties: Item.Properties) extends Item(properties) {
                 if (!player.abilities.isCreativeMode) {
                     placement.consume(world, player, stack)
                 }
-                val sound = MicroMaterialRegistry.getMaterial(material).getSound
+                val sound = material.getSound
                 if (sound != null) {
                     world.playSound(null, placement.pos.getX + 0.5D, placement.pos.getY + 0.5D, placement.pos.getZ + 0.5D, sound.getPlaceSound, SoundCategory.BLOCKS, (sound.getVolume + 1.0F) / 2.0F, sound.getPitch * 0.8F)
                 }
@@ -83,11 +83,11 @@ class ItemMicroBlock(properties: Item.Properties) extends Item(properties) {
 
 object ItemMicroBlock {
 
-    def create(factoryID: Int, size: Int, material: Int): ItemStack = create(factoryID, size, MicroMaterialRegistry.getMaterialName(material))
-
     def create(factoryID: Int, size: Int, material: MicroMaterial): ItemStack = create(factoryID, size, material.getRegistryName)
 
     def create(factoryID: Int, size: Int, material: ResourceLocation): ItemStack = createStack(1, factoryID, size, material)
+
+    def createStack(amount: Int, factoryId: Int, size: Int, material: MicroMaterial): ItemStack = createStack(amount, factoryId, size, material.getRegistryName)
 
     def createStack(amount: Int, factoryId: Int, size: Int, material: ResourceLocation): ItemStack = {
         val stack = new ItemStack(MicroblockModContent.itemMicroBlock, amount)
@@ -124,16 +124,7 @@ object ItemMicroBlock {
         }
     }
 
-    def getMaterialID(stack: ItemStack): Int = {
-        stack.getOrCreateTag()
-        if (!stack.getTag.contains("mat")) {
-            return 0
-        }
-
-        MicroMaterialRegistry.getMaterialID(stack.getTag.getString("mat"))
-    }
-
-    def getMaterial(stack: ItemStack): MicroMaterial = {
+    def getMaterialFromStack(stack: ItemStack): MicroMaterial = {
         stack.getOrCreateTag()
         if (!stack.getTag.contains("mat")) {
             return null
@@ -152,32 +143,32 @@ object ItemMicroBlockRenderer extends IItemRenderer {
     override def getTransforms = TransformUtils.DEFAULT_BLOCK
 
     override def renderItem(stack: ItemStack, transformType: TransformType, mStack: MatrixStack, getter: IRenderTypeBuffer, packedLight: Int, packedOverlay: Int) {
-        val material = getMaterial(stack)
+        val material = getMaterialFromStack(stack)
         val factory = getFactory(stack)
         val size = getSize(stack)
         if (material == null || factory == null) {
             return
         }
         val mat = new Matrix4(mStack)
-        val part = factory.create(true, getMaterialID(stack)).asInstanceOf[MicroblockClient]
+        val part = factory.create(true, getMaterialFromStack(stack)).asInstanceOf[MicroblockClient]
         val ccrs = CCRenderState.instance()
         part.setShape(size, factory.itemSlot)
         mat.translate(new Vector3(0.5, 0.5, 0.5).subtract(part.getBounds.center))
 
         ccrs.reset()
-        ccrs.bind(part.getIMaterial.getRenderLayer, getter)
+        ccrs.bind(part.getMaterial.getRenderLayer, getter)
         ccrs.r = new TransformingVertexBuilder(ccrs.r, mat)
         ccrs.brightness = packedLight
         ccrs.overlay = packedOverlay
-        part.render(Vector3.ZERO, null, ccrs)
+        part.render(null, ccrs)
     }
 
     def renderHighlight(player: PlayerEntity, hand: Hand, stack: ItemStack, hit: BlockRayTraceResult, mStack: MatrixStack, getter: IRenderTypeBuffer, partialTicks: Float): Boolean = {
-        val material = getMaterialID(stack)
+        val material = getMaterialFromStack(stack)
         val mcrClass = getFactory(stack)
         val size = getSize(stack)
 
-        if (material < 0 || mcrClass == null) {
+        if (material == null || mcrClass == null) {
             return false
         }
 

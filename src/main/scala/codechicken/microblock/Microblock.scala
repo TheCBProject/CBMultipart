@@ -1,14 +1,10 @@
 package codechicken.microblock
 
-import java.util.Collections
-
 import codechicken.lib.data.{MCDataInput, MCDataOutput}
 import codechicken.lib.raytracer.VoxelShapeCache
 import codechicken.lib.render.CCRenderState
-import codechicken.lib.vec.{Cuboid6, Vector3}
-import codechicken.microblock.MicroMaterialRegistry._
-import codechicken.microblock.api.{TMicroOcclusion, TMicroOcclusionClient}
-import codechicken.multipart._
+import codechicken.lib.vec.Cuboid6
+import codechicken.microblock.api.{MicroMaterial, TMicroOcclusion, TMicroOcclusionClient}
 import codechicken.multipart.api.part.{TIconHitEffectsPart, TMultiPart, TPartialOcclusionPart, TSlottedPart}
 import codechicken.multipart.util.PartRayTraceResult
 import net.minecraft.client.renderer.RenderType
@@ -22,17 +18,16 @@ import net.minecraftforge.client.model.ModelLoader
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
-abstract class Microblock(var material: Int = 0) extends TMultiPart //with TCuboidPart
-{
+abstract class Microblock(var material: MicroMaterial) extends TMultiPart {
     var shape: Byte = 0
 
     def microFactory: MicroblockFactory
 
     def getType = microFactory.getType
 
-    override def getStrength(player: PlayerEntity, hit: PartRayTraceResult) = getIMaterial match {
-        case null => super.getStrength(player, hit)
+    override def getStrength(player: PlayerEntity, hit: PartRayTraceResult) = getMaterial match {
         case mat => mat.getStrength(player)
+        case null => super.getStrength(player, hit)
     }
 
     def getSize = shape >> 4
@@ -54,8 +49,6 @@ abstract class Microblock(var material: Int = 0) extends TMultiPart //with TCubo
 
     def getBounds: Cuboid6
 
-    def getIMaterial = MicroMaterialRegistry.getMaterial(material)
-
     /**
      * The factory ID that will be put into the ItemStack damage value
      */
@@ -68,7 +61,7 @@ abstract class Microblock(var material: Int = 0) extends TMultiPart //with TCubo
             val m = size / s
             size -= m * s
             if (m > 0) {
-                items += ItemMicroBlock.createStack(m, itemFactoryID, s, getMaterialName(material))
+                items += ItemMicroBlock.createStack(m, itemFactoryID, s, material)
             }
         }
         items.asJava
@@ -78,14 +71,14 @@ abstract class Microblock(var material: Int = 0) extends TMultiPart //with TCubo
         val size = getSize
         for (s <- Seq(4, 2, 1))
             if (size % s == 0 && size / s >= 1) {
-                return ItemMicroBlock.create(itemFactoryID, size, getMaterialName(material))
+                return ItemMicroBlock.create(itemFactoryID, size, material)
             }
 
         ItemStack.EMPTY //unreachable
     }
 
     override def writeDesc(packet: MCDataOutput) {
-        packet.writeVarInt(material) //read by IDynamicPartFactory
+        packet.writeRegistryIdUnsafe(MicroMaterialRegistry.MICRO_MATERIALS, material)
         packet.writeByte(shape)
     }
 
@@ -105,19 +98,19 @@ abstract class Microblock(var material: Int = 0) extends TMultiPart //with TCubo
 
     override def save(tag: CompoundNBT) {
         tag.putByte("shape", shape)
-        tag.putString("material", getMaterialName(material).toString)
+        tag.putString("material", material.getRegistryName.toString)
     }
 
     override def load(tag: CompoundNBT) {
         shape = tag.getByte("shape")
-        material = getMaterialID(tag.getString("material"))
+        material = MicroMaterialRegistry.getMaterial(tag.getString("material"))
     }
 
-    def isTransparent = getIMaterial.isTransparent
+    def isTransparent = getMaterial.isTransparent
 
-    override def getLightValue = getIMaterial.getLightValue
+    override def getLightValue = getMaterial.getLightValue
 
-    override def getExplosionResistance(entity: Entity) = getIMaterial.explosionResistance(entity) * microFactory.getResistanceFactor
+    override def getExplosionResistance(entity: Entity) = getMaterial.explosionResistance(entity) * microFactory.getResistanceFactor
 }
 
 trait MicroblockClient extends Microblock with TIconHitEffectsPart {
@@ -125,14 +118,14 @@ trait MicroblockClient extends Microblock with TIconHitEffectsPart {
     override def getBreakingIcon(hit: PartRayTraceResult) = getBrokenIcon(hit.getFace.ordinal)
 
     @OnlyIn(Dist.CLIENT)
-    def getBrokenIcon(side: Int) = getIMaterial match {
-        case null => ModelLoader.White.instance()
+    def getBrokenIcon(side: Int) = getMaterial match {
         case mat => mat.getBreakingIcon(side)
+        case null => ModelLoader.White.instance()
     }
 
-    override def renderStatic(pos: Vector3, layer: RenderType, ccrs: CCRenderState) = {
-        if (layer != null && getIMaterial.canRenderInLayer(layer)) {
-            render(pos, layer, ccrs)
+    override def renderStatic(layer: RenderType, ccrs: CCRenderState) = {
+        if (layer != null && getMaterial.canRenderInLayer(layer)) {
+            render(layer, ccrs)
             true
         } else {
             false
@@ -146,15 +139,15 @@ trait MicroblockClient extends Microblock with TIconHitEffectsPart {
      * @param layer The block layer, null for inventory rendering
      * @param ccrs  The CCRenderState to add the verts to
      */
-    def render(pos: Vector3, layer: RenderType, ccrs: CCRenderState): Unit
+    def render(layer: RenderType, ccrs: CCRenderState): Unit
 }
 
 trait CommonMicroblockClient extends CommonMicroblock with MicroblockClient with TMicroOcclusionClient {
-    override def render(pos: Vector3, layer: RenderType, ccrs: CCRenderState) {
+    override def render(layer: RenderType, ccrs: CCRenderState) {
         if (layer == null) {
-            MicroblockRender.renderCuboid(pos, ccrs, getIMaterial, layer, getBounds, 0)
+            MicroblockRender.renderCuboid(ccrs, getMaterial, layer, getBounds, 0)
         } else {
-            MicroblockRender.renderCuboid(pos, ccrs, getIMaterial, layer, renderBounds, renderMask)
+            MicroblockRender.renderCuboid(ccrs, getMaterial, layer, renderBounds, renderMask)
         }
     }
 }

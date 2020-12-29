@@ -1,6 +1,7 @@
 package codechicken.microblock
 
 import codechicken.lib.data.MCDataInput
+import codechicken.microblock.api.MicroMaterial
 import codechicken.multipart.api.MultiPartType
 import net.minecraft.nbt.CompoundNBT
 import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
@@ -24,11 +25,11 @@ abstract class MicroblockFactory extends MultiPartType[Microblock] {
     def register() {
     }
 
-    def create(client: Boolean, material: Int) = MicroBlockGenerator.create(this, material, client)
+    def create(client: Boolean, material: MicroMaterial) = MicroBlockGenerator.create(this, material, client)
 
-    override def createPartClient(packet: MCDataInput) = create(true, if (packet != null) packet.readVarInt() else 0)
+    override def createPartClient(packet: MCDataInput) = create(true, packet.readRegistryIdUnsafe(MicroMaterialRegistry.MICRO_MATERIALS))
 
-    override def createPartServer(tag: CompoundNBT) = create(false, if (tag != null) MicroMaterialRegistry.getMaterialID(tag.getString("material")) else 0)
+    override def createPartServer(tag: CompoundNBT) = create(false, MicroMaterialRegistry.getMaterial(tag.getString("material")))
 }
 
 /**

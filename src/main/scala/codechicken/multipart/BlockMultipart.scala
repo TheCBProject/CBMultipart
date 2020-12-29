@@ -1,14 +1,13 @@
 package codechicken.multipart
 
 import java.util.{Random, ArrayList => JArrayList, List => JList}
-
 import codechicken.lib.raytracer.{DistanceRayTraceResult, RayTracer}
 import codechicken.lib.vec.Vector3
 import codechicken.multipart.util.MultiPartLoadHandler.TileNBTContainer
 import codechicken.multipart.util.PartRayTraceResult
 import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.block.material.Material
-import net.minecraft.block.{Block, BlockState}
+import net.minecraft.block.{Block, BlockState, SoundType}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.particle.ParticleManager
 import net.minecraft.client.renderer.{ActiveRenderInfo, IRenderTypeBuffer}
@@ -18,7 +17,7 @@ import net.minecraft.fluid.IFluidState
 import net.minecraft.item.ItemStack
 import net.minecraft.util.math._
 import net.minecraft.util.math.shapes.{ISelectionContext, VoxelShapes}
-import net.minecraft.util.{ActionResultType, Direction, Hand}
+import net.minecraft.util.{ActionResultType, Direction, Hand, SoundCategory}
 import net.minecraft.world._
 import net.minecraft.world.storage.loot.{LootContext, LootParameters}
 import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
@@ -56,17 +55,7 @@ class BlockMultipart extends Block(Block.Properties.create(Material.ROCK)) {
 
     override def hasTileEntity(state: BlockState) = true
 
-    override def createTileEntity(state: BlockState, world: IBlockReader) = {
-        world match {
-            case world: IWorldReader =>
-                if (world.isRemote) {
-                    null
-                } else {
-                    new TileNBTContainer
-                }
-            case _ => null
-        }
-    }
+    override def createTileEntity(state: BlockState, world: IBlockReader) = new TileNBTContainer
 
     override def ticksRandomly(state: BlockState) = true
 
@@ -117,6 +106,7 @@ class BlockMultipart extends Block(Block.Properties.create(Material.ROCK)) {
     override def removedByPlayer(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, willHarvest: Boolean, fluid: IFluidState): Boolean = {
         val hit = retracePart(world, pos, player)
         val tile = getTile(world, pos)
+        world.playEvent(player, 2001, pos, Block.getStateId(state))
 
         if (hit == null || tile == null) {
             dropAndDestroy(world, pos, state)
@@ -238,6 +228,5 @@ class BlockMultipart extends Block(Block.Properties.create(Material.ROCK)) {
         true
     }
 
-    //    @OnlyIn(Dist.CLIENT)
-    //    override def addDestroyEffects(world: World, pos: BlockPos, manager: ParticleManager) = true
+    override def addDestroyEffects(state: BlockState, world: World, pos: BlockPos, manager: ParticleManager) = true
 }

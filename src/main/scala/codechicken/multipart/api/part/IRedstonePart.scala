@@ -112,7 +112,9 @@ object RedstoneInteractions {
         Blocks.JUNGLE_BUTTON,
         Blocks.OAK_BUTTON,
         Blocks.SPRUCE_BUTTON,
-        Blocks.REDSTONE_BLOCK)
+        Blocks.REDSTONE_BLOCK,
+        Blocks.REDSTONE_LAMP
+    )
 
     /**
      * Get the direct power to p on side

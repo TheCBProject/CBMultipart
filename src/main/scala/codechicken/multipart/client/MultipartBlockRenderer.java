@@ -38,7 +38,7 @@ public class MultipartBlockRenderer implements ICCBlockRenderer {
             ccrs.reset();
             ccrs.bind(new TransformingVertexBuilder(builder, mStack), DefaultVertexFormats.BLOCK);
             ccrs.lightMatrix.locate(world, pos);
-            return tile.renderStatic(Vector3.fromBlockPos(pos), MinecraftForgeClient.getRenderLayer(), ccrs);
+            return tile.renderStatic(MinecraftForgeClient.getRenderLayer(), ccrs);
         }
         return false;
     }
@@ -54,7 +54,7 @@ public class MultipartBlockRenderer implements ICCBlockRenderer {
             ccrs.overlay = OverlayTexture.NO_OVERLAY;
             ccrs.brightness = WorldRenderer.getPackedLightmapCoords(world, state, pos);
             ccrs.lightMatrix.locate(world, pos);
-            tile.renderStatic(Vector3.fromBlockPos(pos), MinecraftForgeClient.getRenderLayer(), ccrs);
+            tile.renderStatic(MinecraftForgeClient.getRenderLayer(), ccrs);
             mStack.pop();
         }
     }

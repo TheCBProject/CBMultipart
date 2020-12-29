@@ -314,14 +314,12 @@ abstract class TMultiPart {
      * This may be called on a ChunkBatching thread. Please make sure
      * Everything you do is Thread Safe.
      *
-     * @param pos   The position to render at. Use this instead of the actual tile position
-     *              (Although they will be the same in almost all cases).
      * @param layer The render layer
      * @param ccrs  An instance of CCRenderState that is in use
      * @return true if vertices were added to the buffer
      */
     @OnlyIn(Dist.CLIENT)
-    def renderStatic(pos: Vector3, layer: RenderType, ccrs: CCRenderState) = false
+    def renderStatic(layer: RenderType, ccrs: CCRenderState) = false
 
     /**
      * Render the static, unmoving faces of this part into the world renderer.
@@ -339,13 +337,11 @@ abstract class TMultiPart {
      * This may be called on a ChunkBatching thread. Please make sure
      * Everything you do is Thread Safe.
      *
-     * @param pos     The position to render at. Use this instead of the actual tile position
-     *                (Although they will be the same in almost all cases)
      * @param ccrs    An instance of CCRenderState that is in use
      * @param texture The current f overlay texture
      */
     @OnlyIn(Dist.CLIENT)
-    def renderBreaking(pos: Vector3, texture: TextureAtlasSprite, ccrs: CCRenderState) {}
+    def renderBreaking(texture: TextureAtlasSprite, ccrs: CCRenderState) {}
 
     /**
      * The bounds of this part for Frustum culling.

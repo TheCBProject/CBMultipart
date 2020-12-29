@@ -200,7 +200,7 @@ trait TMicroOcclusion extends TMultiPart {
 
     def getSize: Int
 
-    def getMaterial: Int
+    def getMaterial: MicroMaterial
 
     def getBounds: Cuboid6
 

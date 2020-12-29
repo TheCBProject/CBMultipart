@@ -15,7 +15,7 @@ class GrassMicroMaterial extends BlockMicroMaterial(Blocks.GRASS_BLOCK.getDefaul
         //sideIconT = new IconTransformation(TextureUtils.getIconsForBlock(Blocks.GRASS.getDefaultState, 2)(1))
     }
 
-    override def getMicroRenderOps(pos: Vector3, side: Int, layer: RenderType, bounds: Cuboid6) = {
+    override def getMicroRenderOps(side: Int, layer: RenderType, bounds: Cuboid6) = {
         val list = Seq.newBuilder[Seq[IVertexOperation]]
 
         if (side == 1) {
@@ -36,7 +36,7 @@ class GrassMicroMaterial extends BlockMicroMaterial(Blocks.GRASS_BLOCK.getDefaul
 class TopMicroMaterial($state: BlockState) extends BlockMicroMaterial($state) {
     def this(b: Block) = this(b.getDefaultState)
 
-    override def getMicroRenderOps(pos: Vector3, side: Int, layer: RenderType, bounds: Cuboid6) = {
+    override def getMicroRenderOps(side: Int, layer: RenderType, bounds: Cuboid6) = {
         val list = Seq.newBuilder[Seq[IVertexOperation]]
 
         if (side <= 1) {

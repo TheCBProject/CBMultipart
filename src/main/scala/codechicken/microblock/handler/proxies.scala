@@ -35,13 +35,13 @@ trait MicroblockProxy {
 class MicroblockProxyServer extends MicroblockProxy {
 
     protected var saws = mutable.ListBuffer[Item]()
+    FaceMicroFactory.register(0)
+    HollowMicroFactory.register(1)
+    CornerMicroFactory.register(2)
+    EdgeMicroFactory.register(3)
+    PostMicroFactory.register()
 
     override def commonSetup(event: FMLCommonSetupEvent) {
-        FaceMicroFactory.register(0)
-        HollowMicroFactory.register(1)
-        CornerMicroFactory.register(2)
-        EdgeMicroFactory.register(3)
-        PostMicroFactory.register()
         MicroBlockGenerator.loadAnnotations()
 
         //        sawStone = createSaw(config, "saw_stone", 1)

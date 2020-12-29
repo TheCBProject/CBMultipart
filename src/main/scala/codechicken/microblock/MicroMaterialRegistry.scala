@@ -3,10 +3,12 @@ package codechicken.microblock
 import codechicken.lib.util.SneakyUtils.unsafeCast
 import codechicken.microblock.api.MicroMaterial
 import codechicken.microblock.handler.MicroblockMod
+import codechicken.microblock.handler.MicroblockModContent.itemMicroBlock
 import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.client.renderer.IRenderTypeBuffer
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.util.math.{BlockRayTraceResult, RayTraceResult}
+import net.minecraft.item.ItemStack
+import net.minecraft.util.math.BlockRayTraceResult
 import net.minecraft.util.{Hand, ResourceLocation}
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.eventbus.api.IEventBus
@@ -23,7 +25,7 @@ trait IMicroHighlightRenderer {
     /**
      * Return true if a custom highlight was rendered and the default should be skipped
      */
-    def renderHighlight(player: PlayerEntity, hand: Hand, hit: RayTraceResult, mcrFactory: CommonMicroFactory, size: Int, material: Int, mStack: MatrixStack, getter: IRenderTypeBuffer, partialTicks: Float): Boolean
+    def renderHighlight(player: PlayerEntity, hand: Hand, hit: BlockRayTraceResult, mcrFactory: CommonMicroFactory, size: Int, material: MicroMaterial, mStack: MatrixStack, getter: IRenderTypeBuffer, partialTicks: Float): Boolean
 }
 
 object MicroMaterialRegistry {
@@ -72,22 +74,70 @@ object MicroMaterialRegistry {
 
     def getMaxCuttingStrength = maxCuttingStrength
 
-    def getMaterial(id: Int): MicroMaterial = MICRO_MATERIALS.getValue(id)
-
     def getMaterial(name: String): MicroMaterial = getMaterial(new ResourceLocation(name))
 
     def getMaterial(name: ResourceLocation): MicroMaterial = MICRO_MATERIALS.getValue(name)
 
-    def getMaterialID(name: String): Int = getMaterialID(new ResourceLocation(name))
+    /**
+     * Gets the [[MicroMaterial]] from the given ItemStack.
+     * If the stack is a [[ItemMicroBlock]] its material will be returned
+     * in all other cases attempts to lookup the material from the registry.
+     *
+     * @param item The [[ItemStack]] to get the material from.
+     * @return The material.
+     */
+    def microMaterial(item: ItemStack) =
+        if (item.getItem == itemMicroBlock) {
+            ItemMicroBlock.getMaterialFromStack(item)
+        } else {
+            findMaterial(item)
+        }
 
-    def getMaterialID(name: ResourceLocation): Int = MICRO_MATERIALS.getID(name)
+    /**
+     * Gets the MicroFactory ID from the given ItemStack.
+     * If the stack is a [[ItemMicroBlock]], its factory is returned
+     * in call other cases 0 is returned.
+     *
+     * @param item The [[ItemStack]] to get the micro factory from.
+     * @return The factory id or 0.
+     */
+    def microFactory(item: ItemStack) =
+        if (item.getItem == itemMicroBlock) {
+            ItemMicroBlock.getFactoryID(item)
+        } else {
+            0
+        }
 
-    def getMaterialName(id: Int): ResourceLocation = MICRO_MATERIALS.getValue(id) match {
-        case mat: MicroMaterial => mat.getRegistryName
-        case _ => null //TODO?
-    }
+    /**
+     * Gets the Micro size from the given ItemStack.
+     * If the stack is a [[ItemMicroBlock]], its size is returned
+     * in call other cases 0 is returned.
+     *
+     * @param item The [[ItemStack]] to get the micro size from.
+     * @return The size or 0.
+     */
+    def microSize(item: ItemStack) =
+        if (item.getItem == itemMicroBlock) {
+            ItemMicroBlock.getSize(item)
+        } else {
+            8
+        }
 
-    def renderHighlight(player: PlayerEntity, hand: Hand, hit: BlockRayTraceResult, mcrClass: CommonMicroFactory, size: Int, material: Int, mStack: MatrixStack, getter: IRenderTypeBuffer, partialTicks: Float): Boolean = {
+    /**
+     * Attempts to find a [[MicroMaterial]] for the given [[ItemStack]]
+     *
+     * @param item The [[ItemStack]] to find the material for.
+     * @return The material or null.
+     */
+    def findMaterial(item: ItemStack): MicroMaterial =
+        MicroMaterialRegistry.MICRO_MATERIALS.asScala.find { m =>
+            val mitem = m.getItem
+            item.getItem == mitem.getItem &&
+                ItemStack.areItemStackTagsEqual(item, mitem)
+        }.orNull
+
+
+    def renderHighlight(player: PlayerEntity, hand: Hand, hit: BlockRayTraceResult, mcrClass: CommonMicroFactory, size: Int, material: MicroMaterial, mStack: MatrixStack, getter: IRenderTypeBuffer, partialTicks: Float): Boolean = {
         val overridden = highlightRenderers.find(_.renderHighlight(player, hand, hit, mcrClass, size, material, mStack, getter, partialTicks))
         if (overridden.isDefined) {
             return true

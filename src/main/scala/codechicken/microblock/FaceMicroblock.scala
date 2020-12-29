@@ -51,15 +51,14 @@ object FaceMicroFactory extends CommonMicroFactory {
 }
 
 trait FaceMicroblockClient extends CommonMicroblockClient {
-    override def render(pos: Vector3, layer: RenderType, ccrs: CCRenderState) {
+    override def render(layer: RenderType, ccrs: CCRenderState) {
         if (layer == null) {
-            MicroblockRender.renderCuboid(pos, ccrs, getIMaterial, layer, getBounds, 0)
+            MicroblockRender.renderCuboid(ccrs, getMaterial, layer, getBounds, 0)
         } else if (isTransparent) {
-            MicroblockRender.renderCuboid(pos, ccrs, getIMaterial, layer, renderBounds, renderMask)
+            MicroblockRender.renderCuboid(ccrs, getMaterial, layer, renderBounds, renderMask)
         } else {
-            val mat = getIMaterial
-            MicroblockRender.renderCuboid(pos, ccrs, mat, layer, renderBounds, renderMask | 1 << getSlot)
-            MicroblockRender.renderCuboid(pos, ccrs, mat, layer, Cuboid6.full, ~(1 << getSlot))
+            MicroblockRender.renderCuboid(ccrs, getMaterial, layer, renderBounds, renderMask | 1 << getSlot)
+            MicroblockRender.renderCuboid(ccrs, getMaterial, layer, Cuboid6.full, ~(1 << getSlot))
         }
     }
 }
@@ -69,5 +68,5 @@ trait FaceMicroblock extends CommonMicroblock with TFacePart {
 
     override def getBounds = FaceMicroFactory.aBounds(shape)
 
-    override def solid(side: Int) = getIMaterial.isSolid
+    override def solid(side: Int) = getMaterial.isSolid
 }

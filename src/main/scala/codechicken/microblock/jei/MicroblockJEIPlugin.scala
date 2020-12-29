@@ -44,14 +44,13 @@ class MicroblockJEIPlugin extends IModPlugin {
 
     private def computeBlacklist: Seq[ItemStack] = {
         var blacklist = Seq[ItemStack]()
-        val stoneId = MicroRecipe.findMaterial(new ItemStack(Blocks.STONE))
-        val stoneMatName = if (stoneId != -1) MicroMaterialRegistry.getMaterialName(stoneId) else null
+        val stoneId = MicroMaterialRegistry.findMaterial(new ItemStack(Blocks.STONE))
         for (factoryID <- CommonMicroFactory.factories.indices) {
             val factory = CommonMicroFactory.factories(factoryID)
             if (factory != null) {
                 for (size <- Seq(1, 2, 4)) {
-                    blacklist ++= MicroMaterialRegistry.MICRO_MATERIALS.getKeys.asScala
-                        .filterNot(_ == stoneMatName)
+                    blacklist ++= MicroMaterialRegistry.MICRO_MATERIALS.getValues.asScala
+                        .filterNot(_ == stoneId)
                         .map(e => ItemMicroBlock.create(factoryID, size, e))
 
                 }

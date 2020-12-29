@@ -1,8 +1,5 @@
 package codechicken.multipart
 
-import java.lang.{Iterable => JIterable}
-import java.util.{Random, ArrayList => JArrayList, Collection => JCollection, LinkedList => JLinkedList, List => JList}
-
 import codechicken.lib.capability.CapabilityCache
 import codechicken.lib.data.{MCByteStream, MCDataInput, MCDataOutput}
 import codechicken.lib.raytracer.{MergedVoxelShapeHolder, VoxelShapeCache}
@@ -31,6 +28,8 @@ import net.minecraft.util.{ActionResultType, Direction, Hand}
 import net.minecraft.world.World
 import net.minecraftforge.common.capabilities.{Capability, ICapabilityProvider}
 
+import java.lang.{Iterable => JIterable}
+import java.util.{Random, ArrayList => JArrayList, Collection => JCollection, LinkedList => JLinkedList, List => JList}
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
@@ -613,12 +612,12 @@ class TileMultipart extends TileEntity(ModContent.tileMultipartType) with IChunk
 
 trait TileMultipartClient extends TileMultipart {
 
-    def renderStatic(pos: Vector3, layer: RenderType, ccrs: CCRenderState) = partList.count(_.renderStatic(pos, layer, ccrs)) > 0
+    def renderStatic(layer: RenderType, ccrs: CCRenderState) = partList.count(_.renderStatic(layer, ccrs)) > 0
 
-    def renderDamage(pos: Vector3, texture: TextureAtlasSprite, ccrs: CCRenderState) {
+    def renderDamage(texture: TextureAtlasSprite, ccrs: CCRenderState) {
         Minecraft.getInstance.objectMouseOver match {
             case hit: PartRayTraceResult if partList.isDefinedAt(hit.partIndex) =>
-                partList(hit.partIndex).renderBreaking(pos, texture, ccrs)
+                partList(hit.partIndex).renderBreaking(texture, ccrs)
             case _ =>
         }
     }
@@ -680,10 +679,12 @@ object TileMultipart {
      * Returns whether part can be added to the space at pos. Will do conversions as necessary.
      * This function is the recommended way to add parts to the world.
      */
-    def canPlacePart(useContext: ItemUseContext, part: TMultiPart): Boolean = {
+    def canPlacePart(useContext: ItemUseContext, part: TMultiPart, offset: Boolean = false): Boolean = {
         val world = useContext.getWorld
-        val pos = useContext.getPos.offset(useContext.getFace)
-
+        var pos = useContext.getPos
+        if (offset) {
+            pos = pos.offset(useContext.getFace)
+        }
         if (!checkNoEntityCollision(world, pos, part)) {
             return false
         }

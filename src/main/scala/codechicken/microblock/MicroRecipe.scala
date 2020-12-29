@@ -1,7 +1,8 @@
 package codechicken.microblock
 
+import codechicken.microblock.MicroMaterialRegistry._
 import codechicken.microblock.MicroRecipe._
-import codechicken.microblock.api.BlockMicroMaterial
+import codechicken.microblock.api.{BlockMicroMaterial, MicroMaterial}
 import codechicken.microblock.handler.MicroblockModContent
 import codechicken.microblock.handler.MicroblockModContent._
 import net.minecraft.block.Blocks
@@ -10,8 +11,6 @@ import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.SpecialRecipe
 import net.minecraft.util.ResourceLocation
 import net.minecraft.world.World
-
-import scala.jdk.CollectionConverters._
 
 class MicroRecipe(id: ResourceLocation) extends SpecialRecipe(id) {
 
@@ -60,7 +59,7 @@ class MicroRecipe(id: ResourceLocation) extends SpecialRecipe(id) {
         var count = 0
         var smallest = 0
         var mcrFactory = 0
-        var material = 0
+        var material: MicroMaterial = null
         for (i <- 0 until 9) {
             val item = icraft.getStackInSlot(i)
             if (!item.isEmpty) {
@@ -134,7 +133,7 @@ class MicroRecipe(id: ResourceLocation) extends SpecialRecipe(id) {
         val size = microSize(item)
         val material = microMaterial(item)
         val mcrClass = microFactory(item)
-        if (size == 1 || material < 0 || !canCut(saw, getStackRowCol(icraft, col, row), material)) {
+        if (size == 1 || material == null || !canCut(saw, getStackRowCol(icraft, col, row), material)) {
             return ItemStack.EMPTY
         }
 
@@ -189,49 +188,18 @@ class MicroRecipe(id: ResourceLocation) extends SpecialRecipe(id) {
 }
 
 object MicroRecipe {
-    def create(amount: Int, factoryID: Int, size: Int, material: Int): ItemStack = {
+    def create(amount: Int, factoryID: Int, size: Int, material: MicroMaterial): ItemStack = {
         if (size == 8) {
-            val item = MicroMaterialRegistry.getMaterial(material).getItem.copy
+            val item = material.getItem.copy
             item.setCount(amount)
             return item
         }
-        ItemMicroBlock.createStack(amount, factoryID, size, MicroMaterialRegistry.getMaterialName(material))
+        ItemMicroBlock.createStack(amount, factoryID, size, material)
     }
 
-    def microMaterial(item: ItemStack) =
-        if (item.getItem == itemMicroBlock) {
-            ItemMicroBlock.getMaterialID(item)
-        } else {
-            findMaterial(item)
-        }
-
-    def microFactory(item: ItemStack) =
-        if (item.getItem == itemMicroBlock) {
-            ItemMicroBlock.getFactoryID(item)
-        } else {
-            0
-        }
-
-    def microSize(item: ItemStack) =
-        if (item.getItem == itemMicroBlock) {
-            ItemMicroBlock.getSize(item)
-        } else {
-            8
-        }
-
-    def findMaterial(item: ItemStack): Int =
-        MicroMaterialRegistry.MICRO_MATERIALS.asScala.find { m =>
-            val mitem = m.getItem
-            item.getItem == mitem.getItem &&
-                ItemStack.areItemStackTagsEqual(item, mitem)
-        } match {
-            case None => -1
-            case Some(m) => MicroMaterialRegistry.getMaterialID(m.getRegistryName)
-        }
-
-    def canCut(saw: Saw, sawItem: ItemStack, material: Int): Boolean = {
+    def canCut(saw: Saw, sawItem: ItemStack, material: MicroMaterial): Boolean = {
         val sawStrength = saw.getCuttingStrength(sawItem)
-        val matStrength = MicroMaterialRegistry.getMaterial(material).getCutterStrength
+        val matStrength = material.getCutterStrength
         sawStrength >= matStrength || sawStrength == MicroMaterialRegistry.getMaxCuttingStrength
     }
 

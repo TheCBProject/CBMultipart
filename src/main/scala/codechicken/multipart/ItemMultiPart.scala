@@ -26,12 +26,12 @@ trait TItemMultiPart extends Item {
         val player = context.getPlayer
         var pos = context.getPos
         val side = context.getFace.getIndex
-        val vhit = new Vector3(context.getHitVec)
+        val vhit = new Vector3(context.getHitVec).subtract(pos)
         val d = getHitDepth(vhit, side)
 
-        def place(): ActionResultType = {
+        def place(offset: Boolean): ActionResultType = {
             val part = newPart(stack, player, world, pos, side, vhit)
-            if (part == null || !TileMultipart.canPlacePart(context, part)) return ActionResultType.FAIL
+            if (part == null || !TileMultipart.canPlacePart(context, part, offset)) return ActionResultType.FAIL
 
             if (!world.isRemote) {
                 TileMultipart.addPart(world, pos, part)
@@ -45,10 +45,10 @@ trait TItemMultiPart extends Item {
             ActionResultType.SUCCESS
         }
 
-        if (d < 1 && place() == ActionResultType.SUCCESS) return ActionResultType.SUCCESS
+        if (d < 1 && place(false) == ActionResultType.SUCCESS) return ActionResultType.SUCCESS
 
         pos = pos.offset(context.getFace)
-        place()
+        place(true)
     }
 
     /**

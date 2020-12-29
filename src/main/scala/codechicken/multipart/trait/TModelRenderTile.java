@@ -58,8 +58,8 @@ class TModelRenderTile extends TileMultipart implements TileMultipartClient {
     }
 
     @Override
-    public boolean renderStatic(Vector3 pos, RenderType layer, CCRenderState ccrs) {
-        boolean ret = TileMultipartClient.super.renderStatic(pos, layer, ccrs);
+    public boolean renderStatic(RenderType layer, CCRenderState ccrs) {
+        boolean ret = TileMultipartClient.super.renderStatic(layer, ccrs);
         BlockRendererDispatcher rendererDispatcher = Minecraft.getInstance().getBlockRendererDispatcher();
 
         ILightReader world = ccrs.lightMatrix.access;

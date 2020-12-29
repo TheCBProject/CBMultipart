@@ -32,7 +32,7 @@ object DataGenerators {
 class ItemModels(gen: DataGenerator, helper: ExistingFileHelper) extends ItemModelProvider(gen, modId, helper) {
 
     override protected def registerModels(): Unit = {
-        noTexture(itemMicroBlock)
+        generated(itemMicroBlock).texture(null)
         generated(itemStoneRod)
         generated(itemStoneSaw)
         generated(itemIronSaw)

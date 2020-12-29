@@ -62,11 +62,11 @@ trait TIconHitEffectsPart extends TMultiPart {
 
     @OnlyIn(Dist.CLIENT)
     override def addHitEffects(hit: PartRayTraceResult, manager: ParticleManager) {
-        //IconHitEffects.addHitEffects(this, hit, manager)
+        IconHitEffects.addHitEffects(this, hit, manager)
     }
 
     @OnlyIn(Dist.CLIENT)
     override def addDestroyEffects(hit: PartRayTraceResult, manager: ParticleManager) {
-        //IconHitEffects.addDestroyEffects(this, manager)
+        IconHitEffects.addDestroyEffects(this, manager)
     }
 }

@@ -1,9 +1,11 @@
 package codechicken.multipart.trait.extern;
 
+import codechicken.multipart.TileMultipart;
+import codechicken.multipart.api.part.redstone.IRedstonePart;
 import codechicken.multipart.api.tile.IRedstoneConnector;
 
 /**
- * Internal interface for TileMultipart instances hosting IRedstonePart
+ * Internal interface for {@link TileMultipart} instances hosting {@link IRedstonePart}s
  */
 public interface IRedstoneTile extends IRedstoneConnector {
 

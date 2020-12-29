@@ -1,6 +1,7 @@
 package codechicken.microblock
 
 import codechicken.lib.vec.{Rotation, Vector3}
+import codechicken.microblock.api.MicroMaterial
 import codechicken.multipart.TileMultipart
 import codechicken.multipart.util.{ControlKeyModifier, MultiPartHelper, PartRayTraceResult}
 import net.minecraft.entity.player.PlayerEntity
@@ -52,11 +53,11 @@ abstract class PlacementProperties {
 }
 
 object MicroblockPlacement {
-    def apply(player: PlayerEntity, hand: Hand, hit: BlockRayTraceResult, size: Int, material: Int, checkMaterial: Boolean, pp: PlacementProperties): ExecutablePlacement =
+    def apply(player: PlayerEntity, hand: Hand, hit: BlockRayTraceResult, size: Int, material: MicroMaterial, checkMaterial: Boolean, pp: PlacementProperties): ExecutablePlacement =
         new MicroblockPlacement(player, hand, hit, size, material, checkMaterial, pp).apply()
 }
 
-class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: BlockRayTraceResult, val size: Int, val material: Int, val checkMaterial: Boolean, val pp: PlacementProperties) {
+class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: BlockRayTraceResult, val size: Int, val material: MicroMaterial, val checkMaterial: Boolean, val pp: PlacementProperties) {
     val world = player.world
     val mcrFactory = pp.microFactory
     val pos = hit.getPos
@@ -142,7 +143,7 @@ class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: Blo
 
     def externalPlacement(npart: Microblock): ExecutablePlacement = {
         val pos = this.pos.offset(Direction.BY_INDEX.apply(side))
-        if (TileMultipart.canPlacePart(new ItemUseContext(player, hand, hit), npart)) {
+        if (TileMultipart.canPlacePart(new ItemUseContext(player, hand, hit), npart, true)) {
             return new AdditionPlacement(pos, npart)
         }
         null
@@ -151,7 +152,7 @@ class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: Blo
     def getHitDepth(vhit: Vector3, side: Int): Double =
         vhit.copy.scalarProject(Rotation.axes(side)) + (side % 2 ^ 1)
 
-    def create(size: Int, slot: Int, material: Int) = {
+    def create(size: Int, slot: Int, material: MicroMaterial) = {
         val part = mcrFactory.create(world.isRemote, material)
         part.setShape(size, slot)
         part

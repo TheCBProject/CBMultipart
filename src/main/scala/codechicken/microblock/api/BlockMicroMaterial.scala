@@ -69,7 +69,7 @@ class BlockMicroMaterial(val state: BlockState) extends MicroMaterial {
         }
     }
 
-    override def getMicroRenderOps(pos: Vector3, side: Int, layer: RenderType, bounds: Cuboid6): Seq[Seq[IVertexOperation]] = {
+    override def getMicroRenderOps(side: Int, layer: RenderType, bounds: Cuboid6): Seq[Seq[IVertexOperation]] = {
         Seq(MaterialRenderHelper.instance.start(layer, icont).blockColour(getColour(layer)).lighting().result())
     }
 
