@@ -1,5 +1,5 @@
 modLoader="scorge"
-loaderVersion="[1,)"
+loaderVersion="[3.1,)"
 issueTrackerURL="https://github.com/TheCBProject/ForgeMultipart"
 #CBMultipart
 [[mods]]
