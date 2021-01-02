@@ -1,8 +1,8 @@
 package codechicken.multipart.minecraft;
 
 import codechicken.lib.vec.Vector3;
-import codechicken.multipart.TileMultipart;
 import codechicken.multipart.api.part.TFacePart;
+import codechicken.multipart.block.TileMultiPart;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -38,7 +38,7 @@ public abstract class McSidedStatePart extends McStatePart implements TFacePart 
     }
 
     public void drop() {
-        TileMultipart.dropItem(getDropStack(), world(), Vector3.fromTileCenter(tile()));
+        TileMultiPart.dropItem(getDropStack(), world(), Vector3.fromTileCenter(tile()));
         tile().remPart(this);
     }
 

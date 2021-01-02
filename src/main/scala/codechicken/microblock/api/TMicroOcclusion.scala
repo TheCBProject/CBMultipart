@@ -45,7 +45,7 @@ object MicroOcclusion {
         val tile = part.tile
         for (i <- 0 until m)
             if (i != p.getSlot) {
-                tile.partMap(i) match {
+                tile.getSlottedPart(i) match {
                     case other: JMicroShrinkRender =>
                         renderMask |= shrinkFrom(p, other, renderBounds)
                     case _ =>

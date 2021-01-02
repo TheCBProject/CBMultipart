@@ -8,7 +8,7 @@ import net.minecraftforge.fml.network.event.EventNetworkChannel;
 /**
  * Created by covers1624 on 4/30/20.
  */
-public class MultipartNetwork {
+public class MultiPartNetwork {
 
     public static final ResourceLocation NET_CHANNEL = new ResourceLocation("cmp:n");
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
@@ -28,8 +28,8 @@ public class MultipartNetwork {
     public static void init() {
         LOCK.lock();
         netChannel = PacketCustomChannelBuilder.named(NET_CHANNEL)//
-                .assignServerHandler(() -> MultipartSPH::new)//
-                .assignClientHandler(() -> MultipartCPH::new)//
+                .assignServerHandler(() -> MultiPartSPH::new)//
+                .assignClientHandler(() -> MultiPartCPH::new)//
                 .build();
     }
 

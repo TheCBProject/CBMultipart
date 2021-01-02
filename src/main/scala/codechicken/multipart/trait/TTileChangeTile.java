@@ -2,10 +2,10 @@ package codechicken.multipart.trait;
 
 import codechicken.lib.math.MathHelper;
 import codechicken.mixin.forge.TraitSide;
-import codechicken.multipart.TileMultipart;
 import codechicken.multipart.api.annotation.MultiPartTrait;
 import codechicken.multipart.api.part.INeighborTileChangePart;
 import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.block.TileMultiPart;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
@@ -15,12 +15,12 @@ import java.util.List;
  * Created by covers1624 on 23/9/20.
  */
 @MultiPartTrait (value = INeighborTileChangePart.class, side = TraitSide.SERVER)
-class TTileChangeTile extends TileMultipart {
+class TTileChangeTile extends TileMultiPart {
 
     private boolean weakTileChanges = false;
 
     @Override
-    public void copyFrom(TileMultipart that) {
+    public void copyFrom(TileMultiPart that) {
         super.copyFrom(that);
         if (that instanceof TTileChangeTile) {
             weakTileChanges = ((TTileChangeTile) that).weakTileChanges;
@@ -38,7 +38,7 @@ class TTileChangeTile extends TileMultipart {
     @Override
     public void partRemoved(TMultiPart part, int p) {
         super.partRemoved(part, p);
-        weakTileChanges = jPartList().stream().anyMatch(e -> e instanceof INeighborTileChangePart && ((INeighborTileChangePart) e).weakTileChanges());
+        weakTileChanges = getPartList().stream().anyMatch(e -> e instanceof INeighborTileChangePart && ((INeighborTileChangePart) e).weakTileChanges());
     }
 
     @Override
@@ -53,7 +53,7 @@ class TTileChangeTile extends TileMultipart {
             return;
         }
         boolean weak = diff == 2;
-        List<TMultiPart> jPartList = jPartList();
+        List<TMultiPart> jPartList = getPartList();
         for (int i = 0, jPartListSize = jPartList.size(); i < jPartListSize; i++) {
             TMultiPart part = jPartList.get(i);
             if (part instanceof INeighborTileChangePart) {

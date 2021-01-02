@@ -3,13 +3,12 @@ package codechicken.multipart.api.part
 import java.lang.{Iterable => JIterable}
 import java.util.Collections
 import java.util.function.Consumer
-
 import codechicken.lib.data.{MCDataInput, MCDataOutput}
 import codechicken.lib.render.CCRenderState
 import codechicken.lib.vec.{Cuboid6, Vector3}
-import codechicken.multipart.TileMultipart
 import codechicken.multipart.api.MultiPartType
-import codechicken.multipart.network.MultipartSPH
+import codechicken.multipart.block.TileMultiPart
+import codechicken.multipart.network.MultiPartSPH
 import codechicken.multipart.util.{PartRayTraceResult, TickScheduler}
 import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.block.SoundType
@@ -19,19 +18,20 @@ import net.minecraft.client.renderer.tileentity.TileEntityRenderer
 import net.minecraft.client.renderer.{ActiveRenderInfo, IRenderTypeBuffer, LightTexture, RenderType}
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.item.ItemStack
+import net.minecraft.item.{ItemStack, ItemUseContext}
 import net.minecraft.nbt.CompoundNBT
 import net.minecraft.tileentity.TileEntityType
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.shapes.{VoxelShape, VoxelShapes}
 import net.minecraft.util.{ActionResultType, Hand}
+import net.minecraft.world.Explosion
 import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 
 abstract class TMultiPart {
     /**
      * Reference to the container TileMultipart instance
      */
-    var tile: TileMultipart = _
+    var tile: TileMultiPart = _
 
     /**
      * Getter for tile.worldObj
@@ -48,7 +48,7 @@ abstract class TMultiPart {
     /**
      * Called when the container tile instance is changed to update reference
      */
-    def bind(t: TileMultipart) {
+    def bind(t: TileMultiPart) {
         tile = t
     }
 
@@ -87,7 +87,7 @@ abstract class TMultiPart {
      * @param func The function to evaluate to write packet data.
      */
     def sendUpdate(func: Consumer[MCDataOutput]) {
-        MultipartSPH.dispatchPartUpdate(this, func)
+        MultiPartSPH.dispatchPartUpdate(this, func)
     }
 
     /**
@@ -141,17 +141,12 @@ abstract class TMultiPart {
     def pickItem(hit: PartRayTraceResult): ItemStack = ItemStack.EMPTY
 
     /**
-     * If any part returns true for this, torches can be placed. Vanilla hacks...
-     */
-    def canPlaceTorchOnTop = false
-
-    /**
      * Explosion resistance of the host tile is the maximum explosion resistance of the contained parts
      *
      * @param entity The entity responsible for this explosion
      * @return The resistance of this part the the explosion
      */
-    def getExplosionResistance(entity: Entity) = 0F
+    def getExplosionResistance(entity: Entity, explosion: Explosion) = 0F
 
     /**
      * The light level emitted by this part
@@ -175,10 +170,10 @@ abstract class TMultiPart {
      * Weird place for this, but handles conversion placement
      * and direct placement.
      *
-     * @param stack The stack used to place the part.
+     * @param context The ItemUseContext used when placing the part.
      * @return The sound
      */
-    def getPlacementSound(stack: ItemStack, player: PlayerEntity): SoundType = null
+    def getPlacementSound(context: ItemUseContext): SoundType = null
 
     /**
      * Called when this part is added to the block space

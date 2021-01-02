@@ -3,13 +3,13 @@ package codechicken.multipart.handler;
 import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.raytracer.RayTracer;
 import codechicken.lib.util.CrashLock;
-import codechicken.multipart.TileMultipart;
 import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.block.TileMultiPart;
 import codechicken.multipart.init.MultiPartRegistries;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
@@ -21,8 +21,8 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 
-import static codechicken.multipart.network.MultipartNetwork.NET_CHANNEL;
-import static codechicken.multipart.network.MultipartNetwork.S_MULTIPART_PLACEMENT;
+import static codechicken.multipart.network.MultiPartNetwork.NET_CHANNEL;
+import static codechicken.multipart.network.MultiPartNetwork.S_MULTIPART_PLACEMENT;
 
 /**
  * Created by covers1624 on 1/9/20.
@@ -52,6 +52,7 @@ public class PlacementConversionHandler {
         }
     }
 
+    //TODO, unify with ItemMultiPart
     public static boolean place(PlayerEntity player, Hand hand, World world) {
         ItemStack held = player.getHeldItem(hand);
         if (held.isEmpty()) {
@@ -63,7 +64,7 @@ public class PlacementConversionHandler {
         }
 
         BlockPos pos = hit.getPos().offset(hit.getFace());
-        BlockItemUseContext ctx = new BlockItemUseContext(world, player, hand, held, hit);
+        ItemUseContext ctx = new ItemUseContext(player, hand, hit);
         TMultiPart part = MultiPartRegistries.convertItem(ctx);
 
         if (part == null) {
@@ -71,8 +72,8 @@ public class PlacementConversionHandler {
         }
 
         if (!world.isRemote) {
-            TileMultipart.addPart(world, pos, part);
-            SoundType sound = part.getPlacementSound(held, player);
+            TileMultiPart.addPart(world, pos, part);
+            SoundType sound = part.getPlacementSound(ctx);
             if (sound != null) {
                 world.playSound(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, sound.getPlaceSound(), SoundCategory.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
             }

@@ -2,9 +2,9 @@ package codechicken.multipart.util;
 
 import codechicken.lib.data.MCDataByteBuf;
 import codechicken.lib.util.CrashLock;
-import codechicken.multipart.TileMultipart;
+import codechicken.multipart.block.TileMultiPart;
 import codechicken.multipart.init.ModContent;
-import codechicken.multipart.network.MultipartSPH;
+import codechicken.multipart.network.MultiPartSPH;
 import io.netty.buffer.Unpooled;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
@@ -50,7 +50,7 @@ public class MultiPartLoadHandler {
         while (iterator.hasNext()) {
             Map.Entry<BlockPos, TileEntity> entry = iterator.next();
             if (entry.getValue() instanceof TileNBTContainer) {
-                TileEntity newTile = TileMultipart.createFromNBT(((TileNBTContainer) entry.getValue()).tag);
+                TileEntity newTile = TileMultiPart.fromNBT(((TileNBTContainer) entry.getValue()).tag);
                 if (newTile != null) {
                     newTile.validate();
                     entry.setValue(newTile);
@@ -85,7 +85,7 @@ public class MultiPartLoadHandler {
         @Override
         public void handleUpdateTag(CompoundNBT tag) {
             byte[] data = tag.getByteArray("data");
-            TileMultipart.handleDescPacket(world, pos, new MCDataByteBuf(Unpooled.wrappedBuffer(data)));
+            TileMultiPart.handleDescPacket(world, pos, new MCDataByteBuf(Unpooled.wrappedBuffer(data)));
         }
 
         @Override
@@ -108,12 +108,12 @@ public class MultiPartLoadHandler {
         public void tick() {
             if (!failed && !loaded) {
                 if (tag != null) {
-                    TileMultipart newTile = TileMultipart.createFromNBT(tag);
+                    TileMultiPart newTile = TileMultiPart.fromNBT(tag);
                     if (newTile != null) {
                         newTile.validate();
                         world.setTileEntity(pos, newTile);
                         newTile.notifyTileChange();
-                        MultipartSPH.sendDescUpdate(newTile);
+                        MultiPartSPH.sendDescUpdate(newTile);
                     } else {
                         world.removeBlock(pos, false);
                     }

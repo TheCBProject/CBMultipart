@@ -11,11 +11,9 @@ import codechicken.mixin.scala.MixinScalaLanguageSupport;
 import codechicken.mixin.util.JavaTraitGenerator;
 import codechicken.mixin.util.SimpleDebugger;
 import codechicken.mixin.util.Utils;
-import codechicken.multipart.TileMultipart;
-import codechicken.multipart.TileMultipartClient;
 import codechicken.multipart.api.annotation.MultiPartTrait;
 import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.trait.TIInventoryTile;
+import codechicken.multipart.block.TileMultiPart;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
@@ -45,7 +43,7 @@ import static org.objectweb.asm.Opcodes.*;
  * TODO allow parallel registration of traits. Requires mixin compiler changes. (parallel stream processing of annotations)
  * Created by covers1624 on 4/5/20.
  */
-public class MultiPartGenerator extends SidedGenerator<TileMultipart, TMultiPart> {
+public class MultiPartGenerator extends SidedGenerator<TileMultiPart, TMultiPart> {
 
     private static final Logger logger = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
@@ -56,10 +54,10 @@ public class MultiPartGenerator extends SidedGenerator<TileMultipart, TMultiPart
 
     private final Map<String, TraitKey> passthroughTraits = new HashMap<>();
 
-    private final MixinFactory.TraitKey clientTrait = registerTrait(asmName(TileMultipartClient.class));
+    private final MixinFactory.TraitKey clientTrait = registerTrait(asmName("codechicken.multipart.trait.TileMultipartClient"));
 
     private MultiPartGenerator() {
-        super(MixinCompiler.create(new ForgeMixinBackend(), makeDebugger(), getMixinSupports()), TileMultipart.class, "cmp");
+        super(MixinCompiler.create(new ForgeMixinBackend(), makeDebugger(), getMixinSupports()), TileMultiPart.class, "cmp");
         Optional<MixinLanguageSupport.JavaMixinLanguageSupport> javaSupport = mixinCompiler.findLanguageSupport("java");
         javaSupport//
                 .orElseThrow(() -> new RuntimeException("Unable to find JavaMixinLanguageSupport instance..."))//
@@ -88,7 +86,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultipart, TMultiPart
      * <p>
      * This allows compatibility with APIs that expect interfaces on the tile entity.
      * If you require more than one part in the space implementing an interface, i.e the old IInventory system.
-     * You will need to write your own trait implementation manually. Refer to {@link TIInventoryTile}.
+     * You will need to write your own trait implementation manually. Refer to {@link codechicken.multipart.trait.TInventoryTile}.
      *
      * @param iFace  The Interface to implement.
      * @param client If this interface should be used client side.
@@ -124,10 +122,10 @@ public class MultiPartGenerator extends SidedGenerator<TileMultipart, TMultiPart
         ).collect(ImmutableSet.toImmutableSet());
     }
 
-    public TileMultipart generateCompositeTile(TileEntity tile, Collection<TMultiPart> parts, boolean client) {
+    public TileMultiPart generateCompositeTile(TileEntity tile, Collection<TMultiPart> parts, boolean client) {
         ImmutableSet<MixinFactory.TraitKey> traits = getTraits(parts, client);
-        if (tile instanceof TileMultipart && traits.equals(getTraitsForClass(tile.getClass()))) {
-            return (TileMultipart) tile;
+        if (tile instanceof TileMultiPart && traits.equals(getTraitsForClass(tile.getClass()))) {
+            return (TileMultiPart) tile;
         }
         return construct(traits);
     }
@@ -157,7 +155,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultipart, TMultiPart
 
         ClassWriter cw = new CC_ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 
-        cw.visit(V1_8, ACC_SUPER, tName, null, "codechicken/multipart/TileMultipart", new String[] { iName });
+        cw.visit(V1_8, ACC_SUPER, tName, null, "codechicken/multipart/block/TileMultiPart", new String[] { iName });
 
         {
             FieldVisitor fv = cw.visitField(ACC_PRIVATE, vName, iDesc, null, null);
@@ -167,7 +165,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultipart, TMultiPart
             MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/TileMultipart", "<init>", "()V", false);
+            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/block/TileMultiPart", "<init>", "()V", false);
             mv.visitInsn(RETURN);
             mv.visitMaxs(-1, -1);
         }
@@ -177,7 +175,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultipart, TMultiPart
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 1);
-            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/TileMultipart", "bindPart", "(Lcodechicken/multipart/api/part/TMultiPart;)V", false);
+            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/block/TileMultiPart", "bindPart", "(Lcodechicken/multipart/api/part/TMultiPart;)V", false);
             mv.visitVarInsn(ALOAD, 1);
             mv.visitTypeInsn(INSTANCEOF, iName);
             Label l2 = new Label();
@@ -198,7 +196,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultipart, TMultiPart
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 1);
             mv.visitVarInsn(ILOAD, 2);
-            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/TileMultipart", "partRemoved", "(Lcodechicken/multipart/api/part/TMultiPart;I)V", false);
+            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/block/TileMultiPart", "partRemoved", "(Lcodechicken/multipart/api/part/TMultiPart;I)V", false);
             mv.visitVarInsn(ALOAD, 1);
             mv.visitVarInsn(ALOAD, 0);
             mv.visitFieldInsn(GETFIELD, tName, vName, iDesc);
@@ -227,7 +225,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultipart, TMultiPart
             mv.visitLabel(l1);
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 1);
-            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/TileMultipart", "canAddPart", "(Lcodechicken/multipart/api/part/TMultiPart;)Z", false);
+            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/block/TileMultiPart", "canAddPart", "(Lcodechicken/multipart/api/part/TMultiPart;)Z", false);
             mv.visitInsn(IRETURN);
             mv.visitMaxs(-1, -1);
             mv.visitEnd();
@@ -282,13 +280,13 @@ public class MultiPartGenerator extends SidedGenerator<TileMultipart, TMultiPart
 
         @Override
         protected void beforeTransform() {
-            ObfMapping m_copyFrom = new ObfMapping(cNode.name, "copyFrom", "(Lcodechicken/multipart/TileMultipart;)V");
+            ObfMapping m_copyFrom = new ObfMapping(cNode.name, "copyFrom", "(Lcodechicken/multipart/block/TileMultiPart;)V");
             if (!instanceFields.isEmpty() && (ASMHelper.findMethod(m_copyFrom, cNode) == null)) {
                 MethodVisitor mv = m_copyFrom.visitMethod(cNode, ACC_PUBLIC, null);
                 mv.visitCode();
                 mv.visitVarInsn(ALOAD, 0);
                 mv.visitVarInsn(ALOAD, 1);
-                mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/TileMultipart", m_copyFrom.s_name, m_copyFrom.s_desc, false);
+                mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/block/TileMultiPart", m_copyFrom.s_name, m_copyFrom.s_desc, false);
 
                 mv.visitVarInsn(ALOAD, 1);
                 mv.visitTypeInsn(INSTANCEOF, cNode.name);

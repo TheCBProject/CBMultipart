@@ -2,8 +2,9 @@ package codechicken.multipart.minecraft;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
+import codechicken.lib.render.CCRenderState;
+import codechicken.multipart.api.NormalOcclusionTest;
 import codechicken.multipart.api.part.IModelRenderPart;
-import codechicken.multipart.api.part.NormalOcclusionTest;
 import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.api.part.TNormalOcclusionPart;
 import codechicken.multipart.util.PartRayTraceResult;
@@ -14,6 +15,7 @@ import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
@@ -127,12 +129,18 @@ public abstract class McStatePart extends TMultiPart implements TNormalOcclusion
 
     @Override
     public boolean occlusionTest(TMultiPart npart) {
-        return NormalOcclusionTest.apply(this, npart);
+        return NormalOcclusionTest.test(this, npart);
     }
 
     @Override
-    public SoundType getPlacementSound(ItemStack stack, PlayerEntity player) {
-        return state.getSoundType(world(), pos(), player);
+    public SoundType getPlacementSound(ItemUseContext context) {
+        return state.getSoundType(world(), pos(), context.getPlayer());
+    }
+
+    //TODO, Temporary.
+    @Override
+    public boolean renderStatic(RenderType layer, CCRenderState ccrs) {
+        return IModelRenderPart.super.renderStatic(layer, ccrs);
     }
 
     //    @Override

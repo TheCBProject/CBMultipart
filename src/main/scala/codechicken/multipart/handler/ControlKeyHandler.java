@@ -2,7 +2,7 @@ package codechicken.multipart.handler;
 
 import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.util.CrashLock;
-import codechicken.multipart.network.MultipartNetwork;
+import codechicken.multipart.network.MultiPartNetwork;
 import codechicken.multipart.util.ControlKeyModifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
@@ -33,7 +33,7 @@ public class ControlKeyHandler {
             lastPressed = pressed;
             if (Minecraft.getInstance().getConnection() != null) {
                 ControlKeyModifier.setIsControlDown(Minecraft.getInstance().player, pressed);
-                PacketCustom packet = new PacketCustom(MultipartNetwork.NET_CHANNEL, MultipartNetwork.S_CONTROL_KEY_MODIFIER);
+                PacketCustom packet = new PacketCustom(MultiPartNetwork.NET_CHANNEL, MultiPartNetwork.S_CONTROL_KEY_MODIFIER);
                 packet.writeBoolean(pressed);
                 packet.sendToServer();
             }

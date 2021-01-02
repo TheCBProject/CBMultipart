@@ -67,6 +67,4 @@ trait FaceMicroblock extends CommonMicroblock with TFacePart {
     override def microFactory = FaceMicroFactory
 
     override def getBounds = FaceMicroFactory.aBounds(shape)
-
-    override def solid(side: Int) = getMaterial.isSolid
 }

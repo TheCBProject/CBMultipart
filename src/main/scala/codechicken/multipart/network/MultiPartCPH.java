@@ -3,9 +3,9 @@ package codechicken.multipart.network;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
+import codechicken.multipart.block.TileMultiPart;
 import codechicken.multipart.util.MultiPartHelper;
 import codechicken.multipart.init.MultiPartRegistries;
-import codechicken.multipart.TileMultipart;
 import codechicken.multipart.api.part.TMultiPart;
 import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.client.Minecraft;
@@ -15,19 +15,19 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.MinecraftForge;
 
-import static codechicken.multipart.network.MultipartNetwork.*;
+import static codechicken.multipart.network.MultiPartNetwork.*;
 
 /**
  * Created by covers1624 on 4/30/20.
  */
-public class MultipartCPH implements ICustomPacketHandler.IClientPacketHandler {
+public class MultiPartCPH implements ICustomPacketHandler.IClientPacketHandler {
 
     @VisibleForTesting
     static BlockPos lastPos = new BlockPos(0, 0, 0);
 
     public static void init() {
-        MinecraftForge.EVENT_BUS.addListener(MultipartCPH::onDisconnectFromServer);
-        MinecraftForge.EVENT_BUS.addListener(MultipartCPH::onConnectToServer);
+        MinecraftForge.EVENT_BUS.addListener(MultiPartCPH::onDisconnectFromServer);
+        MinecraftForge.EVENT_BUS.addListener(MultiPartCPH::onConnectToServer);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class MultipartCPH implements ICustomPacketHandler.IClientPacketHandler {
         int num = packet.readVarInt();
         for (int i = 0; i < num; i++) {
             BlockPos pos = readUpdateHeader(packet.readByte() & 0x03, packet);
-            TileMultipart.handleDescPacket(mc.world, pos, packet);
+            TileMultiPart.handleDescPacket(mc.world, pos, packet);
         }
     }
 
@@ -69,9 +69,9 @@ public class MultipartCPH implements ICustomPacketHandler.IClientPacketHandler {
         byte partByte = packet.readByte();
         BlockPos pos = readUpdateHeader(partByte & 0x3, packet);
         TileEntity tileEntity = mc.world.getTileEntity(pos);
-        if (tileEntity instanceof TileMultipart) {
-            TileMultipart tile = (TileMultipart) tileEntity;
-            tile.remPart_impl(tile.jPartList().get(partByte >> 2));
+        if (tileEntity instanceof TileMultiPart) {
+            TileMultiPart tile = (TileMultiPart) tileEntity;
+            tile.remPart_impl(tile.getPartList().get(partByte >> 2));
         }
     }
 
@@ -80,9 +80,9 @@ public class MultipartCPH implements ICustomPacketHandler.IClientPacketHandler {
         int partIndex = partByte >> 2;
         BlockPos pos = readUpdateHeader(partByte & 0x03, packet);
         TileEntity tileEntity = mc.world.getTileEntity(pos);
-        if (tileEntity instanceof TileMultipart) {
-            TileMultipart tile = (TileMultipart) tileEntity;
-            TMultiPart part = tile.jPartList().get(partIndex);
+        if (tileEntity instanceof TileMultiPart) {
+            TileMultiPart tile = (TileMultiPart) tileEntity;
+            TMultiPart part = tile.getPartList().get(partIndex);
             if (part != null) {
                 part.readUpdate(packet);
             }

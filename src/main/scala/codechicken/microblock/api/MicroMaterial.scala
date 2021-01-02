@@ -2,14 +2,16 @@ package codechicken.microblock.api
 
 import codechicken.lib.render.pipeline.IVertexOperation
 import codechicken.lib.vec.{Cuboid6, Vector3}
-import codechicken.microblock.MicroBlockGenerator
+import codechicken.microblock.{MicroBlockGenerator, Microblock}
 import net.minecraft.block.SoundType
 import net.minecraft.client.renderer.RenderType
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.text.ITextComponent
+import net.minecraft.world.{Explosion, IWorldReader}
 import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.InterModComms
@@ -101,12 +103,7 @@ abstract class MicroMaterial extends ForgeRegistryEntry[MicroMaterial] {
     def getSound: SoundType
 
     /**
-     * Return true if this material is solid and opaque (can run wires on etc)
-     */
-    def isSolid = !isTransparent
-
-    /**
      * Get the explosion resistance of this part to an explosion caused by entity
      */
-    def explosionResistance(entity: Entity): Float
+    def explosionResistance(world:IWorldReader, pos:BlockPos, entity: Entity, explosion: Explosion): Float
 }

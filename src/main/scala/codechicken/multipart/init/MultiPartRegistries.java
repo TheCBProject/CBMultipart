@@ -9,6 +9,7 @@ import codechicken.multipart.api.PartConverter;
 import codechicken.multipart.api.part.TMultiPart;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
@@ -158,7 +159,7 @@ public class MultiPartRegistries {
                 .orElse(Collections.emptyList());
     }
 
-    public static TMultiPart convertItem(BlockItemUseContext context) {
+    public static TMultiPart convertItem(ItemUseContext context) {
         return PART_CONVERTERS.getValues().stream()//
                 .map(c -> c.convert(context))//
                 .filter(e -> e.getType() == ActionResultType.SUCCESS)//

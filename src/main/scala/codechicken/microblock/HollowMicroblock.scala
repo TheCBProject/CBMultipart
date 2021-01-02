@@ -164,7 +164,7 @@ trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclu
 
     def getHollowSize = tile match {
         case null => 8
-        case _ => tile.partMap(6) match {
+        case _ => tile.getSlottedPart(6) match {
             case part: ISidedHollowConnect => part.getHollowSize(getSlot)
             case _ => 8
         }

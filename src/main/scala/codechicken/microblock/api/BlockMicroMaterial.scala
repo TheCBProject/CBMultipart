@@ -1,14 +1,13 @@
 package codechicken.microblock.api
 
 import java.util.Random
-
 import codechicken.lib.render.CCRenderState
 import codechicken.lib.render.pipeline.IVertexOperation
 import codechicken.lib.texture.TextureUtils
 import codechicken.lib.util.SneakyUtils.unsafeCast
 import codechicken.lib.vec.uv.{IconTransformation, MultiIconTransformation}
 import codechicken.lib.vec.{Cuboid6, Vector3}
-import codechicken.microblock.{MaterialRenderHelper, logger}
+import codechicken.microblock.{MaterialRenderHelper, Microblock, logger}
 import net.minecraft.block.{Block, BlockState}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.{RenderType, RenderTypeLookup}
@@ -19,6 +18,7 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.{Item, ItemStack}
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.{Direction, ResourceLocation}
+import net.minecraft.world.{Explosion, IWorldReader}
 import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 
 import scala.collection.mutable.ListBuffer
@@ -107,7 +107,7 @@ class BlockMicroMaterial(val state: BlockState) extends MicroMaterial {
 
     def getSound = state.getBlock.getSoundType(state)
 
-    def explosionResistance(entity: Entity): Float = 2 //state.getBlock.getExplosionResistance(entity)
+    def explosionResistance(world:IWorldReader, pos:BlockPos, exploder: Entity, explosion: Explosion) = state.getBlock.getExplosionResistance(state, world, pos, exploder, explosion)
 }
 
 /**

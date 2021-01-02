@@ -17,7 +17,7 @@ public class UpdatePacketTests {
 
     @BeforeEach
     public void setup() {
-        MultipartCPH.lastPos = new BlockPos(0, 0, 0);
+        MultiPartCPH.lastPos = new BlockPos(0, 0, 0);
     }
 
     @Test
@@ -26,9 +26,9 @@ public class UpdatePacketTests {
         MCDataByteBuf packet = new MCDataByteBuf(buf);
         BlockPos last = new BlockPos(0, 0, 0);
         BlockPos curr = new BlockPos(3333, 56, -2348);
-        MultipartSPH.writeHeader(packet, 44, last, curr);
+        MultiPartSPH.writeHeader(packet, 44, last, curr);
 
-        BlockPos readPos = MultipartCPH.readUpdateHeader(buf.readByte() & 0x03, packet);
+        BlockPos readPos = MultiPartCPH.readUpdateHeader(buf.readByte() & 0x03, packet);
         assertEquals(curr, readPos);
     }
 
@@ -38,9 +38,9 @@ public class UpdatePacketTests {
         MCDataByteBuf packet = new MCDataByteBuf(buf);
         BlockPos last = new BlockPos(0, 0, 0);
         BlockPos curr = new BlockPos(3333, 56, -2348);
-        MultipartSPH.writeHeader(packet, 44, last, curr);
+        MultiPartSPH.writeHeader(packet, 44, last, curr);
 
-        BlockPos readPos = MultipartCPH.readUpdateHeader(packet.readByte() & 0x03, packet);
+        BlockPos readPos = MultiPartCPH.readUpdateHeader(packet.readByte() & 0x03, packet);
         assertEquals(curr, readPos);
         buf.readerIndex(0);
         buf.writerIndex(0);
@@ -48,10 +48,10 @@ public class UpdatePacketTests {
         // 3333 & 15 = 5
         // -2348 & 15 = 4
         curr = curr.add(3, 6, 9);
-        MultipartSPH.writeHeader(packet, 44, last, curr);
+        MultiPartSPH.writeHeader(packet, 44, last, curr);
         assertEquals(3, buf.writerIndex());//Should be exactly 3 bytes written, +1 because this is the next index.
 
-        readPos = MultipartCPH.readUpdateHeader(packet.readByte() & 0x03, packet);
+        readPos = MultiPartCPH.readUpdateHeader(packet.readByte() & 0x03, packet);
 
         assertEquals(curr, readPos);
     }
@@ -62,18 +62,18 @@ public class UpdatePacketTests {
         MCDataByteBuf packet = new MCDataByteBuf(buf);
         BlockPos last = new BlockPos(0, 0, 0);
         BlockPos curr = new BlockPos(3333, 56, -2348);
-        MultipartSPH.writeHeader(packet, 44, last, curr);
+        MultiPartSPH.writeHeader(packet, 44, last, curr);
 
-        BlockPos readPos = MultipartCPH.readUpdateHeader(packet.readByte() & 0x03, packet);
+        BlockPos readPos = MultiPartCPH.readUpdateHeader(packet.readByte() & 0x03, packet);
         assertEquals(curr, readPos);
         buf.readerIndex(0);
         buf.writerIndex(0);
 
         last = curr;
-        MultipartSPH.writeHeader(packet, 44, last, curr);
+        MultiPartSPH.writeHeader(packet, 44, last, curr);
         assertEquals(1, buf.writerIndex());//Should be exactly 1 byte written, +1 because this is the next index.
 
-        readPos = MultipartCPH.readUpdateHeader(packet.readByte() & 0x03, packet);
+        readPos = MultiPartCPH.readUpdateHeader(packet.readByte() & 0x03, packet);
         assertEquals(curr, readPos);
     }
 
@@ -83,19 +83,19 @@ public class UpdatePacketTests {
         MCDataByteBuf packet = new MCDataByteBuf(buf);
         BlockPos last = new BlockPos(0, 0, 0);
         BlockPos curr = new BlockPos(3333, 56, -2348);
-        MultipartSPH.writeHeader(packet, 44, last, curr);
+        MultiPartSPH.writeHeader(packet, 44, last, curr);
 
-        BlockPos readPos = MultipartCPH.readUpdateHeader(packet.readByte() & 0x03, packet);
+        BlockPos readPos = MultiPartCPH.readUpdateHeader(packet.readByte() & 0x03, packet);
         assertEquals(curr, readPos);
         buf.readerIndex(0);
         buf.writerIndex(0);
 
         last = curr;
         curr = curr.add(127, 6, 9);
-        MultipartSPH.writeHeader(packet, 44, last, curr);
+        MultiPartSPH.writeHeader(packet, 44, last, curr);
         assertEquals(4, buf.writerIndex());//Should be exactly 4 bytes written, +1 because this is the next index.
 
-        readPos = MultipartCPH.readUpdateHeader(packet.readByte() & 0x03, packet);
+        readPos = MultiPartCPH.readUpdateHeader(packet.readByte() & 0x03, packet);
         assertEquals(curr, readPos);
     }
 }

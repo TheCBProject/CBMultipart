@@ -1,16 +1,14 @@
 package codechicken.multipart.api.part.redstone;
 
-import codechicken.multipart.api.annotation.MultiPartMarker;
-import codechicken.multipart.trait.TRedstoneTile;
 import codechicken.multipart.trait.extern.IRedstoneTile;
 
 /**
  * Interface for parts with redstone interaction
  * <p>
- * Marker interface for TRedstoneTile. This means that if a part is an instance of {@link IRedstonePart}, 
+ * Marker interface for TRedstoneTile. This means that if a part is an instance of {@link IRedstonePart},
  * the container tile may be cast to {@link IRedstoneTile}
  */
-@MultiPartMarker (TRedstoneTile.class)
+//@MultiPartMarker (TRedstoneTile.class)
 public interface IRedstonePart {
 
     /**

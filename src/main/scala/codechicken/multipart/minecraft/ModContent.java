@@ -10,6 +10,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.item.Items;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
@@ -87,11 +88,11 @@ public class ModContent {
         }
 
         @Override
-        public ActionResult<TMultiPart> convert(BlockItemUseContext context) {
+        public ActionResult<TMultiPart> convert(ItemUseContext context) {
             if (context.getItem().getItem() != item) {
                 return emptyResult();
             }
-            TMultiPart result = factory.get().setStateOnPlacement(context);
+            TMultiPart result = factory.get().setStateOnPlacement(new BlockItemUseContext(context));
             if (result != null) {
                 return ActionResult.resultSuccess(result);
             }

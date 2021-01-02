@@ -1,8 +1,8 @@
 package codechicken.multipart.util;
 
-import codechicken.multipart.TileMultipart;
 import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.api.part.TRandomTickPart;
+import codechicken.multipart.block.TileMultiPart;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
@@ -116,9 +116,9 @@ class WorldTickScheduler {
             for (SavedTickEntry savedTick : savedTicks) {
                 //Use map to avoid loading locks.
                 TileEntity tileEntity = chunk.getTileEntityMap().get(savedTick.pos);
-                if (tileEntity instanceof TileMultipart) {
-                    TileMultipart tile = (TileMultipart) tileEntity;
-                    scheduledTicks.add(new PartTickEntry(tile.jPartList().get(savedTick.idx), savedTick.time, false));
+                if (tileEntity instanceof TileMultiPart) {
+                    TileMultiPart tile = (TileMultiPart) tileEntity;
+                    scheduledTicks.add(new PartTickEntry(tile.getPartList().get(savedTick.idx), savedTick.time, false));
                 }
             }
             savedTicks.clear();
@@ -208,7 +208,7 @@ class WorldTickScheduler {
             if (part.tile() != null) {
                 CompoundNBT tag = new CompoundNBT();
                 tag.put("pos", NBTUtil.writeBlockPos(part.pos()));
-                tag.putInt("idx", part.tile().jPartList().indexOf(part));
+                tag.putInt("idx", part.tile().getPartList().indexOf(part));
                 tag.putLong("time", time);
                 return tag;
             }

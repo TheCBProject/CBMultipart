@@ -6,9 +6,9 @@ import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.util.CrashLock;
 import codechicken.lib.util.LazyValuePair;
+import codechicken.multipart.block.TileMultiPart;
 import codechicken.multipart.handler.PlacementConversionHandler;
 import codechicken.multipart.init.MultiPartRegistries;
-import codechicken.multipart.TileMultipart;
 import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.util.ControlKeyModifier;
 import com.google.common.annotations.VisibleForTesting;
@@ -29,20 +29,20 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static codechicken.lib.math.MathHelper.between;
-import static codechicken.multipart.network.MultipartNetwork.*;
+import static codechicken.multipart.network.MultiPartNetwork.*;
 
 /**
  * Created by covers1624 on 4/30/20.
  */
-public class MultipartSPH implements ICustomPacketHandler.IServerPacketHandler {
+public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
     private static final Map<UUID, BlockPos> playerLastPositions = new HashMap<>();
 
     public static void init() {
         LOCK.lock();
-        MinecraftForge.EVENT_BUS.addListener(MultipartSPH::onPlayerLoggedIn);
-        MinecraftForge.EVENT_BUS.addListener(MultipartSPH::onPlayerLoggedOut);
+        MinecraftForge.EVENT_BUS.addListener(MultiPartSPH::onPlayerLoggedIn);
+        MinecraftForge.EVENT_BUS.addListener(MultiPartSPH::onPlayerLoggedOut);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class MultipartSPH implements ICustomPacketHandler.IServerPacketHandler {
     }
 
     //region Send C_TILE_DESC
-    public static void sendDescUpdate(TileMultipart tile) {
+    public static void sendDescUpdate(TileMultiPart tile) {
         ServerWorld world = (ServerWorld) tile.getWorld();
         Stream<ServerPlayerEntity> players = world.getChunkProvider().chunkManager.getTrackingPlayers(new ChunkPos(tile.getPos()), false);
         sendDescUpdates(players, Collections.singleton(tile));
@@ -70,9 +70,9 @@ public class MultipartSPH implements ICustomPacketHandler.IServerPacketHandler {
         if (tiles.isEmpty()) {
             return;
         }
-        List<Pair<TileMultipart, MCByteStream>> data = tiles.stream()//
-                .filter(e -> e instanceof TileMultipart)//
-                .map(e -> (TileMultipart) e)//
+        List<Pair<TileMultiPart, MCByteStream>> data = tiles.stream()//
+                .filter(e -> e instanceof TileMultiPart)//
+                .map(e -> (TileMultiPart) e)//
                 .map(tile -> LazyValuePair.of(tile, t -> {
                     MCByteStream stream = new MCByteStream();
                     t.writeDesc(stream);
@@ -85,10 +85,10 @@ public class MultipartSPH implements ICustomPacketHandler.IServerPacketHandler {
         players.forEach(player -> sendDescUpdateTo(player, data));
     }
 
-    private static void sendDescUpdateTo(ServerPlayerEntity player, List<Pair<TileMultipart, MCByteStream>> data) {
+    private static void sendDescUpdateTo(ServerPlayerEntity player, List<Pair<TileMultiPart, MCByteStream>> data) {
         PacketCustom packet = new PacketCustom(NET_CHANNEL, C_TILE_DESC);
         packet.writeVarInt(data.size());
-        for (Pair<TileMultipart, MCByteStream> entry : data) {
+        for (Pair<TileMultiPart, MCByteStream> entry : data) {
             writeHeaderFor(player, packet, 0, entry.getLeft().getPos());
             packet.append(entry.getRight().getBytes());
         }
@@ -97,7 +97,7 @@ public class MultipartSPH implements ICustomPacketHandler.IServerPacketHandler {
     //endregion
 
     //region Send C_ADD_PART
-    public static void sendAddPart(TileMultipart tile, TMultiPart part) {
+    public static void sendAddPart(TileMultiPart tile, TMultiPart part) {
         ServerWorld world = (ServerWorld) tile.getWorld();
         MCByteStream stream = new MCByteStream();
         MultiPartRegistries.writePart(stream, part);
@@ -112,7 +112,7 @@ public class MultipartSPH implements ICustomPacketHandler.IServerPacketHandler {
     //endregion
 
     //region Send C_REM_PART
-    public static void sendRemPart(TileMultipart tile, int partIdx) {
+    public static void sendRemPart(TileMultiPart tile, int partIdx) {
         ServerWorld world = (ServerWorld) tile.getWorld();
         world.getChunkProvider().chunkManager.getTrackingPlayers(new ChunkPos(tile.getPos()), false)//
                 .forEach(player -> {
@@ -132,7 +132,7 @@ public class MultipartSPH implements ICustomPacketHandler.IServerPacketHandler {
         world.getChunkProvider().chunkManager.getTrackingPlayers(new ChunkPos(pos), false)//
                 .forEach(player -> {
                     PacketCustom packet = new PacketCustom(NET_CHANNEL, C_PART_UPDATE);
-                    writeHeaderFor(player, packet, part.tile().jPartList().indexOf(part), part.pos());
+                    writeHeaderFor(player, packet, part.tile().getPartList().indexOf(part), part.pos());
                     packet.append(stream.getBytes());
                     packet.sendToPlayer(player);
                 });

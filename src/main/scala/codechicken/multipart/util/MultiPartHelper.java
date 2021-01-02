@@ -2,11 +2,11 @@ package codechicken.multipart.util;
 
 import codechicken.lib.packet.PacketCustom;
 import codechicken.mixin.api.MixinFactory;
-import codechicken.multipart.TileMultipart;
 import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.block.TileMultiPart;
 import codechicken.multipart.init.ModContent;
 import codechicken.multipart.init.MultiPartRegistries;
-import codechicken.multipart.network.MultipartSPH;
+import codechicken.multipart.network.MultiPartSPH;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.network.play.server.SChangeBlockPacket;
 import net.minecraft.tileentity.TileEntity;
@@ -34,7 +34,7 @@ public class MultiPartHelper {
      * @param pos   The position.
      * @return The tile.
      */
-    public static TileMultipart getOrConvertTile(World world, BlockPos pos) {
+    public static TileMultiPart getOrConvertTile(World world, BlockPos pos) {
         return getOrConvertTile2(world, pos).getLeft();
     }
 
@@ -47,14 +47,14 @@ public class MultiPartHelper {
      * @return A Pair result of, the tile if it exists null otherwise, and a boolean flag if the tile
      * exists as a result of conversion.
      */
-    public static Pair<TileMultipart, Boolean> getOrConvertTile2(World world, BlockPos pos) {
+    public static Pair<TileMultiPart, Boolean> getOrConvertTile2(World world, BlockPos pos) {
         TileEntity t = world.getTileEntity(pos);
-        if (t instanceof TileMultipart) {
-            return Pair.of((TileMultipart) t, false);
+        if (t instanceof TileMultiPart) {
+            return Pair.of((TileMultiPart) t, false);
         }
         Collection<TMultiPart> parts = MultiPartRegistries.convertBlock(world, pos, world.getBlockState(pos));
         if (!parts.isEmpty()) {
-            TileMultipart tile = MultiPartGenerator.INSTANCE.generateCompositeTile(null, parts, world.isRemote);
+            TileMultiPart tile = MultiPartGenerator.INSTANCE.generateCompositeTile(null, parts, world.isRemote);
             tile.setPos(pos);
             tile.setWorldAndPos(world, pos);
             parts.forEach(tile::addPart_do);
@@ -69,8 +69,8 @@ public class MultiPartHelper {
      * INTERNAL METHOD
      * Checks if there are redundant traits on the tile and strips them.
      */
-    public static TileMultipart partRemoved(TileMultipart tile) {
-        TileMultipart newTile = MultiPartGenerator.INSTANCE.generateCompositeTile(tile, tile.jPartList(), tile.getWorld().isRemote);
+    public static TileMultiPart partRemoved(TileMultiPart tile) {
+        TileMultiPart newTile = MultiPartGenerator.INSTANCE.generateCompositeTile(tile, tile.getPartList(), tile.getWorld().isRemote);
         if (tile != newTile) {
             tile.setValid(false);
             silentAddTile(tile.getWorld(), tile.getPos(), newTile);
@@ -85,24 +85,24 @@ public class MultiPartHelper {
      * Performs the necessary operations to add a part to a tile.
      * Checks if any new traits need to be applied to the tile instance, and replaces if so.
      */
-    public static TileMultipart addPart(World world, BlockPos pos, TMultiPart part) {
-        Pair<TileMultipart, Boolean> pair = getOrConvertTile2(world, pos);
-        TileMultipart tile = pair.getLeft();
+    public static TileMultiPart addPart(World world, BlockPos pos, TMultiPart part) {
+        Pair<TileMultiPart, Boolean> pair = getOrConvertTile2(world, pos);
+        TileMultiPart tile = pair.getLeft();
         boolean converted = pair.getRight();
         ImmutableSet<MixinFactory.TraitKey> traits = MultiPartGenerator.INSTANCE.getTraits(part, world.isRemote);
 
-        TileMultipart newTile = tile;
+        TileMultiPart newTile = tile;
         if (newTile != null) {
             //If we just converted an in-world block to a TileMultipart
             if (converted) {//TODO, dont use head here? assume all parts are capable of receiving these callbacks
                 //Callback to the part, so it can do stuff to inworld tile before it gets nuked.
-                TMultiPart head = newTile.jPartList().get(0);
+                TMultiPart head = newTile.getPartList().get(0);
                 head.invalidateConvertedTile();
                 world.setBlockState(pos, ModContent.blockMultipart.getDefaultState(), 0);
                 silentAddTile(world, pos, newTile);
                 PacketCustom.sendToChunk(new SChangeBlockPacket(world, pos), world, pos);
                 head.onConverted();
-                MultipartSPH.sendAddPart(newTile, head); //TODO, what if a converter converts the tile to more than one part?
+                MultiPartSPH.sendAddPart(newTile, head); //TODO, what if a converter converts the tile to more than one part?
             }
 
             //Get the traits that exist on this TileMultipart instance.

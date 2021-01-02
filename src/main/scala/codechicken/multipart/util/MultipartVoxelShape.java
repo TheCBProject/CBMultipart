@@ -1,8 +1,8 @@
 package codechicken.multipart.util;
 
 import codechicken.lib.raytracer.DistanceRayTraceResult;
-import codechicken.multipart.TileMultipart;
 import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.block.TileMultiPart;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -20,9 +20,9 @@ import java.util.stream.IntStream;
 public class MultipartVoxelShape extends VoxelShape {
 
     private final VoxelShape shape;
-    private final TileMultipart tile;
+    private final TileMultiPart tile;
 
-    public MultipartVoxelShape(VoxelShape shape, TileMultipart tile) {
+    public MultipartVoxelShape(VoxelShape shape, TileMultiPart tile) {
         super(shape.part);
         this.shape = shape;
         this.tile = tile;
@@ -36,7 +36,7 @@ public class MultipartVoxelShape extends VoxelShape {
     @Override
     public BlockRayTraceResult rayTrace(Vec3d start, Vec3d end, BlockPos pos) {
 
-        List<TMultiPart> parts = tile.jPartList();
+        List<TMultiPart> parts = tile.getPartList();
         return IntStream.range(0, parts.size())//
                 .mapToObj(index -> {
                     TMultiPart part = parts.get(index);

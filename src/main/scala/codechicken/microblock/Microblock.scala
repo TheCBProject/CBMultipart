@@ -12,6 +12,7 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundNBT
+import net.minecraft.world.Explosion
 import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 import net.minecraftforge.client.model.ModelLoader
 
@@ -110,7 +111,7 @@ abstract class Microblock(var material: MicroMaterial) extends TMultiPart {
 
     override def getLightValue = getMaterial.getLightValue
 
-    override def getExplosionResistance(entity: Entity) = getMaterial.explosionResistance(entity) * microFactory.getResistanceFactor
+    override def getExplosionResistance(entity: Entity, explosion: Explosion) = getMaterial.explosionResistance(world, pos, entity, explosion) * microFactory.getResistanceFactor
 }
 
 trait MicroblockClient extends Microblock with TIconHitEffectsPart {

@@ -2,8 +2,8 @@ package codechicken.microblock
 
 import codechicken.lib.vec.{Rotation, Vector3}
 import codechicken.microblock.api.MicroMaterial
-import codechicken.multipart.TileMultipart
-import codechicken.multipart.util.{ControlKeyModifier, MultiPartHelper, PartRayTraceResult}
+import codechicken.multipart.block.TileMultiPart
+import codechicken.multipart.util.{ControlKeyModifier, MultiPartHelper, OffsetItemUseContext, PartRayTraceResult}
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.{ItemStack, ItemUseContext}
 import net.minecraft.util.math.{BlockPos, BlockRayTraceResult}
@@ -18,7 +18,7 @@ abstract class ExecutablePlacement(val pos: BlockPos, val part: Microblock) {
 
 class AdditionPlacement($pos: BlockPos, $part: Microblock) extends ExecutablePlacement($pos, $part) {
     def place(world: World, player: PlayerEntity, item: ItemStack) {
-        TileMultipart.addPart(world, pos, part)
+        TileMultiPart.addPart(world, pos, part)
     }
 
     def consume(world: World, player: PlayerEntity, item: ItemStack) {
@@ -85,7 +85,7 @@ class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: Blo
         }
 
         if (doExpand) {
-            val hpart = htile.partList(hit.asInstanceOf[PartRayTraceResult].partIndex)
+            val hpart = htile.getPartList.get(hit.asInstanceOf[PartRayTraceResult].partIndex)
             if (hpart.getType == mcrFactory.getType) {
                 val mpart = hpart.asInstanceOf[CommonMicroblock]
                 if (mpart.material == material && mpart.getSize + size < 8) {
@@ -123,17 +123,17 @@ class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: Blo
 
     def expand(mpart: Microblock, npart: Microblock): ExecutablePlacement = {
         val pos = mpart.tile.getPos
-        if (TileMultipart.checkNoEntityCollision(world, pos, npart) && mpart.tile.canReplacePart(mpart, npart)) {
+        if (TileMultiPart.checkNoEntityCollision(world, pos, npart) && mpart.tile.canReplacePart(mpart, npart)) {
             return new ExpandingPlacement(pos, npart, mpart)
         }
         return null
     }
 
-    def internalPlacement(htile: TileMultipart, slot: Int): ExecutablePlacement = internalPlacement(htile, create(size, slot, material))
+    def internalPlacement(htile: TileMultiPart, slot: Int): ExecutablePlacement = internalPlacement(htile, create(size, slot, material))
 
-    def internalPlacement(htile: TileMultipart, npart: Microblock): ExecutablePlacement = {
+    def internalPlacement(htile: TileMultiPart, npart: Microblock): ExecutablePlacement = {
         val pos = htile.getPos
-        if (TileMultipart.checkNoEntityCollision(world, pos, npart) && htile.canAddPart(npart)) {
+        if (TileMultiPart.checkNoEntityCollision(world, pos, npart) && htile.canAddPart(npart)) {
             return new AdditionPlacement(pos, npart)
         }
         return null
@@ -143,7 +143,7 @@ class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: Blo
 
     def externalPlacement(npart: Microblock): ExecutablePlacement = {
         val pos = this.pos.offset(Direction.BY_INDEX.apply(side))
-        if (TileMultipart.canPlacePart(new ItemUseContext(player, hand, hit), npart, true)) {
+        if (TileMultiPart.canPlacePart(new OffsetItemUseContext(new ItemUseContext(player, hand, hit)), npart)) {
             return new AdditionPlacement(pos, npart)
         }
         null

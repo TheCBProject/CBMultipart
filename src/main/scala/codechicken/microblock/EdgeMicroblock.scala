@@ -1,7 +1,6 @@
 package codechicken.microblock
 
 import java.util.Collections
-
 import codechicken.lib.data.MCDataInput
 import codechicken.lib.raytracer.VoxelShapeCache
 import codechicken.lib.render.CCRenderState
@@ -12,6 +11,7 @@ import codechicken.microblock.api.MicroOcclusion
 import codechicken.microblock.handler.MicroblockModContent
 import codechicken.multipart._
 import codechicken.multipart.api.part.{TEdgePart, TMultiPart, TNormalOcclusionPart, TPartialOcclusionPart}
+import codechicken.multipart.block.TileMultiPart
 import codechicken.multipart.util.PartRayTraceResult
 import net.minecraft.client.renderer.RenderType
 import net.minecraft.util.math.shapes.VoxelShape
@@ -38,7 +38,7 @@ object EdgePlacement extends PlacementProperties {
         val part = PostMicroFactory.create(pmt.world.isRemote, pmt.material)
         part.setShape(pmt.size, pmt.hit.getFace.ordinal >> 1)
         if (pmt.doExpand) {
-            val hpart = pmt.htile.partList(pmt.hit.asInstanceOf[PartRayTraceResult].partIndex)
+            val hpart = pmt.htile.getPartList.get(pmt.hit.asInstanceOf[PartRayTraceResult].partIndex)
             if (hpart.getType == PostMicroFactory.getType) {
                 val mpart = hpart.asInstanceOf[Microblock]
                 if (mpart.material == pmt.material && mpart.getSize + pmt.size < 8) {
@@ -53,7 +53,7 @@ object EdgePlacement extends PlacementProperties {
         }
 
         if (pmt.internal && !pmt.oppMod) {
-            return pmt.internalPlacement(pmt.htile.asInstanceOf[TileMultipart], part)
+            return pmt.internalPlacement(pmt.htile.asInstanceOf[TileMultiPart], part)
         }
 
         pmt.externalPlacement(part)
@@ -156,7 +156,7 @@ trait PostMicroblockClient extends PostMicroblock with MicroblockClient {
         shrinkFace(getShapeSlot << 1)
         shrinkFace(getShapeSlot << 1 | 1)
 
-        tile.partList.foreach {
+        tile.getPartList.forEach {
             case post: PostMicroblock if post != this =>
                 shrinkPost(post)
             case _ =>
@@ -164,7 +164,7 @@ trait PostMicroblockClient extends PostMicroblock with MicroblockClient {
     }
 
     def shrinkFace(fside: Int): Unit = {
-        val part = tile.partMap(fside)
+        val part = tile.getSlottedPart(fside)
         if (part != null && part.isInstanceOf[FaceMicroblock]) {
             MicroOcclusion.shrink(renderBounds1, part.asInstanceOf[CommonMicroblock].getBounds, fside)
         }
@@ -219,6 +219,4 @@ trait PostMicroblock extends Microblock with TPartialOcclusionPart with TNormalO
     }
 
     def getResistanceFactor = PostMicroFactory.getResistanceFactor
-
-    override def canPlaceTorchOnTop = getShapeSlot == 0
 }

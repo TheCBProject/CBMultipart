@@ -1,7 +1,7 @@
 package codechicken.multipart.init;
 
 import codechicken.lib.util.CrashLock;
-import codechicken.multipart.BlockMultipart;
+import codechicken.multipart.block.BlockMultiPart;
 import codechicken.multipart.util.MultiPartLoadHandler.TileNBTContainer;
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntityType;
@@ -21,7 +21,7 @@ public class ModContent {
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
 
     @ObjectHolder ("multipart")
-    public static BlockMultipart blockMultipart;
+    public static BlockMultiPart blockMultipart;
 
     @ObjectHolder ("saved_multipart")
     public static TileEntityType<?> tileMultipartType;
@@ -34,7 +34,7 @@ public class ModContent {
 
     private static void onRegisterBlocks(RegistryEvent.Register<Block> event) {
         IForgeRegistry<Block> r = event.getRegistry();
-        r.register(new BlockMultipart().setRegistryName("multipart"));
+        r.register(new BlockMultiPart().setRegistryName("multipart"));
     }
 
     private static void onRegisterTiles(RegistryEvent.Register<TileEntityType<?>> event) {

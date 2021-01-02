@@ -4,6 +4,7 @@ import codechicken.multipart.api.part.TMultiPart;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.math.BlockPos;
@@ -51,7 +52,7 @@ public abstract class PartConverter extends ForgeRegistryEntry<PartConverter> {
      * @return An {@link ActionResult} specifying {@link ActionResultType#SUCCESS} if the block / tile
      * was converted, and {@link ActionResultType#PASS} if no conversion was performed.
      */
-    public ActionResult<TMultiPart> convert(BlockItemUseContext context) {
+    public ActionResult<TMultiPart> convert(ItemUseContext context) {
         return emptyResult();
     }
 
