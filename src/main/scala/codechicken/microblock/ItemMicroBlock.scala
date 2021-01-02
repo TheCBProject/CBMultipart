@@ -156,8 +156,7 @@ object ItemMicroBlockRenderer extends IItemRenderer {
         mat.translate(new Vector3(0.5, 0.5, 0.5).subtract(part.getBounds.center))
 
         ccrs.reset()
-        ccrs.bind(part.getMaterial.getRenderLayer, getter)
-        ccrs.r = new TransformingVertexBuilder(ccrs.r, mat)
+        ccrs.bind(part.getMaterial.getRenderLayer, getter, mat)
         ccrs.brightness = packedLight
         ccrs.overlay = packedOverlay
         part.render(null, ccrs)
@@ -175,5 +174,5 @@ object ItemMicroBlockRenderer extends IItemRenderer {
         MicroMaterialRegistry.renderHighlight(player, hand, hit, mcrClass, size, material, mStack, getter, partialTicks)
     }
 
-    override def func_230044_c_(): Boolean = true
+    override def func_230044_c_(): Boolean = false
 }

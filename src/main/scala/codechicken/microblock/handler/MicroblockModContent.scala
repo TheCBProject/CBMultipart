@@ -87,8 +87,7 @@ object MicroblockModContent {
         r.register(BlockMicroMaterial(Blocks.POLISHED_DIORITE))
         r.register(BlockMicroMaterial(Blocks.ANDESITE))
         r.register(BlockMicroMaterial(Blocks.POLISHED_ANDESITE))
-        r.register(BlockMicroMaterial(Blocks.GRASS_BLOCK)) //TODO, below and remove this.
-        //        r.register(new GrassMicroMaterial(null))
+        r.register(new GrassMicroMaterial())
         r.register(BlockMicroMaterial(Blocks.DIRT))
         r.register(BlockMicroMaterial(Blocks.COARSE_DIRT))
         r.register(BlockMicroMaterial(Blocks.PODZOL))

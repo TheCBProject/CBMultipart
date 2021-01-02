@@ -1,6 +1,7 @@
 package codechicken.microblock
 
 import codechicken.lib.render.pipeline.IVertexOperation
+import codechicken.lib.texture.TextureUtils
 import codechicken.lib.vec.uv.{IconTransformation, UVTranslation}
 import codechicken.lib.vec.{Cuboid6, Vector3}
 import codechicken.microblock.api.BlockMicroMaterial
@@ -12,7 +13,7 @@ class GrassMicroMaterial extends BlockMicroMaterial(Blocks.GRASS_BLOCK.getDefaul
 
     override def loadIcons() {
         super.loadIcons()
-        //sideIconT = new IconTransformation(TextureUtils.getIconsForBlock(Blocks.GRASS.getDefaultState, 2)(1))
+        sideIconT = new IconTransformation(TextureUtils.getIconsForBlock(Blocks.GRASS_BLOCK.getDefaultState, 2)(1))
     }
 
     override def getMicroRenderOps(side: Int, layer: RenderType, bounds: Cuboid6) = {

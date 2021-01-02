@@ -35,9 +35,7 @@ class MaterialRenderHelper {
 }
 
 object MaterialRenderHelper {
-    private val instances = new ThreadLocal[MaterialRenderHelper] {
-        override def initialValue() = new MaterialRenderHelper
-    }
+    private val instances = ThreadLocal.withInitial(() => new MaterialRenderHelper)
 
     def instance = instances.get()
 }
