@@ -1,146 +1,182 @@
-//package codechicken.multipart.minecraft;
-//
-//import codechicken.lib.raytracer.CuboidRayTraceResult;
-//import codechicken.multipart.IFaceRedstonePart;
-//import net.minecraft.block.*;
-//import net.minecraft.entity.Entity;
-//import net.minecraft.entity.player.PlayerEntity;
-//import net.minecraft.entity.projectile.ArrowEntity;
-//import net.minecraft.item.BlockItemUseContext;
-//import net.minecraft.item.ItemStack;
-//import net.minecraft.util.*;
-//
-//public class ButtonPart extends McSidedMetaPart implements IFaceRedstonePart {
-//
-//    public static StoneButtonBlock stoneButton = (StoneButtonBlock) Blocks.STONE_BUTTON;
-//    public static WoodButtonBlock woodenButton = null;//(WoodButtonBlock) Blocks.WOODEN_BUTTON;
-//
-//    public ButtonPart() {
-//        state = stoneButton.getDefaultState();
-//    }
-//
-//    public ButtonPart(BlockState state) {
-//        super(state);
-//    }
-//
-//    @Override
-//    public ResourceLocation getType() {
-//        return Content.BUTTON;
-//    }
-//
-//    @Override
-//    public Block getBlock() {
-//        return sensitive() ? woodenButton : stoneButton;
-//    }
-//
-//    @Override
-//    public Direction getSideFromState() {
-//        return state.get(AbstractButtonBlock.HORIZONTAL_FACING).getOpposite();
-//    }
-//
-//    public int delay() {
-//        return sensitive() ? 30 : 20;
-//    }
-//
-//    public boolean sensitive() {
-//        return state.getBlock() == woodenButton;
-//    }
-//
-//    @Override
-//    public void setStateOnPlacement(BlockItemUseContext context) {
-//        Block heldBlock = Block.getBlockFromItem(context.getItem().getItem());
-//        if (!(heldBlock instanceof AbstractButtonBlock)) {
-//            throw new RuntimeException("Invalid placement of Button Part");
-//        }
-//        state = heldBlock.getStateForPlacement(context);
-//    }
-//
-//    @Override
-//    public boolean activate(PlayerEntity player, CuboidRayTraceResult hit, ItemStack item, Hand hand) {
-//        if (pressed()) {
-//            return false;
-//        }
-//
-//        if (!world().isRemote) {
-//            toggle();
-//        }
-//
-//        return true;
-//    }
-//
-//    @Override
-//    public void scheduledTick() {
-//        if (pressed()) {
-//            updateState();
-//        }
-//    }
-//
-//    public boolean pressed() {
-//        return state.get(AbstractButtonBlock.POWERED);
-//    }
-//
-//    @Override
-//    public void onEntityCollision(Entity entity) {
-//        if (!pressed() && !world().isRemote && entity instanceof ArrowEntity) {
-//            updateState();
-//        }
-//    }
-//
-//    private void toggle() {
-//        state = state.cycle(AbstractButtonBlock.POWERED);
-//
-//        boolean on = pressed();
-//
+package codechicken.multipart.minecraft;
+
+import codechicken.multipart.api.MultiPartType;
+import codechicken.multipart.api.part.redstone.IFaceRedstonePart;
+import codechicken.multipart.util.PartRayTraceResult;
+import net.minecraft.block.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.*;
+
+
+public class ButtonPart extends McSidedStatePart implements IFaceRedstonePart {
+
+    private final MultiPartType<?> type;
+    private final AbstractButtonBlock block;
+
+    public ButtonPart(MultiPartType<?> type, AbstractButtonBlock block) {
+        this(type, block, block.getDefaultState());
+    }
+
+    public ButtonPart(MultiPartType<?> type, AbstractButtonBlock block, BlockState state) {
+        super(state);
+        this.type = type;
+        this.block = block;
+    }
+
+    @Override
+    public MultiPartType<?> getType() {
+        return type;
+    }
+
+    @Override
+    public BlockState getDefaultState() {
+        return block.getDefaultState();
+    }
+
+    @Override
+    public ItemStack getDropStack() {
+        return new ItemStack(block);
+    }
+
+    @Override
+    public Direction getSide() {
+        return HorizontalFaceBlock.getFacing(state).getOpposite();
+    }
+
+    public int delay() {
+        return sensitive() ? 30 : 20;
+    }
+
+    public boolean sensitive() {
+        return block.wooden;
+    }
+
+    @Override
+    public ActionResultType activate(PlayerEntity player, PartRayTraceResult hit, ItemStack item, Hand hand) {
+        if (pressed()) {
+            return ActionResultType.CONSUME;
+        }
+
+        if (!world().isRemote) {
+            toggle();
+        }
+
+        return ActionResultType.SUCCESS;
+    }
+
+    @Override
+    public void scheduledTick() {
+        if (pressed()) {
+            updateState();
+        }
+    }
+
+    public boolean pressed() {
+        return state.get(AbstractButtonBlock.POWERED);
+    }
+
+    @Override
+    public void onEntityCollision(Entity entity) {
+        if (!pressed() && !world().isRemote && entity instanceof ArrowEntity) {
+            updateState();
+        }
+    }
+
+    private void toggle() {
+        state = state.cycle(AbstractButtonBlock.POWERED);
+
+        boolean on = pressed();
+
 //        SoundEvent sound = sensitive() ? (on ? SoundEvents.BLOCK_WOODEN_BUTTON_CLICK_ON : SoundEvents.BLOCK_WOODEN_BUTTON_CLICK_OFF) : (on ? SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON : SoundEvents.BLOCK_STONE_BUTTON_CLICK_OFF);
 //
 //        world().playSound(null, pos(), sound, SoundCategory.BLOCKS, 0.3F, on ? 0.6F : 0.5F);
-//
-//        if (on) {
-//            scheduleTick(delay());
-//        }
-//
-//        sendDescUpdate();
-//        tile().markDirty();
-//        tile().notifyPartChange(this);
-//        tile().notifyNeighborChange(getSideFromState().ordinal());
-//    }
-//
-//    private void updateState() {
-//        boolean arrows = sensitive() && !world().getEntitiesWithinAABB(ArrowEntity.class, getBounds().add(pos()).aabb()).isEmpty();
-//        boolean pressed = pressed();
-//
-//        if (arrows != pressed) {
-//            toggle();
-//        }
-//        if (arrows && pressed) {
-//            scheduleTick(delay());
-//        }
-//    }
-//
-//    @Override
-//    public void onRemoved() {
-//        if (pressed()) {
-//            tile().notifyNeighborChange(getSideFromState().ordinal());
-//        }
-//    }
-//
-//    @Override
-//    public int weakPowerLevel(int side) {
-//        return pressed() ? 15 : 0;
-//    }
-//
-//    @Override
-//    public int strongPowerLevel(int side) {
-//        return pressed() && side == getSideFromState().ordinal() ? 15 : 0;
-//    }
-//
-//    @Override
-//    public boolean canConnectRedstone(int side) {
-//        return true;
-//    }
-//
-//    @Override
-//    public int getFace() {
-//        return getSideFromState().ordinal();
-//    }
-//}
+        block.playSound(null, world(), pos(), on);
+
+        if (on) {
+            scheduleTick(delay());
+        }
+
+        sendUpdate(this::writeDesc);
+        tile().markDirty();
+        tile().notifyPartChange(this);
+        tile().notifyNeighborChange(getSide().ordinal());
+    }
+
+    private void updateState() {
+        boolean arrows = sensitive() && !world().getEntitiesWithinAABB(ArrowEntity.class, getOutlineShape().getBoundingBox().offset(pos())).isEmpty();
+        boolean pressed = pressed();
+
+        if (arrows != pressed) {
+            toggle();
+        }
+        if (arrows && pressed) {
+            scheduleTick(delay());
+        }
+    }
+
+    @Override
+    public void onRemoved() {
+        if (pressed()) {
+            tile().notifyNeighborChange(getSide().ordinal());
+        }
+    }
+
+    @Override
+    public int weakPowerLevel(int side) {
+        return pressed() ? 15 : 0;
+    }
+
+    @Override
+    public int strongPowerLevel(int side) {
+        return pressed() && side == getSide().ordinal() ? 15 : 0;
+    }
+
+    @Override
+    public boolean canConnectRedstone(int side) {
+        return true;
+    }
+
+    @Override
+    public int getFace() {
+        return getSide().ordinal();
+    }
+
+    public static class StoneButtonPart extends ButtonPart {
+        public StoneButtonPart() { super(ModContent.stoneButtonPartType, (AbstractButtonBlock) Blocks.STONE_BUTTON); }
+        public StoneButtonPart(BlockState state) { super(ModContent.stoneButtonPartType, (AbstractButtonBlock) Blocks.STONE_BUTTON, state); }
+    }
+
+    public static class OakButtonPart extends ButtonPart {
+        public OakButtonPart() { super(ModContent.oakButtonPartType, (AbstractButtonBlock) Blocks.OAK_BUTTON); }
+        public OakButtonPart(BlockState state) { super(ModContent.oakButtonPartType, (AbstractButtonBlock) Blocks.OAK_BUTTON, state); }
+    }
+
+    public static class SpruceButtonPart extends ButtonPart {
+        public SpruceButtonPart() { super(ModContent.spruceButtonPartType, (AbstractButtonBlock) Blocks.SPRUCE_BUTTON); }
+        public SpruceButtonPart(BlockState state) { super(ModContent.spruceButtonPartType, (AbstractButtonBlock) Blocks.SPRUCE_BUTTON, state); }
+    }
+
+    public static class BirchButtonPart extends ButtonPart {
+        public BirchButtonPart() { super(ModContent.birchButtonPartType, (AbstractButtonBlock) Blocks.BIRCH_BUTTON); }
+        public BirchButtonPart(BlockState state) { super(ModContent.birchButtonPartType, (AbstractButtonBlock) Blocks.BIRCH_BUTTON, state); }
+    }
+
+    public static class JungleButtonPart extends ButtonPart {
+        public JungleButtonPart() { super(ModContent.jungleButtonPartType, (AbstractButtonBlock) Blocks.JUNGLE_BUTTON); }
+        public JungleButtonPart(BlockState state) { super(ModContent.jungleButtonPartType, (AbstractButtonBlock) Blocks.JUNGLE_BUTTON, state); }
+    }
+
+    public static class AcaciaButtonPart extends ButtonPart {
+        public AcaciaButtonPart() { super(ModContent.acaciaButtonPartType, (AbstractButtonBlock) Blocks.ACACIA_BUTTON); }
+        public AcaciaButtonPart(BlockState state) { super(ModContent.acaciaButtonPartType, (AbstractButtonBlock) Blocks.ACACIA_BUTTON, state); }
+    }
+
+    public static class DarkOakButtonPart extends ButtonPart {
+        public DarkOakButtonPart() { super(ModContent.darkOakButtonPartType, (AbstractButtonBlock) Blocks.DARK_OAK_BUTTON); }
+        public DarkOakButtonPart(BlockState state) { super(ModContent.darkOakButtonPartType, (AbstractButtonBlock) Blocks.DARK_OAK_BUTTON, state); }
+    }
+
+}

@@ -7,6 +7,7 @@ import codechicken.lib.vec.Vector3;
 import codechicken.multipart.api.MultiPartType;
 import codechicken.multipart.api.part.AnimateTickPart;
 import codechicken.multipart.api.part.TMultiPart;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalBlock;
@@ -44,28 +45,36 @@ public class TorchPart extends McSidedStatePart implements AnimateTickPart {
     }
 
     @Override
-    public BlockState getDefaultState() {
-        return Blocks.TORCH.getDefaultState();
-    }
-
-    @Override
-    public ItemStack getDropStack() {
-        return new ItemStack(Items.TORCH);
-    }
-
-    @Override
     public MultiPartType<?> getType() {
         return ModContent.torchPartType;
     }
 
+    protected Block getStandingBlock() {
+        return Blocks.TORCH;
+    }
+
+    protected Block getWallBlock() {
+        return Blocks.WALL_TORCH;
+    }
+
+    @Override
+    public BlockState getDefaultState() {
+        return getStandingBlock().getDefaultState();
+    }
+
+    @Override
+    public ItemStack getDropStack() {
+        return new ItemStack(getStandingBlock());
+    }
+
     @Override
     public Direction getSide() {
-        return state.getBlock() == Blocks.TORCH ? Direction.DOWN : state.get(HorizontalBlock.HORIZONTAL_FACING).getOpposite();
+        return state.getBlock() == getStandingBlock() ? Direction.DOWN : state.get(HorizontalBlock.HORIZONTAL_FACING).getOpposite();
     }
 
     @Override
     public VoxelShape getOcclusionShape() {
-        if (state.getBlock() == Blocks.TORCH) {
+        if (state.getBlock() == getStandingBlock()) {
             return STANDING_OCCLUSION;
         }
         return WALL_OCCLUSION[getSide().getHorizontalIndex()];
@@ -73,14 +82,14 @@ public class TorchPart extends McSidedStatePart implements AnimateTickPart {
 
     @Override
     public TMultiPart setStateOnPlacement(BlockItemUseContext context) {
-        BlockState wallState = Blocks.WALL_TORCH.getStateForPlacement(context);
+        BlockState wallState = getWallBlock().getStateForPlacement(context);
 
         IWorldReader world = context.getWorld();
         BlockPos pos = context.getPos();
 
         for (Direction dir : context.getNearestLookingDirections()) {
             if (dir != Direction.UP) {
-                BlockState state = dir == Direction.DOWN ? Blocks.TORCH.getStateForPlacement(context) : wallState;
+                BlockState state = dir == Direction.DOWN ? getStandingBlock().getStateForPlacement(context) : wallState;
                 if (state != null && state.isValidPosition(world, pos)) {
                     this.state = state;
                     return this;

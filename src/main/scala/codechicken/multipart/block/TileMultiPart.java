@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -47,7 +48,7 @@ import java.util.stream.StreamSupport;
  */
 public class TileMultiPart extends TileEntity implements IChunkLoadTile {
 
-    private List<TMultiPart> partList = new ArrayList<>();
+    private List<TMultiPart> partList = new CopyOnWriteArrayList<>();
     private CapabilityCache capabilityCache = new CapabilityCache();
 
     private final MergedVoxelShapeHolder<TMultiPart> outlineShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()

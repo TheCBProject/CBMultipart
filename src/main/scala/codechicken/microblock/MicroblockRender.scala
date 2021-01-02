@@ -51,7 +51,7 @@ object MicroblockRender {
     def renderCuboid(ccrs: CCRenderState, mat: MicroMaterial, layer: RenderType, c: Cuboid6, faces: Int) {
         MicroMaterialRegistry.loadIcons()
 
-        val f = new BlockFace
+        val f = face
         ccrs.setModel(f)
         for (s <- 0 until 6 if (faces & 1 << s) == 0) {
             f.loadCuboidFace(c, s).computeLightCoords()

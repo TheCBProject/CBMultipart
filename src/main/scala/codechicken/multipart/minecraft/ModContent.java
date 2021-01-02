@@ -37,6 +37,28 @@ public class ModContent {
     @ObjectHolder ("torch")
     public static MultiPartType<TorchPart> torchPartType;
 
+    @ObjectHolder ("redstone_torch")
+    public static MultiPartType<RedstoneTorchPart> redstoneTorchPartType;
+
+    @ObjectHolder ("lever")
+    public static MultiPartType<LeverPart> leverPartType;
+
+    @ObjectHolder ("stone_button")
+    public static MultiPartType<LeverPart> stoneButtonPartType;
+
+    @ObjectHolder ("oak_button")
+    public static MultiPartType<LeverPart> oakButtonPartType;
+    @ObjectHolder ("spruce_button")
+    public static MultiPartType<LeverPart> spruceButtonPartType;
+    @ObjectHolder ("birch_button")
+    public static MultiPartType<LeverPart> birchButtonPartType;
+    @ObjectHolder ("jungle_button")
+    public static MultiPartType<LeverPart> jungleButtonPartType;
+    @ObjectHolder ("acacia_button")
+    public static MultiPartType<LeverPart> acaciaButtonPartType;
+    @ObjectHolder ("dark_oak_button")
+    public static MultiPartType<LeverPart> darkOakButtonPartType;
+
     @SubscribeEvent
     public static void onRegisterMultiParts(RegistryEvent.Register<MultiPartType<?>> event) {
         IForgeRegistry<MultiPartType<?>> r = event.getRegistry();
@@ -45,6 +67,18 @@ public class ModContent {
         ModLoadingContext.get().setActiveContainer(null, null);
 
         r.register(new SimpleMultiPartType<>(e -> new TorchPart()).setRegistryName("torch"));
+        r.register(new SimpleMultiPartType<>(e -> new RedstoneTorchPart()).setRegistryName("redstone_torch"));
+        r.register(new SimpleMultiPartType<>(e -> new LeverPart()).setRegistryName("lever"));
+
+        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.StoneButtonPart()).setRegistryName("stone_button"));
+
+        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.OakButtonPart()).setRegistryName("oak_button"));
+        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.SpruceButtonPart()).setRegistryName("spruce_button"));
+        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.BirchButtonPart()).setRegistryName("birch_button"));
+        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.JungleButtonPart()).setRegistryName("jungle_button"));
+        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.AcaciaButtonPart()).setRegistryName("acacia_button"));
+        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.DarkOakButtonPart()).setRegistryName("dark_oak_button"));
+
 
         ModLoadingContext.get().setActiveContainer(container, ext);
     }
@@ -58,6 +92,17 @@ public class ModContent {
         ModLoadingContext.get().setActiveContainer(null, null);
 
         r.register(new Converter<>(TorchPart::new, TorchPart::new, Items.TORCH, Blocks.TORCH, Blocks.WALL_TORCH).setRegistryName("torch"));
+        r.register(new Converter<>(RedstoneTorchPart::new, RedstoneTorchPart::new, Items.REDSTONE_TORCH, Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WALL_TORCH).setRegistryName("redstone_torch"));
+        r.register(new Converter<>(LeverPart::new, LeverPart::new, Items.LEVER, Blocks.LEVER).setRegistryName("lever"));
+
+        r.register(new Converter<>(ButtonPart.StoneButtonPart::new, ButtonPart.StoneButtonPart::new, Items.STONE_BUTTON, Blocks.STONE_BUTTON).setRegistryName("stone_button"));
+
+        r.register(new Converter<>(ButtonPart.OakButtonPart::new, ButtonPart.OakButtonPart::new, Items.OAK_BUTTON, Blocks.OAK_BUTTON).setRegistryName("oak_button"));
+        r.register(new Converter<>(ButtonPart.SpruceButtonPart::new, ButtonPart.SpruceButtonPart::new, Items.SPRUCE_BUTTON, Blocks.SPRUCE_BUTTON).setRegistryName("spruce_button"));
+        r.register(new Converter<>(ButtonPart.BirchButtonPart::new, ButtonPart.BirchButtonPart::new, Items.BIRCH_BUTTON, Blocks.BIRCH_BUTTON).setRegistryName("birch_button"));
+        r.register(new Converter<>(ButtonPart.JungleButtonPart::new, ButtonPart.JungleButtonPart::new, Items.JUNGLE_BUTTON, Blocks.JUNGLE_BUTTON).setRegistryName("jungle_button"));
+        r.register(new Converter<>(ButtonPart.AcaciaButtonPart::new, ButtonPart.AcaciaButtonPart::new, Items.ACACIA_BUTTON, Blocks.ACACIA_BUTTON).setRegistryName("acacia_button"));
+        r.register(new Converter<>(ButtonPart.DarkOakButtonPart::new, ButtonPart.DarkOakButtonPart::new, Items.DARK_OAK_BUTTON, Blocks.DARK_OAK_BUTTON).setRegistryName("dark_oak_button"));
 
         ModLoadingContext.get().setActiveContainer(container, ext);
     }

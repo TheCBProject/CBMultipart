@@ -119,7 +119,7 @@ public class TickScheduler {
      * @param ticks The number of ticks in the future.
      */
     public static void scheduleTick(TMultiPart part, int ticks) {
-        if (!(part.world() instanceof ServerWorld)) {
+        if (part.world() instanceof ServerWorld) {
             IChunk chunk = part.world().getChunk(part.pos());
             if (chunk instanceof Chunk) {//Should always be the case unless world gen.
                 WorldTickScheduler.ChunkScheduler chunkScheduler = WorldTickScheduler.getInstance((Chunk) chunk);
@@ -137,7 +137,7 @@ public class TickScheduler {
     public static void loadRandomTick(TRandomTickPart part) {
         @SuppressWarnings ("RedundantCast")
         TMultiPart thePart = (TMultiPart) part;
-        if (!(thePart.world() instanceof ServerWorld)) {
+        if (thePart.world() instanceof ServerWorld) {
             IChunk chunk = thePart.world().getChunk(thePart.pos());
             if (chunk instanceof Chunk) {//Should always be the case unless world gen.
                 WorldTickScheduler.ChunkScheduler chunkScheduler = WorldTickScheduler.getInstance((Chunk) chunk);

@@ -4,8 +4,10 @@ import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.raytracer.RayTracer;
 import codechicken.lib.util.CrashLock;
 import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.block.BlockMultiPart;
 import codechicken.multipart.block.TileMultiPart;
 import codechicken.multipart.init.MultiPartRegistries;
+import codechicken.multipart.util.MultiPartHelper;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -66,8 +68,9 @@ public class PlacementConversionHandler {
         BlockPos pos = hit.getPos().offset(hit.getFace());
         ItemUseContext ctx = new ItemUseContext(player, hand, hit);
         TMultiPart part = MultiPartRegistries.convertItem(ctx);
+        TileMultiPart tile = MultiPartHelper.getOrConvertTile(world, pos);
 
-        if (part == null) {
+        if (part == null || tile == null) {
             return false;
         }
 
