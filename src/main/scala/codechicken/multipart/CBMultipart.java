@@ -9,6 +9,7 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.scorge.lang.ScorgeModLoadingContext;
 
 /**
@@ -36,6 +37,11 @@ public class CBMultipart {
     @SubscribeEvent
     public void onClientSetup(FMLClientSetupEvent event) {
         proxy.clientSetup(event);
+    }
+
+    @SubscribeEvent
+    public void onLoadComplete(FMLLoadCompleteEvent event) {
+        proxy.onLoadComplete(event);
     }
 
     @SubscribeEvent

@@ -9,6 +9,7 @@ import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
 import codechicken.lib.world.IChunkLoadTile;
 import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.capability.MergedCapabilityHolder;
 import codechicken.multipart.init.ModContent;
 import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.network.MultiPartSPH;
@@ -33,7 +34,11 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.lighting.WorldLightManager;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -67,6 +72,8 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
             .setExtractor(TMultiPart::getRayTraceShape)
             .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
 
+    private final MergedCapabilityHolder capHolder = new MergedCapabilityHolder(this);
+
     public TileMultiPart() {
         super(ModContent.tileMultipartType);
     }
@@ -89,8 +96,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
      */
     public void copyFrom(TileMultiPart that) {
         partList = that.partList;
-//        capParts = that.capParts;
-//        resetCapCache();
+        capHolder.invalidate();
         markShapeChange();
     }
 
@@ -118,8 +124,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
      */
     public void clearParts() {
         partList = new ArrayList<>();
-//        capParts = new LinkedList<>();
-//        resetCapCache();
+        capHolder.invalidate();
         markShapeChange();
     }
 
@@ -252,12 +257,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
 
         partList.add(part);
         bindPart(part);
-//        part match {
-//            case p: ICapabilityProvider =>
-//                capParts.add(p)
-//                resetCapCache()
-//            case _ =>
-//        }
+        capHolder.invalidate();
         markShapeChange();
         part.bind(this);
     }
@@ -293,14 +293,9 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
         if (sendPacket) MultiPartSPH.sendRemPart(this, idx);
 
         partRemoved(part, idx);
-//        part match {
-//            case p: ICapabilityProvider =>
-//                capParts.remove(p)
-//                resetCapCache()
-//            case _ =>
-//        }
         part.onRemoved();
         part.tile_$eq(null);
+        capHolder.invalidate();
         markShapeChange();
 
         if (partList.isEmpty()) world.removeBlock(pos, false);
@@ -330,12 +325,12 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     public void remove() {
         if (!isRemoved()) {
             super.remove();
+            capHolder.invalidate();
             if (world != null) {
                 partList.forEach(TMultiPart::onWorldSeparate);
             }
         }
     }
-
     //endregion
 
     //region *** Internal callbacks ***
@@ -490,6 +485,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
                 e.onPartChanged(part);
             }
         });
+        capHolder.invalidate();
     }
 
     /**
@@ -501,6 +497,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
                 parts.forEach(p::onPartChanged);
             }
         });
+        capHolder.invalidate();
     }
 
     /**
@@ -552,6 +549,17 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
         return capabilityCache;
     }
 
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if (!removed) {
+            LazyOptional<T> opt = capHolder.getCapability(cap, side);
+            if (opt.isPresent()) {
+                return opt;
+            }
+        }
+        return super.getCapability(cap, side);
+    }
+
     //endregion
 
     public static boolean canPlacePart(ItemUseContext context, TMultiPart part) {
@@ -596,7 +604,6 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
      * Constructs this tile and its parts from a desc packet
      */
     public static void handleDescPacket(World world, BlockPos pos, MCDataInput packet) {
-
         List<TMultiPart> parts = new ArrayList<>();
         int nParts = packet.readUByte();
         for (int i = 0; i < nParts; i++) {
