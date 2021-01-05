@@ -7,9 +7,11 @@ import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.block.BlockMultiPart;
 import codechicken.multipart.block.TileMultiPart;
 import codechicken.multipart.init.ModContent;
+import codechicken.multipart.util.PartRayTraceResult;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -55,7 +57,7 @@ public class MultipartBlockRenderer implements ICCBlockRenderer {
             ccrs.overlay = OverlayTexture.NO_OVERLAY;
             ccrs.brightness = WorldRenderer.getPackedLightmapCoords(world, state, pos);
             ccrs.lightMatrix.locate(world, pos);
-            renderStatic(tile, MinecraftForgeClient.getRenderLayer(), ccrs);
+            renderBreaking(tile, ccrs);
             mStack.pop();
         }
     }
@@ -66,5 +68,12 @@ public class MultipartBlockRenderer implements ICCBlockRenderer {
             ret |= part.renderStatic(type, ccrs);
         }
         return ret;
+    }
+
+    private void renderBreaking(TileMultiPart tile, CCRenderState ccrs) {
+        if (Minecraft.getInstance().objectMouseOver instanceof PartRayTraceResult) {
+            PartRayTraceResult hit = (PartRayTraceResult) Minecraft.getInstance().objectMouseOver;
+            hit.part.renderBreaking(ccrs);
+        }
     }
 }

@@ -310,21 +310,24 @@ abstract class TMultiPart {
      * Everything you do is Thread Safe.
      *
      * @param layer The render layer
-     * @param ccrs  An instance of CCRenderState that is in use
+     * @param ccrs  An instance of CCRenderState to use.
      * @return true if vertices were added to the buffer
      */
     @OnlyIn(Dist.CLIENT)
     def renderStatic(layer: RenderType, ccrs: CCRenderState) = false
 
     /**
-     * Render the static, unmoving faces of this part into the world renderer.
+     * Override how your part displays its breaking progress,
+     * By default this method will delegate to renderStatic with a null RenderType.
+     * You shouldn't need to override this in _most_ cases.
      *
      * CCRenderState is set up as follows should you wish to use it:
      *  - CCRenderState.reset() has been called
      *  - The current buffer is bound
+     *  - LightMatrix has been located.
      *
-     * Otherwise an instance of the VertexBuffer can be retrieved from
-     * CCRenderState via CCRenderState.getBuffer()
+     * Otherwise an instance of the [[com.mojang.blaze3d.vertex.IVertexBuilder]] and [[net.minecraft.client.renderer.vertex.VertexFormat]] can be retrieved from
+     * CCRenderState via CCRenderState.getConsumer and CCRenderState.getVertexFormat
      *
      * NOTE: The tessellator is already drawing. DO NOT make draw calls or
      * mess with the GL state
@@ -332,11 +335,12 @@ abstract class TMultiPart {
      * This may be called on a ChunkBatching thread. Please make sure
      * Everything you do is Thread Safe.
      *
-     * @param ccrs    An instance of CCRenderState that is in use
-     * @param texture The current f overlay texture
+     * @param ccrs An instance of CCRenderState to use.
      */
     @OnlyIn(Dist.CLIENT)
-    def renderBreaking(texture: TextureAtlasSprite, ccrs: CCRenderState) {}
+    def renderBreaking(ccrs: CCRenderState) {
+        renderStatic(null, ccrs)
+    }
 
     /**
      * The bounds of this part for Frustum culling.

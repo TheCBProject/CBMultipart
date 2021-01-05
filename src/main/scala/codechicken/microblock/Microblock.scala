@@ -125,7 +125,7 @@ trait MicroblockClient extends Microblock with TIconHitEffectsPart {
     }
 
     override def renderStatic(layer: RenderType, ccrs: CCRenderState) = {
-        if (layer != null && getMaterial.canRenderInLayer(layer)) {
+        if (layer == null || getMaterial.canRenderInLayer(layer)) {
             render(layer, ccrs)
             true
         } else {
