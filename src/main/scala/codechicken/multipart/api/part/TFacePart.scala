@@ -1,7 +1,7 @@
 package codechicken.multipart.api.part;
 
 /**
- * Inteface which must be implemented by parts that go in a face part.
+ * Interface which must be implemented by parts that go in a face part.
  */
 trait TFacePart extends TSlottedPart {
     /**

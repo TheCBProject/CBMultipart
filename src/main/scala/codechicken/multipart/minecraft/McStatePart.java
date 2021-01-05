@@ -2,16 +2,20 @@ package codechicken.multipart.minecraft;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
+import codechicken.lib.raytracer.CuboidRayTraceResult;
 import codechicken.lib.render.CCRenderState;
+import codechicken.lib.texture.TextureUtils;
+import codechicken.lib.vec.Cuboid6;
 import codechicken.multipart.api.NormalOcclusionTest;
-import codechicken.multipart.api.part.IModelRenderPart;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.api.part.TNormalOcclusionPart;
+import codechicken.multipart.api.part.*;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
@@ -20,12 +24,14 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 
 import java.util.Collections;
 
-public abstract class McStatePart extends TMultiPart implements TNormalOcclusionPart, IModelRenderPart {
+public abstract class McStatePart extends TMultiPart implements TNormalOcclusionPart, IModelRenderPart, TIconHitEffectsPart {
 
     public BlockState state;
 
@@ -143,35 +149,32 @@ public abstract class McStatePart extends TMultiPart implements TNormalOcclusion
         return IModelRenderPart.super.renderStatic(layer, ccrs);
     }
 
-    //    @Override
-    //    public Cuboid6 getBounds() {
-    //        if (tile() != null) {
-    //            //TODO VoxelShape.
-    //            return Cuboid6.full;//new Cuboid6(getBlock().getBoundingBox(state, world(), pos()));
-    //        } else {
-    //            return Cuboid6.full;//new Cuboid6(getBlock().getBoundingBox(state, null, null));
-    //        }
-    //    }
-    //
-    //    @Override
-    //    @OnlyIn (Dist.CLIENT)
-    //    public TextureAtlasSprite getBreakingIcon(CuboidRayTraceResult hit) {
-    //        return getBrokenIcon(hit.getFace().ordinal());
-    //    }
-    //
-    //    @Override
-    //    @OnlyIn (Dist.CLIENT)
-    //    public TextureAtlasSprite getBrokenIcon(int side) {
-    //        return TextureUtils.getParticleIconForBlock(state);
-    //    }
-    //
-    //    @Override
-    //    public void addHitEffects(CuboidRayTraceResult hit, ParticleManager manager) {
-    //        IconHitEffects.addHitEffects(this, hit, manager);
-    //    }
-    //
-    //    @Override
-    //    public void addDestroyEffects(CuboidRayTraceResult hit, ParticleManager manager) {
-    //        IconHitEffects.addDestroyEffects(this, manager, false);
-    //    }
+    @Override
+    public Cuboid6 getBounds() {
+        return new Cuboid6(getOutlineShape().getBoundingBox());
+    }
+
+    @Override
+    @OnlyIn (Dist.CLIENT)
+    public TextureAtlasSprite getBreakingIcon(PartRayTraceResult hit) {
+        return getBrokenIcon(hit.getFace().ordinal());
+    }
+
+    @Override
+    @OnlyIn (Dist.CLIENT)
+    public TextureAtlasSprite getBrokenIcon(int side) {
+        return Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes()
+                .getModel(getCurrentState())
+                .getParticleTexture(getModelData());
+    }
+
+    @Override
+    public void addHitEffects(PartRayTraceResult hit, ParticleManager manager) {
+        IconHitEffects.addHitEffects(this, hit, manager);
+    }
+
+    @Override
+    public void addDestroyEffects(PartRayTraceResult hit, ParticleManager manager) {
+        IconHitEffects.addDestroyEffects(this, manager, true);
+    }
 }
