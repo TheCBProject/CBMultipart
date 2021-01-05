@@ -43,7 +43,7 @@ import java.util.Random;
 public class BlockMultiPart extends Block {
 
     public BlockMultiPart() {
-        super(Block.Properties.create(Material.ROCK));
+        super(Block.Properties.create(Material.ROCK).variableOpacity());
     }
 
     @Override
