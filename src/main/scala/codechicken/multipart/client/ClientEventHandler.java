@@ -34,7 +34,7 @@ public class ClientEventHandler {
         TileMultiPart tile = BlockMultiPart.getTile(info.getRenderViewEntity().world, target.getPos());
         if (tile == null) return;
 
-        TMultiPart part = tile.getPartList().get(hit.partIndex);
+        TMultiPart part = hit.part;
 
         if (!part.drawHighlight(hit, info, mStack, buffers, partialTicks)) {
             Matrix4 mat = new Matrix4(mStack);

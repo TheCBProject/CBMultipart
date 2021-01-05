@@ -85,7 +85,7 @@ class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: Blo
         }
 
         if (doExpand) {
-            val hpart = htile.getPartList.get(hit.asInstanceOf[PartRayTraceResult].partIndex)
+            val hpart = hit.asInstanceOf[PartRayTraceResult].part
             if (hpart.getType == mcrFactory.getType) {
                 val mpart = hpart.asInstanceOf[CommonMicroblock]
                 if (mpart.material == material && mpart.getSize + size < 8) {

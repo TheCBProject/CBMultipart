@@ -132,10 +132,7 @@ public class BlockMultiPart extends Block {
         }
 
         if (world.isRemote && tile.isClientTile()) {
-            TMultiPart part = tile.getPartList().get(hit.partIndex);
-            if (part != null) {
-                part.addDestroyEffects(hit, Minecraft.getInstance().particles);
-            }
+            hit.part.addDestroyEffects(hit, Minecraft.getInstance().particles);
             return true;
         }
 
@@ -272,10 +269,7 @@ public class BlockMultiPart extends Block {
         TileMultiPart tile = getTile(world, ((BlockRayTraceResult) blockHit).getPos());
         if (tile != null && blockHit instanceof PartRayTraceResult) {
             PartRayTraceResult hit = (PartRayTraceResult) blockHit;
-            TMultiPart part = tile.getPartList().get(hit.partIndex);
-            if (part != null) {
-                part.addHitEffects(hit, manager);
-            }
+            hit.part.addHitEffects(hit, manager);
         }
         return true;
     }

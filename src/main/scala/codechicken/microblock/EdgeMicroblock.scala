@@ -38,7 +38,7 @@ object EdgePlacement extends PlacementProperties {
         val part = PostMicroFactory.create(pmt.world.isRemote, pmt.material)
         part.setShape(pmt.size, pmt.hit.getFace.ordinal >> 1)
         if (pmt.doExpand) {
-            val hpart = pmt.htile.getPartList.get(pmt.hit.asInstanceOf[PartRayTraceResult].partIndex)
+            val hpart = pmt.hit.asInstanceOf[PartRayTraceResult].part
             if (hpart.getType == PostMicroFactory.getType) {
                 val mpart = hpart.asInstanceOf[Microblock]
                 if (mpart.material == pmt.material && mpart.getSize + pmt.size < 8) {

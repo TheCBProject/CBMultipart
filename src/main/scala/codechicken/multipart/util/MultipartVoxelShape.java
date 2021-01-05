@@ -36,10 +36,8 @@ public class MultipartVoxelShape extends VoxelShape {
     @Override
     public BlockRayTraceResult rayTrace(Vec3d start, Vec3d end, BlockPos pos) {
 
-        List<TMultiPart> parts = tile.getPartList();
-        return IntStream.range(0, parts.size())//
-                .mapToObj(index -> {
-                    TMultiPart part = parts.get(index);
+        return tile.getPartList().stream()
+                .map(part -> {
                     BlockRayTraceResult hit = part.getRayTraceShape().rayTrace(start, end, pos);
                     if (hit == null) {
                         hit = part.getOutlineShape().rayTrace(start, end, pos);
@@ -49,17 +47,17 @@ public class MultipartVoxelShape extends VoxelShape {
                     }
                     PartRayTraceResult result;
                     if (hit instanceof DistanceRayTraceResult) {
-                        result = new PartRayTraceResult(index, (DistanceRayTraceResult) hit);
+                        result = new PartRayTraceResult(part, (DistanceRayTraceResult) hit);
                     } else {
-                        result = new PartRayTraceResult(index, hit, start);
+                        result = new PartRayTraceResult(part, hit, start);
                     }
                     result.subHit = hit.subHit;
                     result.hitInfo = hit.hitInfo;
                     return result;
-                })//
-                .filter(Objects::nonNull)//
-                .sorted()//
-                .findFirst()//
+                })
+                .filter(Objects::nonNull)
+                .sorted()
+                .findFirst()
                 .orElse(null);
     }
 }

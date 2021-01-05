@@ -343,10 +343,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     public VoxelShape getRayTraceShape() { return rayTraceShapeHolder.update(partList); }
 
     public void harvestPart(PartRayTraceResult hit, PlayerEntity player) {
-        TMultiPart part = partList.get(hit.partIndex);
-        if (part != null) {
-            part.harvest(player, hit);
-        }
+        hit.part.harvest(player, hit);
     }
 
     public List<ItemStack> getDrops() {
@@ -357,11 +354,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     }
 
     public ItemStack getPickBlock(PartRayTraceResult hit) {
-        TMultiPart part = partList.get(hit.partIndex);
-        if (part != null) {
-            return part.pickItem(hit);
-        }
-        return ItemStack.EMPTY;
+        return hit.part.pickItem(hit);
     }
 
     public float getExplosionResistance(Entity exploder, Explosion explosion) {
@@ -379,11 +372,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     }
 
     public float getPlayerRelativeBlockHardness(PlayerEntity player, PartRayTraceResult hit) {
-        TMultiPart part = partList.get(hit.partIndex);
-        if (part != null) {
-            return part.getStrength(player, hit);
-        }
-        return 1 / 100F;
+        return hit.part.getStrength(player, hit);
     }
 
     @Override
@@ -402,18 +391,11 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     }
 
     public ActionResultType onBlockActivated(PlayerEntity player, PartRayTraceResult hit, Hand hand) {
-        TMultiPart part = partList.get(hit.partIndex);
-        if (part != null) {
-            return part.activate(player, hit, player.getHeldItem(hand), hand);
-        }
-        return ActionResultType.FAIL;
+        return hit.part.activate(player, hit, player.getHeldItem(hand), hand);
     }
 
     public void onBlockClicked(PlayerEntity player, PartRayTraceResult hit) {
-        TMultiPart part = partList.get(hit.partIndex);
-        if (part != null) {
-            part.click(player, hit, player.getHeldItemMainhand());
-        }
+        hit.part.click(player, hit, player.getHeldItemMainhand());
     }
 
     @Override
