@@ -13,7 +13,7 @@ import java.util.List;
  * Created by covers1624 on 18/9/20.
  */
 @MultiPartTrait (ITickablePart.class)
-class TTickableTile extends TileMultiPart implements ITickableTileEntity {
+public class TTickableTile extends TileMultiPart implements ITickableTileEntity {
 
     private final List<ITickablePart> tickingParts = new ArrayList<>();
     private boolean doesTick;

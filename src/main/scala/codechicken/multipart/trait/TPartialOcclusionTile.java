@@ -18,7 +18,7 @@ import java.util.List;
  * Created by covers1624 on 2/9/20.
  */
 @MultiPartTrait (TPartialOcclusionPart.class)
-class TPartialOcclusionTile extends TileMultiPart {
+public class TPartialOcclusionTile extends TileMultiPart {
 
     //Static cache.
     private static TPartialOcclusionTile lastOcclusionTestedTile;

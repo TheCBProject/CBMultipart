@@ -13,7 +13,7 @@ import java.util.Random;
  * Created by covers1624 on 2/9/20.
  */
 @MultiPartTrait (value = AnimateTickPart.class, side = TraitSide.CLIENT)
-class TAnimateTickTile extends TileMultiPart {
+public class TAnimateTickTile extends TileMultiPart {
 
     @Override
     public void animateTick(Random random) {

@@ -22,7 +22,7 @@ import java.util.List;
  */
 @MultiPartTrait (IInventory.class)
 @MultiPartTrait (ISidedInventory.class)
-class TInventoryTile extends TileMultiPart implements ISidedInventory {
+public class TInventoryTile extends TileMultiPart implements ISidedInventory {
 
     private List<IInventory> invList = new ArrayList<>();
 

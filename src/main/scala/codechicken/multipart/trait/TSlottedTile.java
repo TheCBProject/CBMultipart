@@ -11,7 +11,7 @@ import java.util.Arrays;
  * Created by covers1624 on 1/1/21.
  */
 @MultiPartTrait (TSlottedPart.class)
-class TSlottedTile extends TileMultiPart {
+public class TSlottedTile extends TileMultiPart {
 
     private TMultiPart[] v_partMap = new TMultiPart[27];
 

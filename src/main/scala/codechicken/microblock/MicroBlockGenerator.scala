@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableSet
 /**
  * Created by covers1624 on 4/18/20.
  */
-object MicroBlockGenerator extends SidedGenerator[Microblock, MicroMaterial](MultiPartGenerator.MIXIN_COMPILER, classOf[Microblock], "cmb", classOf[MicroMaterial]) {
+object MicroBlockGenerator extends SidedGenerator[Microblock, Factory, MicroMaterial](MultiPartGenerator.MIXIN_COMPILER, classOf[Microblock], classOf[Factory], "cmb") {
 
     def loadAnnotations() {
         loadAnnotations(classOf[MicroBlockTrait], classOf[TraitList])
@@ -23,7 +23,10 @@ object MicroBlockGenerator extends SidedGenerator[Microblock, MicroMaterial](Mul
         if (client) {
             traitBuilder.add(factory.clientTraitKey)
         }
-        construct(traitBuilder.build(), material: MicroMaterial)
+        construct(traitBuilder.build()).create(material)
     }
+}
 
+trait Factory {
+    def create(material:MicroMaterial): Microblock
 }

@@ -1,4 +1,8 @@
-package codechicken.multipart.api.part;
+package codechicken.multipart.api.part
+
+import codechicken.multipart.`trait`.TSlottedTile
+import codechicken.multipart.api.annotation.MultiPartMarker
+;
 
 /**
  * Interface for parts that fill a slot based configuration as defined in PartMap.
@@ -6,6 +10,7 @@ package codechicken.multipart.api.part;
  *
  * Marker interface for TSlottedTile
  */
+@MultiPartMarker (classOf[TSlottedTile])
 trait TSlottedPart extends TMultiPart {
     /**
      * a bitmask of slots that this part fills. slot x is 1<<x

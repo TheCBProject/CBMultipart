@@ -112,7 +112,7 @@ public class MultiPartHelper {
                 //concat traits and generate new tile.
                 ImmutableSet<MixinFactory.TraitKey> newTraits = ImmutableSet.<MixinFactory.TraitKey>builder()//
                         .addAll(tileTraits).addAll(traits).build();
-                newTile = MultiPartGenerator.INSTANCE.construct(newTraits);
+                newTile = MultiPartGenerator.INSTANCE.construct(newTraits).newInstance();
                 newTile.setValid(false);
                 silentAddTile(world, pos, newTile);
                 newTile.from(tile);
@@ -120,7 +120,7 @@ public class MultiPartHelper {
         } else {
             //Nothing exists in world, just create a new tile with the required traits.
             world.setBlockState(pos, ModContent.blockMultipart.getDefaultState(), 0);
-            newTile = MultiPartGenerator.INSTANCE.construct(traits);
+            newTile = MultiPartGenerator.INSTANCE.construct(traits).newInstance();
             silentAddTile(world, pos, newTile);
         }
         //actually add the part to the tile.

@@ -7,7 +7,7 @@ import net.minecraft.util.math.BlockPos;
 /**
  * Manual trait implemented on every client side TileMultiPart.
  */
-class TileMultipartClient extends TileMultiPart {
+public class TileMultipartClient extends TileMultiPart {
 
     @Override
     public boolean isClientTile() {
@@ -22,12 +22,4 @@ class TileMultipartClient extends TileMultiPart {
             world.worldRenderer.markBlockRangeForRenderUpdate(pos.getX(), pos.getY(), pos.getZ(), pos.getX(), pos.getY(), pos.getZ());
         }
     }
-
-    //    def renderDamage(texture: TextureAtlasSprite, ccrs: CCRenderState) {
-//        Minecraft.getInstance.objectMouseOver match {
-//            case hit: PartRayTraceResult if partList.isDefinedAt(hit.partIndex) =>
-//                partList(hit.partIndex).renderBreaking(texture, ccrs)
-//            case _ =>
-//        }
-//    }
 }

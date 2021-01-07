@@ -17,7 +17,7 @@ import static codechicken.multipart.util.PartMap.edgeBetween;
  * Created by covers1624 on 31/12/20.
  */
 @MultiPartTrait (IRedstonePart.class)
-class TRedstoneTile extends TileMultiPart implements IRedstoneTile {
+public class TRedstoneTile extends TileMultiPart implements IRedstoneTile {
 
     @Override
     public int strongPowerLevel(int side) {

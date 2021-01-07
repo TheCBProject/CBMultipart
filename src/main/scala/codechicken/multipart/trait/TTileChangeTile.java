@@ -15,7 +15,7 @@ import java.util.List;
  * Created by covers1624 on 23/9/20.
  */
 @MultiPartTrait (value = INeighborTileChangePart.class, side = TraitSide.SERVER)
-class TTileChangeTile extends TileMultiPart {
+public class TTileChangeTile extends TileMultiPart {
 
     private boolean weakTileChanges = false;
 
@@ -38,7 +38,8 @@ class TTileChangeTile extends TileMultiPart {
     @Override
     public void partRemoved(TMultiPart part, int p) {
         super.partRemoved(part, p);
-        weakTileChanges = getPartList().stream().anyMatch(e -> e instanceof INeighborTileChangePart && ((INeighborTileChangePart) e).weakTileChanges());
+        weakTileChanges = getPartList().stream()
+                .anyMatch(e -> e instanceof INeighborTileChangePart && ((INeighborTileChangePart) e).weakTileChanges());
     }
 
     @Override

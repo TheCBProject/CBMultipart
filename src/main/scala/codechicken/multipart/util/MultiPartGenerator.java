@@ -43,7 +43,7 @@ import static org.objectweb.asm.Opcodes.*;
  * TODO allow parallel registration of traits. Requires mixin compiler changes. (parallel stream processing of annotations)
  * Created by covers1624 on 4/5/20.
  */
-public class MultiPartGenerator extends SidedGenerator<TileMultiPart, TMultiPart> {
+public class MultiPartGenerator extends SidedGenerator<TileMultiPart, MultiPartGenerator.Factory, TMultiPart> {
 
     private static final Logger logger = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
@@ -57,7 +57,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultiPart, TMultiPart
     private final MixinFactory.TraitKey clientTrait = registerTrait(asmName("codechicken.multipart.trait.TileMultipartClient"));
 
     private MultiPartGenerator() {
-        super(MixinCompiler.create(new ForgeMixinBackend(), makeDebugger(), getMixinSupports()), TileMultiPart.class, "cmp");
+        super(MixinCompiler.create(new ForgeMixinBackend(), makeDebugger(), getMixinSupports()), TileMultiPart.class, Factory.class, "cmp");
         Optional<MixinLanguageSupport.JavaMixinLanguageSupport> javaSupport = mixinCompiler.findLanguageSupport("java");
         javaSupport//
                 .orElseThrow(() -> new RuntimeException("Unable to find JavaMixinLanguageSupport instance..."))//
@@ -127,7 +127,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultiPart, TMultiPart
         if (tile instanceof TileMultiPart && traits.equals(getTraitsForClass(tile.getClass()))) {
             return (TileMultiPart) tile;
         }
-        return construct(traits);
+        return construct(traits).newInstance();
     }
 
     public TraitKey registerPassthroughTrait(@AsmName String iName) {
@@ -306,6 +306,10 @@ public class MultiPartGenerator extends SidedGenerator<TileMultiPart, TMultiPart
                 mv.visitEnd();
             }
         }
+    }
+
+    public interface Factory {
+        TileMultiPart newInstance();
     }
 
     private static SimpleDebugger.DumpType parseType(String value) {
