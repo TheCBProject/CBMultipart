@@ -9,7 +9,6 @@ import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
 import codechicken.lib.world.IChunkLoadTile;
 import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.capability.MergedCapabilityHolder;
 import codechicken.multipart.init.ModContent;
 import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.network.MultiPartSPH;
@@ -72,8 +71,6 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
             .setExtractor(TMultiPart::getRayTraceShape)
             .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
 
-    private final MergedCapabilityHolder capHolder = new MergedCapabilityHolder(this);
-
     public TileMultiPart() {
         super(ModContent.tileMultipartType);
     }
@@ -96,7 +93,6 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
      */
     public void copyFrom(TileMultiPart that) {
         partList = that.partList;
-        capHolder.invalidate();
         markShapeChange();
     }
 
@@ -124,7 +120,6 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
      */
     public void clearParts() {
         partList = new ArrayList<>();
-        capHolder.invalidate();
         markShapeChange();
     }
 
@@ -169,6 +164,13 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
      * Overriden by {@link codechicken.multipart.trait.TSlottedTile}
      */
     public TMultiPart getSlottedPart(int slot) { return null; }
+
+    /**
+     * Called when the Tile is marked as removed via {@link #remove()}.
+     * <p>
+     * Provided for trait overrides, do not call externally.
+     */
+    public void onRemoved() { }
 
     public void operate(Consumer<TMultiPart> cons) {
         for (TMultiPart part : partList) {
@@ -257,7 +259,6 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
 
         partList.add(part);
         bindPart(part);
-        capHolder.invalidate();
         markShapeChange();
         part.bind(this);
     }
@@ -295,7 +296,6 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
         partRemoved(part, idx);
         part.onRemoved();
         part.tile_$eq(null);
-        capHolder.invalidate();
         markShapeChange();
 
         if (partList.isEmpty()) world.removeBlock(pos, false);
@@ -325,7 +325,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     public void remove() {
         if (!isRemoved()) {
             super.remove();
-            capHolder.invalidate();
+            onRemoved();
             if (world != null) {
                 partList.forEach(TMultiPart::onWorldSeparate);
             }
@@ -467,7 +467,6 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
                 e.onPartChanged(part);
             }
         });
-        capHolder.invalidate();
     }
 
     /**
@@ -479,7 +478,6 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
                 parts.forEach(p::onPartChanged);
             }
         });
-        capHolder.invalidate();
     }
 
     /**
@@ -530,18 +528,6 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     public CapabilityCache getCapCache() {
         return capabilityCache;
     }
-
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (!removed) {
-            LazyOptional<T> opt = capHolder.getCapability(cap, side);
-            if (opt.isPresent()) {
-                return opt;
-            }
-        }
-        return super.getCapability(cap, side);
-    }
-
     //endregion
 
     public static boolean canPlacePart(ItemUseContext context, TMultiPart part) {
