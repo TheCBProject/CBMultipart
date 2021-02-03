@@ -49,7 +49,7 @@ public class TCapabilityTile extends TileMultiPart {
 
     @Override
     public void bindPart(TMultiPart _part) {
-        super.partAdded(_part);
+        super.bindPart(_part);
         if (!(_part instanceof ICapabilityProvider)) {
             return;
         }

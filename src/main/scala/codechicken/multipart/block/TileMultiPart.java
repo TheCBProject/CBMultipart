@@ -331,6 +331,13 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
             }
         }
     }
+
+    //Empty method here fixes trait inheritance issue.
+    @Override
+    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
+        return super.getCapability(cap, side);
+    }
+
     //endregion
 
     //region *** Internal callbacks ***
