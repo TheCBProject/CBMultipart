@@ -9,6 +9,7 @@ buildscript {
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 
@@ -21,6 +22,7 @@ plugins {
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: "org.spongepowered.mixin"
 
 group = "codechicken"
 archivesBaseName = "CBMultipart"
@@ -81,6 +83,10 @@ minecraft {
             mods { cb_microblock { source sourceSets.main } }
         }
     }
+}
+
+mixin {
+    add (sourceSets.main, "mixins.cbmultipart.refmap.json")
 }
 
 configurations {
@@ -164,6 +170,7 @@ shadowJar {
         attributes 'Implementation-Vendor': 'covers1624'
         attributes 'Implementation-Version': version
         attributes 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        attributes 'MixinConfigs': 'mixins.cbmultipart.json'
     }
 
     configurations = [project.configurations.shadow]
@@ -207,6 +214,7 @@ task deobfJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) 
         attributes 'Implementation-Vendor': 'covers1624'
         attributes 'Implementation-Version': version
         attributes 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        attributes 'MixinConfigs': 'mixins.cbmultipart.json'
     }
 
     configurations = [project.configurations.shadow]
