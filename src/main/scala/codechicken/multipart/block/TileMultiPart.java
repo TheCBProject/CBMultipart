@@ -297,6 +297,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
         part.onRemoved();
         part.tile_$eq(null);
         markShapeChange();
+        recalcLight(false, true);
 
         if (partList.isEmpty()) world.removeBlock(pos, false);
         return idx;
