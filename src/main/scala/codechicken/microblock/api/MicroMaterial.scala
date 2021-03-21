@@ -1,11 +1,14 @@
 package codechicken.microblock.api
 
+import codechicken.lib.render.CCRenderState
 import codechicken.lib.render.pipeline.IVertexOperation
-import codechicken.lib.vec.{Cuboid6, Vector3}
-import codechicken.microblock.{MicroBlockGenerator, Microblock}
+import codechicken.lib.vec.{Cuboid6, Matrix4}
+import codechicken.microblock.{MicroBlockGenerator, MicroblockClient}
+import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.block.SoundType
-import net.minecraft.client.renderer.RenderType
+import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
+import net.minecraft.client.renderer.{IRenderTypeBuffer, RenderType}
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
@@ -14,8 +17,7 @@ import net.minecraft.util.text.ITextComponent
 import net.minecraft.world.{Explosion, IWorldReader}
 import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 import net.minecraftforge.event.RegistryEvent
-import net.minecraftforge.fml.InterModComms
-import net.minecraftforge.registries.{ForgeRegistryEntry, IForgeRegistry}
+import net.minecraftforge.registries.ForgeRegistryEntry
 
 /**
  * A MicroMaterial! Used to define the type of a Microblock, can control various aspects
@@ -55,6 +57,22 @@ abstract class MicroMaterial extends ForgeRegistryEntry[MicroMaterial] {
      */
     @OnlyIn(Dist.CLIENT)
     def getMicroRenderOps(side: Int, layer: RenderType, bounds: Cuboid6): Seq[Seq[IVertexOperation]]
+
+    /**
+     * Called to override the item renderer for a given Microblock for your MicroMaterial.
+     *
+     * @param ccrs          The CCRenderState, already setup, lightmap and overlay can be retrieved from here.
+     * @param stack         The ItemStack being rendered.
+     * @param transformType The transformation Type of where we are rendering.
+     * @param mStack        The Original MatrixStack passed to the ItemRenderer.
+     * @param buffers       The IRenderTypeBuffer to get your buffers from.
+     * @param mat           A Matrix4 with mStack already applied, and translated to the part center.
+     * @param part          The Microblock to render.
+     * @return Returning true here means you did something custom and no additional rendering will be done for your item. False means default rendering will be performed.
+     *
+     */
+    @OnlyIn(Dist.CLIENT)
+    def renderItem(ccrs: CCRenderState, stack: ItemStack, transformType: TransformType, mStack: MatrixStack, buffers: IRenderTypeBuffer, mat: Matrix4, part: MicroblockClient): Boolean = false
 
     /**
      * Get the render pass for which this material renders in.
@@ -105,5 +123,5 @@ abstract class MicroMaterial extends ForgeRegistryEntry[MicroMaterial] {
     /**
      * Get the explosion resistance of this part to an explosion caused by entity
      */
-    def explosionResistance(world:IWorldReader, pos:BlockPos, entity: Entity, explosion: Explosion): Float
+    def explosionResistance(world: IWorldReader, pos: BlockPos, entity: Entity, explosion: Explosion): Float
 }

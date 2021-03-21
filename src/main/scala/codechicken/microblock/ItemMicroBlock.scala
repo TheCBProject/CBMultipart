@@ -2,7 +2,6 @@ package codechicken.microblock
 
 import codechicken.lib.raytracer.RayTracer
 import codechicken.lib.render.CCRenderState
-import codechicken.lib.render.buffer.TransformingVertexBuilder
 import codechicken.lib.render.item.IItemRenderer
 import codechicken.lib.util.TransformUtils
 import codechicken.lib.vec.{Matrix4, Vector3}
@@ -98,7 +97,7 @@ object ItemMicroBlock {
         stack
     }
 
-    /** Itemstack getters **/
+    /** Itemstack getters * */
 
     def getFactoryID(stack: ItemStack): Int = {
         stack.getOrCreateTag()
@@ -142,23 +141,27 @@ object ItemMicroBlockRenderer extends IItemRenderer {
 
     override def getTransforms = TransformUtils.DEFAULT_BLOCK
 
-    override def renderItem(stack: ItemStack, transformType: TransformType, mStack: MatrixStack, getter: IRenderTypeBuffer, packedLight: Int, packedOverlay: Int) {
+    override def renderItem(stack: ItemStack, transformType: TransformType, mStack: MatrixStack, buffers: IRenderTypeBuffer, packedLight: Int, packedOverlay: Int) {
         val material = getMaterialFromStack(stack)
         val factory = getFactory(stack)
         val size = getSize(stack)
         if (material == null || factory == null) {
             return
         }
-        val mat = new Matrix4(mStack)
         val part = factory.create(true, getMaterialFromStack(stack)).asInstanceOf[MicroblockClient]
-        val ccrs = CCRenderState.instance()
         part.setShape(size, factory.itemSlot)
+
+        val mat = new Matrix4(mStack)
         mat.translate(new Vector3(0.5, 0.5, 0.5).subtract(part.getBounds.center))
 
+        val ccrs = CCRenderState.instance()
         ccrs.reset()
-        ccrs.bind(part.getMaterial.getRenderLayer, getter, mat)
         ccrs.brightness = packedLight
         ccrs.overlay = packedOverlay
+
+        if (material.renderItem(ccrs, stack, transformType, mStack, buffers, mat, part)) return
+
+        ccrs.bind(part.getMaterial.getRenderLayer, buffers, mat)
         part.render(null, ccrs)
     }
 
