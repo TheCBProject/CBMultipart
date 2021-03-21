@@ -1,7 +1,6 @@
 package codechicken.microblock
 
 import java.util.OptionalDouble
-
 import codechicken.lib.render.buffer.TransformingVertexBuilder
 import codechicken.lib.vec.Rotation._
 import codechicken.lib.vec.{Matrix4, Rotation, Vector3}
@@ -10,17 +9,21 @@ import com.mojang.blaze3d.matrix.MatrixStack
 import com.mojang.blaze3d.vertex.IVertexBuilder
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.client.renderer.{IRenderTypeBuffer, RenderState, RenderType}
+import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 
 trait PlacementGrid {
+
     def getHitSlot(vhit: Vector3, side: Int): Int
 
+    @OnlyIn(Dist.CLIENT)
     def render(hit: Vector3, side: Int, mStack: MatrixStack, getter: IRenderTypeBuffer) {
         val mat = new Matrix4(mStack)
         transformFace(hit, side, mat)
-        val builder = new TransformingVertexBuilder(getter.getBuffer(PlacementGrid.lineType), mat)
+        val builder = new TransformingVertexBuilder(getter.getBuffer(PlacementGridClient.lineType), mat)
         drawLines(builder)
     }
 
+    @OnlyIn(Dist.CLIENT)
     def drawLines(builder: IVertexBuilder) {}
 
     def transformFace(hit: Vector3, side: Int, mat: Matrix4) {
@@ -32,7 +35,8 @@ trait PlacementGrid {
     }
 }
 
-object PlacementGrid {
+@OnlyIn(Dist.CLIENT)
+object PlacementGridClient {
     val lineType = RenderType.makeType("placement_lines", DefaultVertexFormats.POSITION_COLOR, 1, 256, RenderType.State.getBuilder
         .line(new RenderState.LineState(OptionalDouble.of(2.0)))
         .layer(RenderState.PROJECTION_LAYERING)
@@ -43,6 +47,8 @@ object PlacementGrid {
 }
 
 class FaceEdgeGrid(size: Double) extends PlacementGrid {
+
+    @OnlyIn(Dist.CLIENT)
     override def drawLines(builder: IVertexBuilder) {
         builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
         builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
@@ -98,6 +104,8 @@ class FaceEdgeGrid(size: Double) extends PlacementGrid {
 object FacePlacementGrid extends FaceEdgeGrid(1 / 4D)
 
 object CornerPlacementGrid extends PlacementGrid {
+
+    @OnlyIn(Dist.CLIENT)
     override def drawLines(builder: IVertexBuilder) {
         builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
         builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
@@ -136,6 +144,8 @@ object CornerPlacementGrid extends PlacementGrid {
 }
 
 object EdgePlacementGrid extends PlacementGrid {
+
+    @OnlyIn(Dist.CLIENT)
     override def drawLines(builder: IVertexBuilder) {
         builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
         builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
