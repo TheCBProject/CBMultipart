@@ -70,7 +70,7 @@ public class PlacementConversionHandler {
         TMultiPart part = MultiPartRegistries.convertItem(ctx);
         TileMultiPart tile = MultiPartHelper.getOrConvertTile(world, pos);
 
-        if (part == null || tile == null) {
+        if (part == null || tile == null || !tile.canAddPart(part)) {
             return false;
         }
 
