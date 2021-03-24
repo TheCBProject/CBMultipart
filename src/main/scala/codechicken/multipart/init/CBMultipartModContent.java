@@ -16,7 +16,7 @@ import static codechicken.multipart.CBMultipart.MOD_ID;
  * Created by covers1624 on 2/9/20.
  */
 @ObjectHolder (MOD_ID)
-public class ModContent {
+public class CBMultipartModContent {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
 
@@ -28,8 +28,8 @@ public class ModContent {
 
     public static void init(IEventBus eventBus) {
         LOCK.lock();
-        eventBus.addGenericListener(Block.class, ModContent::onRegisterBlocks);
-        eventBus.addGenericListener(TileEntityType.class, ModContent::onRegisterTiles);
+        eventBus.addGenericListener(Block.class, CBMultipartModContent::onRegisterBlocks);
+        eventBus.addGenericListener(TileEntityType.class, CBMultipartModContent::onRegisterTiles);
     }
 
     private static void onRegisterBlocks(RegistryEvent.Register<Block> event) {

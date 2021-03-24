@@ -1,6 +1,7 @@
 package codechicken.multipart;
 
-import codechicken.multipart.init.ModContent;
+import codechicken.multipart.init.CBMultipartModContent;
+import codechicken.multipart.init.DataGenerators;
 import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.proxy.Proxy;
 import codechicken.multipart.proxy.ProxyClient;
@@ -24,9 +25,9 @@ public class CBMultipart {
     public CBMultipart() {
         proxy = DistExecutor.safeRunForDist(() -> ProxyClient::new, () -> Proxy::new);
         ScorgeModLoadingContext.get().getModEventBus().register(this);
-        ModContent.init(ScorgeModLoadingContext.get().getModEventBus());
-        //        ScorgeModLoadingContext.get().getModEventBus().register(MultipartModContent$.MODULE$);
+        CBMultipartModContent.init(ScorgeModLoadingContext.get().getModEventBus());
         MultiPartRegistries.init(ScorgeModLoadingContext.get().getModEventBus());
+        DataGenerators.init(ScorgeModLoadingContext.get().getModEventBus());
     }
 
     @SubscribeEvent

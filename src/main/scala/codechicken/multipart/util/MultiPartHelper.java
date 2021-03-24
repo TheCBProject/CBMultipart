@@ -4,7 +4,7 @@ import codechicken.lib.packet.PacketCustom;
 import codechicken.mixin.api.MixinFactory;
 import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.block.TileMultiPart;
-import codechicken.multipart.init.ModContent;
+import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.network.MultiPartSPH;
 import com.google.common.collect.ImmutableSet;
@@ -98,7 +98,7 @@ public class MultiPartHelper {
                 //Callback to the part, so it can do stuff to inworld tile before it gets nuked.
                 TMultiPart head = newTile.getPartList().get(0);
                 head.invalidateConvertedTile();
-                world.setBlockState(pos, ModContent.blockMultipart.getDefaultState(), 0);
+                world.setBlockState(pos, CBMultipartModContent.blockMultipart.getDefaultState(), 0);
                 silentAddTile(world, pos, newTile);
                 PacketCustom.sendToChunk(new SChangeBlockPacket(world, pos), world, pos);
                 head.onConverted();
@@ -119,7 +119,7 @@ public class MultiPartHelper {
             }
         } else {
             //Nothing exists in world, just create a new tile with the required traits.
-            world.setBlockState(pos, ModContent.blockMultipart.getDefaultState(), 0);
+            world.setBlockState(pos, CBMultipartModContent.blockMultipart.getDefaultState(), 0);
             newTile = MultiPartGenerator.INSTANCE.construct(traits).newInstance();
             silentAddTile(world, pos, newTile);
         }

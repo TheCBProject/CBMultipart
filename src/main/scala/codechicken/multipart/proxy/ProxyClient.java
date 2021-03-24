@@ -6,7 +6,7 @@ import codechicken.multipart.client.ClientEventHandler;
 import codechicken.multipart.client.MultipartBlockRenderer;
 import codechicken.multipart.client.MultipartTileRenderer;
 import codechicken.multipart.handler.ControlKeyHandler;
-import codechicken.multipart.init.ModContent;
+import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.network.MultiPartCPH;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -22,8 +22,8 @@ public class ProxyClient extends Proxy {
         ControlKeyHandler.init();
         ClientEventHandler.init();
         MultiPartCPH.init();
-        RenderTypeLookup.setRenderLayer(ModContent.blockMultipart, e -> true);
+        RenderTypeLookup.setRenderLayer(CBMultipartModContent.blockMultipart, e -> true);
         BlockRenderingRegistry.registerRenderer(new MultipartBlockRenderer());
-        ClientRegistry.bindTileEntityRenderer(SneakyUtils.unsafeCast(ModContent.tileMultipartType), MultipartTileRenderer::new);
+        ClientRegistry.bindTileEntityRenderer(SneakyUtils.unsafeCast(CBMultipartModContent.tileMultipartType), MultipartTileRenderer::new);
     }
 }

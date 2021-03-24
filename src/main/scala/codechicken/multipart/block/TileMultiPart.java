@@ -9,7 +9,7 @@ import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
 import codechicken.lib.world.IChunkLoadTile;
 import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.init.ModContent;
+import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.network.MultiPartSPH;
 import codechicken.multipart.util.*;
@@ -36,8 +36,6 @@ import net.minecraft.world.lighting.WorldLightManager;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -72,7 +70,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
             .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
 
     public TileMultiPart() {
-        super(ModContent.tileMultipartType);
+        super(CBMultipartModContent.tileMultipartType);
     }
 
     public List<TMultiPart> getPartList() {
@@ -450,7 +448,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
      * Notifies neighboring blocks that this tile has changed
      */
     public void notifyTileChange() {
-        world.notifyNeighborsOfStateChange(pos, ModContent.blockMultipart);
+        world.notifyNeighborsOfStateChange(pos, CBMultipartModContent.blockMultipart);
     }
 
     /**
@@ -460,9 +458,9 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     public void notifyPartChange(TMultiPart part) {
         internalPartChange(part);
 
-        BlockState state = ModContent.blockMultipart.getDefaultState();
+        BlockState state = CBMultipartModContent.blockMultipart.getDefaultState();
         world.notifyBlockUpdate(pos, state, state, 3);
-        world.notifyNeighborsOfStateChange(pos, ModContent.blockMultipart);
+        world.notifyNeighborsOfStateChange(pos, CBMultipartModContent.blockMultipart);
         world.getChunkProvider().getLightManager().checkBlock(pos);
     }
 
@@ -520,7 +518,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
      * Helper function for calling a second level notify on a side (eg indirect power from a lever)
      */
     public void notifyNeighborChange(Direction side) {
-        world.notifyNeighborsOfStateChange(getPos().offset(side), ModContent.blockMultipart);
+        world.notifyNeighborsOfStateChange(getPos().offset(side), CBMultipartModContent.blockMultipart);
     }
 
     public void notifyNeighborChange(int side) { notifyNeighborChange(Direction.byIndex(side)); }
@@ -590,7 +588,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
         TileEntity t = world.getTileEntity(pos);
         TileMultiPart tile = MultiPartGenerator.INSTANCE.generateCompositeTile(t, parts, true);
         if (tile != t) {
-            world.setBlockState(pos, ModContent.blockMultipart.getDefaultState());
+            world.setBlockState(pos, CBMultipartModContent.blockMultipart.getDefaultState());
             MultiPartHelper.silentAddTile(world, pos, tile);
         }
 

@@ -3,7 +3,7 @@ package codechicken.multipart.util;
 import codechicken.lib.data.MCDataByteBuf;
 import codechicken.lib.util.CrashLock;
 import codechicken.multipart.block.TileMultiPart;
-import codechicken.multipart.init.ModContent;
+import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.network.MultiPartSPH;
 import io.netty.buffer.Unpooled;
 import net.minecraft.nbt.CompoundNBT;
@@ -42,7 +42,7 @@ public class MultiPartLoadHandler {
         public CompoundNBT tag;
 
         public TileNBTContainer() {
-            super(ModContent.tileMultipartType);
+            super(CBMultipartModContent.tileMultipartType);
         }
 
         //Handle initial desc sync

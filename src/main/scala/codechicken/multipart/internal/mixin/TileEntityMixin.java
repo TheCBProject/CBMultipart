@@ -1,7 +1,7 @@
 package codechicken.multipart.internal.mixin;
 
 import codechicken.multipart.block.TileMultiPart;
-import codechicken.multipart.init.ModContent;
+import codechicken.multipart.init.CBMultipartModContent;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,7 +22,7 @@ public class TileEntityMixin {
     )
     private static void onCreate(CompoundNBT tag, CallbackInfoReturnable<TileEntity> cir) {
         String s = tag.getString("id");
-        if (ModContent.tileMultipartType.getRegistryName().toString().equals(s)) {
+        if (CBMultipartModContent.tileMultipartType.getRegistryName().toString().equals(s)) {
             cir.setReturnValue(TileMultiPart.fromNBT(tag));
         }
     }

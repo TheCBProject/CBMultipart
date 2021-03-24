@@ -6,7 +6,7 @@ import codechicken.lib.render.buffer.TransformingVertexBuilder;
 import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.block.BlockMultiPart;
 import codechicken.multipart.block.TileMultiPart;
-import codechicken.multipart.init.ModContent;
+import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.util.PartRayTraceResult;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -30,7 +30,7 @@ public class MultipartBlockRenderer implements ICCBlockRenderer {
 
     @Override
     public boolean canHandleBlock(ILightReader world, BlockPos pos, BlockState blockState) {
-        return blockState.getBlock() == ModContent.blockMultipart;
+        return blockState.getBlock() == CBMultipartModContent.blockMultipart;
     }
 
     @Override
