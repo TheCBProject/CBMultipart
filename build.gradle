@@ -6,7 +6,7 @@ buildscript {
         maven { url = "https://repo.spongepowered.org/maven/" }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:4.1.+'
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
@@ -22,11 +22,10 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: "org.spongepowered.mixin"
 
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+
 group = "codechicken"
 archivesBaseName = "CBMultipart"
-
-targetCompatibility = "1.8"
-sourceCompatibility = "1.8"
 
 sourceSets.main.resources.srcDirs += "src/main/generated"
 
@@ -84,12 +83,13 @@ minecraft {
 }
 
 mixin {
-    add (sourceSets.main, "mixins.cbmultipart.refmap.json")
+    add(sourceSets.main, "mixins.cbmultipart.refmap.json")
 }
 
 configurations {
     shadow
     compile.extendsFrom shadow
+    annotationProcessor.extendsFrom minecraft
 }
 
 repositories {

@@ -16,7 +16,7 @@ issueTrackerURL="https://github.com/TheCBProject/ForgeMultipart"
 [[dependencies.cb_multipart]]
 	modId="forge"
 	mandatory=true
-	versionRange="[28,)"
+	versionRange="[31.2.49,)"
 	ordering="NONE"
 	side="BOTH"
 [[dependencies.cb_multipart]]
@@ -46,7 +46,7 @@ issueTrackerURL="https://github.com/TheCBProject/ForgeMultipart"
 [[dependencies.cb_microblock]]
 	modId="forge"
 	mandatory=true
-	versionRange="[28,)"
+	versionRange="[31.2.49,)"
 	ordering="NONE"
 	side="BOTH"
 [[dependencies.cb_microblock]]
@@ -82,7 +82,7 @@ issueTrackerURL="https://github.com/TheCBProject/ForgeMultipart"
 [[dependencies.cb_multipart_minecraft]]
     modId="forge"
     mandatory=true
-    versionRange="[28,)"
+    versionRange="[31.2.49,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.cb_multipart_minecraft]]
