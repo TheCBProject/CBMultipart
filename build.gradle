@@ -82,14 +82,15 @@ minecraft {
     }
 }
 
-mixin {
-    add(sourceSets.main, "mixins.cbmultipart.refmap.json")
+sourceSets {
+    create("mixin")
 }
 
 configurations {
     shadow
     compile.extendsFrom shadow
-    annotationProcessor.extendsFrom minecraft
+    mixinAnnotationProcessor.extendsFrom minecraft
+    mixinImplementation.extendsFrom implementation
 }
 
 repositories {
@@ -100,6 +101,7 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
+    mixinCompile sourceSets.main.output
 
     //Scala
     compile "org.scala-lang:scala-compiler:${config.scala_version}"
@@ -118,6 +120,10 @@ dependencies {
     shadow "codechicken:ChickenASM:${config.chicken_asm_version}:modlauncher"
 
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.0.0'
+}
+
+mixin {
+    add("mixin", "mixins.cbmultipart.refmap.json")
 }
 
 reobf {
@@ -159,6 +165,7 @@ processResources { task ->
 jar.enabled = false//Disable normal jar, is replaced by ShadowJar.
 shadowJar {
     finalizedBy 'reobfShadowJar'
+    from sourceSets.mixin.output
     classifier 'universal'
     manifest {
         attributes 'Specification-Title': archivesBaseName
@@ -183,6 +190,8 @@ shadowJar {
     exclude 'org/apache/**'
     exclude 'org/objectweb/**'
     exclude 'com/google/**'
+    exclude 'scala/reflect/**'
+    exclude 'reflect.properties'
     exclude 'NOTICE'
     exclude 'LICENSE'
     exclude 'Log4j-charsets.properties'
@@ -202,6 +211,7 @@ task srcJar(type: Jar) {
 task deobfJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
     build.dependsOn it
     from sourceSets.main.output
+    from sourceSets.mixin.output
     classifier = 'deobf'
 
     manifest {
@@ -227,6 +237,8 @@ task deobfJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) 
     exclude 'org/apache/**'
     exclude 'org/objectweb/**'
     exclude 'com/google/**'
+    exclude 'scala/reflect/**'
+    exclude 'reflect.properties'
     exclude 'NOTICE'
     exclude 'LICENSE'
     exclude 'Log4j-charsets.properties'
