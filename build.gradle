@@ -82,15 +82,9 @@ minecraft {
     }
 }
 
-sourceSets {
-    create("mixin")
-}
-
 configurations {
     shadow
     compile.extendsFrom shadow
-    mixinAnnotationProcessor.extendsFrom minecraft
-    mixinImplementation.extendsFrom implementation
 }
 
 repositories {
@@ -101,7 +95,6 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
-    mixinCompile sourceSets.main.output
 
     //Scala
     compile "org.scala-lang:scala-compiler:${config.scala_version}"
@@ -122,8 +115,38 @@ dependencies {
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.0.0'
 }
 
+//TODO, needed until 'main' is a fully java source set.
+task mixinAnnotations(type: Exec) {
+    dependsOn compileScala, createMcpToSrg
+    compileScala.finalizedBy it
+
+    doFirst {
+        executable = javaToolchains.compilerFor {
+            languageVersion = JavaLanguageVersion.of(8)
+        }.get().executablePath
+        def destPath = compileScala.destinationDir.toPath()
+        def args = [
+                "-proc:only",
+                "-d",
+                compileScala.destinationDir,
+                "-classpath",
+                "${configurations.minecraft.asPath}${File.pathSeparatorChar}${tasks.compileScala.outputs.files.asPath}",
+                "-AreobfTsrgFile=${tasks.createMcpToSrg.outputs.files[0]}",
+                "-AoutRefMapFile=${new File(compileScala.destinationDir, "mixins.cbmultipart.refmap.json")}",
+                "-AmappingTypes=tsrg",
+        ]
+        tasks.compileScala.outputs.files.asFileTree.each {
+            def name = it.toString()
+            if (name.endsWith(".class") && name.contains("mixin")) {
+                args << destPath.relativize(it.toPath()).toString().replace(".class", "").replace(File.pathSeparator, ".").replace("/", ".")
+            }
+        }
+        setArgs(args)
+    }
+}
+
 mixin {
-    add("mixin", "mixins.cbmultipart.refmap.json")
+    add(sourceSets.main, "mixins.cbmultipart.refmap.json")
 }
 
 reobf {
@@ -165,7 +188,6 @@ processResources { task ->
 jar.enabled = false//Disable normal jar, is replaced by ShadowJar.
 shadowJar {
     finalizedBy 'reobfShadowJar'
-    from sourceSets.mixin.output
     classifier 'universal'
     manifest {
         attributes 'Specification-Title': archivesBaseName
@@ -211,7 +233,6 @@ task srcJar(type: Jar) {
 task deobfJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
     build.dependsOn it
     from sourceSets.main.output
-    from sourceSets.mixin.output
     classifier = 'deobf'
 
     manifest {
