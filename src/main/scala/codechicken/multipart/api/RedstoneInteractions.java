@@ -54,14 +54,14 @@ public class RedstoneInteractions {
      * Get the direct power level to space (pos) on side with mask
      */
     public static int getPowerTo(World world, BlockPos pos, int side, int mask) {
-        return getPower(world, pos.offset(Direction.byIndex(side)), side ^ 1, mask);
+        return getPower(world, pos.relative(Direction.from3DDataValue(side)), side ^ 1, mask);
     }
 
     /**
      * Get the direct power level provided by space (pos) on side with mask
      */
     public static int getPower(World world, BlockPos pos, int side, int mask) {
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         if (tile instanceof IRedstoneConnector) {
             return ((IRedstoneConnector) tile).weakPowerLevel(side, mask);
         }
@@ -74,9 +74,9 @@ public class RedstoneInteractions {
 
         int vMask = vanillaConnectionMask(world, pos, state, side, true);
         if ((vMask & mask) > 0) {
-            int m = world.getRedstonePower(pos, Direction.byIndex(side ^ 1));
+            int m = world.getSignal(pos, Direction.from3DDataValue(side ^ 1));
             if (m < 15 && block == Blocks.REDSTONE_WIRE) {
-                m = Math.max(m, state.get(RedstoneWireBlock.POWER));
+                m = Math.max(m, state.getValue(RedstoneWireBlock.POWER));
             } //painful vanilla kludge
             return m;
         }
@@ -89,7 +89,7 @@ public class RedstoneInteractions {
      * @param power , whether the connection mask is for signal transfer or visual connection. (some blocks accept power without visual connection)
      */
     public static int otherConnectionMask(IWorldReader world, BlockPos pos, int side, boolean power) {
-        return getConnectionMask(world, pos.offset(Direction.byIndex(side)), side ^ 1, power);
+        return getConnectionMask(world, pos.relative(Direction.from3DDataValue(side)), side ^ 1, power);
     }
 
     /**
@@ -116,7 +116,7 @@ public class RedstoneInteractions {
      * @param power If true, don't test canConnectRedstone on blocks, just get a power transmission mask rather than a visual connection
      */
     public static int getConnectionMask(IWorldReader world, BlockPos pos, int side, boolean power) {
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         if (tile instanceof IRedstoneConnector) {
             return ((IRedstoneConnector) tile).getConnectionMask(side);
         }
@@ -154,13 +154,13 @@ public class RedstoneInteractions {
         }
 
         if (block == Blocks.REPEATER) { //stupid minecraft hardcodes
-            int fside = state.get(HorizontalBlock.HORIZONTAL_FACING).ordinal();
+            int fside = state.getValue(HorizontalBlock.FACING).ordinal();
             if ((side & 6) == (fside & 6)) {
                 return power ? 0x1F : 4;
             }
             return 0;
         }
-        if (power || block.canConnectRedstone(state, world, pos, Direction.byIndex(side))) {
+        if (power || block.canConnectRedstone(state, world, pos, Direction.from3DDataValue(side))) {
             return 0x1F;
         }
         return 0;

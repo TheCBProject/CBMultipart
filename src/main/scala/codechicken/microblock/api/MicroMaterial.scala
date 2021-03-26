@@ -77,13 +77,13 @@ abstract class MicroMaterial extends ForgeRegistryEntry[MicroMaterial] {
     /**
      * Get the render pass for which this material renders in.
      */
-    def canRenderInLayer(layer: RenderType) = layer == RenderType.getSolid
+    def canRenderInLayer(layer: RenderType) = layer == RenderType.solid
 
 
     /**
      * Gets the render pass for which this material renders as an item.
      */
-    def getRenderLayer: RenderType = RenderType.getSolid
+    def getRenderLayer: RenderType = RenderType.solid
 
     /**
      * Return true if this material is not opaque (glass, ice).
@@ -123,5 +123,5 @@ abstract class MicroMaterial extends ForgeRegistryEntry[MicroMaterial] {
     /**
      * Get the explosion resistance of this part to an explosion caused by entity
      */
-    def explosionResistance(world: IWorldReader, pos: BlockPos, entity: Entity, explosion: Explosion): Float
+    def explosionResistance(world: IWorldReader, pos: BlockPos, explosion: Explosion): Float
 }

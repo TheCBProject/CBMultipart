@@ -16,13 +16,13 @@ class MicroRecipe(id: ResourceLocation) extends SpecialRecipe(id) {
 
     override def getSerializer = MicroblockModContent.microRecipeSerializer
 
-    override def getRecipeOutput = ItemMicroBlock.create(1, 1, BlockMicroMaterial.makeMaterialKey(Blocks.STONE.getDefaultState))
+    override def getResultItem = ItemMicroBlock.create(1, 1, BlockMicroMaterial.makeMaterialKey(Blocks.STONE.defaultBlockState))
 
-    override def matches(icraft: CraftingInventory, world: World) = !getCraftingResult(icraft).isEmpty
+    override def matches(icraft: CraftingInventory, world: World) = !assemble(icraft).isEmpty
 
-    override def canFit(width: Int, height: Int): Boolean = width >= 3 && height >= 3
+    override def canCraftInDimensions(width: Int, height: Int): Boolean = width >= 3 && height >= 3
 
-    override def getCraftingResult(icraft: CraftingInventory): ItemStack = {
+    override def assemble(icraft: CraftingInventory): ItemStack = {
         var res = getHollowResult(icraft)
         if (!res.isEmpty) return res
         res = getGluingResult(icraft)
@@ -45,7 +45,7 @@ class MicroRecipe(id: ResourceLocation) extends SpecialRecipe(id) {
         if (first.isEmpty || first.getItem != itemMicroBlock || factory != 0) return ItemStack.EMPTY
 
         for (i <- 1 to 8 if i != 4) {
-            val item = icraft.getStackInSlot(i)
+            val item = icraft.getItem(i)
             if (item.isEmpty || item.getItem != itemMicroBlock ||
                 microMaterial(item) != material || microFactory(item) != factory || microSize(item) != size) {
                 return ItemStack.EMPTY
@@ -61,7 +61,7 @@ class MicroRecipe(id: ResourceLocation) extends SpecialRecipe(id) {
         var mcrFactory = 0
         var material: MicroMaterial = null
         for (i <- 0 until 9) {
-            val item = icraft.getStackInSlot(i)
+            val item = icraft.getItem(i)
             if (!item.isEmpty) {
                 if (item.getItem != itemMicroBlock) return ItemStack.EMPTY
                 if (count == 0) {
@@ -173,7 +173,7 @@ class MicroRecipe(id: ResourceLocation) extends SpecialRecipe(id) {
     def getHollowFillResult(icraft: CraftingInventory): ItemStack = {
         var cover: ItemStack = ItemStack.EMPTY
         for (i <- 0 until 9) {
-            val item = icraft.getStackInSlot(i)
+            val item = icraft.getItem(i)
             if (!item.isEmpty) {
                 if (item.getItem != itemMicroBlock || !cover.isEmpty || microFactory(item) != 1) {
                     return ItemStack.EMPTY
@@ -203,5 +203,5 @@ object MicroRecipe {
         sawStrength >= matStrength || sawStrength == MicroMaterialRegistry.getMaxCuttingStrength
     }
 
-    def getStackRowCol(inv: CraftingInventory, row: Int, col: Int): ItemStack = inv.getStackInSlot(row + col * inv.getWidth)
+    def getStackRowCol(inv: CraftingInventory, row: Int, col: Int): ItemStack = inv.getItem(row + col * inv.getWidth)
 }

@@ -19,12 +19,12 @@ trait Saw extends Item {
 }
 
 class ItemSaw(sawTag: ConfigTag, val harvestLevel: Int) extends Item({
-    val maxDamage = sawTag.getTag("durability").setDefaultInt(1 << harvestLevel + 8).getInt
+    val durability = sawTag.getTag("durability").setDefaultInt(1 << harvestLevel + 8).getInt
     val prop = new Item.Properties()
-        .group(ItemGroup.TOOLS)
+        .tab(ItemGroup.TAB_TOOLS)
         .setNoRepair()
-    if (maxDamage > 0) {
-        prop.maxDamage(maxDamage)
+    if (durability > 0) {
+        prop.durability(durability)
     }
     prop
 }) with Saw {
@@ -32,9 +32,9 @@ class ItemSaw(sawTag: ConfigTag, val harvestLevel: Int) extends Item({
     override def hasContainerItem(stack: ItemStack) = true
 
     override def getContainerItem(stack: ItemStack) =
-        if (isDamageable) {
+        if (canBeDepleted) {
             val newStack = new ItemStack(stack.getItem, 1)
-            newStack.setDamage(stack.getDamage + 1)
+            newStack.setDamageValue(stack.getDamageValue + 1)
             newStack
         } else {
             stack

@@ -2,9 +2,7 @@ package codechicken.multipart.minecraft;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import codechicken.lib.raytracer.CuboidRayTraceResult;
 import codechicken.lib.render.CCRenderState;
-import codechicken.lib.texture.TextureUtils;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.multipart.api.NormalOcclusionTest;
 import codechicken.multipart.api.part.*;
@@ -36,14 +34,14 @@ public abstract class McStatePart extends TMultiPart implements TNormalOcclusion
     public BlockState state;
 
     public McStatePart() {
-        this.state = getDefaultState();
+        this.state = defaultBlockState();
     }
 
     public McStatePart(BlockState state) {
         this.state = state;
     }
 
-    public abstract BlockState getDefaultState();
+    public abstract BlockState defaultBlockState();
 
     public abstract ItemStack getDropStack();
 
@@ -94,18 +92,18 @@ public abstract class McStatePart extends TMultiPart implements TNormalOcclusion
     }
 
     public TMultiPart setStateOnPlacement(BlockItemUseContext context) {
-        state = getDefaultState().getBlock().getStateForPlacement(context);
+        state = defaultBlockState().getBlock().getStateForPlacement(context);
         return this;
     }
 
     @Override
     public float getStrength(PlayerEntity player, PartRayTraceResult hit) {
-        return state.getPlayerRelativeBlockHardness(player, player.world, new BlockPos(0, -1, 0));
+        return state.getDestroyProgress(player, player.level, new BlockPos(0, -1, 0));
     }
 
     @Override
     public int getLightValue() {
-        return state.getLightValue();
+        return state.getLightEmission();
     }
 
     @Override
@@ -119,13 +117,13 @@ public abstract class McStatePart extends TMultiPart implements TNormalOcclusion
     }
 
     @Override
-    public VoxelShape getCullingShape() {
-        return state.getRenderShape(world(), pos());
+    public VoxelShape getRenderOcclusionShape() {
+        return state.getOcclusionShape(world(), pos());
     }
 
     @Override
-    public VoxelShape getRayTraceShape() {
-        return state.getRaytraceShape(world(), pos());
+    public VoxelShape getInteractionShape() {
+        return state.getInteractionShape(world(), pos());
     }
 
     @Override
@@ -151,20 +149,20 @@ public abstract class McStatePart extends TMultiPart implements TNormalOcclusion
 
     @Override
     public Cuboid6 getBounds() {
-        return new Cuboid6(getOutlineShape().getBoundingBox());
+        return new Cuboid6(getOutlineShape().bounds());
     }
 
     @Override
     @OnlyIn (Dist.CLIENT)
     public TextureAtlasSprite getBreakingIcon(PartRayTraceResult hit) {
-        return getBrokenIcon(hit.getFace().ordinal());
+        return getBrokenIcon(hit.getDirection().ordinal());
     }
 
     @Override
     @OnlyIn (Dist.CLIENT)
     public TextureAtlasSprite getBrokenIcon(int side) {
-        return Minecraft.getInstance().getBlockRendererDispatcher().getBlockModelShapes()
-                .getModel(getCurrentState())
+        return Minecraft.getInstance().getBlockRenderer().getBlockModelShaper()
+                .getBlockModel(getCurrentState())
                 .getParticleTexture(getModelData());
     }
 

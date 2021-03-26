@@ -68,20 +68,20 @@ public class TInventoryTile extends TileMultiPart implements ISidedInventory {
     }
 
     private void rebuildSlotMap() {
-        sizeSum = invList.stream().mapToInt(IInventory::getSizeInventory).sum();
-        invSize = invList.stream().mapToInt(IInventory::getSizeInventory).toArray();
+        sizeSum = invList.stream().mapToInt(IInventory::getContainerSize).sum();
+        invSize = invList.stream().mapToInt(IInventory::getContainerSize).toArray();
         faceSlots = ArrayUtils.fill(new int[6][0], null);
     }
 
     @Override
-    public void clear() {
+    public void clearContent() {
         for (IInventory inv : invList) {
-            inv.clear();
+            inv.clearContent();
         }
     }
 
     @Override
-    public int getSizeInventory() {
+    public int getContainerSize() {
         return sizeSum;
     }
 
@@ -96,43 +96,43 @@ public class TInventoryTile extends TileMultiPart implements ISidedInventory {
     }
 
     @Override
-    public ItemStack getStackInSlot(int slot) {
+    public ItemStack getItem(int slot) {
         int i = 0;
         while (slot >= invSize[i]) {
             slot -= invSize[i];
             i++;
         }
-        return invList.get(i).getStackInSlot(slot);
+        return invList.get(i).getItem(slot);
     }
 
     @Override
-    public ItemStack decrStackSize(int slot, int count) {
+    public ItemStack removeItem(int slot, int count) {
         int i = 0;
         while (slot >= invSize[i]) {
             slot -= invSize[i];
             i++;
         }
-        return invList.get(i).decrStackSize(slot, count);
+        return invList.get(i).removeItem(slot, count);
     }
 
     @Override
-    public ItemStack removeStackFromSlot(int slot) {
+    public ItemStack removeItemNoUpdate(int slot) {
         int i = 0;
         while (slot >= invSize[i]) {
             slot -= invSize[i];
             i++;
         }
-        return invList.get(i).removeStackFromSlot(slot);
+        return invList.get(i).removeItemNoUpdate(slot);
     }
 
     @Override
-    public void setInventorySlotContents(int slot, ItemStack stack) {
+    public void setItem(int slot, ItemStack stack) {
         int i = 0;
         while (slot >= invSize[i]) {
             slot -= invSize[i];
             i++;
         }
-        invList.get(i).setInventorySlotContents(slot, stack);
+        invList.get(i).setItem(slot, stack);
     }
 
     @Override
@@ -148,7 +148,7 @@ public class TInventoryTile extends TileMultiPart implements ISidedInventory {
                             .map(j -> j + finalBase)
                             .forEach(intList::add);
                 }
-                base += inv.getSizeInventory();
+                base += inv.getContainerSize();
             }
             slots = intList.toIntArray();
             faceSlots[side.ordinal()] = slots;
@@ -157,7 +157,7 @@ public class TInventoryTile extends TileMultiPart implements ISidedInventory {
     }
 
     @Override
-    public boolean canInsertItem(int slot, ItemStack stack, @Nullable Direction side) {
+    public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction side) {
         int i = 0;
         while (slot >= invSize[i]) {
             slot -= invSize[i];
@@ -165,13 +165,13 @@ public class TInventoryTile extends TileMultiPart implements ISidedInventory {
         }
         IInventory inv = invList.get(i);
         if (inv instanceof ISidedInventory) {
-            return ((ISidedInventory) inv).canInsertItem(slot, stack, side);
+            return ((ISidedInventory) inv).canPlaceItemThroughFace(slot, stack, side);
         }
         return true;
     }
 
     @Override
-    public boolean canExtractItem(int slot, ItemStack stack, Direction side) {
+    public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
         int i = 0;
         while (slot >= invSize[i]) {
             slot -= invSize[i];
@@ -179,13 +179,13 @@ public class TInventoryTile extends TileMultiPart implements ISidedInventory {
         }
         IInventory inv = invList.get(i);
         if (inv instanceof ISidedInventory) {
-            return ((ISidedInventory) inv).canExtractItem(slot, stack, side);
+            return ((ISidedInventory) inv).canTakeItemThroughFace(slot, stack, side);
         }
         return true;
     }
 
     @Override
-    public boolean isUsableByPlayer(PlayerEntity player) {
+    public boolean stillValid(PlayerEntity player) {
         return true;
     }
 }

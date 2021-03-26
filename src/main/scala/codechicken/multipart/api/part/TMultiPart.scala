@@ -36,12 +36,12 @@ abstract class TMultiPart {
     /**
      * Getter for tile.worldObj
      */
-    def world = if (tile == null) null else tile.getWorld
+    def world = if (tile == null) null else tile.getLevel
 
     /**
      * Short getter for blockPos
      */
-    def pos = tile.getPos
+    def pos = tile.getBlockPos
 
     def capCache = tile.getCapCache
 
@@ -113,9 +113,9 @@ abstract class TMultiPart {
     //TODO pass through ISelectionContext
     def getCollisionShape: VoxelShape = getOutlineShape
 
-    def getCullingShape: VoxelShape = getOutlineShape
+    def getRenderOcclusionShape: VoxelShape = getOutlineShape
 
-    def getRayTraceShape: VoxelShape = getOutlineShape
+    def getInteractionShape: VoxelShape = getOutlineShape
 
     /**
      * Harvest this part, removing it from the container tile and dropping items if necessary.
@@ -124,7 +124,7 @@ abstract class TMultiPart {
      * @param player The player harvesting the part
      */
     def harvest(player: PlayerEntity, hit: PartRayTraceResult) {
-        if (!player.abilities.isCreativeMode) {
+        if (!player.abilities.instabuild) {
             tile.dropItems(getDrops)
         }
         tile.remPart(this)
@@ -143,10 +143,10 @@ abstract class TMultiPart {
     /**
      * Explosion resistance of the host tile is the maximum explosion resistance of the contained parts
      *
-     * @param entity The entity responsible for this explosion
+     * @param explosion The explosion.
      * @return The resistance of this part the the explosion
      */
-    def getExplosionResistance(entity: Entity, explosion: Explosion) = 0F
+    def getExplosionResistance(explosion: Explosion) = 0F
 
     /**
      * The light level emitted by this part

@@ -1,14 +1,13 @@
 package codechicken.microblock.handler
 
-import java.util.function.Consumer
-
 import codechicken.lib.datagen.ItemModelProvider
+import codechicken.lib.datagen.recipe.RecipeProvider
 import codechicken.microblock.handler.MicroblockMod.modId
 import codechicken.microblock.handler.MicroblockModContent._
-import net.minecraft.data._
+import net.minecraft.data.{BlockTagsProvider, DataGenerator, ItemTagsProvider}
 import net.minecraft.item.Items
-import net.minecraftforge.client.model.generators.ExistingFileHelper
 import net.minecraftforge.common.Tags
+import net.minecraftforge.common.data.ExistingFileHelper
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.event.lifecycle.GatherDataEvent
 
@@ -24,12 +23,16 @@ object DataGenerators {
         if (event.includeClient()) {
             gen.addProvider(new ItemModels(gen, helper))
         }
-        gen.addProvider(new ItemTags(gen))
-        gen.addProvider(new Recipes(gen))
+        if (event.includeServer()) {
+            gen.addProvider(new ItemTags(gen, helper))
+            gen.addProvider(new Recipes(gen))
+        }
     }
 }
 
 class ItemModels(gen: DataGenerator, helper: ExistingFileHelper) extends ItemModelProvider(gen, modId, helper) {
+
+    override def getName = "CBMicroblock Item Models"
 
     override protected def registerModels(): Unit = {
         generated(itemMicroBlock).texture(null)
@@ -38,64 +41,47 @@ class ItemModels(gen: DataGenerator, helper: ExistingFileHelper) extends ItemMod
         generated(itemIronSaw)
         generated(itemDiamondSaw)
     }
-
-    override def getName = "CBMicroblock Item Models"
 }
 
-class ItemTags(gen: DataGenerator) extends ItemTagsProvider(gen) {
-
-    override protected def registerTags() {
-        getBuilder(stoneRodTag).add(itemStoneRod)
-    }
+class ItemTags(gen: DataGenerator, helper: ExistingFileHelper) extends ItemTagsProvider(gen, new BlockTagsProvider(gen, modId, helper), modId, helper) {
 
     override def getName = "CBMicroblock Item Tags"
+
+    override protected def addTags() {
+        tag(stoneRodTag).add(itemStoneRod)
+    }
 }
 
 class Recipes(gen: DataGenerator) extends RecipeProvider(gen) {
 
+    override def getName = "CBMicroblock Recipes"
 
-    override protected def registerRecipes(consumer: Consumer[IFinishedRecipe]) {
-        CustomRecipeBuilder.customRecipe(microRecipeSerializer).build(consumer, s"$modId:microblock")
-        ShapedRecipeBuilder.shapedRecipe(itemStoneRod) //
-            .key('S', Tags.Items.COBBLESTONE) //
-            .patternLine("S") //
-            .patternLine("S") //
-            .addCriterion("has_cobble", hasItem(Tags.Items.COBBLESTONE))
-            .build(consumer)
+    override protected def registerRecipes() {
+        special(microRecipeSerializer, s"$modId:microblock")
+        shapedRecipe(itemStoneRod)
+            .key('S', Tags.Items.COBBLESTONE)
+            .patternLine("S")
+            .patternLine("S")
 
-        ShapedRecipeBuilder.shapedRecipe(itemStoneSaw)
+        shapedRecipe(itemStoneSaw)
             .key('S', Tags.Items.RODS_WOODEN)
             .key('R', stoneRodTag)
             .key('M', Items.FLINT)
             .patternLine("SRR")
             .patternLine("SMR")
-            .addCriterion("has_sticks", hasItem(Tags.Items.RODS_WOODEN))
-            .addCriterion("has_stone_rod", hasItem(stoneRodTag))
-            .addCriterion("has_flint", hasItem(Items.FLINT))
-            .build(consumer)
 
-        ShapedRecipeBuilder.shapedRecipe(itemIronSaw)
+        shapedRecipe(itemIronSaw)
             .key('S', Tags.Items.RODS_WOODEN)
             .key('R', stoneRodTag)
             .key('M', Tags.Items.INGOTS_IRON)
             .patternLine("SRR")
             .patternLine("SMR")
-            .addCriterion("has_sticks", hasItem(Tags.Items.RODS_WOODEN))
-            .addCriterion("has_stone_rod", hasItem(stoneRodTag))
-            .addCriterion("has_iron", hasItem(Tags.Items.INGOTS_IRON))
-            .build(consumer)
 
-        ShapedRecipeBuilder.shapedRecipe(itemDiamondSaw)
+        shapedRecipe(itemDiamondSaw)
             .key('S', Tags.Items.RODS_WOODEN)
             .key('R', stoneRodTag)
             .key('M', Tags.Items.GEMS_DIAMOND)
             .patternLine("SRR")
             .patternLine("SMR")
-            .addCriterion("has_sticks", hasItem(Tags.Items.RODS_WOODEN))
-            .addCriterion("has_stone_rod", hasItem(stoneRodTag))
-            .addCriterion("has_diamond", hasItem(Tags.Items.GEMS_DIAMOND))
-            .build(consumer)
     }
-
-    override def getName = "CBMicroblock Recipes"
 }

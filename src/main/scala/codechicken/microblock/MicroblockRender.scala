@@ -16,15 +16,15 @@ import net.minecraft.util.math.BlockRayTraceResult
 
 object MicroblockRender {
 
-    val highlighRenderType = RenderType.makeType("cbmp_highlight", DefaultVertexFormats.BLOCK, 7, 255, RenderType.State.getBuilder
-        .texture(RenderState.BLOCK_SHEET)
-        .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
-        .build(false))
+    val highlighRenderType = RenderType.create("cbmp_highlight", DefaultVertexFormats.BLOCK, 7, 255, RenderType.State.builder
+        .setTextureState(RenderState.BLOCK_SHEET)
+        .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
+        .createCompositeState(false))
 
     def renderHighlight(player: PlayerEntity, hand:Hand, hit: BlockRayTraceResult, mcrFactory: CommonMicroFactory, size: Int, material: MicroMaterial, mStack: MatrixStack, getter: IRenderTypeBuffer, partialTicks: Float) {
-        mcrFactory.placementProperties.placementGrid.render(new Vector3(hit.getHitVec), hit.getFace.ordinal, mStack, getter)
+        mcrFactory.placementProperties.placementGrid.render(new Vector3(hit.getLocation), hit.getDirection.ordinal, mStack, getter)
 
-        val placement = MicroblockPlacement(player, hand, hit, size, material, !player.abilities.isCreativeMode, mcrFactory.placementProperties)
+        val placement = MicroblockPlacement(player, hand, hit, size, material, !player.abilities.instabuild, mcrFactory.placementProperties)
         if (placement == null) {
             return
         }

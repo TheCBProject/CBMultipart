@@ -20,7 +20,7 @@ import static codechicken.multipart.util.PartMap.edgeBetween;
 public class TRedstoneTile extends TileMultiPart implements IRedstoneTile {
 
     @Override
-    public int strongPowerLevel(int side) {
+    public int getDirectSignal(int side) {
         int max = 0;
         for (TMultiPart part : getPartList()) {
             if (part instanceof IRedstonePart) {
@@ -34,13 +34,13 @@ public class TRedstoneTile extends TileMultiPart implements IRedstoneTile {
     }
 
     @Override
-    public int weakPowerLevel(int side) {
-        return weakPowerLevel(side, otherConnectionMask(getWorld(), getPos(), side, true));
+    public int getSignal(int side) {
+        return weakPowerLevel(side, otherConnectionMask(getLevel(), getBlockPos(), side, true));
     }
 
     @Override
     public boolean canConnectRedstone(int side) {
-        return (getConnectionMask(side) & otherConnectionMask(getWorld(), getPos(), side, true)) > 0;
+        return (getConnectionMask(side) & otherConnectionMask(getLevel(), getBlockPos(), side, true)) > 0;
     }
 
     @Override

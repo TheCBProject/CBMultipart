@@ -28,7 +28,7 @@ public class ControlKeyHandler {
     }
 
     private static void tick(TickEvent.ClientTickEvent event) {
-        boolean pressed = KEY.isKeyDown();
+        boolean pressed = KEY.isDown();
         if (pressed != lastPressed) {
             lastPressed = pressed;
             if (Minecraft.getInstance().getConnection() != null) {

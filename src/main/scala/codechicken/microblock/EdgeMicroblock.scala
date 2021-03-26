@@ -35,8 +35,8 @@ object EdgePlacement extends PlacementProperties {
     override def customPlacement(pmt: MicroblockPlacement): ExecutablePlacement = {
         if (pmt.size % 2 == 1) return null
 
-        val part = PostMicroFactory.create(pmt.world.isRemote, pmt.material)
-        part.setShape(pmt.size, pmt.hit.getFace.ordinal >> 1)
+        val part = PostMicroFactory.create(pmt.world.isClientSide, pmt.material)
+        part.setShape(pmt.size, pmt.hit.getDirection.ordinal >> 1)
         if (pmt.doExpand) {
             val hpart = pmt.hit.asInstanceOf[PartRayTraceResult].part
             if (hpart.getType == PostMicroFactory.getType) {

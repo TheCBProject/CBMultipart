@@ -66,11 +66,11 @@ public class TickScheduler {
     }
 
     private static void attachChunkCapabilities(AttachCapabilitiesEvent<Chunk> event) {
-        if (!(event.getObject().getWorld() instanceof ServerWorld)) {
+        if (!(event.getObject().getLevel() instanceof ServerWorld)) {
             return;
         }
-        ServerWorld world = (ServerWorld) event.getObject().getWorld();
-        WorldTickScheduler worldScheduler = WorldTickScheduler.getInstance(world);
+        ServerWorld level = (ServerWorld) event.getObject().getLevel();
+        WorldTickScheduler worldScheduler = WorldTickScheduler.getInstance(level);
         WorldTickScheduler.ChunkScheduler scheduler = new WorldTickScheduler.ChunkScheduler(worldScheduler, event.getObject());
         event.addCapability(CHUNK_KEY, new SimpleCapProviderSerializable<>(CHUNK_CAPABILITY, scheduler));
     }
@@ -85,7 +85,7 @@ public class TickScheduler {
             chunk = (Chunk) iChunk;
         } else if (iChunk instanceof ChunkPrimerWrapper) {
             //This should never happen due to event locations.
-            chunk = ((ChunkPrimerWrapper) iChunk).func_217336_u();
+            chunk = ((ChunkPrimerWrapper) iChunk).getWrapped();
         } else {
             //We dont care about proto chunks.
             return;

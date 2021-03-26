@@ -42,7 +42,7 @@ public class PlacementConversionHandler {
 
     private static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         World world = event.getWorld();
-        if (world.isRemote) {
+        if (world.isClientSide) {
             if (placing.get() != null) {
                 return;
             }
@@ -56,7 +56,7 @@ public class PlacementConversionHandler {
 
     //TODO, unify with ItemMultiPart
     public static boolean place(PlayerEntity player, Hand hand, World world) {
-        ItemStack held = player.getHeldItem(hand);
+        ItemStack held = player.getItemInHand(hand);
         if (held.isEmpty()) {
             return false;
         }
@@ -65,7 +65,7 @@ public class PlacementConversionHandler {
             return false;
         }
 
-        BlockPos pos = hit.getPos().offset(hit.getFace());
+        BlockPos pos = hit.getBlockPos().relative(hit.getDirection());
         ItemUseContext ctx = new ItemUseContext(player, hand, hit);
         TMultiPart part = MultiPartRegistries.convertItem(ctx);
         TileMultiPart tile = MultiPartHelper.getOrConvertTile(world, pos);
@@ -74,20 +74,20 @@ public class PlacementConversionHandler {
             return false;
         }
 
-        if (!world.isRemote) {
+        if (!world.isClientSide) {
             TileMultiPart.addPart(world, pos, part);
             SoundType sound = part.getPlacementSound(ctx);
             if (sound != null) {
                 world.playSound(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, sound.getPlaceSound(), SoundCategory.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
             }
-            if (!player.abilities.isCreativeMode) {
+            if (!player.abilities.instabuild) {
                 held.shrink(1);
                 if (held.isEmpty()) {
                     ForgeEventFactory.onPlayerDestroyItem(player, held, hand);
                 }
             }
         } else {
-            player.swingArm(hand);
+            player.swing(hand);
             PacketCustom packet = new PacketCustom(NET_CHANNEL, S_MULTIPART_PLACEMENT);
             packet.writeBoolean(hand == Hand.MAIN_HAND);
             packet.sendToServer();

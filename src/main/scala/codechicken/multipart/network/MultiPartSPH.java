@@ -6,10 +6,10 @@ import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.util.CrashLock;
 import codechicken.lib.util.LazyValuePair;
+import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.block.TileMultiPart;
 import codechicken.multipart.handler.PlacementConversionHandler;
 import codechicken.multipart.init.MultiPartRegistries;
-import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.util.ControlKeyModifier;
 import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -53,7 +53,7 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
                 break;
             }
             case S_MULTIPART_PLACEMENT: {
-                PlacementConversionHandler.place(sender, packet.readBoolean() ? Hand.MAIN_HAND : Hand.OFF_HAND, sender.world);
+                PlacementConversionHandler.place(sender, packet.readBoolean() ? Hand.MAIN_HAND : Hand.OFF_HAND, sender.level);
                 break;
             }
         }
@@ -61,8 +61,8 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
 
     //region Send C_TILE_DESC
     public static void sendDescUpdate(TileMultiPart tile) {
-        ServerWorld world = (ServerWorld) tile.getWorld();
-        Stream<ServerPlayerEntity> players = world.getChunkProvider().chunkManager.getTrackingPlayers(new ChunkPos(tile.getPos()), false);
+        ServerWorld world = (ServerWorld) tile.getLevel();
+        Stream<ServerPlayerEntity> players = world.getChunkSource().chunkMap.getPlayers(new ChunkPos(tile.getBlockPos()), false);
         sendDescUpdates(players, Collections.singleton(tile));
     }
 
@@ -70,14 +70,14 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
         if (tiles.isEmpty()) {
             return;
         }
-        List<Pair<TileMultiPart, MCByteStream>> data = tiles.stream()//
-                .filter(e -> e instanceof TileMultiPart)//
-                .map(e -> (TileMultiPart) e)//
+        List<Pair<TileMultiPart, MCByteStream>> data = tiles.stream()
+                .filter(e -> e instanceof TileMultiPart)
+                .map(e -> (TileMultiPart) e)
                 .map(tile -> LazyValuePair.of(tile, t -> {
                     MCByteStream stream = new MCByteStream();
                     t.writeDesc(stream);
                     return stream;
-                }))//
+                }))
                 .collect(Collectors.toList());
         if (data.isEmpty()) {
             return;
@@ -89,7 +89,7 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
         PacketCustom packet = new PacketCustom(NET_CHANNEL, C_TILE_DESC);
         packet.writeVarInt(data.size());
         for (Pair<TileMultiPart, MCByteStream> entry : data) {
-            writeHeaderFor(player, packet, 0, entry.getLeft().getPos());
+            writeHeaderFor(player, packet, 0, entry.getLeft().getBlockPos());
             packet.append(entry.getRight().getBytes());
         }
         packet.sendToPlayer(player);
@@ -98,13 +98,13 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
 
     //region Send C_ADD_PART
     public static void sendAddPart(TileMultiPart tile, TMultiPart part) {
-        ServerWorld world = (ServerWorld) tile.getWorld();
+        ServerWorld world = (ServerWorld) tile.getLevel();
         MCByteStream stream = new MCByteStream();
         MultiPartRegistries.writePart(stream, part);
-        world.getChunkProvider().chunkManager.getTrackingPlayers(new ChunkPos(tile.getPos()), false)//
+        world.getChunkSource().chunkMap.getPlayers(new ChunkPos(tile.getBlockPos()), false)
                 .forEach(player -> {
                     PacketCustom packet = new PacketCustom(NET_CHANNEL, C_ADD_PART);
-                    writeHeaderFor(player, packet, 0, tile.getPos());
+                    writeHeaderFor(player, packet, 0, tile.getBlockPos());
                     packet.append(stream.getBytes());
                     packet.sendToPlayer(player);
                 });
@@ -113,11 +113,11 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
 
     //region Send C_REM_PART
     public static void sendRemPart(TileMultiPart tile, int partIdx) {
-        ServerWorld world = (ServerWorld) tile.getWorld();
-        world.getChunkProvider().chunkManager.getTrackingPlayers(new ChunkPos(tile.getPos()), false)//
+        ServerWorld world = (ServerWorld) tile.getLevel();
+        world.getChunkSource().chunkMap.getPlayers(new ChunkPos(tile.getBlockPos()), false)
                 .forEach(player -> {
                     PacketCustom packet = new PacketCustom(NET_CHANNEL, C_REM_PART);
-                    writeHeaderFor(player, packet, partIdx, tile.getPos());
+                    writeHeaderFor(player, packet, partIdx, tile.getBlockPos());
                     packet.sendToPlayer(player);
                 });
     }
@@ -129,7 +129,7 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
         MCByteStream stream = new MCByteStream();
         func.accept(stream);
         BlockPos pos = part.pos();
-        world.getChunkProvider().chunkManager.getTrackingPlayers(new ChunkPos(pos), false)//
+        world.getChunkSource().chunkMap.getPlayers(new ChunkPos(pos), false)
                 .forEach(player -> {
                     PacketCustom packet = new PacketCustom(NET_CHANNEL, C_PART_UPDATE);
                     writeHeaderFor(player, packet, part.tile().getPartList().indexOf(part), part.pos());
@@ -141,9 +141,9 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
 
     //region Helpers.
     private static void writeHeaderFor(ServerPlayerEntity player, MCDataOutput packet, int partId, BlockPos pos) {
-        BlockPos last = playerLastPositions.computeIfAbsent(player.getUniqueID(), id -> new BlockPos(0, 0, 0));
+        BlockPos last = playerLastPositions.computeIfAbsent(player.getUUID(), id -> new BlockPos(0, 0, 0));
         writeHeader(packet, partId, last, pos);
-        playerLastPositions.put(player.getUniqueID(), pos);
+        playerLastPositions.put(player.getUUID(), pos);
     }
 
     /**
@@ -196,11 +196,11 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
     //region Events
     //I don't trust the LoggedOut event.
     private static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        playerLastPositions.remove(event.getPlayer().getUniqueID());
+        playerLastPositions.remove(event.getPlayer().getUUID());
     }
 
     private static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        playerLastPositions.remove(event.getPlayer().getUniqueID());
+        playerLastPositions.remove(event.getPlayer().getUUID());
     }
     //endregion
 }

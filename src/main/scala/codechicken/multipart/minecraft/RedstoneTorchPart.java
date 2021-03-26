@@ -40,7 +40,7 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
     }
 
     public boolean active() {
-        return state.get(RedstoneTorchBlock.LIT);
+        return state.getValue(RedstoneTorchBlock.LIT);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
 
     @Override
     public void onNeighborBlockChanged(BlockPos from) {
-        if (!world().isRemote) {
+        if (!world().isClientSide) {
             if (!dropIfCantStay() && isBeingPowered() == active()) {
                 scheduleTick(2);
             }
@@ -67,7 +67,7 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
 
     @Override
     public void scheduledTick() {
-        if (!world().isRemote && isBeingPowered() == active()) {
+        if (!world().isClientSide && isBeingPowered() == active()) {
             toggle();
         }
     }
@@ -117,16 +117,16 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
     private void toggle() {
         if (active()) {
             if (burnedOut(true)) {
-                world().playEvent(1502, pos(), 0);
+                world().levelEvent(1502, pos(), 0);
             }
         } else if (burnedOut(false)) {
             return;
         }
 
-        state = state.with(RedstoneTorchBlock.LIT, !active());
+        state = state.setValue(RedstoneTorchBlock.LIT, !active());
 
         sendUpdate(this::writeDesc);
-        tile().markDirty();
+        tile().setChanged();
         tile().notifyPartChange(this);
         tile().notifyNeighborChange(1);
     }

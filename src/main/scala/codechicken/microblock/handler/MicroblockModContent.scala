@@ -8,6 +8,7 @@ import codechicken.multipart.api.MultiPartType
 import net.minecraft.block.Blocks
 import net.minecraft.item.crafting.{IRecipeSerializer, SpecialRecipeSerializer}
 import net.minecraft.item.{Item, ItemGroup}
+import net.minecraft.tags.ITag.INamedTag
 import net.minecraft.tags.{ItemTags, Tag}
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.event.RegistryEvent
@@ -19,7 +20,7 @@ import net.minecraftforge.fml.ModLoadingContext
  */
 object MicroblockModContent {
 
-    var microTab = new SimpleItemGroup("cb_microblock", () => ItemMicroBlock.create(0, 1, BlockMicroMaterial.makeMaterialKey(Blocks.STONE.getDefaultState)))
+    var microTab = new SimpleItemGroup("cb_microblock", () => ItemMicroBlock.create(0, 1, BlockMicroMaterial.makeMaterialKey(Blocks.STONE.defaultBlockState)))
 
     var itemMicroBlock: ItemMicroBlock = _
     var itemStoneRod: Item = _
@@ -27,7 +28,7 @@ object MicroblockModContent {
     var itemIronSaw: Item = _
     var itemDiamondSaw: Item = _
 
-    var stoneRodTag: Tag[Item] = new ItemTags.Wrapper(new ResourceLocation("forge:rods/stone"))
+    var stoneRodTag: INamedTag[Item] = ItemTags.bind("forge:rods/stone")
 
     var microRecipeSerializer: SpecialRecipeSerializer[_] = _
 
@@ -40,10 +41,10 @@ object MicroblockModContent {
     @SubscribeEvent
     def onRegisterItems(event: RegistryEvent.Register[Item]) {
         val registry = event.getRegistry
-        itemMicroBlock = new ItemMicroBlock(new Item.Properties().group(microTab))
+        itemMicroBlock = new ItemMicroBlock(new Item.Properties().tab(microTab))
         registry.register(itemMicroBlock.setRegistryName("microblock"))
 
-        itemStoneRod = new Item(new Item.Properties().group(ItemGroup.MATERIALS))
+        itemStoneRod = new Item(new Item.Properties().tab(ItemGroup.TAB_MATERIALS))
         registry.register(itemStoneRod.setRegistryName("stone_rod"))
 
         val sawsTag = MicroblockMod.config.getTag("saws")

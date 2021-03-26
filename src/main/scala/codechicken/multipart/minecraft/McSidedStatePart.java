@@ -20,13 +20,13 @@ public abstract class McSidedStatePart extends McStatePart implements TFacePart 
 
     @Override
     public void onNeighborBlockChanged(BlockPos from) {
-        if (!world().isRemote) {
+        if (!world().isClientSide) {
             dropIfCantStay();
         }
     }
 
     public boolean canStay() {
-        return state.isValidPosition(world(), pos());
+        return state.canSurvive(world(), pos());
     }
 
     public boolean dropIfCantStay() {

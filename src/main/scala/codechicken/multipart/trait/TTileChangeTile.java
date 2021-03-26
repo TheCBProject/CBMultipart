@@ -46,7 +46,7 @@ public class TTileChangeTile extends TileMultiPart {
     public void onNeighborTileChange(BlockPos neighborPos) {
         super.onNeighborTileChange(neighborPos);
 
-        BlockPos offset = neighborPos.subtract(getPos());
+        BlockPos offset = neighborPos.subtract(getBlockPos());
         int diff = MathHelper.absSum(offset);
         Direction side = MathHelper.getSide(offset);
 

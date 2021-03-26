@@ -30,8 +30,8 @@ class WorldTickScheduler {
     @CapabilityInject (WorldTickScheduler.ChunkScheduler.class)
     private static Capability<WorldTickScheduler.ChunkScheduler> CHUNK_CAPABILITY = null;
 
-    public static WorldTickScheduler getInstance(ServerWorld world) {
-        return world.getCapability(WORLD_CAPABILITY, null).orElseThrow(() -> new RuntimeException("Should never happen..."));
+    public static WorldTickScheduler getInstance(ServerWorld level) {
+        return level.getCapability(WORLD_CAPABILITY, null).orElseThrow(() -> new RuntimeException("Should never happen..."));
     }
 
     public static ChunkScheduler getInstance(Chunk world) {
@@ -115,7 +115,7 @@ class WorldTickScheduler {
         public void onChunkLoad() {
             for (SavedTickEntry savedTick : savedTicks) {
                 //Use map to avoid loading locks.
-                TileEntity tileEntity = chunk.getTileEntityMap().get(savedTick.pos);
+                TileEntity tileEntity = chunk.getBlockEntities().get(savedTick.pos);
                 if (tileEntity instanceof TileMultiPart) {
                     TileMultiPart tile = (TileMultiPart) tileEntity;
                     scheduledTicks.add(new PartTickEntry(tile.getPartList().get(savedTick.idx), savedTick.time, false));

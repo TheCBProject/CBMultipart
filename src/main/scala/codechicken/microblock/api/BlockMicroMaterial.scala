@@ -40,18 +40,18 @@ class BlockMicroMaterial(val state: BlockState) extends MicroMaterial {
     override def loadIcons(): Unit = {
         @OnlyIn(Dist.CLIENT)
         def getSideIcon(state: BlockState, s: Int): TextureAtlasSprite = {
-            val side = Direction.BY_INDEX(s)
-            val model = Minecraft.getInstance.getBlockRendererDispatcher.getModelForState(state)
-            var winner = if (model.getParticleTexture == null) TextureUtils.getMissingSprite else model.getParticleTexture
+            val side = Direction.BY_3D_DATA(s)
+            val model = Minecraft.getInstance.getBlockRenderer.getBlockModel(state)
+            var winner = if (model.getParticleIcon == null) TextureUtils.getMissingSprite else model.getParticleIcon
             if (model != null) {
                 val quads = new ListBuffer[BakedQuad]
                 quads.addAll(model.getQuads(state, side, new Random(0)).asScala)
-                quads.addAll(model.getQuads(state, null, new Random(0)).asScala.filter((quad: BakedQuad) => quad.getFace eq side))
+                quads.addAll(model.getQuads(state, null, new Random(0)).asScala.filter((quad: BakedQuad) => quad.getDirection eq side))
                 if (quads.nonEmpty) {
                     val list = new ListBuffer[TextureAtlasSprite]
 
                     for (quad <- quads) {
-                        val sprite: TextureAtlasSprite = quad.func_187508_a()
+                        val sprite: TextureAtlasSprite = quad.getSprite
                         list += sprite
                     }
                     if (list.nonEmpty) winner = list.head
@@ -85,21 +85,21 @@ class BlockMicroMaterial(val state: BlockState) extends MicroMaterial {
 
     override def canRenderInLayer(layer: RenderType) = RenderTypeLookup.canRenderInLayer(state, layer)
 
-    override def getRenderLayer = RenderTypeLookup.getRenderType(state)
+    override def getRenderLayer = RenderTypeLookup.getRenderType(state, false)
 
     @OnlyIn(Dist.CLIENT)
     def getBreakingIcon(side: Int) = pIconT.icon
 
-    def getItem = new ItemStack(Item.getItemFromBlock(state.getBlock), 1)
+    def getItem = new ItemStack(Item.byBlock(state.getBlock), 1)
 
     def getLocalizedName = getItem.getDisplayName
 
     def getStrength(player: PlayerEntity) =
-        state.getPlayerRelativeBlockHardness(player, player.world, new BlockPos(0, -1, 0))
+        state.getDestroyProgress(player, player.level, new BlockPos(0, -1, 0))
 
     def isTransparent = false //!state.isOpaqueCube
 
-    def getLightValue = state.getLightValue
+    def getLightValue = state.getLightEmission
 
     def toolClasses = Seq("axe", "pickaxe", "shovel")
 
@@ -107,7 +107,7 @@ class BlockMicroMaterial(val state: BlockState) extends MicroMaterial {
 
     def getSound = state.getBlock.getSoundType(state)
 
-    def explosionResistance(world:IWorldReader, pos:BlockPos, exploder: Entity, explosion: Explosion) = state.getBlock.getExplosionResistance(state, world, pos, exploder, explosion)
+    def explosionResistance(world:IWorldReader, pos:BlockPos, explosion: Explosion) = state.getBlock.getExplosionResistance(state, world, pos, explosion)
 }
 
 /**
@@ -140,7 +140,7 @@ object BlockMicroMaterial {
         new ResourceLocation(block.getRegistryName.getNamespace, path)
     }
 
-    def apply(block: Block) = new BlockMicroMaterial(block.getDefaultState)
+    def apply(block: Block) = new BlockMicroMaterial(block.defaultBlockState())
 
     def apply(state: BlockState) = new BlockMicroMaterial(state)
 }

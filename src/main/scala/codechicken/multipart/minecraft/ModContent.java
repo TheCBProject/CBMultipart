@@ -127,19 +127,19 @@ public class ModContent {
                 return PartConverter.emptyResultList();
             }
             if (ArrayUtils.contains(blocks, state.getBlock())) {
-                return ActionResult.resultSuccess(Collections.singleton(blockFactory.apply(state)));
+                return ActionResult.success(Collections.singleton(blockFactory.apply(state)));
             }
             return super.convert(world, pos, state);
         }
 
         @Override
         public ActionResult<TMultiPart> convert(ItemUseContext context) {
-            if (context.getItem().getItem() != item) {
+            if (context.getItemInHand().getItem() != item) {
                 return emptyResult();
             }
             TMultiPart result = factory.get().setStateOnPlacement(new BlockItemUseContext(context));
             if (result != null) {
-                return ActionResult.resultSuccess(result);
+                return ActionResult.success(result);
             }
             return super.convert(context);
         }

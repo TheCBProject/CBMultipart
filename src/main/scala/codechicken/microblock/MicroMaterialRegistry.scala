@@ -133,7 +133,7 @@ object MicroMaterialRegistry {
         MicroMaterialRegistry.MICRO_MATERIALS.asScala.find { m =>
             val mitem = m.getItem
             item.getItem == mitem.getItem &&
-                ItemStack.areItemStackTagsEqual(item, mitem)
+                ItemStack.tagMatches(item, mitem)
         }.orNull
 
 

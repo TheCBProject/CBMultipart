@@ -5,7 +5,6 @@ import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.block.BlockState
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.{BlockRendererDispatcher, RenderType}
-import net.minecraft.world.ILightReader
 import net.minecraftforge.client.model.data.IModelData
 
 import java.util.Random
@@ -30,7 +29,7 @@ trait IModelRenderPart extends TMultiPart {
     def getModelData: IModelData
 
     override def renderStatic(layer: RenderType, ccrs: CCRenderState): Boolean = {
-        val rendererDispatcher = Minecraft.getInstance.getBlockRendererDispatcher
+        val rendererDispatcher = Minecraft.getInstance.getBlockRenderer
 
         val world = ccrs.lightMatrix.access //Use the ChunkRenderCache world opposed to this parts _actual_ world
         val random = new Random

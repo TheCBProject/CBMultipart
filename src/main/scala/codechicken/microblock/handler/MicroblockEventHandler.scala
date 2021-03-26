@@ -21,19 +21,19 @@ object MicroblockEventHandler {
     @OnlyIn(Dist.CLIENT)
     def drawBlockHighlight(event: HighlightBlock) {
 
-        event.getInfo.getRenderViewEntity match {
+        event.getInfo.getEntity match {
             case player: PlayerEntity =>
-                val currentItem = player.getHeldItemMainhand
+                val currentItem = player.getMainHandItem
 
                 if (!currentItem.isEmpty && currentItem.getItem == MicroblockModContent.itemMicroBlock) {
                     val mStack = event.getMatrix
                     val info = event.getInfo
-                    mStack.push()
-                    mStack.translate(-info.getProjectedView.x, -info.getProjectedView.y, -info.getProjectedView.z)
+                    mStack.pushPose()
+                    mStack.translate(-info.getPosition.x, -info.getPosition.y, -info.getPosition.z)
                     if (ItemMicroBlockRenderer.renderHighlight(player, Hand.MAIN_HAND ,currentItem, event.getTarget, mStack, event.getBuffers, event.getPartialTicks)) {
                         event.setCanceled(true)
                     }
-                    mStack.pop()
+                    mStack.popPose()
                 }
             case _ =>
         }

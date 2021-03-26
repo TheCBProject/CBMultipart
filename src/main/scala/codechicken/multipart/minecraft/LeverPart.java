@@ -27,8 +27,8 @@ public class LeverPart extends McSidedStatePart implements IFaceRedstonePart {
     }
 
     @Override
-    public BlockState getDefaultState() {
-        return Blocks.LEVER.getDefaultState();
+    public BlockState defaultBlockState() {
+        return Blocks.LEVER.defaultBlockState();
     }
 
     @Override
@@ -37,25 +37,25 @@ public class LeverPart extends McSidedStatePart implements IFaceRedstonePart {
     }
 
     public boolean active() {
-        return state.get(LeverBlock.POWERED);
+        return state.getValue(LeverBlock.POWERED);
     }
 
     @Override
     public Direction getSide() {
-        return HorizontalFaceBlock.getFacing(state).getOpposite();
+        return HorizontalFaceBlock.getConnectedDirection(state).getOpposite();
     }
 
     @Override
     public ActionResultType activate(PlayerEntity player, PartRayTraceResult hit, ItemStack item, Hand hand) {
-        if (world().isRemote) {
+        if (world().isClientSide) {
             return ActionResultType.SUCCESS;
         }
 
         state = state.cycle(LeverBlock.POWERED);
-        world().playSound(null, pos(), SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, active() ? 0.6F : 0.5F);
+        world().playSound(null, pos(), SoundEvents.LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, active() ? 0.6F : 0.5F);
 
         sendUpdate(this::writeDesc);
-        tile().markDirty();
+        tile().setChanged();
         tile().notifyPartChange(this);
         tile().notifyNeighborChange(getSide().ordinal());
         return ActionResultType.SUCCESS;
@@ -99,7 +99,7 @@ public class LeverPart extends McSidedStatePart implements IFaceRedstonePart {
     public void readUpdate(MCDataInput packet) {
         super.readUpdate(packet);
         if (active()) {
-            LeverBlock.addParticles(state, world(), pos(), 1.0F);
+            LeverBlock.makeParticle(state, world(), pos(), 1.0F);
         }
     }
 }

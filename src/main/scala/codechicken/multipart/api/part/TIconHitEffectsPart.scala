@@ -21,9 +21,9 @@ import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
  */
 object IconHitEffects {
     def addHitEffects(part: TIconHitEffectsPart, hit: PartRayTraceResult, manager: ParticleManager) {
-        CustomParticleHandler.addBlockHitEffects(part.tile.getWorld,
+        CustomParticleHandler.addBlockHitEffects(part.tile.getLevel,
             part.getBounds.copy.add(Vector3.fromTile(part.tile)),
-            hit.getFace, part.getBreakingIcon(hit), manager)
+            hit.getDirection, part.getBreakingIcon(hit), manager)
     }
 
     def addDestroyEffects(part: TIconHitEffectsPart, manager: ParticleManager) {
@@ -41,7 +41,7 @@ object IconHitEffects {
                 Cuboid6.full.copy
             }
 
-        CustomParticleHandler.addBlockDestroyEffects(part.tile.getWorld,
+        CustomParticleHandler.addBlockDestroyEffects(part.tile.getLevel,
             bounds.add(Vector3.fromTile(part.tile)), icons, manager)
     }
 }

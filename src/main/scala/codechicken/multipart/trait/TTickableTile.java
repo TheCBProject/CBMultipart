@@ -55,7 +55,7 @@ public class TTickableTile extends TileMultiPart implements ITickableTileEntity 
     public void loadFrom(TileMultiPart that) {
         super.loadFrom(that);
         if (doesTick) {
-            getWorld().tickableTileEntities.add(this);
+            getLevel().tickableBlockEntities.add(this);
         }
     }
 
@@ -63,7 +63,7 @@ public class TTickableTile extends TileMultiPart implements ITickableTileEntity 
     public void loadTo(TileMultiPart that) {
         super.loadTo(that);
         if (doesTick) {
-            getWorld().tickableTileEntities.remove(this);
+            getLevel().tickableBlockEntities.remove(this);
         }
     }
 
@@ -83,11 +83,11 @@ public class TTickableTile extends TileMultiPart implements ITickableTileEntity 
             return;
         }
         doesTick = tick;
-        if (getWorld() != null && getWorld().getTileEntity(getPos()) == this) {
+        if (getLevel() != null && getLevel().getBlockEntity(getBlockPos()) == this) {
             if (tick) {
-                getWorld().addTileEntity(this);
+                getLevel().addBlockEntity(this);
             } else {
-                getWorld().tickableTileEntities.remove(this);
+                getLevel().tickableBlockEntities.remove(this);
             }
         }
     }

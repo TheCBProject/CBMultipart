@@ -58,8 +58,8 @@ public class TorchPart extends McSidedStatePart implements AnimateTickPart {
     }
 
     @Override
-    public BlockState getDefaultState() {
-        return getStandingBlock().getDefaultState();
+    public BlockState defaultBlockState() {
+        return getStandingBlock().defaultBlockState();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class TorchPart extends McSidedStatePart implements AnimateTickPart {
 
     @Override
     public Direction getSide() {
-        return state.getBlock() == getStandingBlock() ? Direction.DOWN : state.get(HorizontalBlock.HORIZONTAL_FACING).getOpposite();
+        return state.getBlock() == getStandingBlock() ? Direction.DOWN : state.getValue(HorizontalBlock.FACING).getOpposite();
     }
 
     @Override
@@ -77,20 +77,20 @@ public class TorchPart extends McSidedStatePart implements AnimateTickPart {
         if (state.getBlock() == getStandingBlock()) {
             return STANDING_OCCLUSION;
         }
-        return WALL_OCCLUSION[getSide().getHorizontalIndex()];
+        return WALL_OCCLUSION[getSide().get2DDataValue()];
     }
 
     @Override
     public TMultiPart setStateOnPlacement(BlockItemUseContext context) {
         BlockState wallState = getWallBlock().getStateForPlacement(context);
 
-        IWorldReader world = context.getWorld();
-        BlockPos pos = context.getPos();
+        IWorldReader world = context.getLevel();
+        BlockPos pos = context.getClickedPos();
 
         for (Direction dir : context.getNearestLookingDirections()) {
             if (dir != Direction.UP) {
                 BlockState state = dir == Direction.DOWN ? getStandingBlock().getStateForPlacement(context) : wallState;
-                if (state != null && state.isValidPosition(world, pos)) {
+                if (state != null && state.canSurvive(world, pos)) {
                     this.state = state;
                     return this;
                 }

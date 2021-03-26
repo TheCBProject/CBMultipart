@@ -47,7 +47,7 @@ public class UpdatePacketTests {
         last = curr;
         // 3333 & 15 = 5
         // -2348 & 15 = 4
-        curr = curr.add(3, 6, 9);
+        curr = curr.offset(3, 6, 9);
         MultiPartSPH.writeHeader(packet, 44, last, curr);
         assertEquals(3, buf.writerIndex());//Should be exactly 3 bytes written, +1 because this is the next index.
 
@@ -91,7 +91,7 @@ public class UpdatePacketTests {
         buf.writerIndex(0);
 
         last = curr;
-        curr = curr.add(127, 6, 9);
+        curr = curr.offset(127, 6, 9);
         MultiPartSPH.writeHeader(packet, 44, last, curr);
         assertEquals(4, buf.writerIndex());//Should be exactly 4 bytes written, +1 because this is the next index.
 

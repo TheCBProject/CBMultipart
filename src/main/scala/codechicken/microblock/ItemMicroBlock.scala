@@ -20,7 +20,7 @@ import net.minecraft.util.text.{StringTextComponent, TranslationTextComponent}
 
 class ItemMicroBlock(properties: Item.Properties) extends Item(properties) {
 
-    override def getDisplayName(stack: ItemStack) = {
+    override def getName(stack: ItemStack) = {
         val material = getMaterialFromStack(stack)
         val mcrFactory = getFactory(stack)
         val size = getSize(stack)
@@ -31,8 +31,8 @@ class ItemMicroBlock(properties: Item.Properties) extends Item(properties) {
         }
     }
 
-    override def fillItemGroup(group: ItemGroup, list: NonNullList[ItemStack]) {
-        if (isInGroup(group)) {
+    override def fillItemCategory(group: ItemGroup, list: NonNullList[ItemStack]) {
+        if (allowdedIn(group)) {
             for (factoryID <- factories.indices) {
                 val factory = factories(factoryID)
                 if (factory != null) {
@@ -43,10 +43,10 @@ class ItemMicroBlock(properties: Item.Properties) extends Item(properties) {
         }
     }
 
-    override def onItemUse(context: ItemUseContext): ActionResultType = {
+    override def useOn(context: ItemUseContext): ActionResultType = {
         val player = context.getPlayer
-        val world = context.getWorld
-        val stack = player.getHeldItem(context.getHand)
+        val world = context.getLevel
+        val stack = player.getItemInHand(context.getHand)
         val material = getMaterialFromStack(stack)
         val mcrFactory = getFactory(stack)
         val size = getSize(stack)
@@ -54,16 +54,16 @@ class ItemMicroBlock(properties: Item.Properties) extends Item(properties) {
             return ActionResultType.FAIL
         }
 
-        val hit = RayTracer.retraceBlock(world, player, context.getPos)
+        val hit = RayTracer.retraceBlock(world, player, context.getClickedPos)
         if (hit != null) {
-            val placement = MicroblockPlacement(player, context.getHand, hit, size, material, !player.abilities.isCreativeMode, mcrFactory.placementProperties)
+            val placement = MicroblockPlacement(player, context.getHand, hit, size, material, !player.abilities.instabuild, mcrFactory.placementProperties)
             if (placement == null) {
                 return ActionResultType.FAIL
             }
 
-            if (!world.isRemote) {
+            if (!world.isClientSide) {
                 placement.place(world, player, stack)
-                if (!player.abilities.isCreativeMode) {
+                if (!player.abilities.instabuild) {
                     placement.consume(world, player, stack)
                 }
                 val sound = material.getSound
@@ -135,11 +135,11 @@ object ItemMicroBlock {
 
 object ItemMicroBlockRenderer extends IItemRenderer {
 
-    override def isAmbientOcclusion = true
+    override def useAmbientOcclusion = true
 
     override def isGui3d = true
 
-    override def getTransforms = TransformUtils.DEFAULT_BLOCK
+    override def getModelTransform = TransformUtils.DEFAULT_BLOCK
 
     override def renderItem(stack: ItemStack, transformType: TransformType, mStack: MatrixStack, buffers: IRenderTypeBuffer, packedLight: Int, packedOverlay: Int) {
         val material = getMaterialFromStack(stack)
@@ -177,5 +177,5 @@ object ItemMicroBlockRenderer extends IItemRenderer {
         MicroMaterialRegistry.renderHighlight(player, hand, hit, mcrClass, size, material, mStack, getter, partialTicks)
     }
 
-    override def func_230044_c_(): Boolean = false
+    override def usesBlockLight(): Boolean = false
 }

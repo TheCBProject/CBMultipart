@@ -111,12 +111,12 @@ abstract class Microblock(var material: MicroMaterial) extends TMultiPart {
 
     override def getLightValue = getMaterial.getLightValue
 
-    override def getExplosionResistance(entity: Entity, explosion: Explosion) = getMaterial.explosionResistance(world, pos, entity, explosion) * microFactory.getResistanceFactor
+    override def getExplosionResistance(explosion: Explosion) = getMaterial.explosionResistance(world, pos, explosion) * microFactory.getResistanceFactor
 }
 
 trait MicroblockClient extends Microblock with TIconHitEffectsPart {
     @OnlyIn(Dist.CLIENT)
-    override def getBreakingIcon(hit: PartRayTraceResult) = getBrokenIcon(hit.getFace.ordinal)
+    override def getBreakingIcon(hit: PartRayTraceResult) = getBrokenIcon(hit.getDirection.ordinal)
 
     @OnlyIn(Dist.CLIENT)
     def getBrokenIcon(side: Int) = getMaterial match {

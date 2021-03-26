@@ -25,10 +25,10 @@ public abstract class ItemMultiPart extends Item {
     public abstract TMultiPart newPart(ItemUseContext context);
 
     @Override
-    public ActionResultType onItemUse(ItemUseContext context) {
+    public ActionResultType useOn(ItemUseContext context) {
 
-        Vector3 vHit = new Vector3(context.getHitVec()).subtract(context.getPos());
-        double hitDepth = getHitDepth(vHit, context.getFace().ordinal());
+        Vector3 vHit = new Vector3(context.getClickLocation()).subtract(context.getClickedPos());
+        double hitDepth = getHitDepth(vHit, context.getClickedFace().ordinal());
 
         if (hitDepth < 1 && place(context)) {
             return ActionResultType.SUCCESS;
@@ -38,13 +38,13 @@ public abstract class ItemMultiPart extends Item {
     }
 
     private boolean place(ItemUseContext context) {
-        World world = context.getWorld();
-        BlockPos pos = context.getPos();
+        World world = context.getLevel();
+        BlockPos pos = context.getClickedPos();
 
         TMultiPart part = newPart(context);
         if (part == null || !TileMultiPart.canPlacePart(context, part)) { return false; }
 
-        if (!world.isRemote) {
+        if (!world.isClientSide) {
             TileMultiPart.addPart(world, pos, part);
             SoundType sound = part.getPlacementSound(context);
             if (sound != null) {
@@ -52,8 +52,8 @@ public abstract class ItemMultiPart extends Item {
                         SoundCategory.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
             }
         }
-        if (!context.getPlayer().abilities.isCreativeMode) {
-            context.getItem().shrink(1);
+        if (!context.getPlayer().abilities.instabuild) {
+            context.getItemInHand().shrink(1);
         }
         return true;
     }

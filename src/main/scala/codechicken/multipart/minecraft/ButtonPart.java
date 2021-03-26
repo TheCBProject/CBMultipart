@@ -17,7 +17,7 @@ public class ButtonPart extends McSidedStatePart implements IFaceRedstonePart {
     private final AbstractButtonBlock block;
 
     public ButtonPart(MultiPartType<?> type, AbstractButtonBlock block) {
-        this(type, block, block.getDefaultState());
+        this(type, block, block.defaultBlockState());
     }
 
     public ButtonPart(MultiPartType<?> type, AbstractButtonBlock block, BlockState state) {
@@ -32,8 +32,8 @@ public class ButtonPart extends McSidedStatePart implements IFaceRedstonePart {
     }
 
     @Override
-    public BlockState getDefaultState() {
-        return block.getDefaultState();
+    public BlockState defaultBlockState() {
+        return block.defaultBlockState();
     }
 
     @Override
@@ -43,7 +43,7 @@ public class ButtonPart extends McSidedStatePart implements IFaceRedstonePart {
 
     @Override
     public Direction getSide() {
-        return HorizontalFaceBlock.getFacing(state).getOpposite();
+        return HorizontalFaceBlock.getConnectedDirection(state).getOpposite();
     }
 
     public int delay() {
@@ -51,7 +51,7 @@ public class ButtonPart extends McSidedStatePart implements IFaceRedstonePart {
     }
 
     public boolean sensitive() {
-        return block.wooden;
+        return block.sensitive;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ButtonPart extends McSidedStatePart implements IFaceRedstonePart {
             return ActionResultType.CONSUME;
         }
 
-        if (!world().isRemote) {
+        if (!world().isClientSide) {
             toggle();
         }
 
@@ -75,12 +75,12 @@ public class ButtonPart extends McSidedStatePart implements IFaceRedstonePart {
     }
 
     public boolean pressed() {
-        return state.get(AbstractButtonBlock.POWERED);
+        return state.getValue(AbstractButtonBlock.POWERED);
     }
 
     @Override
     public void onEntityCollision(Entity entity) {
-        if (!pressed() && !world().isRemote && entity instanceof ArrowEntity) {
+        if (!pressed() && !world().isClientSide && entity instanceof ArrowEntity) {
             updateState();
         }
     }
@@ -90,9 +90,6 @@ public class ButtonPart extends McSidedStatePart implements IFaceRedstonePart {
 
         boolean on = pressed();
 
-//        SoundEvent sound = sensitive() ? (on ? SoundEvents.BLOCK_WOODEN_BUTTON_CLICK_ON : SoundEvents.BLOCK_WOODEN_BUTTON_CLICK_OFF) : (on ? SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON : SoundEvents.BLOCK_STONE_BUTTON_CLICK_OFF);
-//
-//        world().playSound(null, pos(), sound, SoundCategory.BLOCKS, 0.3F, on ? 0.6F : 0.5F);
         block.playSound(null, world(), pos(), on);
 
         if (on) {
@@ -100,13 +97,13 @@ public class ButtonPart extends McSidedStatePart implements IFaceRedstonePart {
         }
 
         sendUpdate(this::writeDesc);
-        tile().markDirty();
+        tile().setChanged();
         tile().notifyPartChange(this);
         tile().notifyNeighborChange(getSide().ordinal());
     }
 
     private void updateState() {
-        boolean arrows = sensitive() && !world().getEntitiesWithinAABB(ArrowEntity.class, getOutlineShape().getBoundingBox().offset(pos())).isEmpty();
+        boolean arrows = sensitive() && !world().getEntitiesOfClass(ArrowEntity.class, getOutlineShape().bounds().move(pos())).isEmpty();
         boolean pressed = pressed();
 
         if (arrows != pressed) {

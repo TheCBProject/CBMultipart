@@ -39,8 +39,8 @@ public class CBMultipartModContent {
 
     private static void onRegisterTiles(RegistryEvent.Register<TileEntityType<?>> event) {
         IForgeRegistry<TileEntityType<?>> r = event.getRegistry();
-        r.register(TileEntityType.Builder.create(TileNBTContainer::new, blockMultipart).build(null)//
-                .setRegistryName("saved_multipart")//
+        r.register(TileEntityType.Builder.of(TileNBTContainer::new, blockMultipart).build(null)
+                .setRegistryName("saved_multipart")
         );
     }
 

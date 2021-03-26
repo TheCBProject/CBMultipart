@@ -37,12 +37,13 @@ trait PlacementGrid {
 
 @OnlyIn(Dist.CLIENT)
 object PlacementGridClient {
-    val lineType = RenderType.makeType("placement_lines", DefaultVertexFormats.POSITION_COLOR, 1, 256, RenderType.State.getBuilder
-        .line(new RenderState.LineState(OptionalDouble.of(2.0)))
-        .layer(RenderState.PROJECTION_LAYERING)
-        .transparency(RenderState.TRANSLUCENT_TRANSPARENCY)
-        .writeMask(RenderState.COLOR_WRITE)
-        .build(false)
+    val lineType = RenderType.create("placement_lines", DefaultVertexFormats.POSITION_COLOR, 1, 256, RenderType.State.builder
+        .setLineState(new RenderState.LineState(OptionalDouble.of(2.0)))
+        .setLayeringState(RenderState.VIEW_OFFSET_Z_LAYERING)
+        .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
+        .setOutputState(RenderState.ITEM_ENTITY_TARGET)
+        .setWriteMaskState(RenderState.COLOR_DEPTH_WRITE)
+        .createCompositeState(false)
     )
 }
 
@@ -50,41 +51,41 @@ class FaceEdgeGrid(size: Double) extends PlacementGrid {
 
     @OnlyIn(Dist.CLIENT)
     override def drawLines(builder: IVertexBuilder) {
-        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(-size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(-size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(-size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(-size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(-size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(size, 0, size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(-size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-size, 0, -size).color(0f, 0f, 0f, 1f).endVertex()
     }
 
     def getHitSlot(vhit: Vector3, side: Int) = {
@@ -107,23 +108,23 @@ object CornerPlacementGrid extends PlacementGrid {
 
     @OnlyIn(Dist.CLIENT)
     override def drawLines(builder: IVertexBuilder) {
-        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(0, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(0, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(-0.5, 0, 0).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(0.5, 0, 0).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, 0).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, 0).color(0f, 0f, 0f, 1f).endVertex()
     }
 
     def getHitSlot(vhit: Vector3, side: Int): Int = {
@@ -147,29 +148,29 @@ object EdgePlacementGrid extends PlacementGrid {
 
     @OnlyIn(Dist.CLIENT)
     override def drawLines(builder: IVertexBuilder) {
-        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(0.25, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(0.25, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.25, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.25, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(-0.25, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(-0.25, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.25, 0, -0.5).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.25, 0, 0.5).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(-0.5, 0, 0.25).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(0.5, 0, 0.25).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, 0.25).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, 0.25).color(0f, 0f, 0f, 1f).endVertex()
 
-        builder.pos(-0.5, 0, -0.25).color(0f, 0f, 0f, 1f).endVertex()
-        builder.pos(0.5, 0, -0.25).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(-0.5, 0, -0.25).color(0f, 0f, 0f, 1f).endVertex()
+        builder.vertex(0.5, 0, -0.25).color(0f, 0f, 0f, 1f).endVertex()
     }
 
     override def getHitSlot(vhit: Vector3, side: Int): Int = {

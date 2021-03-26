@@ -1,6 +1,8 @@
 modLoader="scorge"
 loaderVersion="[3.1,)"
 issueTrackerURL="https://github.com/TheCBProject/ForgeMultipart"
+license="GNU Lesser General Public License v2.1"
+
 #CBMultipart
 [[mods]]
 	modId="cb_multipart"
@@ -22,7 +24,7 @@ issueTrackerURL="https://github.com/TheCBProject/ForgeMultipart"
 [[dependencies.cb_multipart]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.15.2]"
+    versionRange="[1.16.5]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.cb_multipart]]
@@ -52,7 +54,7 @@ issueTrackerURL="https://github.com/TheCBProject/ForgeMultipart"
 [[dependencies.cb_microblock]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.15.2]"
+    versionRange="[1.16.5]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.cb_microblock]]
@@ -88,7 +90,7 @@ issueTrackerURL="https://github.com/TheCBProject/ForgeMultipart"
 [[dependencies.cb_multipart_minecraft]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.15.2]"
+    versionRange="[1.16.5]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.cb_multipart_minecraft]]

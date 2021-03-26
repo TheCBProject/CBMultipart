@@ -11,7 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
@@ -27,8 +27,8 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.loot.LootContext;
-import net.minecraft.world.storage.loot.LootParameters;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameters;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -43,9 +43,9 @@ import java.util.Random;
 public class BlockMultiPart extends Block {
 
     public BlockMultiPart() {
-        super(Block.Properties.create(Material.ROCK)
-                .variableOpacity()
-                .notSolid()
+        super(Block.Properties.of(Material.STONE)
+                .dynamicShape()
+                .noOcclusion()
         );
     }
 
@@ -61,7 +61,7 @@ public class BlockMultiPart extends Block {
     }
 
     @Override
-    public boolean ticksRandomly(BlockState state) {
+    public boolean isRandomlyTicking(BlockState state) {
         return true;
     }
 
@@ -84,22 +84,25 @@ public class BlockMultiPart extends Block {
     }
 
     @Override
-    public VoxelShape getRenderShape(BlockState state, IBlockReader world, BlockPos pos) {
+    public VoxelShape getOcclusionShape(BlockState state, IBlockReader world, BlockPos pos) {
         TileMultiPart tile = getTile(world, pos);
-        return tile == null ? VoxelShapes.empty() : tile.getCullingShape();
+        return tile == null ? VoxelShapes.empty() : tile.getRenderOcclusionShape();
     }
 
     @Override
-    public VoxelShape getRaytraceShape(BlockState state, IBlockReader world, BlockPos pos) {
+    public VoxelShape getInteractionShape(BlockState state, IBlockReader world, BlockPos pos) {
         TileMultiPart tile = getTile(world, pos);
-        return tile == null ? VoxelShapes.empty() : tile.getRayTraceShape();
+        return tile == null ? VoxelShapes.empty() : tile.getInteractionShape();
     }
+    
+    //TODO getBlockSupportShape
+    //TODO getVisualShape
 
     @Override
-    public float getExplosionResistance(BlockState state, IWorldReader world, BlockPos pos, @Nullable Entity exploder, Explosion explosion) {
+    public float getExplosionResistance(BlockState state, IBlockReader world, BlockPos pos, Explosion explosion) {
         TileMultiPart tile = getTile(world, pos);
         if (tile != null) {
-            return tile.getExplosionResistance(exploder, explosion);
+            return tile.getExplosionResistance(explosion);
         }
         return 0;
     }
@@ -114,38 +117,38 @@ public class BlockMultiPart extends Block {
     }
 
     @Override
-    public float getPlayerRelativeBlockHardness(BlockState state, PlayerEntity player, IBlockReader world, BlockPos pos) {
+    public float getDestroyProgress(BlockState state, PlayerEntity player, IBlockReader world, BlockPos pos) {
         TileMultiPart tile = getTile(world, pos);
         PartRayTraceResult hit = retracePart(world, pos, player);
         if (tile != null && hit != null) {
-            return tile.getPlayerRelativeBlockHardness(player, hit);
+            return tile.getDestroyProgress(player, hit);
         }
         return 1 / 100F;
     }
 
     @Override
-    public boolean removedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, IFluidState fluid) {
+    public boolean removedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid) {
         TileMultiPart tile = getTile(world, pos);
         PartRayTraceResult hit = retracePart(world, pos, player);
-        world.playEvent(player, 2001, pos, Block.getStateId(state));
+        world.levelEvent(player, 2001, pos, Block.getId(state));
 
         if (hit == null || tile == null) {
             dropAndDestroy(world, pos);
             return true;
         }
 
-        if (world.isRemote && tile.isClientTile()) {
-            hit.part.addDestroyEffects(hit, Minecraft.getInstance().particles);
+        if (world.isClientSide && tile.isClientTile()) {
+            hit.part.addDestroyEffects(hit, Minecraft.getInstance().particleEngine);
             return true;
         }
 
         tile.harvestPart(hit, player);
-        return world.getTileEntity(pos) == null;
+        return world.getBlockEntity(pos) == null;
     }
 
     @Override
     public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
-        TileMultiPart tile = getTile(builder.getWorld(), builder.get(LootParameters.POSITION));
+        TileMultiPart tile = getTile(builder.getParameter(LootParameters.BLOCK_ENTITY));//TODO
         if (tile != null) {
             return tile.getDrops();
         }
@@ -165,38 +168,38 @@ public class BlockMultiPart extends Block {
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit_) {
+    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit_) {
         TileMultiPart tile = getTile(world, pos);
         PartRayTraceResult hit = retracePart(world, pos, player);
         if (tile != null && hit != null) {
-            return tile.onBlockActivated(player, hit, hand);
+            return tile.use(player, hit, hand);
         }
         return ActionResultType.FAIL;
     }
 
     @Override
-    public void onBlockClicked(BlockState state, World world, BlockPos pos, PlayerEntity player) {
+    public void attack(BlockState state, World world, BlockPos pos, PlayerEntity player) {
         TileMultiPart tile = getTile(world, pos);
         PartRayTraceResult hit = retracePart(world, pos, player);
         if (tile != null && hit != null) {
-            tile.onBlockClicked(player, hit);
+            tile.attack(player, hit);
         }
 
     }
 
     @Override
-    public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
+    public void entityInside(BlockState state, World world, BlockPos pos, Entity entity) {
         TileMultiPart tile = getTile(world, pos);
         if (tile != null) {
-            tile.onEntityCollision(entity);
+            tile.entityInside(entity);
         }
     }
 
     @Override
-    public void onEntityWalk(World world, BlockPos pos, Entity entity) {
+    public void stepOn(World world, BlockPos pos, Entity entity) {
         TileMultiPart tile = getTile(world, pos);
         if (tile != null) {
-            tile.onEntityStanding(entity);
+            tile.stepOn(entity);
         }
     }
 
@@ -226,7 +229,7 @@ public class BlockMultiPart extends Block {
     }
 
     @Override
-    public boolean canProvidePower(BlockState state) {
+    public boolean isSignalSource(BlockState state) {
         return true;
     }
 
@@ -240,19 +243,19 @@ public class BlockMultiPart extends Block {
     }
 
     @Override
-    public int getStrongPower(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
+    public int getDirectSignal(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
         TileMultiPart tile = getTile(world, pos);
         if (tile != null) {
-            return tile.strongPowerLevel(side.ordinal() ^ 1);// 'side' is respect to connecting block, we want with respect to this block
+            return tile.getDirectSignal(side.ordinal() ^ 1);// 'side' is respect to connecting block, we want with respect to this block
         }
         return 0;
     }
 
     @Override
-    public int getWeakPower(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
+    public int getSignal(BlockState state, IBlockReader world, BlockPos pos, Direction side) {
         TileMultiPart tile = getTile(world, pos);
         if (tile != null) {
-            return tile.weakPowerLevel(side.ordinal() ^ 1);// 'side' is respect to connecting block, we want with respect to this block
+            return tile.getSignal(side.ordinal() ^ 1);// 'side' is respect to connecting block, we want with respect to this block
         }
         return 0;
     }
@@ -269,7 +272,7 @@ public class BlockMultiPart extends Block {
     @Override
     @OnlyIn (Dist.CLIENT)
     public boolean addHitEffects(BlockState state, World world, RayTraceResult blockHit, ParticleManager manager) {
-        TileMultiPart tile = getTile(world, ((BlockRayTraceResult) blockHit).getPos());
+        TileMultiPart tile = getTile(world, ((BlockRayTraceResult) blockHit).getBlockPos());
         if (tile != null && blockHit instanceof PartRayTraceResult) {
             PartRayTraceResult hit = (PartRayTraceResult) blockHit;
             hit.part.addHitEffects(hit, manager);
@@ -285,15 +288,22 @@ public class BlockMultiPart extends Block {
 
     public static void dropAndDestroy(World world, BlockPos pos) {
         TileMultiPart tile = getTile(world, pos);
-        if (tile != null && !world.isRemote) {
+        if (tile != null && !world.isClientSide) {
             tile.dropItems(tile.getDrops());
         }
 
         world.removeBlock(pos, false);
     }
 
+    public static TileMultiPart getTile(TileEntity tile) {
+        if (tile instanceof TileMultiPart) {
+            return (TileMultiPart) tile;
+        }
+        return null;
+    }
+
     public static TileMultiPart getTile(IBlockReader world, BlockPos pos) {
-        TileEntity tile = world.getTileEntity(pos);
+        TileEntity tile = world.getBlockEntity(pos);
         if (tile instanceof TileMultiPart) {
             TileMultiPart t = (TileMultiPart) tile;
             if (!t.getPartList().isEmpty()) {

@@ -16,10 +16,10 @@ public class TileMultipartClient extends TileMultiPart {
 
     @Override
     public void markRender() {
-        if (getWorld() instanceof ClientWorld) {
-            ClientWorld world = (ClientWorld) getWorld();
-            BlockPos pos = getPos();
-            world.worldRenderer.markBlockRangeForRenderUpdate(pos.getX(), pos.getY(), pos.getZ(), pos.getX(), pos.getY(), pos.getZ());
+        if (getLevel() instanceof ClientWorld) {
+            ClientWorld world = (ClientWorld) getLevel();
+            BlockPos pos = getBlockPos();
+            world.levelRenderer.setBlocksDirty(pos.getX(), pos.getY(), pos.getZ(), pos.getX(), pos.getY(), pos.getZ());
         }
     }
 }

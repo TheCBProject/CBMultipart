@@ -61,12 +61,12 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
             .setExtractor(TMultiPart::getCollisionShape)
             .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
 
-    private final MergedVoxelShapeHolder<TMultiPart> cullingShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
-            .setExtractor(TMultiPart::getCullingShape)
+    private final MergedVoxelShapeHolder<TMultiPart> occlusionShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
+            .setExtractor(TMultiPart::getRenderOcclusionShape)
             .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
 
-    private final MergedVoxelShapeHolder<TMultiPart> rayTraceShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
-            .setExtractor(TMultiPart::getRayTraceShape)
+    private final MergedVoxelShapeHolder<TMultiPart> interactionShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
+            .setExtractor(TMultiPart::getInteractionShape)
             .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
 
     public TileMultiPart() {
@@ -164,7 +164,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     public TMultiPart getSlottedPart(int slot) { return null; }
 
     /**
-     * Called when the Tile is marked as removed via {@link #remove()}.
+     * Called when the Tile is marked as removed via {@link #setRemoved()}.
      * <p>
      * Provided for trait overrides, do not call externally.
      */
@@ -182,8 +182,8 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     //region *** Tile Save/Load ***
 
     @Override
-    public final CompoundNBT write(CompoundNBT compound) {
-        compound = super.write(compound);
+    public final CompoundNBT save(CompoundNBT compound) {
+        compound = super.save(compound);
         ListNBT parts = new ListNBT();
         for (TMultiPart part : partList) {
             parts.add(MultiPartRegistries.savePart(new CompoundNBT(), part));
@@ -242,14 +242,14 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     }
 
     public void addPart_impl(TMultiPart part) {
-        if (!world.isRemote) MultiPartSPH.sendAddPart(this, part);
+        if (!level.isClientSide) MultiPartSPH.sendAddPart(this, part);
 
         addPart_do(part);
         part.onAdded();
         partAdded(part);
         notifyPartChange(part);
         notifyTileChange();
-        markDirty();
+        setChanged();
         markRender();
     }
 
@@ -262,17 +262,17 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     }
 
     public TileMultiPart remPart(TMultiPart part) {
-        Preconditions.checkArgument(!world.isRemote, "Cannot remove MultiParts from a client tile.");
+        Preconditions.checkArgument(!level.isClientSide, "Cannot remove MultiParts from a client tile.");
         return remPart_impl(part);
     }
 
     public TileMultiPart remPart_impl(TMultiPart part) {
-        remPart_do(part, !world.isRemote);
+        remPart_do(part, !level.isClientSide);
 
         if (!isRemoved()) {
             TileMultiPart tile = partRemoved(this);
             tile.notifyPartChange(part);
-            tile.markDirty();
+            tile.setChanged();
             tile.markRender();
             return tile;
 
@@ -297,15 +297,15 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
         markShapeChange();
         recalcLight(false, true);
 
-        if (partList.isEmpty()) world.removeBlock(pos, false);
+        if (partList.isEmpty()) level.removeBlock(worldPosition, false);
         return idx;
     }
 
     private void loadParts(Iterable<TMultiPart> parts) {
         clearParts();
         parts.forEach(this::addPart_do);
-        if (world != null) {
-            if (world.isRemote) {
+        if (level != null) {
+            if (level.isClientSide) {
                 operate(TMultiPart::onWorldJoin);
             }
             notifyPartChange(null);
@@ -314,18 +314,18 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
 
     public final void setValid(boolean b) {
         if (b) {
-            validate();
+            clearRemoved();
         } else {
-            remove();
+            setRemoved();
         }
     }
 
     @Override
-    public void remove() {
+    public void setRemoved() {
         if (!isRemoved()) {
-            super.remove();
+            super.setRemoved();
             onRemoved();
-            if (world != null) {
+            if (level != null) {
                 partList.forEach(TMultiPart::onWorldSeparate);
             }
         }
@@ -344,9 +344,9 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
 
     public VoxelShape getCollisionShape() { return collisionShapeHolder.update(partList); }
 
-    public VoxelShape getCullingShape() { return cullingShapeHolder.update(partList); }
+    public VoxelShape getRenderOcclusionShape() { return occlusionShapeHolder.update(partList); }
 
-    public VoxelShape getRayTraceShape() { return rayTraceShapeHolder.update(partList); }
+    public VoxelShape getInteractionShape() { return interactionShapeHolder.update(partList); }
 
     public void harvestPart(PartRayTraceResult hit, PlayerEntity player) {
         hit.part.harvest(player, hit);
@@ -363,9 +363,9 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
         return hit.part.pickItem(hit);
     }
 
-    public float getExplosionResistance(Entity exploder, Explosion explosion) {
+    public float getExplosionResistance(Explosion explosion) {
         return (float) partList.stream()
-                .mapToDouble(e -> e.getExplosionResistance(exploder, explosion))
+                .mapToDouble(e -> e.getExplosionResistance(explosion))
                 .max()
                 .orElse(0);
     }
@@ -377,7 +377,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
                 .orElse(0);
     }
 
-    public float getPlayerRelativeBlockHardness(PlayerEntity player, PartRayTraceResult hit) {
+    public float getDestroyProgress(PlayerEntity player, PartRayTraceResult hit) {
         return hit.part.getStrength(player, hit);
     }
 
@@ -392,29 +392,29 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     }
 
     public void onMoved() {
-        capabilityCache.setWorldPos(getWorld(), getPos());
+        capabilityCache.setWorldPos(level, worldPosition);
         operate(TMultiPart::onMoved);
     }
 
-    public ActionResultType onBlockActivated(PlayerEntity player, PartRayTraceResult hit, Hand hand) {
-        return hit.part.activate(player, hit, player.getHeldItem(hand), hand);
+    public ActionResultType use(PlayerEntity player, PartRayTraceResult hit, Hand hand) {
+        return hit.part.activate(player, hit, player.getItemInHand(hand), hand);
     }
 
-    public void onBlockClicked(PlayerEntity player, PartRayTraceResult hit) {
-        hit.part.click(player, hit, player.getHeldItemMainhand());
+    public void attack(PlayerEntity player, PartRayTraceResult hit) {
+        hit.part.click(player, hit, player.getMainHandItem());
     }
 
     @Override
-    public void setWorldAndPos(World world, BlockPos pos) {
-        super.setWorldAndPos(world, pos);
+    public void setLevelAndPosition(World world, BlockPos pos) {
+        super.setLevelAndPosition(world, pos);
         capabilityCache.setWorldPos(world, pos);
     }
 
-    public void onEntityCollision(Entity entity) {
+    public void entityInside(Entity entity) {
         operate(e -> e.onEntityCollision(entity));
     }
 
-    public void onEntityStanding(Entity entity) {
+    public void stepOn(Entity entity) {
         operate(e -> e.onEntityStanding(entity));
     }
 
@@ -425,15 +425,15 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
 
     public boolean canConnectRedstone(int side) { return false; }
 
-    public int strongPowerLevel(int side) { return 0; }
+    public int getDirectSignal(int side) { return 0; }
 
-    public int weakPowerLevel(int side) { return 0; }
+    public int getSignal(int side) { return 0; }
 
     @Override
     public AxisAlignedBB getRenderBoundingBox() {
         Cuboid6 c = Cuboid6.full.copy();
         operate(e -> c.enclose(e.getRenderBounds()));
-        return c.add(pos).aabb();
+        return c.add(worldPosition).aabb();
     }
 
     public void animateTick(Random random) { }
@@ -448,7 +448,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
      * Notifies neighboring blocks that this tile has changed
      */
     public void notifyTileChange() {
-        world.notifyNeighborsOfStateChange(pos, CBMultipartModContent.blockMultipart);
+        level.updateNeighborsAt(worldPosition, CBMultipartModContent.blockMultipart);
     }
 
     /**
@@ -458,10 +458,10 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     public void notifyPartChange(TMultiPart part) {
         internalPartChange(part);
 
-        BlockState state = CBMultipartModContent.blockMultipart.getDefaultState();
-        world.notifyBlockUpdate(pos, state, state, 3);
-        world.notifyNeighborsOfStateChange(pos, CBMultipartModContent.blockMultipart);
-        world.getChunkProvider().getLightManager().checkBlock(pos);
+        BlockState state = CBMultipartModContent.blockMultipart.defaultBlockState();
+        level.sendBlockUpdated(worldPosition, state, state, 3);
+        level.updateNeighborsAt(worldPosition, CBMultipartModContent.blockMultipart);
+        level.getChunkSource().getLightEngine().checkBlock(worldPosition);
     }
 
     /**
@@ -490,7 +490,9 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
      * Callback for parts to mark the chunk as needs saving
      */
     @Override
-    public void markDirty() { super.markDirty(); }
+    public void setChanged() {
+        super.setChanged();
+    }
 
     /**
      * Mark this block space for a render update.
@@ -498,37 +500,39 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     public void markRender() { }
 
     public void recalcLight(boolean sky, boolean block) {
-        WorldLightManager lm = world.getChunkProvider().getLightManager();
-        if (sky && lm.skyLight != null) {
-            lm.skyLight.checkLight(pos);
+        WorldLightManager lm = level.getLightEngine();
+        if (sky && lm.skyEngine != null) {
+            lm.skyEngine.checkBlock(worldPosition);
         }
-        if (block && lm.blockLight != null) {
-            lm.blockLight.checkLight(pos);
+        if (block && lm.blockEngine != null) {
+            lm.blockEngine.checkBlock(worldPosition);
         }
     }
 
     public void markShapeChange() {
         outlineShapeHolder.clear();
         collisionShapeHolder.clear();
-        cullingShapeHolder.clear();
-        rayTraceShapeHolder.clear();
+        occlusionShapeHolder.clear();
+        interactionShapeHolder.clear();
     }
 
     /**
      * Helper function for calling a second level notify on a side (eg indirect power from a lever)
      */
     public void notifyNeighborChange(Direction side) {
-        world.notifyNeighborsOfStateChange(getPos().offset(side), CBMultipartModContent.blockMultipart);
+        level.updateNeighborsAt(worldPosition.relative(side), CBMultipartModContent.blockMultipart);
     }
 
-    public void notifyNeighborChange(int side) { notifyNeighborChange(Direction.byIndex(side)); }
+    public void notifyNeighborChange(int side) {
+        notifyNeighborChange(Direction.from3DDataValue(side));
+    }
 
     /**
      * Utility function for dropping items around the center of this space
      */
     public void dropItems(Iterable<ItemStack> items) {
         Vector3 pos = Vector3.fromTileCenter(this);
-        items.forEach(e -> dropItem(e, world, pos));
+        items.forEach(e -> dropItem(e, level, pos));
     }
 
     public CapabilityCache getCapCache() {
@@ -537,10 +541,10 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     //endregion
 
     public static boolean canPlacePart(ItemUseContext context, TMultiPart part) {
-        World world = context.getWorld();
-        BlockPos pos = context.getPos();
+        World world = context.getLevel();
+        BlockPos pos = context.getClickedPos();
 
-        if (!checkNoEntityCollision(world, pos, part)) {
+        if (!isUnobstructed(world, pos, part)) {
             return false;
         }
 
@@ -554,8 +558,8 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
         return true;
     }
 
-    public static boolean checkNoEntityCollision(World world, BlockPos pos, TMultiPart part) {
-        return world.checkNoEntityCollision(null, part.getCollisionShape().withOffset(pos.getX(), pos.getY(), pos.getZ()));
+    public static boolean isUnobstructed(World world, BlockPos pos, TMultiPart part) {
+        return world.isUnobstructed(null, part.getCollisionShape().move(pos.getX(), pos.getY(), pos.getZ()));
     }
 
     /**
@@ -563,7 +567,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
      */
     public static boolean replaceable(World world, BlockPos pos, ItemUseContext context) {
         BlockState state = world.getBlockState(pos);
-        return state.isAir(world, pos) || state.isReplaceable(new BlockItemUseContext(context));
+        return state.isAir(world, pos) || state.canBeReplaced(new BlockItemUseContext(context));
     }
 
     /**
@@ -585,10 +589,10 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
         }
         if (parts.isEmpty()) return;
 
-        TileEntity t = world.getTileEntity(pos);
+        TileEntity t = world.getBlockEntity(pos);
         TileMultiPart tile = MultiPartGenerator.INSTANCE.generateCompositeTile(t, parts, true);
         if (tile != t) {
-            world.setBlockState(pos, CBMultipartModContent.blockMultipart.getDefaultState());
+            world.setBlockAndUpdate(pos, CBMultipartModContent.blockMultipart.defaultBlockState());
             MultiPartHelper.silentAddTile(world, pos, tile);
         }
 
@@ -613,23 +617,23 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
         if (parts.isEmpty()) return null;
 
         TileMultiPart tile = MultiPartGenerator.INSTANCE.generateCompositeTile(null, parts, false);
-        tile.read(tag);
+        tile.save(tag);
         tile.loadParts(parts);
         return tile;
     }
 
     public static void dropItem(ItemStack stack, World world, Vector3 pos) {
         ItemEntity item = new ItemEntity(world, pos.x, pos.y, pos.z, stack);
-        item.setMotion(world.rand.nextGaussian() * 0.05, world.rand.nextGaussian() * 0.05 + 0.2, world.rand.nextGaussian() * 0.05);
-        item.setPickupDelay(10);
-        world.addEntity(item);
+        item.setDeltaMovement(world.random.nextGaussian() * 0.05, world.random.nextGaussian() * 0.05 + 0.2, world.random.nextGaussian() * 0.05);
+        item.setPickUpDelay(10);
+        world.addFreshEntity(item);
     }
 
     private static TileMultiPart partRemoved(TileMultiPart tile) {
-        TileMultiPart newTile = MultiPartGenerator.INSTANCE.generateCompositeTile(tile, tile.getPartList(), tile.getWorld().isRemote);
+        TileMultiPart newTile = MultiPartGenerator.INSTANCE.generateCompositeTile(tile, tile.getPartList(), tile.getLevel().isClientSide);
         if (tile != newTile) {
             tile.setValid(false);
-            MultiPartHelper.silentAddTile(tile.getWorld(), tile.getPos(), newTile);
+            MultiPartHelper.silentAddTile(tile.getLevel(), tile.getBlockPos(), newTile);
             newTile.from(tile);
             newTile.notifyTileChange();
         }

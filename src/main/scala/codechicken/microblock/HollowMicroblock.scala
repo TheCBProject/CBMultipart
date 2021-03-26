@@ -144,8 +144,8 @@ trait HollowMicroblockClient extends HollowMicroblock with CommonMicroblockClien
         val t = (shape >> 4) / 8D
 
         val mat = new Matrix4(mStack)
-        mat.translate(hit.getPos)
-        mat.translate(-info.getProjectedView.x, -info.getProjectedView.y, -info.getProjectedView.z)
+        mat.translate(hit.getBlockPos)
+        mat.translate(-info.getPosition.x, -info.getPosition.y, -info.getPosition.z)
         mat.apply(sideRotations(shape & 0xF).at(Vector3.CENTER))
         RenderUtils.bufferHitBox(mat, getter, new Cuboid6(0, 0, 0, 1, t, 1).expand(0.001))
         RenderUtils.bufferHitBox(mat, getter, new Cuboid6(d1, 0, d1, d2, t, d2).expand(-0.001))
@@ -225,7 +225,7 @@ trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclu
 
     override def getCollisionShape = getCollisionBoxes.map(VoxelShapeCache.getShape).reduce(VoxelShapes.or)
 
-    override def getRayTraceShape = new SubHitVoxelShape(getCollisionShape, getCollisionBoxes.map(c => new IndexedCuboid6(0, c)).asJava)
+    override def getInteractionShape = new SubHitVoxelShape(getCollisionShape, getCollisionBoxes.map(c => new IndexedCuboid6(0, c)).asJava)
 
     override def allowCompleteOcclusion = true
 

@@ -6,6 +6,7 @@ import codechicken.multipart.block.TileMultiPart;
 import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.network.MultiPartSPH;
 import io.netty.buffer.Unpooled;
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -47,25 +48,25 @@ public class MultiPartLoadHandler {
 
         //Handle initial desc sync
         @Override
-        public void handleUpdateTag(CompoundNBT tag) {
+        public void handleUpdateTag(BlockState state, CompoundNBT tag) {
             byte[] data = tag.getByteArray("data");
-            TileMultiPart.handleDescPacket(world, pos, new MCDataByteBuf(Unpooled.wrappedBuffer(data)));
+            TileMultiPart.handleDescPacket(getLevel(), getBlockPos(), new MCDataByteBuf(Unpooled.wrappedBuffer(data)));
         }
 
         @Override
-        public void read(CompoundNBT compound) {
-            super.read(compound);
+        public void load(BlockState state, CompoundNBT compound) {
+            super.load(state, compound);
             if (compound != null) {
                 tag = compound.copy();
             }
         }
 
         @Override
-        public CompoundNBT write(CompoundNBT compound) {
+        public CompoundNBT save(CompoundNBT compound) {
             if (tag != null) {
                 compound.merge(tag);
             }
-            return super.write(compound);
+            return super.save(compound);
         }
 
         @Override
@@ -74,20 +75,20 @@ public class MultiPartLoadHandler {
                 if (tag != null) {
                     TileMultiPart newTile = TileMultiPart.fromNBT(tag);
                     if (newTile != null) {
-                        newTile.validate();
-                        world.setTileEntity(pos, newTile);
+                        newTile.clearRemoved();
+                        level.setBlockEntity(getBlockPos(), newTile);
                         newTile.notifyTileChange();
                         MultiPartSPH.sendDescUpdate(newTile);
                     } else {
-                        world.removeBlock(pos, false);
+                        level.removeBlock(getBlockPos(), false);
                     }
                     loaded = true;
                 } else {
                     ticks += 1;
                     if ((ticks % 600) == 0) {
                         failed = true;
-                        logger.warn("TileNBTContainer at '{}' still exists after {} ticks! Deleting..", pos, ticks);
-                        world.removeBlock(pos, false);
+                        logger.warn("TileNBTContainer at '{}' still exists after {} ticks! Deleting..", getBlockPos(), ticks);
+                        level.removeBlock(getBlockPos(), false);
                     }
                 }
             }

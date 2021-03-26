@@ -58,21 +58,21 @@ object MicroblockPlacement {
 }
 
 class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: BlockRayTraceResult, val size: Int, val material: MicroMaterial, val checkMaterial: Boolean, val pp: PlacementProperties) {
-    val world = player.world
+    val world = player.level
     val mcrFactory = pp.microFactory
-    val pos = hit.getPos
-    val vhit = new Vector3(hit.getHitVec).add(-pos.getX, -pos.getY, -pos.getZ)
+    val pos = hit.getBlockPos
+    val vhit = new Vector3(hit.getLocation).add(-pos.getX, -pos.getY, -pos.getZ)
     val gtile = MultiPartHelper.getOrConvertTile2(world, pos)
     val htile = gtile.getLeft
-    val slot = pp.placementGrid.getHitSlot(vhit, hit.getFace.ordinal)
-    val oslot = pp.opposite(slot, hit.getFace.ordinal)
+    val slot = pp.placementGrid.getHitSlot(vhit, hit.getDirection.ordinal)
+    val oslot = pp.opposite(slot, hit.getDirection.ordinal)
 
-    val d = getHitDepth(vhit, hit.getFace.ordinal)
-    val useOppMod = pp.sneakOpposite(slot, hit.getFace.ordinal)
+    val d = getHitDepth(vhit, hit.getDirection.ordinal)
+    val useOppMod = pp.sneakOpposite(slot, hit.getDirection.ordinal)
     val oppMod = ControlKeyModifier.isControlDown(player)
     val internal = d < 1 && htile != null
-    val doExpand = internal && !gtile.getRight && !player.isCrouching && !(oppMod && useOppMod) && pp.expand(slot, hit.getFace.ordinal)
-    val side = hit.getFace.ordinal
+    val doExpand = internal && !gtile.getRight && !player.isCrouching && !(oppMod && useOppMod) && pp.expand(slot, hit.getDirection.ordinal)
+    val side = hit.getDirection.ordinal
 
     def apply(): ExecutablePlacement = {
         val customPlacement = pp.customPlacement(this)
@@ -122,8 +122,8 @@ class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: Blo
     def expand(mpart: CommonMicroblock): ExecutablePlacement = expand(mpart, create(mpart.getSize + size, mpart.getSlot, mpart.material))
 
     def expand(mpart: Microblock, npart: Microblock): ExecutablePlacement = {
-        val pos = mpart.tile.getPos
-        if (TileMultiPart.checkNoEntityCollision(world, pos, npart) && mpart.tile.canReplacePart(mpart, npart)) {
+        val pos = mpart.tile.getBlockPos
+        if (TileMultiPart.isUnobstructed(world, pos, npart) && mpart.tile.canReplacePart(mpart, npart)) {
             return new ExpandingPlacement(pos, npart, mpart)
         }
         return null
@@ -132,8 +132,8 @@ class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: Blo
     def internalPlacement(htile: TileMultiPart, slot: Int): ExecutablePlacement = internalPlacement(htile, create(size, slot, material))
 
     def internalPlacement(htile: TileMultiPart, npart: Microblock): ExecutablePlacement = {
-        val pos = htile.getPos
-        if (TileMultiPart.checkNoEntityCollision(world, pos, npart) && htile.canAddPart(npart)) {
+        val pos = htile.getBlockPos
+        if (TileMultiPart.isUnobstructed(world, pos, npart) && htile.canAddPart(npart)) {
             return new AdditionPlacement(pos, npart)
         }
         return null
@@ -142,7 +142,7 @@ class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: Blo
     def externalPlacement(slot: Int): ExecutablePlacement = externalPlacement(create(size, slot, material))
 
     def externalPlacement(npart: Microblock): ExecutablePlacement = {
-        val pos = this.pos.offset(Direction.BY_INDEX.apply(side))
+        val pos = this.pos.relative(Direction.BY_3D_DATA.apply(side))
         if (TileMultiPart.canPlacePart(new OffsetItemUseContext(new ItemUseContext(player, hand, hit)), npart)) {
             return new AdditionPlacement(pos, npart)
         }
@@ -153,7 +153,7 @@ class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: Blo
         vhit.copy.scalarProject(Rotation.axes(side)) + (side % 2 ^ 1)
 
     def create(size: Int, slot: Int, material: MicroMaterial) = {
-        val part = mcrFactory.create(world.isRemote, material)
+        val part = mcrFactory.create(world.isClientSide, material)
         part.setShape(size, slot)
         part
     }

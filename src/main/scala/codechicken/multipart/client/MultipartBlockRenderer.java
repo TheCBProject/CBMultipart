@@ -17,7 +17,7 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ILightReader;
+import net.minecraft.world.IBlockDisplayReader;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.model.data.IModelData;
 
@@ -29,12 +29,12 @@ import java.util.Random;
 public class MultipartBlockRenderer implements ICCBlockRenderer {
 
     @Override
-    public boolean canHandleBlock(ILightReader world, BlockPos pos, BlockState blockState) {
+    public boolean canHandleBlock(IBlockDisplayReader world, BlockPos pos, BlockState blockState) {
         return blockState.getBlock() == CBMultipartModContent.blockMultipart;
     }
 
     @Override
-    public boolean renderBlock(BlockState state, BlockPos pos, ILightReader world, MatrixStack mStack, IVertexBuilder builder, Random random, IModelData data) {
+    public boolean renderBlock(BlockState state, BlockPos pos, IBlockDisplayReader world, MatrixStack mStack, IVertexBuilder builder, Random random, IModelData data) {
         TileMultiPart tile = BlockMultiPart.getTile(world, pos);
         if (tile != null) {
             CCRenderState ccrs = CCRenderState.instance();
@@ -47,18 +47,18 @@ public class MultipartBlockRenderer implements ICCBlockRenderer {
     }
 
     @Override
-    public void renderBreaking(BlockState state, BlockPos pos, ILightReader world, MatrixStack mStack, IVertexBuilder builder, IModelData data) {
+    public void renderBreaking(BlockState state, BlockPos pos, IBlockDisplayReader world, MatrixStack mStack, IVertexBuilder builder, IModelData data) {
         TileMultiPart tile = BlockMultiPart.getTile(world, pos);
         if (tile != null) {
             CCRenderState ccrs = CCRenderState.instance();
             ccrs.reset();
-            mStack.push();
+            mStack.pushPose();
             ccrs.bind(new TransformingVertexBuilder(builder, mStack), DefaultVertexFormats.BLOCK);
             ccrs.overlay = OverlayTexture.NO_OVERLAY;
-            ccrs.brightness = WorldRenderer.getPackedLightmapCoords(world, state, pos);
+            ccrs.brightness = WorldRenderer.getLightColor(world, state, pos);
             ccrs.lightMatrix.locate(world, pos);
             renderBreaking(tile, ccrs);
-            mStack.pop();
+            mStack.popPose();
         }
     }
 
@@ -71,8 +71,8 @@ public class MultipartBlockRenderer implements ICCBlockRenderer {
     }
 
     private void renderBreaking(TileMultiPart tile, CCRenderState ccrs) {
-        if (Minecraft.getInstance().objectMouseOver instanceof PartRayTraceResult) {
-            PartRayTraceResult hit = (PartRayTraceResult) Minecraft.getInstance().objectMouseOver;
+        if (Minecraft.getInstance().hitResult instanceof PartRayTraceResult) {
+            PartRayTraceResult hit = (PartRayTraceResult) Minecraft.getInstance().hitResult;
             hit.part.renderBreaking(ccrs);
         }
     }

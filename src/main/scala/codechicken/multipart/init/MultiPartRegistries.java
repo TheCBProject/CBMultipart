@@ -48,19 +48,19 @@ public class MultiPartRegistries {
     }
 
     private static void createRegistries(RegistryEvent.NewRegistry event) {
-        MULTIPART_TYPES = unsafeCast(new RegistryBuilder<MultiPartType<?>>()//
-                .setName(new ResourceLocation(CBMultipart.MOD_ID, "multipart_types"))//
-                .setType(unsafeCast(MultiPartType.class))//
-                .disableSaving()//
-                .create()//
+        MULTIPART_TYPES = unsafeCast(new RegistryBuilder<MultiPartType<?>>()
+                .setName(new ResourceLocation(CBMultipart.MOD_ID, "multipart_types"))
+                .setType(unsafeCast(MultiPartType.class))
+                .disableSaving()
+                .create()
         );
-        PART_CONVERTERS = unsafeCast(new RegistryBuilder<PartConverter>()//
-                .setName(new ResourceLocation(CBMultipart.MOD_ID, "part_converters"))//
-                .setType(PartConverter.class)//
-                .disableOverrides()//
-                .disableSaving()//
-                .disableSync()//
-                .create()//
+        PART_CONVERTERS = unsafeCast(new RegistryBuilder<PartConverter>()
+                .setName(new ResourceLocation(CBMultipart.MOD_ID, "part_converters"))
+                .setType(PartConverter.class)
+                .disableOverrides()
+                .disableSaving()
+                .disableSync()
+                .create()
         );
     }
 
@@ -151,20 +151,20 @@ public class MultiPartRegistries {
     }
 
     public static Collection<TMultiPart> convertBlock(IWorld world, BlockPos pos, BlockState state) {
-        return PART_CONVERTERS.getValues().stream()//
-                .map(c -> c.convert(world, pos, state))//
-                .filter(e -> e.getType() == ActionResultType.SUCCESS)//
-                .findFirst()//
-                .map(ActionResult::getResult)//
+        return PART_CONVERTERS.getValues().stream()
+                .map(c -> c.convert(world, pos, state))
+                .filter(e -> e.getResult() == ActionResultType.SUCCESS)
+                .findFirst()
+                .map(ActionResult::getObject)
                 .orElse(Collections.emptyList());
     }
 
     public static TMultiPart convertItem(ItemUseContext context) {
-        return PART_CONVERTERS.getValues().stream()//
-                .map(c -> c.convert(context))//
-                .filter(e -> e.getType() == ActionResultType.SUCCESS)//
-                .findFirst()//
-                .map(ActionResult::getResult)//
+        return PART_CONVERTERS.getValues().stream()
+                .map(c -> c.convert(context))
+                .filter(e -> e.getResult() == ActionResultType.SUCCESS)
+                .findFirst()
+                .map(ActionResult::getObject)
                 .orElse(null);
     }
 

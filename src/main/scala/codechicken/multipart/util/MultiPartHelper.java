@@ -48,15 +48,14 @@ public class MultiPartHelper {
      * exists as a result of conversion.
      */
     public static Pair<TileMultiPart, Boolean> getOrConvertTile2(World world, BlockPos pos) {
-        TileEntity t = world.getTileEntity(pos);
+        TileEntity t = world.getBlockEntity(pos);
         if (t instanceof TileMultiPart) {
             return Pair.of((TileMultiPart) t, false);
         }
         Collection<TMultiPart> parts = MultiPartRegistries.convertBlock(world, pos, world.getBlockState(pos));
         if (!parts.isEmpty()) {
-            TileMultiPart tile = MultiPartGenerator.INSTANCE.generateCompositeTile(null, parts, world.isRemote);
-            tile.setPos(pos);
-            tile.setWorldAndPos(world, pos);
+            TileMultiPart tile = MultiPartGenerator.INSTANCE.generateCompositeTile(null, parts, world.isClientSide);
+            tile.setLevelAndPosition(world, pos);
             parts.forEach(tile::addPart_do);
             return Pair.of(tile, true);
         }
@@ -70,10 +69,10 @@ public class MultiPartHelper {
      * Checks if there are redundant traits on the tile and strips them.
      */
     public static TileMultiPart partRemoved(TileMultiPart tile) {
-        TileMultiPart newTile = MultiPartGenerator.INSTANCE.generateCompositeTile(tile, tile.getPartList(), tile.getWorld().isRemote);
+        TileMultiPart newTile = MultiPartGenerator.INSTANCE.generateCompositeTile(tile, tile.getPartList(), tile.getLevel().isClientSide);
         if (tile != newTile) {
             tile.setValid(false);
-            silentAddTile(tile.getWorld(), tile.getPos(), newTile);
+            silentAddTile(tile.getLevel(), tile.getBlockPos(), newTile);
             newTile.from(tile);
             newTile.notifyTileChange();
         }
@@ -89,7 +88,7 @@ public class MultiPartHelper {
         Pair<TileMultiPart, Boolean> pair = getOrConvertTile2(world, pos);
         TileMultiPart tile = pair.getLeft();
         boolean converted = pair.getRight();
-        ImmutableSet<MixinFactory.TraitKey> traits = MultiPartGenerator.INSTANCE.getTraits(part, world.isRemote);
+        ImmutableSet<MixinFactory.TraitKey> traits = MultiPartGenerator.INSTANCE.getTraits(part, world.isClientSide);
 
         TileMultiPart newTile = tile;
         if (newTile != null) {
@@ -98,7 +97,7 @@ public class MultiPartHelper {
                 //Callback to the part, so it can do stuff to inworld tile before it gets nuked.
                 TMultiPart head = newTile.getPartList().get(0);
                 head.invalidateConvertedTile();
-                world.setBlockState(pos, CBMultipartModContent.blockMultipart.getDefaultState(), 0);
+                world.setBlock(pos, CBMultipartModContent.blockMultipart.defaultBlockState(), 0);
                 silentAddTile(world, pos, newTile);
                 PacketCustom.sendToChunk(new SChangeBlockPacket(world, pos), world, pos);
                 head.onConverted();
@@ -119,7 +118,7 @@ public class MultiPartHelper {
             }
         } else {
             //Nothing exists in world, just create a new tile with the required traits.
-            world.setBlockState(pos, CBMultipartModContent.blockMultipart.getDefaultState(), 0);
+            world.setBlock(pos, CBMultipartModContent.blockMultipart.defaultBlockState(), 0);
             newTile = MultiPartGenerator.INSTANCE.construct(traits).newInstance();
             silentAddTile(world, pos, newTile);
         }
@@ -135,7 +134,7 @@ public class MultiPartHelper {
     public static void silentAddTile(World world, BlockPos pos, TileEntity tile) {
         IChunk chunk = world.getChunk(pos);
         if (chunk != null) {
-            chunk.addTileEntity(pos, tile);
+            chunk.setBlockEntity(pos, tile);
         }
     }
     //endregion

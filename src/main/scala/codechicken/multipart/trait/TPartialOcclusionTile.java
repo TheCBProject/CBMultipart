@@ -77,7 +77,7 @@ public class TPartialOcclusionTile extends TileMultiPart {
             VoxelShape uniqueShape = part1.getPartialOcclusionShape();
             for (TPartialOcclusionPart part2 : parts) {
                 if (part1 != part2) {
-                    uniqueShape = VoxelShapes.combine(uniqueShape, part2.getPartialOcclusionShape(), IBooleanFunction.ONLY_FIRST);
+                    uniqueShape = VoxelShapes.join(uniqueShape, part2.getPartialOcclusionShape(), IBooleanFunction.ONLY_FIRST);
                 }
             }
             if (uniqueShape.isEmpty()) {

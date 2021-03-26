@@ -3,10 +3,10 @@ package codechicken.multipart.network;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
-import codechicken.multipart.block.TileMultiPart;
-import codechicken.multipart.util.MultiPartHelper;
-import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.init.MultiPartRegistries;
+import codechicken.multipart.util.MultiPartHelper;
 import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.play.IClientPlayNetHandler;
@@ -56,19 +56,19 @@ public class MultiPartCPH implements ICustomPacketHandler.IClientPacketHandler {
         int num = packet.readVarInt();
         for (int i = 0; i < num; i++) {
             BlockPos pos = readUpdateHeader(packet.readByte() & 0x03, packet);
-            TileMultiPart.handleDescPacket(mc.world, pos, packet);
+            TileMultiPart.handleDescPacket(mc.level, pos, packet);
         }
     }
 
     public static void handleAddPart(MCDataInput packet, Minecraft mc) {
         BlockPos pos = readUpdateHeader(packet.readByte() & 0x3, packet);
-        MultiPartHelper.addPart(mc.world, pos, MultiPartRegistries.readPart(packet));
+        MultiPartHelper.addPart(mc.level, pos, MultiPartRegistries.readPart(packet));
     }
 
     public static void handleRemPart(MCDataInput packet, Minecraft mc) {
         byte partByte = packet.readByte();
         BlockPos pos = readUpdateHeader(partByte & 0x3, packet);
-        TileEntity tileEntity = mc.world.getTileEntity(pos);
+        TileEntity tileEntity = mc.level.getBlockEntity(pos);
         if (tileEntity instanceof TileMultiPart) {
             TileMultiPart tile = (TileMultiPart) tileEntity;
             tile.remPart_impl(tile.getPartList().get(partByte >> 2));
@@ -79,7 +79,7 @@ public class MultiPartCPH implements ICustomPacketHandler.IClientPacketHandler {
         byte partByte = packet.readByte();
         int partIndex = partByte >> 2;
         BlockPos pos = readUpdateHeader(partByte & 0x03, packet);
-        TileEntity tileEntity = mc.world.getTileEntity(pos);
+        TileEntity tileEntity = mc.level.getBlockEntity(pos);
         if (tileEntity instanceof TileMultiPart) {
             TileMultiPart tile = (TileMultiPart) tileEntity;
             TMultiPart part = tile.getPartList().get(partIndex);
@@ -104,15 +104,15 @@ public class MultiPartCPH implements ICustomPacketHandler.IClientPacketHandler {
             case 0x02: {
                 byte xzByte = packet.readByte();
                 byte yByte = packet.readByte();
-                pos = new BlockPos(//
-                        lastPos.getX() & ~(0xF) | (xzByte >> 4 & 0xF),//
-                        lastPos.getY() & ~(0xFF) | yByte,//
-                        lastPos.getZ() & ~(0xF) | xzByte & 0xF//
+                pos = new BlockPos(
+                        lastPos.getX() & ~(0xF) | (xzByte >> 4 & 0xF),
+                        lastPos.getY() & ~(0xFF) | yByte,
+                        lastPos.getZ() & ~(0xF) | xzByte & 0xF
                 );
                 break;
             }
             case 0x03: {
-                pos = lastPos.add(packet.readByte(), packet.readByte(), packet.readByte());
+                pos = lastPos.offset(packet.readByte(), packet.readByte(), packet.readByte());
                 break;
             }
             default:
@@ -125,6 +125,7 @@ public class MultiPartCPH implements ICustomPacketHandler.IClientPacketHandler {
     private static void onDisconnectFromServer(ClientPlayerNetworkEvent.LoggedOutEvent event) {
         lastPos = BlockPos.ZERO;
     }
+
     private static void onConnectToServer(ClientPlayerNetworkEvent.LoggedInEvent event) {
         lastPos = BlockPos.ZERO;
     }

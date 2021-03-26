@@ -11,12 +11,12 @@ public class OffsetItemUseContext extends ItemUseContext {
     private final BlockPos pos;
 
     public OffsetItemUseContext(ItemUseContext other) {
-        super(other.getWorld(), other.getPlayer(), other.getHand(), other.getItem(), other.rayTraceResult);
-        this.pos = other.getPos().offset(getFace());
+        super(other.getLevel(), other.getPlayer(), other.getHand(), other.getItemInHand(), other.hitResult);
+        this.pos = other.getClickedPos().relative(getClickedFace());
     }
 
     @Override
-    public BlockPos getPos() {
+    public BlockPos getClickedPos() {
         return pos;
     }
 }

@@ -31,7 +31,7 @@ public class NormalOcclusionTest {
             shape = VoxelShapes.or(shape, ((TPartialOcclusionPart) part2).getPartialOcclusionShape());
         }
 
-        return !VoxelShapes.compare(shape, part1.getOcclusionShape(), IBooleanFunction.AND);
+        return !VoxelShapes.joinIsNotEmpty(shape, part1.getOcclusionShape(), IBooleanFunction.AND);
     }
 
     /**
