@@ -41,7 +41,6 @@ public class TickScheduler {
     @CapabilityInject (WorldTickScheduler.ChunkScheduler.class)
     private static Capability<WorldTickScheduler.ChunkScheduler> CHUNK_CAPABILITY = null;
 
-
     private static final ResourceLocation WORLD_KEY = new ResourceLocation(CBMultipart.MOD_ID, "world_scheduled_ticks");
     private static final ResourceLocation CHUNK_KEY = new ResourceLocation(CBMultipart.MOD_ID, "chunk_scheduled_ticks");
 
@@ -140,10 +139,24 @@ public class TickScheduler {
         if (thePart.world() instanceof ServerWorld) {
             IChunk chunk = thePart.world().getChunk(thePart.pos());
             if (chunk instanceof Chunk) {//Should always be the case unless world gen.
-                WorldTickScheduler.ChunkScheduler chunkScheduler = WorldTickScheduler.getInstance((Chunk) chunk);
-                chunkScheduler.loadRandomTick(thePart);
+                loadRandomTick(part, (Chunk) chunk);
             }
         }
+    }
+
+    /**
+     * Loads random ticks for the given part.
+     * Called from {@link TRandomTickPart#onWorldJoin()}.
+     *
+     * @param part  The part.
+     * @param chunk The chunk.
+     */
+    public static void loadRandomTick(TRandomTickPart part, Chunk chunk) {
+        @SuppressWarnings ("RedundantCast")
+        TMultiPart thePart = (TMultiPart) part;
+
+        WorldTickScheduler.ChunkScheduler chunkScheduler = WorldTickScheduler.getInstance(chunk);
+        chunkScheduler.loadRandomTick(thePart);
     }
 
 }

@@ -10,6 +10,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.RedstoneTorchBlock;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.Chunk;
 
 import java.util.Random;
 
@@ -75,6 +76,11 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
     @Override
     public void randomTick() {
         scheduledTick();
+    }
+
+    @Override
+    public void onChunkLoad(Chunk chunk) {
+        TickScheduler.loadRandomTick(this, chunk);
     }
 
     @Override

@@ -18,6 +18,7 @@ object MicroblockRender {
 
     val highlighRenderType = RenderType.create("cbmp_highlight", DefaultVertexFormats.BLOCK, 7, 255, RenderType.State.builder
         .setTextureState(RenderState.BLOCK_SHEET)
+        .setWriteMaskState(RenderState.COLOR_WRITE)
         .setTransparencyState(RenderState.TRANSLUCENT_TRANSPARENCY)
         .createCompositeState(false))
 
