@@ -1,11 +1,8 @@
 package codechicken.multipart.api.part
 
-import java.lang.{Iterable => JIterable}
-import java.util.Collections
-import java.util.function.Consumer
 import codechicken.lib.data.{MCDataInput, MCDataOutput}
 import codechicken.lib.render.CCRenderState
-import codechicken.lib.vec.{Cuboid6, Vector3}
+import codechicken.lib.vec.Cuboid6
 import codechicken.multipart.api.MultiPartType
 import codechicken.multipart.block.TileMultiPart
 import codechicken.multipart.network.MultiPartSPH
@@ -13,7 +10,7 @@ import codechicken.multipart.util.{PartRayTraceResult, TickScheduler}
 import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.block.SoundType
 import net.minecraft.client.particle.ParticleManager
-import net.minecraft.client.renderer.texture.{OverlayTexture, TextureAtlasSprite}
+import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer
 import net.minecraft.client.renderer.{ActiveRenderInfo, IRenderTypeBuffer, LightTexture, RenderType}
 import net.minecraft.entity.Entity
@@ -25,7 +22,12 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.shapes.{VoxelShape, VoxelShapes}
 import net.minecraft.util.{ActionResultType, Hand}
 import net.minecraft.world.Explosion
+import net.minecraft.world.chunk.Chunk
 import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
+
+import java.lang.{Iterable => JIterable}
+import java.util.Collections
+import java.util.function.Consumer
 
 abstract class TMultiPart {
     /**
@@ -193,7 +195,7 @@ abstract class TMultiPart {
     /**
      * Called when the containing chunk is loaded on the server.
      */
-    def onChunkLoad() = onWorldJoin()
+    def onChunkLoad(chunk: Chunk) = onWorldJoin()
 
     /**
      * Called when the containing chunk is unloaded on the server.

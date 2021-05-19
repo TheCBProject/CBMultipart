@@ -32,6 +32,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.lighting.WorldLightManager;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -387,8 +388,12 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     }
 
     @Override
-    public void onChunkLoad() {
-        operate(TMultiPart::onChunkLoad);
+    @Deprecated
+    public void onChunkLoad() { } //Nop
+
+    @Override
+    public void onChunkLoad(Chunk chunk) {
+        operate(e -> e.onChunkLoad(chunk));
     }
 
     public void onMoved() {
