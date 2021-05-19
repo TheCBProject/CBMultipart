@@ -147,6 +147,7 @@ task mixinAnnotations(type: Exec) {
 
 mixin {
     add(sourceSets.main, "mixins.cbmultipart.refmap.json")
+    disableAnnotationProcessorCheck()
 }
 
 reobf {
