@@ -14,7 +14,7 @@ import codechicken.multipart.api.part.{TEdgePart, TMultiPart, TNormalOcclusionPa
 import codechicken.multipart.block.TileMultiPart
 import codechicken.multipart.util.PartRayTraceResult
 import net.minecraft.client.renderer.RenderType
-import net.minecraft.util.math.shapes.VoxelShape
+import net.minecraft.util.math.shapes.{ISelectionContext, VoxelShape}
 
 object EdgePlacement extends PlacementProperties {
 
@@ -196,7 +196,7 @@ trait PostMicroblock extends Microblock with TPartialOcclusionPart with TNormalO
 
     override def getBounds = PostMicroFactory.aBounds(shape)
 
-    override def getOutlineShape = PostMicroFactory.aShapes(shape)
+    override def getShape(context: ISelectionContext) = PostMicroFactory.aShapes(shape)
 
     override def getOcclusionShape = PostMicroFactory.aShapes(shape)
 

@@ -19,7 +19,7 @@ import net.minecraft.item.{ItemStack, ItemUseContext}
 import net.minecraft.nbt.CompoundNBT
 import net.minecraft.tileentity.TileEntityType
 import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.shapes.{VoxelShape, VoxelShapes}
+import net.minecraft.util.math.shapes.{ISelectionContext, VoxelShape, VoxelShapes}
 import net.minecraft.util.{ActionResultType, Hand}
 import net.minecraft.world.Explosion
 import net.minecraft.world.chunk.Chunk
@@ -110,14 +110,17 @@ abstract class TMultiPart {
      */
     def occlusionTest(npart: TMultiPart): Boolean = true
 
-    def getOutlineShape: VoxelShape = VoxelShapes.empty()
+    def getShape(context:ISelectionContext): VoxelShape = VoxelShapes.empty()
 
-    //TODO pass through ISelectionContext
-    def getCollisionShape: VoxelShape = getOutlineShape
+    def getCollisionShape(context: ISelectionContext): VoxelShape = getShape(context)
 
-    def getRenderOcclusionShape: VoxelShape = getOutlineShape
+    def getRenderOcclusionShape: VoxelShape = getShape(ISelectionContext.empty)
 
-    def getInteractionShape: VoxelShape = getOutlineShape
+    def getInteractionShape: VoxelShape = getShape(ISelectionContext.empty)
+
+    def getBlockSupportShape: VoxelShape = getCollisionShape(ISelectionContext.empty)
+
+    def getVisualShape(context: ISelectionContext): VoxelShape = getCollisionShape(context)
 
     /**
      * Harvest this part, removing it from the container tile and dropping items if necessary.

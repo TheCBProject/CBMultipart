@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.shapes.VoxelShape;
 
@@ -37,7 +38,7 @@ public class MultipartVoxelShape extends VoxelShape {
                 .map(part -> {
                     BlockRayTraceResult hit = part.getInteractionShape().clip(start, end, pos);
                     if (hit == null) {
-                        hit = part.getOutlineShape().clip(start, end, pos);
+                        hit = part.getShape(ISelectionContext.empty()).clip(start, end, pos);
                     }
                     if (hit == null) {
                         return null;

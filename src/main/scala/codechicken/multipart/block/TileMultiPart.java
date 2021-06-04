@@ -4,7 +4,6 @@ import codechicken.lib.capability.CapabilityCache;
 import codechicken.lib.data.MCDataByteBuf;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import codechicken.lib.raytracer.MergedVoxelShapeHolder;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
 import codechicken.lib.world.IChunkLoadTile;
@@ -29,6 +28,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
@@ -55,19 +55,21 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     private CapabilityCache capabilityCache = new CapabilityCache();
 
     private final MergedVoxelShapeHolder<TMultiPart> outlineShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
-            .setExtractor(TMultiPart::getOutlineShape)
             .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
 
     private final MergedVoxelShapeHolder<TMultiPart> collisionShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
-            .setExtractor(TMultiPart::getCollisionShape)
             .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
 
     private final MergedVoxelShapeHolder<TMultiPart> occlusionShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
-            .setExtractor(TMultiPart::getRenderOcclusionShape)
             .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
 
     private final MergedVoxelShapeHolder<TMultiPart> interactionShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
-            .setExtractor(TMultiPart::getInteractionShape)
+            .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
+
+    private final MergedVoxelShapeHolder<TMultiPart> supportShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
+            .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
+
+    private final MergedVoxelShapeHolder<TMultiPart> visualShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
             .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
 
     public TileMultiPart() {
@@ -341,13 +343,17 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     //endregion
 
     //region *** Internal callbacks ***
-    public VoxelShape getOutlineShape() { return outlineShapeHolder.update(partList); }
+    public VoxelShape getShape(ISelectionContext context) { return outlineShapeHolder.update(partList, part -> part.getShape(context)); }
 
-    public VoxelShape getCollisionShape() { return collisionShapeHolder.update(partList); }
+    public VoxelShape getCollisionShape(ISelectionContext context) { return collisionShapeHolder.update(partList, part -> part.getCollisionShape(context)); }
 
-    public VoxelShape getRenderOcclusionShape() { return occlusionShapeHolder.update(partList); }
+    public VoxelShape getRenderOcclusionShape() { return occlusionShapeHolder.update(partList, TMultiPart::getRenderOcclusionShape); }
 
-    public VoxelShape getInteractionShape() { return interactionShapeHolder.update(partList); }
+    public VoxelShape getInteractionShape() { return interactionShapeHolder.update(partList, TMultiPart::getInteractionShape); }
+
+    public VoxelShape getBlockSupportShape() { return supportShapeHolder.update(partList, TMultiPart::getBlockSupportShape); }
+
+    public VoxelShape getVisualShape(ISelectionContext context) { return visualShapeHolder.update(partList, part -> part.getVisualShape(context)); }
 
     public void harvestPart(PartRayTraceResult hit, PlayerEntity player) {
         hit.part.harvest(player, hit);
@@ -564,7 +570,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
     }
 
     public static boolean isUnobstructed(World world, BlockPos pos, TMultiPart part) {
-        return world.isUnobstructed(null, part.getCollisionShape().move(pos.getX(), pos.getY(), pos.getZ()));
+        return world.isUnobstructed(null, part.getCollisionShape(ISelectionContext.empty()).move(pos.getX(), pos.getY(), pos.getZ()));
     }
 
     /**
