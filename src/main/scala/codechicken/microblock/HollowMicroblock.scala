@@ -11,7 +11,7 @@ import codechicken.multipart.api.part.{TFacePart, TNormalOcclusionPart}
 import codechicken.multipart.util.PartRayTraceResult
 import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.client.renderer.{ActiveRenderInfo, IRenderTypeBuffer, RenderType}
-import net.minecraft.util.math.shapes.{VoxelShape, VoxelShapes}
+import net.minecraft.util.math.shapes.{ISelectionContext, VoxelShape, VoxelShapes}
 import org.lwjgl.opengl.GL11
 
 import scala.jdk.CollectionConverters._
@@ -158,7 +158,7 @@ trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclu
 
     override def getBounds: Cuboid6 = FaceMicroFactory.aBounds(shape)
 
-    override def getOutlineShape: VoxelShape = getCollisionShape
+    override def getShape(context: ISelectionContext): VoxelShape = getCollisionShape(context)
 
     override def getPartialOcclusionShape = HollowMicroFactory.pShape(shape)
 
@@ -223,9 +223,9 @@ trait HollowMicroblock extends CommonMicroblock with TFacePart with TNormalOcclu
             .map(c => c.apply(tr))
     }
 
-    override def getCollisionShape = getCollisionBoxes.map(VoxelShapeCache.getShape).reduce(VoxelShapes.or)
+    override def getCollisionShape(context: ISelectionContext) = getCollisionBoxes.map(VoxelShapeCache.getShape).reduce(VoxelShapes.or)
 
-    override def getInteractionShape = new SubHitVoxelShape(getCollisionShape, getCollisionBoxes.map(c => new IndexedCuboid6(0, c)).asJava)
+    override def getInteractionShape = new SubHitVoxelShape(getCollisionShape(ISelectionContext.empty()), getCollisionBoxes.map(c => new IndexedCuboid6(0, c)).asJava)
 
     override def allowCompleteOcclusion = true
 

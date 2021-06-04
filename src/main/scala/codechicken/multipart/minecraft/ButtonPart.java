@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
+import net.minecraft.util.math.shapes.ISelectionContext;
 
 
 public class ButtonPart extends McSidedStatePart implements IFaceRedstonePart {
@@ -103,7 +104,7 @@ public class ButtonPart extends McSidedStatePart implements IFaceRedstonePart {
     }
 
     private void updateState() {
-        boolean arrows = sensitive() && !world().getEntitiesOfClass(ArrowEntity.class, getOutlineShape().bounds().move(pos())).isEmpty();
+        boolean arrows = sensitive() && !world().getEntitiesOfClass(ArrowEntity.class, getShape(ISelectionContext.empty()).bounds().move(pos())).isEmpty();
         boolean pressed = pressed();
 
         if (arrows != pressed) {

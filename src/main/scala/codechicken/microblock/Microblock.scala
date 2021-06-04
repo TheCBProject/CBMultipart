@@ -12,6 +12,7 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundNBT
+import net.minecraft.util.math.shapes.ISelectionContext
 import net.minecraft.world.Explosion
 import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 import net.minecraftforge.client.model.ModelLoader
@@ -160,9 +161,9 @@ trait CommonMicroblock extends Microblock with TPartialOcclusionPart with TMicro
 
     def getSlotMask = 1 << getSlot
 
-    override def getOutlineShape = VoxelShapeCache.getShape(getBounds)
+    override def getShape(context: ISelectionContext) = VoxelShapeCache.getShape(getBounds)
 
-    override def getPartialOcclusionShape = getOutlineShape
+    override def getPartialOcclusionShape = getShape(ISelectionContext.empty())
 
     override def itemFactoryID = microFactory.getFactoryID
 }

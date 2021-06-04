@@ -10,6 +10,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraftforge.client.event.DrawHighlightEvent;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -39,7 +40,7 @@ public class ClientEventHandler {
         if (!part.drawHighlight(hit, info, mStack, buffers, partialTicks)) {
             Matrix4 mat = new Matrix4(mStack);
             mat.translate(hit.getBlockPos());
-            RenderUtils.bufferShapeHitBox(mat, buffers, info, part.getOutlineShape());
+            RenderUtils.bufferShapeHitBox(mat, buffers, info, part.getShape(ISelectionContext.empty()));
         }
         event.setCanceled(true);
     }

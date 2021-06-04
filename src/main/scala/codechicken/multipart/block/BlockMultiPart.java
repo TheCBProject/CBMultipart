@@ -74,13 +74,13 @@ public class BlockMultiPart extends Block {
     @Override
     public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
         TileMultiPart tile = getTile(world, pos);
-        return tile == null ? VoxelShapes.empty() : tile.getOutlineShape();
+        return tile == null ? VoxelShapes.empty() : tile.getShape(context);
     }
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
         TileMultiPart tile = getTile(world, pos);
-        return tile == null ? VoxelShapes.empty() : tile.getCollisionShape();
+        return tile == null ? VoxelShapes.empty() : tile.getCollisionShape(context);
     }
 
     @Override
@@ -94,9 +94,18 @@ public class BlockMultiPart extends Block {
         TileMultiPart tile = getTile(world, pos);
         return tile == null ? VoxelShapes.empty() : tile.getInteractionShape();
     }
-    
-    //TODO getBlockSupportShape
-    //TODO getVisualShape
+
+    @Override
+    public VoxelShape getBlockSupportShape(BlockState state, IBlockReader world, BlockPos pos) {
+        TileMultiPart tile = getTile(world, pos);
+        return tile == null ? VoxelShapes.empty() : tile.getBlockSupportShape();
+    }
+
+    @Override
+    public VoxelShape getVisualShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
+        TileMultiPart tile = getTile(world, pos);
+        return tile == null ? VoxelShapes.empty() : tile.getVisualShape(context);
+    }
 
     @Override
     public float getExplosionResistance(BlockState state, IBlockReader world, BlockPos pos, Explosion explosion) {

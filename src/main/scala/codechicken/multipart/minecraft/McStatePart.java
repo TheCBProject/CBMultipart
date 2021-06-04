@@ -21,6 +21,7 @@ import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -107,13 +108,13 @@ public abstract class McStatePart extends TMultiPart implements TNormalOcclusion
     }
 
     @Override
-    public VoxelShape getOutlineShape() {
-        return state.getShape(world(), pos());
+    public VoxelShape getShape(ISelectionContext context) {
+        return state.getShape(world(), pos(), context);
     }
 
     @Override
-    public VoxelShape getCollisionShape() {
-        return state.getCollisionShape(world(), pos());
+    public VoxelShape getCollisionShape(ISelectionContext context) {
+        return state.getCollisionShape(world(), pos(), context);
     }
 
     @Override
@@ -129,6 +130,16 @@ public abstract class McStatePart extends TMultiPart implements TNormalOcclusion
     @Override
     public VoxelShape getOcclusionShape() {
         return state.getCollisionShape(null, null);
+    }
+
+    @Override
+    public VoxelShape getBlockSupportShape() {
+        return state.getBlockSupportShape(world(), pos());
+    }
+
+    @Override
+    public VoxelShape getVisualShape(ISelectionContext context) {
+        return state.getVisualShape(world(), pos(), context);
     }
 
     @Override
@@ -149,7 +160,7 @@ public abstract class McStatePart extends TMultiPart implements TNormalOcclusion
 
     @Override
     public Cuboid6 getBounds() {
-        return new Cuboid6(getOutlineShape().bounds());
+        return new Cuboid6(getShape(ISelectionContext.empty()).bounds());
     }
 
     @Override
