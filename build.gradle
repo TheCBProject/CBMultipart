@@ -138,7 +138,7 @@ task mixinAnnotations(type: Exec) {
         tasks.compileScala.outputs.files.asFileTree.each {
             def name = it.toString()
             if (name.endsWith(".class") && name.contains("mixin")) {
-                args << destPath.relativize(it.toPath()).toString().replace(".class", "").replace(File.pathSeparator, ".").replace("/", ".")
+                args << destPath.relativize(it.toPath()).toString().replace(".class", "").replace(File.pathSeparator, ".").replace(File.separator, ".")
             }
         }
         setArgs(args)
