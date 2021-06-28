@@ -40,13 +40,11 @@ public class MergedVoxelShapeHolder<T> {
             if (!partCache.equals(shapeParts) || mergedShape == null) {
                 VoxelShape merged;
 
-                synchronized (shapeParts) {
-                    shapeParts.clear();
-                    shapeParts.addAll(partCache);
+                shapeParts.clear();
+                shapeParts.addAll(partCache);
 
-                    //Same as VoxelShapes.or(VoxelShapes.empty(), shapeParts.toArray()); Except we skip useless array creation.
-                    merged = shapeParts.stream().reduce(VoxelShapes.empty(), VoxelShapes::or);
-                }
+                //Same as VoxelShapes.or(VoxelShapes.empty(), shapeParts.toArray()); Except we skip useless array creation.
+                merged = shapeParts.stream().reduce(VoxelShapes.empty(), VoxelShapes::or);
 
                 mergedShape = postProcess.apply(merged);
             }
