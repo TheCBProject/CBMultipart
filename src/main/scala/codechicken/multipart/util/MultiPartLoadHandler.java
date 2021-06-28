@@ -71,6 +71,10 @@ public class MultiPartLoadHandler {
 
         @Override
         public void tick() {
+            if (level == null || level.isClientSide) {
+                return;
+            }
+
             if (!failed && !loaded) {
                 if (tag != null) {
                     TileMultiPart newTile = TileMultiPart.fromNBT(tag);
