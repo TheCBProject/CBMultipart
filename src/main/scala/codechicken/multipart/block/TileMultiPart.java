@@ -628,7 +628,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
         if (parts.isEmpty()) return null;
 
         TileMultiPart tile = MultiPartGenerator.INSTANCE.generateCompositeTile(null, parts, false);
-        tile.save(tag);
+        tile.load(CBMultipartModContent.blockMultipart.defaultBlockState(), tag);
         tile.loadParts(parts);
         return tile;
     }
