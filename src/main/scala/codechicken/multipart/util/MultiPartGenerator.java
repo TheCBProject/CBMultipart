@@ -235,7 +235,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultiPart, MultiPartG
             MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, m.name, m.desc, m.signature, m.exceptions.toArray(new String[0]));
             mv.visitVarInsn(ALOAD, 0);
             mv.visitFieldInsn(GETFIELD, tName, vName, iDesc);
-            Utils.finishBridgeCall(mv, m.desc, INVOKEINTERFACE, iName, m.name, m.desc);
+            Utils.finishBridgeCall(mv, m.desc, INVOKEINTERFACE, iName, m.name, m.desc, true);
         });
         cw.visitEnd();
         mixinCompiler.defineInternal(tName, cw.toByteArray());
