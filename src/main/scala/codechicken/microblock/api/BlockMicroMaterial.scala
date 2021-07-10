@@ -92,7 +92,7 @@ class BlockMicroMaterial(val state: BlockState) extends MicroMaterial {
 
     def getItem = new ItemStack(Item.byBlock(state.getBlock), 1)
 
-    def getLocalizedName = getItem.getDisplayName
+    def getLocalizedName = getItem.getHoverName
 
     def getStrength(player: PlayerEntity) =
         state.getDestroyProgress(player, player.level, new BlockPos(0, -1, 0))
