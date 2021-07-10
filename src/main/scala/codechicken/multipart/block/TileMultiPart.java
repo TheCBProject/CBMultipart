@@ -120,7 +120,7 @@ public class TileMultiPart extends TileEntity implements IChunkLoadTile {
      * Provided for trait overrides, do not call externally.
      */
     public void clearParts() {
-        partList = new ArrayList<>();
+        partList = new CopyOnWriteArrayList<>();
         markShapeChange();
     }
 
