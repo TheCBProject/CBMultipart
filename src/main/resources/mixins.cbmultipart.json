@@ -2,7 +2,7 @@
 	"required": true,
 	"minVersion": "0.8",
 	"package": "codechicken.multipart.internal.mixin",
-	"refmap": "mixins.codechickenlib.refmap.json",
+	"refmap": "mixins.cbmultipart.refmap.json",
 	"target": "@env(DEFAULT)",
 	"compatibilityLevel": "JAVA_8",
 	"client": [
