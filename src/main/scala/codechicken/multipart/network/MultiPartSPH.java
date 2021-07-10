@@ -36,15 +36,6 @@ import static codechicken.multipart.network.MultiPartNetwork.*;
  */
 public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
 
-    private static final CrashLock LOCK = new CrashLock("Already initialized.");
-    private static final Map<UUID, BlockPos> playerLastPositions = new HashMap<>();
-
-    public static void init() {
-        LOCK.lock();
-        MinecraftForge.EVENT_BUS.addListener(MultiPartSPH::onPlayerLoggedIn);
-        MinecraftForge.EVENT_BUS.addListener(MultiPartSPH::onPlayerLoggedOut);
-    }
-
     @Override
     public void handlePacket(PacketCustom packet, ServerPlayerEntity sender, IServerPlayNetHandler handler) {
         switch (packet.getType()) {
@@ -89,7 +80,7 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
         PacketCustom packet = new PacketCustom(NET_CHANNEL, C_TILE_DESC);
         packet.writeVarInt(data.size());
         for (Pair<TileMultiPart, MCByteStream> entry : data) {
-            writeHeaderFor(player, packet, 0, entry.getLeft().getBlockPos());
+            packet.writePos(entry.getLeft().getBlockPos());
             packet.append(entry.getRight().getBytes());
         }
         packet.sendToPlayer(player);
@@ -104,7 +95,7 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
         world.getChunkSource().chunkMap.getPlayers(new ChunkPos(tile.getBlockPos()), false)
                 .forEach(player -> {
                     PacketCustom packet = new PacketCustom(NET_CHANNEL, C_ADD_PART);
-                    writeHeaderFor(player, packet, 0, tile.getBlockPos());
+                    packet.writePos(tile.getBlockPos());
                     packet.append(stream.getBytes());
                     packet.sendToPlayer(player);
                 });
@@ -117,7 +108,8 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
         world.getChunkSource().chunkMap.getPlayers(new ChunkPos(tile.getBlockPos()), false)
                 .forEach(player -> {
                     PacketCustom packet = new PacketCustom(NET_CHANNEL, C_REM_PART);
-                    writeHeaderFor(player, packet, partIdx, tile.getBlockPos());
+                    packet.writeByte(partIdx);
+                    packet.writePos(tile.getBlockPos());
                     packet.sendToPlayer(player);
                 });
     }
@@ -132,75 +124,11 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
         world.getChunkSource().chunkMap.getPlayers(new ChunkPos(pos), false)
                 .forEach(player -> {
                     PacketCustom packet = new PacketCustom(NET_CHANNEL, C_PART_UPDATE);
-                    writeHeaderFor(player, packet, part.tile().getPartList().indexOf(part), part.pos());
+                    packet.writeByte(part.tile().getPartList().indexOf(part));
+                    packet.writePos(part.pos());
                     packet.append(stream.getBytes());
                     packet.sendToPlayer(player);
                 });
-    }
-    //endregion
-
-    //region Helpers.
-    private static void writeHeaderFor(ServerPlayerEntity player, MCDataOutput packet, int partId, BlockPos pos) {
-        BlockPos last = playerLastPositions.computeIfAbsent(player.getUUID(), id -> new BlockPos(0, 0, 0));
-        writeHeader(packet, partId, last, pos);
-        playerLastPositions.put(player.getUUID(), pos);
-    }
-
-    /**
-     * Writes a Runtime Update packet's header.
-     * <p>
-     * The packet can be in 4 separate states.<br/>
-     * For all states, a single byte is prefixed, the first 6 bits containing the {@link TMultiPart} partIndex, followed by 2 Flag bits.<br/>
-     * The 2 flag bytes determine what state the packet is in.<br/>
-     * State 0x00, Full, Writes the BlockPos using signedVarInt's.<br/>
-     * State 0x01, SameBlock. Doesnt write any coords, client remembers.<br/>
-     * State 0x02, SubChunk relative, Writes the 16x256x16, sub chunk coords of the block into 2 bytes, the upper 4 bits of byte1 containing
-     * the X coords, and the lower 4 of byte1 containing the Z coords and byte2 containing the Y coords.<br/>
-     * State 0x03, Within -128 - 127 relative. Relative coords to the last block, within 128 blocks on any axis of the last block.<br/>
-     * <p>
-     * Is this over-engineered? Quite possibly.
-     */
-    @VisibleForTesting
-    static void writeHeader(MCDataOutput out, int partIdx, BlockPos last, BlockPos current) {
-        boolean sameBlock = last.equals(current);
-        if (sameBlock) {//Same blockspace, write no position.
-            out.writeByte((partIdx << 2) | 0x01);
-            return;
-        }
-
-        boolean sameChunk = last.getX() >> 4 == current.getX() >> 4 && last.getZ() >> 4 == current.getZ() >> 4 && last.getY() >> 8 == current.getY() >> 8;
-        if (sameChunk) {//Within the same 16x256x16 SubChunk, pack sub chunk coords into 2 bytes: XXXXZZZZ YYYYYYYY
-            out.writeByte((partIdx << 2) | 0x02);
-            out.writeByte((current.getX() & 0xF) << 4 | (current.getZ() & 0xF));
-            out.writeByte(current.getY() & 0xFF);
-            return;
-        }
-
-        boolean within128 = between(-128, current.getX() - last.getX(), 127) && //
-                between(-128, current.getY() - last.getY(), 127) && //
-                between(-128, current.getZ() - last.getZ(), 127);
-        if (within128) {//Within -128 - 127 blocks on any axis.
-            out.writeByte((partIdx << 2) | 0x03);
-            out.writeByte(current.getX() - last.getX());
-            out.writeByte(current.getY() - last.getY());
-            out.writeByte(current.getZ() - last.getZ());
-            return;
-        }
-
-        //Send the entire BlockPos using signedVarInt's
-        out.writeByte((partIdx << 2)/* | 0x00*/);
-        out.writePos(current);
-    }
-    //endregion
-
-    //region Events
-    //I don't trust the LoggedOut event.
-    private static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        playerLastPositions.remove(event.getPlayer().getUUID());
-    }
-
-    private static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        playerLastPositions.remove(event.getPlayer().getUUID());
     }
     //endregion
 }

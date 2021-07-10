@@ -21,7 +21,6 @@ public class ProxyClient extends Proxy {
     public void clientSetup(FMLClientSetupEvent event) {
         ControlKeyHandler.init();
         ClientEventHandler.init();
-        MultiPartCPH.init();
         RenderTypeLookup.setRenderLayer(CBMultipartModContent.blockMultipart, e -> true);
         BlockRenderingRegistry.registerRenderer(new MultipartBlockRenderer());
         ClientRegistry.bindTileEntityRenderer(SneakyUtils.unsafeCast(CBMultipartModContent.tileMultipartType), MultipartTileRenderer::new);

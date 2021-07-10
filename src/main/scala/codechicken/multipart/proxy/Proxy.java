@@ -21,7 +21,6 @@ public class Proxy {
         MultiPartGenerator.INSTANCE.loadAnnotations();
         MultiPartLoadHandler.init();
         MultiPartNetwork.init();
-        MultiPartSPH.init();
         PlacementConversionHandler.init();
         //        MinecraftForge.EVENT_BUS.register(ItemPlacementHelper$.MODULE$);
         TickScheduler.init();
