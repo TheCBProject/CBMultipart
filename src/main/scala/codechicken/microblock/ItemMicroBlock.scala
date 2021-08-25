@@ -103,7 +103,6 @@ object ItemMicroBlock {
         stack.getOrCreateTag()
         if (!stack.getTag.contains("factory_id")) {
             //Wut..
-            logger.error("Found stack with no factory_id tag? {}", stack)
             -2000
         } else {
             stack.getTag.getInt("factory_id")
