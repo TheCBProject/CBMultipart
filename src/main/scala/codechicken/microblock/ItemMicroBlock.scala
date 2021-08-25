@@ -102,8 +102,7 @@ object ItemMicroBlock {
     def getFactoryID(stack: ItemStack): Int = {
         stack.getOrCreateTag()
         if (!stack.getTag.contains("factory_id")) {
-            //Wut..
-            -2000
+            -1
         } else {
             stack.getTag.getInt("factory_id")
         }
@@ -120,9 +119,8 @@ object ItemMicroBlock {
     def getSize(stack: ItemStack): Int = {
         stack.getOrCreateTag()
         if (!stack.getTag.contains("size")) {
-            //Wut..
             logger.error("Found stack with no size tag? {}", stack)
-            -2000
+            -1
         } else {
             stack.getTag.getInt("size")
         }
