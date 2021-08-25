@@ -119,7 +119,6 @@ object ItemMicroBlock {
     def getSize(stack: ItemStack): Int = {
         stack.getOrCreateTag()
         if (!stack.getTag.contains("size")) {
-            logger.error("Found stack with no size tag? {}", stack)
             -1
         } else {
             stack.getTag.getInt("size")
