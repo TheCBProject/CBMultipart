@@ -110,7 +110,13 @@ object ItemMicroBlock {
         }
     }
 
-    def getFactory(stack: ItemStack) = CommonMicroFactory.factories(getFactoryID(stack))
+    def getFactory(stack: ItemStack): CommonMicroFactory =  {
+        val factoryId = getFactoryID(stack)
+        if (factoryId < 0 || factoryId > CommonMicroFactory.factories.length) {
+            return null
+        }
+        CommonMicroFactory.factories(factoryId)
+    }
 
     def getSize(stack: ItemStack): Int = {
         stack.getOrCreateTag()
