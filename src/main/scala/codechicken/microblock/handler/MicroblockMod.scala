@@ -37,12 +37,9 @@ class MicroblockMod {
     ScorgeModLoadingContext.get.getModEventBus.register(DataGenerators)
     MinecraftForge.EVENT_BUS.register(this)
 
-
     @SubscribeEvent
     def onCommonSetup(event: FMLCommonSetupEvent): Unit = {
         proxy.commonSetup(event)
-        ConfigContent.parse(new File("./config"))
-        //ConfigContent.load();
     }
 
     @SubscribeEvent
@@ -63,5 +60,6 @@ class MicroblockMod {
     @SubscribeEvent
     def onProcessIMC(event: InterModProcessEvent): Unit = {
         MicroblockModContent.processIMC(MicroMaterialRegistry.MICRO_MATERIALS, event.getIMCStream)
+        ConfigContent.parse(Paths.get("config", "custom-micromaterials.cfg"))
     }
 }
