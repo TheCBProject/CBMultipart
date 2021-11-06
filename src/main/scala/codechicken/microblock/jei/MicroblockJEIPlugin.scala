@@ -31,7 +31,7 @@ class MicroblockJEIPlugin extends IModPlugin {
         if (instance != this) return
 
         val ingredientManager = runtime.getIngredientManager
-        if (!MicroblockProxy.showAllMicroparts) {
+        if (!MicroblockProxy.showAllMicroblocks) {
             ingredientManager.removeIngredientsAtRuntime(VanillaTypes.ITEM, blacklist.asJavaCollection)
         }
     }

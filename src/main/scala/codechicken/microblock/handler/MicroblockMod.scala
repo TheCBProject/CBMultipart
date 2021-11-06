@@ -48,16 +48,6 @@ class MicroblockMod {
     }
 
     @SubscribeEvent
-    def onServerSetup(event: FMLDedicatedServerSetupEvent): Unit = {
-        proxy.serverSetup(event)
-    }
-
-    @SubscribeEvent
-    def onLoadComplete(event: FMLLoadCompleteEvent): Unit = {
-        proxy.loadComplete(event)
-    }
-
-    @SubscribeEvent
     def onProcessIMC(event: InterModProcessEvent): Unit = {
         MicroblockModContent.processIMC(MicroMaterialRegistry.MICRO_MATERIALS, event.getIMCStream)
         ConfigContent.parse(Paths.get("config", "custom-micromaterials.cfg"))
