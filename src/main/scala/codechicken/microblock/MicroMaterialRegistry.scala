@@ -21,6 +21,7 @@ import scala.jdk.CollectionConverters._
 /**
  * Interface for overriding the default micro placement highlight handler to show the effect of placement on a certain block/part
  */
+// TODO 1.17 Move to API package.
 trait IMicroHighlightRenderer {
     /**
      * Return true if a custom highlight was rendered and the default should be skipped
@@ -40,16 +41,17 @@ object MicroMaterialRegistry {
 
     private var iconsLoaded = false
 
-    private[microblock] def init(eventBus: IEventBus) {
+    private[microblock] def init(eventBus: IEventBus): Unit = {
         eventBus.addListener(createRegistries)
     }
 
-    private def createRegistries(event: RegistryEvent.NewRegistry) {
+    private def createRegistries(event: RegistryEvent.NewRegistry): Unit = {
         MICRO_MATERIALS = unsafeCast(
             new RegistryBuilder[MicroMaterial]
                 .setName(new ResourceLocation(MicroblockMod.modId, "micro_materials"))
                 .setType(classOf[MicroMaterial])
                 .disableSaving()
+                .allowModification()
                 .create()
         )
     }
@@ -57,15 +59,15 @@ object MicroMaterialRegistry {
     /**
      * Registers a highlight renderer
      */
-    def registerHighlightRenderer(handler: IMicroHighlightRenderer) {
+    def registerHighlightRenderer(handler: IMicroHighlightRenderer): Unit = {
         highlightRenderers += handler
     }
 
-    def markIconReload() {
+    def markIconReload(): Unit = {
         iconsLoaded = false
     }
 
-    private[microblock] def loadIcons() {
+    private[microblock] def loadIcons(): Unit = {
         if (!iconsLoaded) {
             MICRO_MATERIALS.forEach(e => e.loadIcons())
             iconsLoaded = true

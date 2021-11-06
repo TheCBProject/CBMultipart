@@ -5,22 +5,26 @@ import codechicken.lib.gui.SimpleItemGroup
 import codechicken.microblock._
 import codechicken.microblock.api.{BlockMicroMaterial, MicroMaterial}
 import codechicken.multipart.api.MultiPartType
-import net.minecraft.block.Blocks
+import net.minecraft.block.{Block, BlockState, Blocks}
 import net.minecraft.item.crafting.{IRecipeSerializer, SpecialRecipeSerializer}
 import net.minecraft.item.{Item, ItemGroup}
 import net.minecraft.tags.ITag.INamedTag
-import net.minecraft.tags.{ItemTags, Tag}
-import net.minecraft.util.ResourceLocation
+import net.minecraft.tags.ItemTags
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.fml.ModLoadingContext
+import net.minecraftforge.fml.{InterModComms, ModLoadingContext}
+import net.minecraftforge.registries.{ForgeRegistry, IForgeRegistry}
+
+import java.util.stream.{Stream => JStream}
 
 /**
  * Created by covers1624 on 23/12/19.
  */
 object MicroblockModContent {
 
-    var microTab = new SimpleItemGroup("cb_microblock", () => ItemMicroBlock.create(0, 1, BlockMicroMaterial.makeMaterialKey(Blocks.STONE.defaultBlockState)))
+    var microTab = new SimpleItemGroup("cb_microblock", () => ItemMicroBlock.create(0, 1, BlockMicroMaterial.makeMaterialKey(Blocks.STONE.defaultBlockState))) {
+        override def hasSearchBar: Boolean = true
+    }
 
     var itemMicroBlock: ItemMicroBlock = _
     var itemStoneRod: Item = _
@@ -39,7 +43,7 @@ object MicroblockModContent {
     var postMultiPartType: MultiPartType[_] = _
 
     @SubscribeEvent
-    def onRegisterItems(event: RegistryEvent.Register[Item]) {
+    def onRegisterItems(event: RegistryEvent.Register[Item]): Unit = {
         val registry = event.getRegistry
         itemMicroBlock = new ItemMicroBlock(new Item.Properties().tab(microTab))
         registry.register(itemMicroBlock.setRegistryName("microblock"))
@@ -58,7 +62,7 @@ object MicroblockModContent {
     }
 
     @SubscribeEvent
-    def onRegisterRecipeSerializers(event: RegistryEvent.Register[IRecipeSerializer[_]]) {
+    def onRegisterRecipeSerializers(event: RegistryEvent.Register[IRecipeSerializer[_]]): Unit = {
         val registry = event.getRegistry
 
         microRecipeSerializer = new SpecialRecipeSerializer(e => new MicroRecipe(e))
@@ -66,7 +70,7 @@ object MicroblockModContent {
     }
 
     @SubscribeEvent
-    def onRegisterMultiParts(event: RegistryEvent.Register[MultiPartType[_]]) {
+    def onRegisterMultiParts(event: RegistryEvent.Register[MultiPartType[_]]): Unit = {
         val registry = event.getRegistry
         faceMultiPartType = registry.register(FaceMicroFactory, MicroblockMod.modId + ":face")
         hollowMultiPartType = registry.register(HollowMicroFactory, MicroblockMod.modId + ":hollow")
@@ -76,10 +80,8 @@ object MicroblockModContent {
     }
 
     @SubscribeEvent
-    def onRegisterMicroMaterials(event: RegistryEvent.Register[MicroMaterial]) {
+    def onRegisterMicroMaterials(event: RegistryEvent.Register[MicroMaterial]): Unit = {
         val r = event.getRegistry
-        val container = ModLoadingContext.get().getActiveContainer
-        val ext: Any = ModLoadingContext.get().extension()
         ModLoadingContext.get().setActiveContainer(null, null)
         r.register(BlockMicroMaterial(Blocks.STONE))
         r.register(BlockMicroMaterial(Blocks.GRANITE))
@@ -311,32 +313,31 @@ object MicroblockModContent {
         r.register(BlockMicroMaterial(Blocks.FIRE_CORAL_BLOCK)) //TODO Dies out of water
         r.register(BlockMicroMaterial(Blocks.HORN_CORAL_BLOCK)) //TODO Dies out of water
         r.register(BlockMicroMaterial(Blocks.BLUE_ICE)) //TODO speed
-        ModLoadingContext.get().setActiveContainer(container, ext)
-        //processRegistrationMessages(r)
     }
 
-    //    def processRegistrationMessages(r: IForgeRegistry[MicroMaterial]) {
-    //        InterModComms.getMessages(MicroblockMod.modId)
-    //            .filter(e => e.getMethod == "micro_material")
-    //            .map(e => (e.getSenderModId, e.getMessageSupplier.get()))
-    //            .forEach(e => {
-    //                val (sender, obj) = e
-    //                val mat = obj match {
-    //                    case state: BlockState => BlockMicroMaterial(state.asInstanceOf[BlockState])
-    //                    case block: Block => BlockMicroMaterial(block.asInstanceOf[Block])
-    //                    case e => logger.error(s"Mod '$sender' tried to register MicroMaterial of invalid " +
-    //                        s"type '${if (e != null) e.toString else null}', class '${if (e != null) e.getClass else null}', please use the registry directly.")
-    //                        null
-    //                }
-    //                if (mat != null) {
-    //                    if (r.containsKey(mat.getRegistryName)) {
-    //                        logger.warn(s"Mod '$sender' tried to register duplicate MicroMaterial '${mat.getRegistryName}'. Ignoring.")
-    //                    } else {
-    //                        r.register(mat)
-    //                    }
-    //                }
-    //            })
-    //    }
+    private[microblock] def processIMC(r: IForgeRegistry[MicroMaterial], messages: JStream[InterModComms.IMCMessage]): Unit = {
+        val registry = r.asInstanceOf[ForgeRegistry[MicroMaterial]]
+        registry.unfreeze() // My god, Forge backs us into a corner with Registries..
+        messages.filter(e => e.getMethod == "micro_material")
+            .forEach(e => {
+                val sender = e.getSenderModId
+                val mat = e.getMessageSupplier[Any]().get() match {
+                    case state: BlockState => BlockMicroMaterial(state.asInstanceOf[BlockState])
+                    case block: Block => BlockMicroMaterial(block.asInstanceOf[Block])
+                    case e => logger.error(s"Mod '$sender' tried to register MicroMaterial of invalid " +
+                        s"type '${if (e != null) e.toString else null}', class '${if (e != null) e.getClass else null}', please use the registry directly.")
+                        null
+                }
+                if (mat != null) {
+                    if (r.containsKey(mat.getRegistryName)) {
+                        logger.warn(s"Mod '$sender' tried to register duplicate MicroMaterial '${mat.getRegistryName}'. Ignoring.")
+                    } else {
+                        r.register(mat)
+                    }
+                }
+            })
+        registry.freeze()
+    }
 
     private def createSaw(config: ConfigTag, name: String, strength: Int) = {
         val saw = new ItemSaw(config.getTag(name), strength)

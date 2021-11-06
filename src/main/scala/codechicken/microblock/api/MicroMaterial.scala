@@ -9,7 +9,6 @@ import net.minecraft.block.SoundType
 import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.client.renderer.{IRenderTypeBuffer, RenderType}
-import net.minecraft.entity.Entity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.util.math.BlockPos
@@ -17,7 +16,7 @@ import net.minecraft.util.text.ITextComponent
 import net.minecraft.world.{Explosion, IWorldReader}
 import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 import net.minecraftforge.event.RegistryEvent
-import net.minecraftforge.registries.ForgeRegistryEntry
+import net.minecraftforge.registries.ForgeRegistryEntry.UncheckedRegistryEntry
 
 /**
  * A MicroMaterial! Used to define the type of a Microblock, can control various aspects
@@ -29,11 +28,13 @@ import net.minecraftforge.registries.ForgeRegistryEntry
  * RegistryNames for [[MicroMaterial]] instances should follow the format laid out in [[BlockMicroMaterial.makeMaterialKey()]],
  * registry overrides are supported by [[MicroMaterial]], so you can feel free to add extra functionality at will.
  *
+ * Simple micro materials can also be registered via IMC messages during the [[net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent]].
+ * Specify the modID of 'cb_microblock', method name of 'micro_material', and a Supplier returning a BlockState or a Block (will use default state).
  *
  * TODO, Many of these methods need extra context for forge overloaded methods.
  * Interface for defining a micro material
  */
-abstract class MicroMaterial extends ForgeRegistryEntry[MicroMaterial] {
+abstract class MicroMaterial extends UncheckedRegistryEntry[MicroMaterial] {
 
     /**
      * The icon to be used for breaking particles on side
@@ -45,7 +46,7 @@ abstract class MicroMaterial extends ForgeRegistryEntry[MicroMaterial] {
      * Callback to load icons from the underlying block/etc
      */
     @OnlyIn(Dist.CLIENT)
-    def loadIcons() {}
+    def loadIcons(): Unit = {}
 
     /**
      * This function must return a list of vertex operations, one set for each
