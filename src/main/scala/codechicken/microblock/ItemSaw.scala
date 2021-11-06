@@ -31,9 +31,12 @@ class ItemSaw(sawTag: ConfigTag, val harvestLevel: Int) extends Item({
 
     override def hasContainerItem(stack: ItemStack) = true
 
-    override def getContainerItem(stack: ItemStack) =
+    override def getContainerItem(stack: ItemStack):ItemStack =
         if (canBeDepleted) {
-            val newStack = new ItemStack(stack.getItem, 1)
+            if (stack.getDamageValue + 1 >= stack.getMaxDamage) {
+                return ItemStack.EMPTY
+            }
+            val newStack = stack.copy()
             newStack.setDamageValue(stack.getDamageValue + 1)
             newStack
         } else {
