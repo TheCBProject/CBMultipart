@@ -39,15 +39,4 @@ public class CBMultipart {
     public void onClientSetup(FMLClientSetupEvent event) {
         proxy.clientSetup(event);
     }
-
-    @SubscribeEvent
-    public void onLoadComplete(FMLLoadCompleteEvent event) {
-        proxy.onLoadComplete(event);
-    }
-
-    @SubscribeEvent
-    public void onServerSetup(FMLDedicatedServerSetupEvent event) {
-        proxy.serverSetup(event);
-    }
-
 }

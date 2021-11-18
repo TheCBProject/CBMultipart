@@ -22,7 +22,7 @@ public class ProxyClient extends Proxy {
         ControlKeyHandler.init();
         ClientEventHandler.init();
         RenderTypeLookup.setRenderLayer(CBMultipartModContent.blockMultipart, e -> true);
-        BlockRenderingRegistry.registerRenderer(new MultipartBlockRenderer());
+        BlockRenderingRegistry.registerRenderer(CBMultipartModContent.blockMultipart, new MultipartBlockRenderer());
         ClientRegistry.bindTileEntityRenderer(SneakyUtils.unsafeCast(CBMultipartModContent.tileMultipartType), MultipartTileRenderer::new);
     }
 }

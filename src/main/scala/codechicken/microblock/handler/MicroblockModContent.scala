@@ -82,7 +82,6 @@ object MicroblockModContent {
     @SubscribeEvent
     def onRegisterMicroMaterials(event: RegistryEvent.Register[MicroMaterial]): Unit = {
         val r = event.getRegistry
-        ModLoadingContext.get().setActiveContainer(null, null)
         r.register(BlockMicroMaterial(Blocks.STONE))
         r.register(BlockMicroMaterial(Blocks.GRANITE))
         r.register(BlockMicroMaterial(Blocks.POLISHED_GRANITE))

@@ -44,20 +44,20 @@ public class ModContent {
     public static MultiPartType<LeverPart> leverPartType;
 
     @ObjectHolder ("stone_button")
-    public static MultiPartType<LeverPart> stoneButtonPartType;
+    public static MultiPartType<ButtonPart.StoneButtonPart> stoneButtonPartType;
 
     @ObjectHolder ("oak_button")
-    public static MultiPartType<LeverPart> oakButtonPartType;
+    public static MultiPartType<ButtonPart.OakButtonPart> oakButtonPartType;
     @ObjectHolder ("spruce_button")
-    public static MultiPartType<LeverPart> spruceButtonPartType;
+    public static MultiPartType<ButtonPart.SpruceButtonPart> spruceButtonPartType;
     @ObjectHolder ("birch_button")
-    public static MultiPartType<LeverPart> birchButtonPartType;
+    public static MultiPartType<ButtonPart.BirchButtonPart> birchButtonPartType;
     @ObjectHolder ("jungle_button")
-    public static MultiPartType<LeverPart> jungleButtonPartType;
+    public static MultiPartType<ButtonPart.JungleButtonPart> jungleButtonPartType;
     @ObjectHolder ("acacia_button")
-    public static MultiPartType<LeverPart> acaciaButtonPartType;
+    public static MultiPartType<ButtonPart.AcaciaButtonPart> acaciaButtonPartType;
     @ObjectHolder ("dark_oak_button")
-    public static MultiPartType<LeverPart> darkOakButtonPartType;
+    public static MultiPartType<ButtonPart.DarkOakButtonPart> darkOakButtonPartType;
 
     @SubscribeEvent
     public static void onRegisterMultiParts(RegistryEvent.Register<MultiPartType<?>> event) {

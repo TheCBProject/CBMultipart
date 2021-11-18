@@ -22,17 +22,10 @@ public class Proxy {
         MultiPartLoadHandler.init();
         MultiPartNetwork.init();
         PlacementConversionHandler.init();
-        //        MinecraftForge.EVENT_BUS.register(ItemPlacementHelper$.MODULE$);
         TickScheduler.init();
         TileChunkLoadHook.init();
     }
 
     public void clientSetup(FMLClientSetupEvent event) {
-    }
-
-    public void serverSetup(FMLDedicatedServerSetupEvent event) {
-    }
-
-    public void onLoadComplete(FMLLoadCompleteEvent event) {
     }
 }

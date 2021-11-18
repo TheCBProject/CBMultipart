@@ -100,6 +100,10 @@ object ConfigContent {
                 state = state.setValue(property, SneakyUtils.unsafeCast(value.get()))
             }
         }
+        if (r.containsKey(BlockMicroMaterial.makeMaterialKey(state))) {
+            LOGGER.warn(s"Skipping microblock config line $lineNumber. Micro material already registered.")
+            return
+        }
         r.register(BlockMicroMaterial(state))
     }
 }
