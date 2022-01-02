@@ -2,8 +2,10 @@ package codechicken.multipart.api.part
 
 import codechicken.lib.data.{MCDataInput, MCDataOutput}
 import codechicken.lib.render.CCRenderState
+import codechicken.lib.util.SneakyUtils.unsafeCast
 import codechicken.lib.vec.Cuboid6
-import codechicken.multipart.api.MultiPartType
+import codechicken.multipart.api.{MultiPartType, MultipartClientRegistry}
+import codechicken.multipart.api.part.render.PartRenderer
 import codechicken.multipart.block.TileMultiPart
 import codechicken.multipart.network.MultiPartSPH
 import codechicken.multipart.util.{PartRayTraceResult, TickScheduler}
@@ -110,7 +112,7 @@ abstract class TMultiPart {
      */
     def occlusionTest(npart: TMultiPart): Boolean = true
 
-    def getShape(context:ISelectionContext): VoxelShape = VoxelShapes.empty()
+    def getShape(context: ISelectionContext): VoxelShape = VoxelShapes.empty()
 
     def getCollisionShape(context: ISelectionContext): VoxelShape = getShape(context)
 
@@ -299,53 +301,26 @@ abstract class TMultiPart {
     def addDestroyEffects(hit: PartRayTraceResult, manager: ParticleManager) {}
 
     /**
-     * Render the static, unmoving faces of this part into the world renderer.
-     * The given CCRenderState is set up as follows should you wish to use it:
-     *  - CCRenderState.reset() has been called
-     *  - The current buffer is bound
-     *  - The light matrix is located
-     *
-     * Otherwise an instance of the VertexBuffer can be retrieved from
-     * CCRenderState via CCRenderState.getBuffer()
-     *
-     * NOTE: The tessellator is already drawing. DO NOT make draw calls or
-     * mess with the GL state
-     *
-     * This may be called on a ChunkBatching thread. Please make sure
-     * Everything you do is Thread Safe.
-     *
-     * @param layer The render layer
-     * @param ccrs  An instance of CCRenderState to use.
-     * @return true if vertices were added to the buffer
+     * @deprecated Please see [[PartRenderer]].
      */
+    @Deprecated // TODO remove in 1.17
     @OnlyIn(Dist.CLIENT)
-    def renderStatic(layer: RenderType, ccrs: CCRenderState) = false
+    def renderStatic(layer: RenderType, ccrs: CCRenderState) =
+        MultipartClientRegistry.getRenderer(getType) match {
+            case renderer: PartRenderer[_] => renderer.renderStatic(unsafeCast(this), layer, ccrs)
+            case _ => false
+        }
 
     /**
-     * Override how your part displays its breaking progress,
-     * By default this method will delegate to renderStatic with a null RenderType.
-     * You shouldn't need to override this in _most_ cases.
-     *
-     * CCRenderState is set up as follows should you wish to use it:
-     *  - CCRenderState.reset() has been called
-     *  - The current buffer is bound
-     *  - LightMatrix has been located.
-     *
-     * Otherwise an instance of the [[com.mojang.blaze3d.vertex.IVertexBuilder]] and [[net.minecraft.client.renderer.vertex.VertexFormat]] can be retrieved from
-     * CCRenderState via CCRenderState.getConsumer and CCRenderState.getVertexFormat
-     *
-     * NOTE: The tessellator is already drawing. DO NOT make draw calls or
-     * mess with the GL state
-     *
-     * This may be called on a ChunkBatching thread. Please make sure
-     * Everything you do is Thread Safe.
-     *
-     * @param ccrs An instance of CCRenderState to use.
+     * @deprecated Please see [[PartRenderer]].
      */
+    @Deprecated // TODO remove in 1.17
     @OnlyIn(Dist.CLIENT)
-    def renderBreaking(ccrs: CCRenderState) {
-        renderStatic(null, ccrs)
-    }
+    def renderBreaking(ccrs: CCRenderState) =
+        MultipartClientRegistry.getRenderer(getType) match {
+            case renderer: PartRenderer[_] => renderer.renderBreaking(unsafeCast(this), ccrs)
+            case _ => renderStatic(null, ccrs)
+        }
 
     /**
      * The bounds of this part for Frustum culling.
@@ -356,24 +331,24 @@ abstract class TMultiPart {
     def getRenderBounds = Cuboid6.full
 
     /**
-     * Render the dynamic, changing faces of this part and other gfx.
-     * This is equivalent to a [[TileEntityRenderer]].
-     *
-     * @param mStack        The MatrixStack to apply.
-     * @param buffers       The Buffer storage.
-     * @param packedLight   The Packed LightMap value to use, see [[LightTexture]]
-     * @param packedOverlay The Packed Overlay value to use, see [[OverlayTexture]]
-     * @param partialTicks  The partial ticks.
+     * @deprecated Please see [[PartRenderer]].
      */
+    @Deprecated // TODO remove in 1.17
     @OnlyIn(Dist.CLIENT)
-    def renderDynamic(mStack: MatrixStack, buffers: IRenderTypeBuffer, packedLight: Int, packedOverlay: Int, partialTicks: Float) {}
+    def renderDynamic(mStack: MatrixStack, buffers: IRenderTypeBuffer, packedLight: Int, packedOverlay: Int, partialTicks: Float) =
+        MultipartClientRegistry.getRenderer(getType) match {
+            case renderer: PartRenderer[_] => renderer.renderDynamic(unsafeCast(this), mStack, buffers, packedLight, packedOverlay, partialTicks)
+            case _ =>
+        }
 
     /**
-     * Override the drawing of the selection box around this part.
-     *
-     * @param hit An instance of ExtendedMOP from collisionRayTrace
-     * @return true if highlight rendering was overridden.
+     * @deprecated Please see [[PartRenderer]].
      */
+    @Deprecated // TODO remove in 1.17
     @OnlyIn(Dist.CLIENT)
-    def drawHighlight(hit: PartRayTraceResult, info: ActiveRenderInfo, mStack: MatrixStack, getter: IRenderTypeBuffer, partialTicks: Float): Boolean = false
+    def drawHighlight(hit: PartRayTraceResult, info: ActiveRenderInfo, mStack: MatrixStack, buffers: IRenderTypeBuffer, partialTicks: Float) =
+        MultipartClientRegistry.getRenderer(getType) match {
+            case renderer: PartRenderer[_] => renderer.drawHighlight(unsafeCast(this), hit, info, mStack, buffers, partialTicks)
+            case _ => false
+        }
 }

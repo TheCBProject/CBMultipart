@@ -1,5 +1,7 @@
 package codechicken.multipart.minecraft;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.scorge.lang.ScorgeModLoadingContext;
 
 //@Mod (modid = MinecraftMultipartMod.modID, acceptedMinecraftVersions = CodeChickenLib.MC_VERSION_DEP)
@@ -9,14 +11,6 @@ public class MinecraftMultipart {
 
     public MinecraftMultipart() {
         ScorgeModLoadingContext.get().getModEventBus().register(ModContent.class);
+        DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ClientInit::init);
     }
-
-    //    @Mod.EventHandler
-    //    public void preInit(FMLPreInitializationEvent event) {
-    //        new Content().init();
-    //        PacketCustom.assignHandler(McMultipartSPH.channel, new McMultipartSPH());
-    //        if (FMLCommonHandler.instance().getSide().isClient()) {
-    //            PacketCustom.assignHandler(McMultipartCPH.channel, new McMultipartCPH());
-    //        }
-    //    }
 }

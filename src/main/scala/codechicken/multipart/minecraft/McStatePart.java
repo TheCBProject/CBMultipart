@@ -152,12 +152,6 @@ public abstract class McStatePart extends TMultiPart implements TNormalOcclusion
         return state.getSoundType(world(), pos(), context.getPlayer());
     }
 
-    //TODO, Temporary.
-    @Override
-    public boolean renderStatic(RenderType layer, CCRenderState ccrs) {
-        return IModelRenderPart.super.renderStatic(layer, ccrs);
-    }
-
     @Override
     public Cuboid6 getBounds() {
         return new Cuboid6(getShape(ISelectionContext.empty()).bounds());
