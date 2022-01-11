@@ -49,6 +49,11 @@ public class MultiPartLoadHandler {
         //Handle initial desc sync
         @Override
         public void handleUpdateTag(BlockState state, CompoundNBT tag) {
+            if (!tag.contains("data")) {
+                logger.warn("Received update tag without 'data' field. Ignoring..");
+                return;
+            }
+
             byte[] data = tag.getByteArray("data");
             TileMultiPart.handleDescPacket(getLevel(), getBlockPos(), new MCDataByteBuf(Unpooled.wrappedBuffer(data)));
         }

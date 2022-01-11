@@ -5,7 +5,7 @@
 	"refmap": "mixins.cbmultipart.refmap.json",
 	"target": "@env(DEFAULT)",
 	"compatibilityLevel": "JAVA_8",
-	"client": [
+	"mixins": [
 		"TileEntityMixin"
 	]
 }
