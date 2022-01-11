@@ -11,7 +11,7 @@ license="GNU Lesser General Public License v2.1"
 	version="${version}"
 
     updateJSONURL="https://version-check.covers1624.net/check/?mod=CBMultipart&mc=${mc_version}"
-    displayURL="https://github.com/TheCBProject/ForgeMultipart"
+    displayURL="https://github.com/TheCBProject/CBMultipart"
     authors="ChickenBones, covers1624"
     description="Open source library for facilitation of multiple functional parts in the one block space."
 
@@ -41,7 +41,7 @@ license="GNU Lesser General Public License v2.1"
 	entryClass="codechicken.microblock.handler.MicroblockMod"
 	version="${version}"
 
-    displayURL="https://github.com/TheCBProject/ForgeMultipart"
+    displayURL="https://github.com/TheCBProject/CBMultipart"
     authors="ChickenBones, covers1624"
     description="Microblocks for CBMultipart."
 
@@ -77,7 +77,7 @@ license="GNU Lesser General Public License v2.1"
     entryClass="codechicken.multipart.minecraft.MinecraftMultipart"
     version="${version}"
 
-    displayURL="https://github.com/TheCBProject/ForgeMultipart"
+    displayURL="https://github.com/TheCBProject/CBMultipart"
     authors="ChickenBones, covers1624"
     description="Provides multipart versions of some vanilla blocks like torches and buttons."
 
