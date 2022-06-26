@@ -1,16 +1,19 @@
 package codechicken.multipart;
 
+import codechicken.lib.world.TileChunkLoadHook;
+import codechicken.multipart.handler.PlacementConversionHandler;
 import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.init.DataGenerators;
 import codechicken.multipart.init.MultiPartRegistries;
-import codechicken.multipart.proxy.Proxy;
-import codechicken.multipart.proxy.ProxyClient;
+import codechicken.multipart.minecraft.ClientInit;
+import codechicken.multipart.network.MultiPartNetwork;
+import codechicken.multipart.util.MultiPartGenerator;
+import codechicken.multipart.util.MultiPartLoadHandler;
+import codechicken.multipart.util.TickScheduler;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import static codechicken.multipart.CBMultipart.MOD_ID;
@@ -23,24 +26,19 @@ public class CBMultipart {
 
     public static final String MOD_ID = "cb_multipart";
 
-    public static Proxy proxy;
-
     public CBMultipart() {
-        proxy = DistExecutor.safeRunForDist(() -> ProxyClient::new, () -> Proxy::new);
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.register(this);
         CBMultipartModContent.init(modEventBus);
         MultiPartRegistries.init(modEventBus);
         DataGenerators.init(modEventBus);
-    }
 
-    @SubscribeEvent
-    public void onCommonSetup(FMLCommonSetupEvent event) {
-        proxy.commonSetup(event);
-    }
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ClientInit::init);
 
-    @SubscribeEvent
-    public void onClientSetup(FMLClientSetupEvent event) {
-        proxy.clientSetup(event);
+        MultiPartGenerator.INSTANCE.loadAnnotations();
+        MultiPartLoadHandler.init();
+        MultiPartNetwork.init();
+        PlacementConversionHandler.init();
+        TickScheduler.init();
+        TileChunkLoadHook.init();
     }
 }
