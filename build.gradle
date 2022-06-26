@@ -6,23 +6,22 @@ buildscript {
         maven { url = "https://repo.spongepowered.org/maven/" }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:4.1.+'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+'
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 
 plugins {
     id 'java'
-    id 'scala'
     id 'maven-publish'
-    id 'com.github.johnrengelman.shadow' version '5.2.0'
-    id "net.covers1624.signing" version '1.1.3'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id "net.covers1624.signing" version '1.1.4'
 }
 
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: "org.spongepowered.mixin"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 group = "codechicken"
 archivesBaseName = "CBMultipart"
@@ -57,7 +56,7 @@ if (System.getenv("KEY_STORE")) {
 config.mod_version = "${config.mod_version}." + (System.getenv("BUILD_NUMBER") ?: "1")
 version = "${config.mc_version}-${config.mod_version}"
 println "Starting build of ${archivesBaseName}, Version: ${config.mod_version}"
-println "Using Forge: ${config.forge_version}, for Minecraft: ${config.mc_version}, with Mappings: ${config.mappings}"
+println "Using Forge: ${config.forge_version}, for Minecraft: ${config.mc_version}"
 
 minecraft {
     mappings channel: 'official', version: config.mc_version
@@ -84,7 +83,7 @@ minecraft {
 
 configurations {
     shadow
-    compile.extendsFrom shadow
+    implementation.extendsFrom shadow
 }
 
 repositories {
@@ -96,58 +95,22 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
 
-    //Scala
-    compile "org.scala-lang:scala-compiler:${config.scala_version}"
-    compile "org.scala-lang:scala-library:${config.scala_version}"
-    compile "org.scala-lang.modules:scala-java8-compat_${config.scala_compat_version}"
-    compile "net.minecraftforge:Scorge:${config.scorge_version}"
-
     //Mod deps
-    compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
-    compileOnly fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}")
+    implementation fg.deobf("codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:universal")
+//    compileOnly fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}")
 
     //Packed into built jar.
-    shadow "codechicken:TraitMixinCompiler:${config.mixin_version}"
-    shadow "codechicken:TraitMixinCompiler:${config.mixin_version}:forge"
-    shadow "codechicken:TraitMixinCompiler:${config.mixin_version}:scala"
-    shadow "codechicken:ChickenASM:${config.chicken_asm_version}:modlauncher"
+    shadow("codechicken:TraitMixinCompiler:${config.mixin_version}") { transitive = false }
+    shadow("codechicken:TraitMixinCompiler-forge:${config.mixin_version}") { transitive = false }
+    shadow("codechicken:TraitMixinCompiler-scala:${config.mixin_version}") { transitive = false }
+    shadow("codechicken:ChickenASM:${config.chicken_asm_version}") { transitive = false }
+    shadow("codechicken:ChickenASM-modlauncher:${config.chicken_asm_version}") { transitive = false }
 
-    testCompile 'org.junit.jupiter:junit-jupiter-api:5.0.0'
-}
-
-//TODO, needed until 'main' is a fully java source set.
-task mixinAnnotations(type: Exec) {
-    dependsOn compileScala, createMcpToSrg
-    compileScala.finalizedBy it
-
-    doFirst {
-        executable = javaToolchains.compilerFor {
-            languageVersion = JavaLanguageVersion.of(8)
-        }.get().executablePath
-        def destPath = compileScala.destinationDir.toPath()
-        def args = [
-                "-proc:only",
-                "-d",
-                compileScala.destinationDir,
-                "-classpath",
-                "${configurations.minecraft.asPath}${File.pathSeparatorChar}${tasks.compileScala.outputs.files.asPath}",
-                "-AreobfTsrgFile=${tasks.createMcpToSrg.outputs.files[0]}",
-                "-AoutRefMapFile=${new File(compileScala.destinationDir, "mixins.cbmultipart.refmap.json")}",
-                "-AmappingTypes=tsrg",
-        ]
-        tasks.compileScala.outputs.files.asFileTree.each {
-            def name = it.toString()
-            if (name.endsWith(".class") && name.contains("mixin")) {
-                args << destPath.relativize(it.toPath()).toString().replace(".class", "").replace(File.pathSeparator, ".").replace(File.separator, ".")
-            }
-        }
-        setArgs(args)
-    }
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.0.0'
 }
 
 mixin {
     add(sourceSets.main, "mixins.cbmultipart.refmap.json")
-    disableAnnotationProcessorCheck()
 }
 
 reobf {
@@ -161,8 +124,7 @@ signing {
     if (!signProps.isEmpty()) {
         jars {
             sign shadowJar
-            sign deobfJar
-            after reobfShadowJar
+            after 'reobfShadowJar'
 
             keyStore = signProps.keyStore
             alias = signProps.alias
@@ -172,17 +134,17 @@ signing {
     }
 }
 
-processResources { task ->
-    inputs.property "mod_version", config.mod_version
-    inputs.property "mc_version", config.mc_version
+processResources {
+    inputs.property 'mod_version', config.mod_version
+    inputs.property 'mc_version', config.mc_version
+    inputs.property 'ccl_version', config.ccl_version
 
-    from(sourceSets.main.resources.srcDirs) { spec ->
-        spec.include 'META-INF/mods.toml'
-        task.doFirst {
-            spec.expand 'version': config.mod_version,
-                    'mc_version': config.mc_version,
-                    'ccl_version': resolve("CodeChickenLib")
-        }
+    filesMatching('META-INF/mods.toml') {
+        expand 'file': ['jarVersion': config.mod_version],
+                'mc_version': config.mc_version,
+                'forge_version': config.forge_version,
+                'lang_version': config.forge_version.split('\\.')[0],
+                'ccl_version_range': "[${config.ccl_version.replace(".+", "")},${config.ccl_version_max})"
     }
 }
 
@@ -202,73 +164,14 @@ shadowJar {
     }
 
     configurations = [project.configurations.shadow]
-    dependencies {
-        include(dependency("codechicken:TraitMixinCompiler:"))
-        include(dependency("codechicken:ChickenASM:"))
-    }
     mergeServiceFiles()
     exclude 'module-info.class'
-    //Transitives are flattened for some stupid reason..
-    exclude 'javax/**'
-    exclude 'org/apache/**'
-    exclude 'org/objectweb/**'
-    exclude 'com/google/**'
-    exclude 'scala/reflect/**'
-    exclude 'reflect.properties'
-    exclude 'NOTICE'
-    exclude 'LICENSE'
-    exclude 'Log4j-charsets.properties'
-    exclude 'META-INF/NOTICE'
-    exclude 'META-INF/LICENSE'
-    exclude 'META-INF/maven/**'
-    exclude 'META-INF/versions/**'
-    exclude 'META-INF/services/org.apache.**'
 }
 
 
 task srcJar(type: Jar) {
     from sourceSets.main.allSource
     classifier = 'sources'
-}
-
-task deobfJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
-    build.dependsOn it
-    from sourceSets.main.output
-    classifier = 'deobf'
-
-    manifest {
-        attributes 'Specification-Title': archivesBaseName
-        attributes 'Specification-Vendor': 'covers1624'
-        attributes 'Specification-Version': "1"
-        attributes 'Implementation-Title': archivesBaseName
-        attributes 'Implementation-Vendor': 'covers1624'
-        attributes 'Implementation-Version': version
-        attributes 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        attributes 'MixinConfigs': 'mixins.cbmultipart.json'
-    }
-
-    configurations = [project.configurations.shadow]
-    dependencies {
-        include(dependency("codechicken:TraitMixinCompiler:"))
-        include(dependency("codechicken:ChickenASM:"))
-    }
-    mergeServiceFiles()
-    exclude 'module-info.class'
-    //Transitives are flattened for some stupid reason..
-    exclude 'javax/**'
-    exclude 'org/apache/**'
-    exclude 'org/objectweb/**'
-    exclude 'com/google/**'
-    exclude 'scala/reflect/**'
-    exclude 'reflect.properties'
-    exclude 'NOTICE'
-    exclude 'LICENSE'
-    exclude 'Log4j-charsets.properties'
-    exclude 'META-INF/NOTICE'
-    exclude 'META-INF/LICENSE'
-    exclude 'META-INF/maven/**'
-    exclude 'META-INF/versions/**'
-    exclude 'META-INF/services/org.apache.**'
 }
 
 build.dependsOn shadowJar
@@ -292,7 +195,6 @@ publishing {
             version project.version
             artifact shadowJar
             artifact srcJar
-            artifact deobfJar
 
             pom {
                 name = archivesBaseName
@@ -331,34 +233,4 @@ publishing {
             }
         }
     }
-}
-
-/**
- * Polls the 'compile' configuration for a dependency with the given module name
- * and resolves, and returns its version. E.g: '1.2.+' will resolve to '1.2.3.4'
- *
- * @param module The module to search for.
- * @param chop If the string should be chopped on the last '-' in its string.
- * @param configuration The name of the configuration to search.
- * @param errorMissing If an error should be thrown if it can't be found.
- * @return The version string, '0' if 'errorMissing' is false and nothing was found.
- */
-def resolve(module, chop = true, configuration = 'compile', errorMissing = true) {
-    //Copy and lenient resolve the configuration, Forge cant be resolved at this time so lenient is required.
-    def filtered = configurations.getByName(configuration).copy().incoming.artifactView({ it.lenient = true }).artifacts
-            .findAll { it.id.componentIdentifier.module == module }
-            .collect { it.id.componentIdentifier.version }
-    if (filtered.size() > 1) {
-        println "WARNING: Found ${filtered.size()} Dependencies with ModuleName '${module}' in configuration '${configuration.name}'"
-    }
-    if (errorMissing && filtered.isEmpty()) {
-        throw new RuntimeException("Failed resolve dependency version for '${module}'")
-    }
-    if (filtered.isEmpty()) return "0"
-    def version = filtered.first() as String
-    if (chop) {
-        def idx = version.lastIndexOf('-')
-        return version.substring(idx + 1)
-    }
-    return version
 }

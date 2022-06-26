@@ -4,7 +4,7 @@
 	"package": "codechicken.multipart.internal.mixin",
 	"refmap": "mixins.cbmultipart.refmap.json",
 	"target": "@env(DEFAULT)",
-	"compatibilityLevel": "JAVA_8",
+	"compatibilityLevel": "JAVA_17",
 	"mixins": [
 		"TileEntityMixin"
 	]

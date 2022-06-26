@@ -3,7 +3,7 @@ package codechicken.microblock
 import codechicken.lib.vec.{Rotation, Vector3}
 import codechicken.microblock.api.MicroMaterial
 import codechicken.multipart.block.TileMultiPart
-import codechicken.multipart.util.{ControlKeyModifier, MultiPartHelper, OffsetItemUseContext, PartRayTraceResult}
+import codechicken.multipart.util.{ControlKeyModifier, MultiPartHelper, OffsetUseOnContext, PartRayTraceResult}
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.{ItemStack, ItemUseContext}
 import net.minecraft.util.math.{BlockPos, BlockRayTraceResult}
@@ -143,7 +143,7 @@ class MicroblockPlacement(val player: PlayerEntity, val hand: Hand, val hit: Blo
 
     def externalPlacement(npart: Microblock): ExecutablePlacement = {
         val pos = this.pos.relative(Direction.BY_3D_DATA.apply(side))
-        if (TileMultiPart.canPlacePart(new OffsetItemUseContext(new ItemUseContext(player, hand, hit)), npart)) {
+        if (TileMultiPart.canPlacePart(new OffsetUseOnContext(new ItemUseContext(player, hand, hit)), npart)) {
             return new AdditionPlacement(pos, npart)
         }
         null
