@@ -1,9 +1,9 @@
-package codechicken.microblock.part.placement.face;
+package codechicken.microblock.part.face;
 
 import codechicken.microblock.factory.MicroblockPartFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
-import codechicken.microblock.part.placement.PlacementGrid;
-import codechicken.microblock.part.placement.PlacementProperties;
+import codechicken.microblock.part.PlacementGrid;
+import codechicken.microblock.part.PlacementProperties;
 
 /**
  * Created by covers1624 on 20/10/22.
@@ -28,7 +28,7 @@ public class FacePlacementProperties extends PlacementProperties {
     }
 
     @Override
-    public MicroblockPartFactory<?> microFactory() {
+    public MicroblockPartFactory microFactory() {
         return CBMicroblockModContent.FACE_MICROBLOCK_PART.get();
     }
 

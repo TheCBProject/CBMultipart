@@ -52,7 +52,7 @@ public class FaceMicroblockPart extends StandardMicroblockPart {
     }
 
     @Override
-    public StandardMicroFactory<FaceMicroblockPart> getMicroFactory() {
+    public StandardMicroFactory getMicroFactory() {
         return CBMicroblockModContent.FACE_MICROBLOCK_PART.get();
     }
 }

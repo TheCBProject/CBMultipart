@@ -1,6 +1,5 @@
-package codechicken.microblock.part.placement;
+package codechicken.microblock.part;
 
-import codechicken.microblock.part.MicroblockPart;
 import codechicken.multipart.block.TileMultiPart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;

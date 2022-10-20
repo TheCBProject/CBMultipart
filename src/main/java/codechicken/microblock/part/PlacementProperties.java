@@ -1,7 +1,6 @@
-package codechicken.microblock.part.placement;
+package codechicken.microblock.part;
 
 import codechicken.microblock.factory.MicroblockPartFactory;
-import codechicken.microblock.part.placement.face.FacePlacementProperties;
 
 /**
  * Created by covers1624 on 20/10/22.
@@ -18,7 +17,7 @@ public abstract class PlacementProperties {
         return true;
     }
 
-    public abstract MicroblockPartFactory<?> microFactory();
+    public abstract MicroblockPartFactory microFactory();
 
     public abstract PlacementGrid placementGrid();
 

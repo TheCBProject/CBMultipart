@@ -1,8 +1,8 @@
-package codechicken.microblock.part.placement.face;
+package codechicken.microblock.part.face;
 
 import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Vector3;
-import codechicken.microblock.part.placement.PlacementGrid;
+import codechicken.microblock.part.PlacementGrid;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 /**

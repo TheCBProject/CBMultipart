@@ -1,4 +1,4 @@
-package codechicken.microblock.part.placement;
+package codechicken.microblock.part;
 
 import codechicken.lib.render.buffer.TransformingVertexConsumer;
 import codechicken.lib.vec.Matrix4;

@@ -27,7 +27,7 @@ public abstract class MicroblockPart extends AbstractMultiPart {
         this.material = material;
     }
 
-    public abstract MicroblockPartFactory<?> getMicroFactory();
+    public abstract MicroblockPartFactory getMicroFactory();
 
     public final int getSize() {
         return shape >> 4;

@@ -24,7 +24,7 @@ public abstract class StandardMicroblockPart extends MicroblockPart implements I
     }
 
     @Override
-    public abstract StandardMicroFactory<?> getMicroFactory();
+    public abstract StandardMicroFactory getMicroFactory();
 
     @Override
     public int getItemFactoryId() {

@@ -68,7 +68,7 @@ public class ClientInit {
 
     private static boolean renderHighlight(Player player, InteractionHand mainHand, ItemStack stack, BlockHitResult hit, PoseStack pStack, MultiBufferSource buffers, float partialTicks) {
         MicroMaterial material = ItemMicroBlock.getMaterialFromStack(stack);
-        StandardMicroFactory<?> factory = ItemMicroBlock.getFactory(stack);
+        StandardMicroFactory factory = ItemMicroBlock.getFactory(stack);
         int size = ItemMicroBlock.getSize(stack);
 
         if (material == null || factory == null) return false;

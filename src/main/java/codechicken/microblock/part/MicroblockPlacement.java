@@ -1,11 +1,9 @@
-package codechicken.microblock.part.placement;
+package codechicken.microblock.part;
 
 import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.factory.MicroblockPartFactory;
-import codechicken.microblock.part.MicroblockPart;
-import codechicken.microblock.part.StandardMicroblockPart;
 import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.block.TileMultiPart;
 import codechicken.multipart.util.ControlKeyModifier;
@@ -37,7 +35,7 @@ public class MicroblockPlacement {
     private final PlacementProperties pp;
 
     private final Level level;
-    private final MicroblockPartFactory<?> microFactory;
+    private final MicroblockPartFactory microFactory;
     private final BlockPos pos;
     private final Vector3 vHit;
     private final Pair<TileMultiPart, Boolean> gTile;

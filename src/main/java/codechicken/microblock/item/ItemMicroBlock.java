@@ -4,8 +4,8 @@ import codechicken.lib.raytracer.RayTracer;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.factory.StandardMicroFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
-import codechicken.microblock.part.placement.ExecutablePlacement;
-import codechicken.microblock.part.placement.MicroblockPlacement;
+import codechicken.microblock.part.ExecutablePlacement;
+import codechicken.microblock.part.MicroblockPlacement;
 import codechicken.microblock.util.MicroMaterialRegistries;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
@@ -40,7 +40,7 @@ public class ItemMicroBlock extends Item {
     @Override
     public Component getName(ItemStack stack) {
         MicroMaterial material = getMaterialFromStack(stack);
-        StandardMicroFactory<?> factory = getFactory(stack);
+        StandardMicroFactory factory = getFactory(stack);
         int size = getSize(stack);
         if (material == null || factory == null) {
             return new TextComponent("Unnamed");
@@ -53,7 +53,7 @@ public class ItemMicroBlock extends Item {
     public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
         if (!allowdedIn(tab)) return;
 
-        for (StandardMicroFactory<?> factory : StandardMicroFactory.FACTORIES.values()) {
+        for (StandardMicroFactory factory : StandardMicroFactory.FACTORIES.values()) {
             for (int size : new int[] { 1, 2, 4 }) {
                 for (MicroMaterial microMaterial : MicroMaterialRegistries.MICRO_MATERIALS) {
                     items.add(create(factory.factoryId, size, microMaterial));
@@ -68,7 +68,7 @@ public class ItemMicroBlock extends Item {
         Level level = ctx.getLevel();
         ItemStack stack = player.getItemInHand(ctx.getHand());
         MicroMaterial material = getMaterialFromStack(stack);
-        StandardMicroFactory<?> factory = getFactory(stack);
+        StandardMicroFactory factory = getFactory(stack);
         int size = getSize(stack);
         if (material == null || factory == null) return InteractionResult.FAIL;
 
@@ -94,7 +94,7 @@ public class ItemMicroBlock extends Item {
     }
 
     @Nullable
-    public static StandardMicroFactory<?> getFactory(ItemStack stack) {
+    public static StandardMicroFactory getFactory(ItemStack stack) {
         int factoryId = getFactoryID(stack);
         if (factoryId == -1 || factoryId > StandardMicroFactory.FACTORIES.size()) return null;
 

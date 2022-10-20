@@ -25,7 +25,7 @@ public class MicroblockItemRenderer implements IItemRenderer {
     @Override
     public void renderItem(ItemStack stack, ItemTransforms.TransformType transformType, PoseStack mStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
         MicroMaterial material = ItemMicroBlock.getMaterialFromStack(stack);
-        StandardMicroFactory<?> factory = ItemMicroBlock.getFactory(stack);
+        StandardMicroFactory factory = ItemMicroBlock.getFactory(stack);
         int size = ItemMicroBlock.getSize(stack);
 
         if (material == null || factory == null) return;
