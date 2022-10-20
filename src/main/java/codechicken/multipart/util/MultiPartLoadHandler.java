@@ -6,12 +6,19 @@ import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.network.MultiPartSPH;
 import io.netty.buffer.Unpooled;
 import net.covers1624.quack.util.CrashLock;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.ChunkEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.List;
 
 /**
  * Created by covers1624 on 13/5/20.
@@ -23,6 +30,21 @@ public class MultiPartLoadHandler {
 
     public static void init() {
         LOCK.lock();
+
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, MultiPartLoadHandler::onChunkLoad);
+    }
+
+    // TODO move this to a Mixin.
+    // Vanilla fires BlockEntity.handleUpdateTag before the LevelChunk has been added to the world.
+    private static void onChunkLoad(ChunkEvent.Load event) {
+        if (event.getWorld().isClientSide() && event.getChunk() instanceof LevelChunk chunk) {
+            for (BlockEntity be : List.copyOf(chunk.getBlockEntities().values())) {
+                if (be instanceof TileNBTContainer tile && tile.updateTag != null) {
+                    byte[] data = tile.updateTag.getByteArray("data");
+                    TileMultiPart.handleDescPacket(tile.getLevel(), tile.getBlockPos(), new MCDataByteBuf(Unpooled.wrappedBuffer(data)));
+                }
+            }
+        }
     }
 
     //This is a fallback in the event that our Mixin does not get hit.
@@ -42,6 +64,8 @@ public class MultiPartLoadHandler {
         //We save this back out in case something breaks.
         public CompoundTag tag;
 
+        public CompoundTag updateTag;
+
         public TileNBTContainer(BlockPos pos, BlockState state) {
             super(CBMultipartModContent.tileMultipartType, pos, state);
         }
@@ -53,9 +77,7 @@ public class MultiPartLoadHandler {
                 logger.warn("Received update tag without 'data' field. Ignoring..");
                 return;
             }
-
-            byte[] data = tag.getByteArray("data");
-            TileMultiPart.handleDescPacket(getLevel(), getBlockPos(), new MCDataByteBuf(Unpooled.wrappedBuffer(data)));
+            updateTag = tag;
         }
 
         @Override

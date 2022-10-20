@@ -2,10 +2,7 @@ package codechicken.multipart.api;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.api.part.render.PartRenderer;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import javax.annotation.Nonnull;

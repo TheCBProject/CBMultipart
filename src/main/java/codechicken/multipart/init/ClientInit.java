@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /**
@@ -19,16 +20,20 @@ public class ClientInit {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
 
-    public void init() {
+    public static void init() {
         LOCK.lock();
 
         ControlKeyHandler.init();
         ClientEventHandler.init();
-        ItemBlockRenderTypes.setRenderLayer(CBMultipartModContent.blockMultipart, e -> true);
-        BlockRenderingRegistry.registerRenderer(CBMultipartModContent.blockMultipart, new MultipartBlockRenderer());
 
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        bus.addListener(ClientInit::onClientInit);
         bus.addListener(ClientInit::onRegisterRenderers);
+    }
+
+    private static void onClientInit(FMLClientSetupEvent event) {
+        ItemBlockRenderTypes.setRenderLayer(CBMultipartModContent.blockMultipart, e -> true);
+        BlockRenderingRegistry.registerRenderer(CBMultipartModContent.blockMultipart, new MultipartBlockRenderer());
     }
 
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
