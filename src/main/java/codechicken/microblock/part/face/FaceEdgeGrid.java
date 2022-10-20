@@ -11,6 +11,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 public class FaceEdgeGrid extends PlacementGrid {
 
     public static final FaceEdgeGrid FACE_PLACEMENT_GRID = new FaceEdgeGrid(1 / 4D);
+    public static final FaceEdgeGrid HOLLOW_PLACEMENT_GRID = new FaceEdgeGrid(3 / 8D);
 
     private final double size;
 

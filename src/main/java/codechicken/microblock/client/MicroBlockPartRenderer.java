@@ -12,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public class MicroBlockPartRenderer implements PartRenderer<MicroblockPart> {
 
+    public static final MicroBlockPartRenderer INSTANCE = new MicroBlockPartRenderer();
+
     @Override
     public boolean renderStatic(MicroblockPart part, @Nullable RenderType layer, CCRenderState ccrs) {
         if (layer == null || part.getMaterial().canRenderInLayer(layer)) {

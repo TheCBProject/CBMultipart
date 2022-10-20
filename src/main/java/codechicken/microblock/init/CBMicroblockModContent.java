@@ -6,6 +6,7 @@ import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.part.face.FaceMicroFactory;
+import codechicken.microblock.part.hollow.HollowMicroFactory;
 import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.MultiPartType;
 import net.covers1624.quack.util.CrashLock;
@@ -40,6 +41,7 @@ public class CBMicroblockModContent {
     public static final RegistryObject<ItemMicroBlock> MICRO_BLOCK_ITEM = ITEMS.register("microblock", () -> new ItemMicroBlock(new Item.Properties().tab(MICRO_TAB)));
 
     public static final RegistryObject<FaceMicroFactory> FACE_MICROBLOCK_PART = MULTIPART_TYPES.register("face", FaceMicroFactory::new);
+    public static final RegistryObject<HollowMicroFactory> HOLLOW_MICROBLOCK_PART = MULTIPART_TYPES.register("hollow", HollowMicroFactory::new);
 
     public static void init() {
         LOCK.lock();

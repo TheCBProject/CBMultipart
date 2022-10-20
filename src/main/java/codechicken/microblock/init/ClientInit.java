@@ -8,7 +8,6 @@ import codechicken.microblock.client.MicroblockItemRenderer;
 import codechicken.microblock.factory.StandardMicroFactory;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.multipart.api.MultipartClientRegistry;
-import codechicken.multipart.client.MultipartBlockRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.client.Camera;
@@ -28,6 +27,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
  * Created by covers1624 on 20/10/22.
  */
 public class ClientInit {
+
     private static final CrashLock LOCK = new CrashLock("Already Initialized.");
 
     private static final ModelRegistryHelper MODEL_HELPER = new ModelRegistryHelper();
@@ -40,10 +40,10 @@ public class ClientInit {
     }
 
     private static void clientSetup(FMLClientSetupEvent event) {
-        MultipartClientRegistry.register(CBMicroblockModContent.FACE_MICROBLOCK_PART.get(), new MicroBlockPartRenderer());
+        MultipartClientRegistry.register(CBMicroblockModContent.FACE_MICROBLOCK_PART.get(), MicroBlockPartRenderer.INSTANCE);
+        MultipartClientRegistry.register(CBMicroblockModContent.HOLLOW_MICROBLOCK_PART.get(), MicroBlockPartRenderer.INSTANCE);
         MODEL_HELPER.register(new ModelResourceLocation(CBMicroblockModContent.MICRO_BLOCK_ITEM.getId(), "inventory"), new MicroblockItemRenderer());
     }
-
 
     // TODO move elsewhere
     private static void onDrawHighlight(DrawSelectionEvent.HighlightBlock event) {
