@@ -33,40 +33,40 @@ license="GNU Lesser General Public License v2.1"
     ordering="AFTER"
     side="BOTH"
 
-##CBMicroblocks
-#[[mods]]
-#	modId="cb_microblock"
-#	displayName="CBMicroblock"
-#	version="${file.jarVersion}"
-#
-#    displayURL="https://github.com/TheCBProject/CBMultipart"
-#    authors="ChickenBones, covers1624"
-#    description="Microblocks for CBMultipart."
-#
-#[[dependencies.cb_microblock]]
-#	modId="forge"
-#	mandatory=true
-#	versionRange="[31.2.49,)"
-#	ordering="NONE"
-#	side="BOTH"
-#[[dependencies.cb_microblock]]
-#    modId="minecraft"
-#    mandatory=true
-#    versionRange="[1.16.5]"
-#    ordering="NONE"
-#    side="BOTH"
-#[[dependencies.cb_microblock]]
-#    modId="codechickenlib"
-#    mandatory=true
-#    versionRange="${ccl_version_range}"
-#    ordering="AFTER"
-#    side="BOTH"
-#[[dependencies.cb_microblock]]
-#    modId="cb_multipart"
-#    mandatory=true
-#    versionRange="[${file.jarVersion}]"
-#    ordering="AFTER"
-#    side="BOTH"
+#CBMicroblocks
+[[mods]]
+	modId="cb_microblock"
+	displayName="CBMicroblock"
+	version="${file.jarVersion}"
+
+    displayURL="https://github.com/TheCBProject/CBMultipart"
+    authors="ChickenBones, covers1624"
+    description="Microblocks for CBMultipart."
+
+[[dependencies.cb_microblock]]
+	modId="forge"
+	mandatory=true
+versionRange="[${forge_version},)"
+	ordering="NONE"
+	side="BOTH"
+[[dependencies.cb_microblock]]
+    modId="minecraft"
+    mandatory=true
+versionRange="[1.18.2]"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.cb_microblock]]
+    modId="codechickenlib"
+    mandatory=true
+    versionRange="${ccl_version_range}"
+    ordering="AFTER"
+    side="BOTH"
+[[dependencies.cb_microblock]]
+    modId="cb_multipart"
+    mandatory=true
+    versionRange="[${file.jarVersion}]"
+    ordering="AFTER"
+    side="BOTH"
 
 #CBMultipartMinecraft
 [[mods]]
