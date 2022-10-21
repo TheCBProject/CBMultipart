@@ -10,6 +10,7 @@ import codechicken.microblock.util.MaskedCuboid;
 import codechicken.microblock.factory.StandardMicroFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.StandardMicroblockPart;
+import codechicken.multipart.api.part.TFacePart;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
 /**
  * Created by covers1624 on 20/10/22.
  */
-public class FaceMicroblockPart extends StandardMicroblockPart {
+public class FaceMicroblockPart extends StandardMicroblockPart implements TFacePart {
 
     public static final Cuboid6[] aBounds = new Cuboid6[256];
     public static final VoxelShape[] aShapes = new VoxelShape[256];
