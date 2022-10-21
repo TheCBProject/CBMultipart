@@ -14,6 +14,7 @@ import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Explosion;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -135,5 +136,19 @@ public abstract class MicroblockPart extends AbstractMultiPart {
         if (material == null) return super.getStrength(player, hit);
 
         return material.getStrength(player);
+    }
+
+    public boolean isTransparent() {
+        return getMaterial().isTransparent();
+    }
+
+    @Override
+    public int getLightEmission() {
+        return getMaterial().getLightEmission();
+    }
+
+    @Override
+    public float getExplosionResistance(Explosion explosion) {
+        return getMaterial().getExplosionResistance(level(), pos(), explosion) * getMicroFactory().getResistanceFactor();
     }
 }

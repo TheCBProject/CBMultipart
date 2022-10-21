@@ -25,6 +25,11 @@ public class CornerMicroFactory extends StandardMicroFactory {
     }
 
     @Override
+    public float getResistanceFactor() {
+        return 1;
+    }
+
+    @Override
     public int getItemSlot() {
         return 7;
     }

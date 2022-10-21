@@ -27,6 +27,11 @@ public class EdgeMicroFactory extends StandardMicroFactory {
     }
 
     @Override
+    public float getResistanceFactor() {
+        return 0.5F;
+    }
+
+    @Override
     public int getItemSlot() {
         return 15;
     }

@@ -27,6 +27,11 @@ public class HollowMicroFactory extends StandardMicroFactory {
     }
 
     @Override
+    public float getResistanceFactor() {
+        return 1;
+    }
+
+    @Override
     public int getItemSlot() {
         return 3;
     }

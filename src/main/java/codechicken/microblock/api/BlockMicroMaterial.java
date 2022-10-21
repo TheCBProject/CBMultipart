@@ -50,6 +50,11 @@ public class BlockMicroMaterial extends UncheckedRegistryEntry<MicroMaterial> im
     }
 
     @Override
+    public boolean isTransparent() {
+        return !state.canOcclude();
+    }
+
+    @Override
     public int getLightEmission() {
         return state.getLightEmission();
     }

@@ -21,6 +21,11 @@ public class FaceMicroFactory extends StandardMicroFactory {
     }
 
     @Override
+    public float getResistanceFactor() {
+        return 1;
+    }
+
+    @Override
     public PlacementProperties placementProperties() {
         return FACE_PLACEMENT;
     }

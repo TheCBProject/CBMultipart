@@ -12,4 +12,9 @@ public class PostMicroblockFactory extends MicroblockPartFactory {
     public PostMicroblockPart create(boolean client, MicroMaterial material) {
         return new PostMicroblockPart(material);
     }
+
+    @Override
+    public float getResistanceFactor() {
+        return 0.5F;
+    }
 }

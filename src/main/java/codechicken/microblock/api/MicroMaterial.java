@@ -23,6 +23,11 @@ public interface MicroMaterial extends IForgeRegistryEntry<MicroMaterial> {
     RenderType getItemRenderLayer();
 
     /**
+     * @return If this material is not opaque. (Glass, Ice, etc.)
+     */
+    boolean isTransparent();
+
+    /**
      * Gets the light level emitted by this micro material.
      *
      * @return The light emission.
