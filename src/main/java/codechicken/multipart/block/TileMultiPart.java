@@ -372,8 +372,8 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
                 .collect(Collectors.toList());
     }
 
-    public ItemStack getPickBlock(PartRayTraceResult hit) {
-        return hit.part.pickItem(hit);
+    public ItemStack getCloneStack(PartRayTraceResult hit) {
+        return hit.part.getCloneStack(hit);
     }
 
     public float getExplosionResistance(Explosion explosion) {
@@ -383,9 +383,9 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
                 .orElse(0);
     }
 
-    public int getLightValue() {
+    public int getLightEmission() {
         return partList.stream()
-                .mapToInt(TMultiPart::getLightValue)
+                .mapToInt(TMultiPart::getLightEmission)
                 .max()
                 .orElse(0);
     }

@@ -207,8 +207,7 @@ public interface TMultiPart {
      * @param hit The {@link PartRayTraceResult} hit result.
      * @return The {@link ItemStack} pick result.
      */
-    // TODO Rename: getCloneStack
-    default ItemStack pickItem(PartRayTraceResult hit) {
+    default ItemStack getCloneStack(PartRayTraceResult hit) {
         return ItemStack.EMPTY;
     }
 
@@ -230,8 +229,7 @@ public interface TMultiPart {
      *
      * @return The light level.
      */
-    // TODO Rename: getLightEmission
-    default int getLightValue() {
+    default int getLightEmission() {
         return 0;
     }
 

@@ -50,7 +50,7 @@ public abstract class McStatePart extends AbstractMultiPart implements TNormalOc
     }
 
     @Override
-    public ItemStack pickItem(PartRayTraceResult hit) {
+    public ItemStack getCloneStack(PartRayTraceResult hit) {
         return getDropStack();
     }
 
@@ -101,7 +101,7 @@ public abstract class McStatePart extends AbstractMultiPart implements TNormalOc
     }
 
     @Override
-    public int getLightValue() {
+    public int getLightEmission() {
         return state.getLightEmission();
     }
 

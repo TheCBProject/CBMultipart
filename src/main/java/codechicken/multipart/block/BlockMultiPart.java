@@ -109,7 +109,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
     public int getLightEmission(BlockState state, BlockGetter world, BlockPos pos) {
         TileMultiPart tile = getTile(world, pos);
         if (tile != null) {
-            return tile.getLightValue();
+            return tile.getLightEmission();
         }
         return 0;
     }
@@ -159,7 +159,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
         TileMultiPart tile = getTile(level, pos);
         PartRayTraceResult hit = retracePart(level, pos, player);
         if (tile != null && hit != null) {
-            return tile.getPickBlock(hit);
+            return tile.getCloneStack(hit);
         }
         return ItemStack.EMPTY;
 
