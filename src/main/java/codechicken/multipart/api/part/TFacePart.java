@@ -8,6 +8,7 @@ public interface TFacePart extends TSlottedPart {
     /**
      * Passed down from Block.isSideSolid. Return true if this part is solid and opaque on the specified side
      */
+    @Deprecated // Unused. Minecraft determines side solidity using shapes now.
     default boolean solid(int side) {
         return true;
     }

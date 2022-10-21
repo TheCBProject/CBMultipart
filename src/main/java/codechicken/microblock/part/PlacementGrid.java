@@ -41,6 +41,7 @@ public abstract class PlacementGrid {
         bufferLines(new TransformingVertexConsumer(buffers.getBuffer(LINES), mat), Rotation.axes[side]);
     }
 
+    // TODO expose a `List<Line3>` for all overlay lines extract rendering to elsewhere.
     protected abstract void bufferLines(VertexConsumer cons, Vector3 norm);
 
     public void transformFace(Vector3 hit, int side, Matrix4 mat) {
