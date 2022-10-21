@@ -2,6 +2,7 @@ package codechicken.microblock;
 
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.init.ClientInit;
+import codechicken.microblock.init.DataGenerators;
 import codechicken.microblock.util.MicroMaterialRegistries;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -20,6 +21,8 @@ public class CBMicroblock {
     public CBMicroblock() {
         MicroMaterialRegistries.init();
         CBMicroblockModContent.init();
+
+        DataGenerators.init();
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ClientInit::init);
     }

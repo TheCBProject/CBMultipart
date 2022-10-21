@@ -5,12 +5,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Tier;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by covers1624 on 26/6/22.
@@ -58,11 +60,12 @@ public interface MicroMaterial extends IForgeRegistryEntry<MicroMaterial> {
     ItemStack getItem();
 
     /**
-     * Get the required saw cutting strength for this material.
+     * Gets the Tier that is required to cut this material.
      *
-     * @return The required cutting strength.
+     * @return The required tier for cutting. Null specifies max available.
      */
-    int getCutterStrength();
+    @Nullable
+    Tier getCutterTier();
 
     /**
      * Get the breaking/waking sound.

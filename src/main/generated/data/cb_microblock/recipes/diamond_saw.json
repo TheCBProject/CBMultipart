@@ -1,21 +1,22 @@
 {
   "type": "minecraft:crafting_shaped",
+  "result": {
+    "item": "cb_microblock:diamond_saw",
+    "nbt": "{Damage:0}"
+  },
   "pattern": [
     "SRR",
     "SMR"
   ],
   "key": {
+    "M": {
+      "tag": "forge:gems/diamond"
+    },
     "S": {
       "tag": "forge:rods/wooden"
     },
     "R": {
       "tag": "forge:rods/stone"
-    },
-    "M": {
-      "tag": "forge:gems/diamond"
     }
-  },
-  "result": {
-    "item": "cb_microblock:diamond_saw"
   }
 }

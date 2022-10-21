@@ -9,6 +9,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -24,6 +26,10 @@ public class ControlKeyHandler {
     public static void init() {
         LOCK.lock();
         MinecraftForge.EVENT_BUS.addListener(ControlKeyHandler::tick);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(ControlKeyHandler::setup);
+    }
+
+    private static void setup(FMLClientSetupEvent event) {
         ClientRegistry.registerKeyBinding(KEY);
     }
 

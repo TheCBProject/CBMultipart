@@ -7,13 +7,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Tier;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraftforge.common.TierSortingRegistry;
 import net.minecraftforge.registries.ForgeRegistryEntry.UncheckedRegistryEntry;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -74,9 +77,15 @@ public class BlockMicroMaterial extends UncheckedRegistryEntry<MicroMaterial> im
         return new ItemStack(state.getBlock(), 1);
     }
 
+    @Nullable
     @Override
-    public int getCutterStrength() {
-        return 0; // TODO harvest levels have changed.
+    public Tier getCutterTier() {
+        for (Tier tier : TierSortingRegistry.getSortedTiers()) {
+            if (TierSortingRegistry.isCorrectTierForDrops(tier, state)) {
+                return tier;
+            }
+        }
+        return null;
     }
 
     @Override
