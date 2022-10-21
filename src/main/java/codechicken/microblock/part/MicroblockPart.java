@@ -4,15 +4,18 @@ import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.util.MaskedCuboid;
 import codechicken.microblock.factory.MicroblockPartFactory;
+import codechicken.microblock.item.ItemMicroBlock;
+import codechicken.microblock.util.MaskedCuboid;
 import codechicken.microblock.util.MicroMaterialRegistries;
 import codechicken.multipart.api.MultiPartType;
 import codechicken.multipart.api.part.AbstractMultiPart;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -94,6 +97,31 @@ public abstract class MicroblockPart extends AbstractMultiPart {
      * @return The id of said factory.
      */
     public abstract int getItemFactoryId();
+
+    @Override
+    public Iterable<ItemStack> getDrops() {
+        int size = getSize();
+        List<ItemStack> items = new LinkedList<>();
+        for (int s : new int[] { 4, 2, 1 }) {
+            int m = size / s;
+            size -= m * s;
+            if (m > 0) {
+                items.add(ItemMicroBlock.createStack(m, getItemFactoryId(), s, material));
+            }
+        }
+        return items;
+    }
+
+    @Override
+    public ItemStack getCloneStack(PartRayTraceResult hit) {
+        int size = getSize();
+        for (int s : new int[]{4, 2, 1}) {
+            if (size % s == 0 && size / s >= 1) {
+                return ItemMicroBlock.create(getItemFactoryId(), size, material);
+            }
+        }
+        return super.getCloneStack(hit);
+    }
 
     public abstract List<MaskedCuboid> getRenderCuboids(boolean isInventory);
 
