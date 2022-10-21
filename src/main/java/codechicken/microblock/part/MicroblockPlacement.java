@@ -85,7 +85,7 @@ public class MicroblockPlacement {
 
         if (doExpand) {
             TMultiPart hPart = ((PartRayTraceResult) hit).part;
-            if (hPart.getType() == microFactory.getType()) {
+            if (hPart.getType() == microFactory) {
                 StandardMicroblockPart mPart = (StandardMicroblockPart) hPart;
                 if (mPart.material == material && mPart.getSize() + size < 8) {
                     return expand(mPart);

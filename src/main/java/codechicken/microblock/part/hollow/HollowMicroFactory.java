@@ -2,10 +2,8 @@ package codechicken.microblock.part.hollow;
 
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.factory.StandardMicroFactory;
-import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.PlacementProperties;
 import codechicken.microblock.part.StandardMicroblockPart;
-import codechicken.multipart.api.MultiPartType;
 
 import static codechicken.microblock.part.hollow.HollowPlacementProperties.HOLLOW_PLACEMENT;
 
@@ -16,11 +14,6 @@ public class HollowMicroFactory extends StandardMicroFactory {
 
     public HollowMicroFactory() {
         super(1);
-    }
-
-    @Override
-    public MultiPartType<?> getType() {
-        return CBMicroblockModContent.HOLLOW_MICROBLOCK_PART.get();
     }
 
     @Override

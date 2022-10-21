@@ -46,7 +46,7 @@ public class ItemMicroBlock extends Item {
             return new TextComponent("Unnamed");
         }
 
-        return new TranslatableComponent("item." + factory.getType().getRegistryName().toString().replace(':', '.') + "." + size, material.getLocalizedName());
+        return new TranslatableComponent("item." + factory.getRegistryName().toString().replace(':', '.') + "." + size, material.getLocalizedName());
     }
 
     @Override

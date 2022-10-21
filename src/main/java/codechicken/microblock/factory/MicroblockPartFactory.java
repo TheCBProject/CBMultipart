@@ -15,8 +15,6 @@ import org.jetbrains.annotations.Nullable;
  */
 public abstract class MicroblockPartFactory extends MultiPartType<MicroblockPart> {
 
-    public abstract MultiPartType<?> getType();
-
     public abstract MicroblockPart create(boolean client, MicroMaterial material);
 
     @Nullable

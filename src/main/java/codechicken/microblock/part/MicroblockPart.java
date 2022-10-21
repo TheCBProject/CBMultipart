@@ -99,7 +99,7 @@ public abstract class MicroblockPart extends AbstractMultiPart {
 
     @Override
     public final MultiPartType<?> getType() {
-        return getMicroFactory().getType();
+        return getMicroFactory();
     }
 
     @Override
