@@ -70,6 +70,6 @@ public class CornerMicroblockPart extends StandardMicroblockPart {
 
     @Override
     public int getSlot() {
-        return 7;
+        return getShapeSlot() + 7;
     }
 }

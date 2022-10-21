@@ -38,7 +38,7 @@ public abstract class StandardMicroblockPart extends MicroblockPart implements I
 
     @Override
     public int getSlotMask() {
-        return 1 << getShapeSlot();
+        return 1 << getSlot();
     }
 
     @Override
@@ -65,33 +65,33 @@ public abstract class StandardMicroblockPart extends MicroblockPart implements I
                     return false;
                 }
             }
-        }
 
-        if (mpart.getMaterial() != getMaterial()) {
-            if (shape1 == 1 && shape2 == 1) {
-                int axisMask = (getSlot() - 7) ^ (mpart.getSlot() - 7);
-                if (axisMask == 3 || axisMask == 5 || axisMask == 6) {
-                    return false;
+            if (mpart.getMaterial() != getMaterial()) {
+                if (shape1 == 1 && shape2 == 1) {
+                    int axisMask = (getSlot() - 7) ^ (mpart.getSlot() - 7);
+                    if (axisMask == 3 || axisMask == 5 || axisMask == 6) {
+                        return false;
+                    }
                 }
-            }
 
-            if (shape1 == 0 && shape2 == 1) {
-                if (!edgeCornerOcclusionTest(this, mpart)) {
-                    return false;
+                if (shape1 == 0 && shape2 == 1) {
+                    if (!edgeCornerOcclusionTest(this, mpart)) {
+                        return false;
+                    }
                 }
-            }
 
-            if (shape1 == 1 && shape2 == 0) {
-                if (!edgeCornerOcclusionTest(mpart, this)) {
-                    return false;
+                if (shape1 == 1 && shape2 == 0) {
+                    if (!edgeCornerOcclusionTest(mpart, this)) {
+                        return false;
+                    }
                 }
-            }
 
-            if (shape1 == 0 && shape2 == 0) {
-                int e1 = getSlot() - 15;
-                int e2 = mpart.getSlot() - 15;
-                if ((e1 & 0xC) == (e2 & 0xC) && ((e1 & 3) ^ (e2 & 3)) == 3) {
-                    return false;
+                if (shape1 == 0 && shape2 == 0) {
+                    int e1 = getSlot() - 15;
+                    int e2 = mpart.getSlot() - 15;
+                    if ((e1 & 0xC) == (e2 & 0xC) && ((e1 & 3) ^ (e2 & 3)) == 3) {
+                        return false;
+                    }
                 }
             }
         }
