@@ -95,7 +95,7 @@ public class MicroblockRender {
             quad.pipe(pipeline);
         }
 
-        if (vs.availableVertices() <= 0) return false;
+        if (vs.getVertexCount() <= 0) return false;
 
         ccrs.setModel(vs);
         if (layer != null) {

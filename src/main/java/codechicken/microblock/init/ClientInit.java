@@ -42,6 +42,7 @@ public class ClientInit {
     private static void clientSetup(FMLClientSetupEvent event) {
         MultipartClientRegistry.register(CBMicroblockModContent.FACE_MICROBLOCK_PART.get(), MicroBlockPartRenderer.INSTANCE);
         MultipartClientRegistry.register(CBMicroblockModContent.HOLLOW_MICROBLOCK_PART.get(), MicroBlockPartRenderer.INSTANCE);
+        MultipartClientRegistry.register(CBMicroblockModContent.CORNER_MICROBLOCK_PART.get(), MicroBlockPartRenderer.INSTANCE);
         MODEL_HELPER.register(new ModelResourceLocation(CBMicroblockModContent.MICRO_BLOCK_ITEM.getId(), "inventory"), new MicroblockItemRenderer());
     }
 
