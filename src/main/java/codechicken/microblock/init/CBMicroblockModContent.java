@@ -6,6 +6,8 @@ import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.part.corner.CornerMicroFactory;
+import codechicken.microblock.part.edge.EdgeMicroFactory;
+import codechicken.microblock.part.edge.PostMicroblockFactory;
 import codechicken.microblock.part.face.FaceMicroFactory;
 import codechicken.microblock.part.hollow.HollowMicroFactory;
 import codechicken.multipart.CBMultipart;
@@ -44,6 +46,8 @@ public class CBMicroblockModContent {
     public static final RegistryObject<FaceMicroFactory> FACE_MICROBLOCK_PART = MULTIPART_TYPES.register("face", FaceMicroFactory::new);
     public static final RegistryObject<HollowMicroFactory> HOLLOW_MICROBLOCK_PART = MULTIPART_TYPES.register("hollow", HollowMicroFactory::new);
     public static final RegistryObject<CornerMicroFactory> CORNER_MICROBLOCK_PART = MULTIPART_TYPES.register("corner", CornerMicroFactory::new);
+    public static final RegistryObject<EdgeMicroFactory> EDGE_MICROBLOCK_PART = MULTIPART_TYPES.register("edge", EdgeMicroFactory::new);
+    public static final RegistryObject<PostMicroblockFactory> POST_MICROBLOCK_PART = MULTIPART_TYPES.register("post", PostMicroblockFactory::new);
 
     public static void init() {
         LOCK.lock();

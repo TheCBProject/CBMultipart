@@ -26,29 +26,29 @@ import org.jetbrains.annotations.Nullable;
 // TODO make this all static?
 public class MicroblockPlacement {
 
-    private final Player player;
-    private final InteractionHand hand;
-    private final BlockHitResult hit;
-    private final int size;
-    private final MicroMaterial material;
-    private final boolean checkMaterial;
-    private final PlacementProperties pp;
+    public final Player player;
+    public final InteractionHand hand;
+    public final BlockHitResult hit;
+    public final int size;
+    public final MicroMaterial material;
+    public final boolean checkMaterial;
+    public final PlacementProperties pp;
 
-    private final Level level;
-    private final MicroblockPartFactory microFactory;
-    private final BlockPos pos;
-    private final Vector3 vHit;
-    private final Pair<TileMultiPart, Boolean> gTile;
-    private final TileMultiPart hTile;
-    private final int side;
-    private final int slot;
-    private final int oSlot;
+    public final Level level;
+    public final MicroblockPartFactory microFactory;
+    public final BlockPos pos;
+    public final Vector3 vHit;
+    public final Pair<TileMultiPart, Boolean> gTile;
+    public final TileMultiPart hTile;
+    public final int side;
+    public final int slot;
+    public final int oSlot;
 
-    private final double hitDepth;
-    private final boolean useOppMod;
-    private final boolean oppMod;
-    private final boolean internal;
-    private final boolean doExpand;
+    public final double hitDepth;
+    public final boolean useOppMod;
+    public final boolean oppMod;
+    public final boolean internal;
+    public final boolean doExpand;
 
     public MicroblockPlacement(Player player, InteractionHand hand, BlockHitResult hit, int size, MicroMaterial material, boolean checkMaterial, PlacementProperties pp) {
         this.player = player;
@@ -76,7 +76,7 @@ public class MicroblockPlacement {
         doExpand = internal && !gTile.getRight() && !player.isCrouching() && !(oppMod && useOppMod) && pp.expand(slot, side);
     }
 
-    public ExecutablePlacement apply() {
+    public ExecutablePlacement calculate() {
         ExecutablePlacement customPlacement = pp.customPlacement(this);
         if (customPlacement != null) return customPlacement;
 
@@ -133,12 +133,12 @@ public class MicroblockPlacement {
     }
 
     @Nullable
-    private ExecutablePlacement internalPlacement(TileMultiPart tile, int slot) {
+    public ExecutablePlacement internalPlacement(TileMultiPart tile, int slot) {
         return internalPlacement(tile, create(size, slot, material));
     }
 
     @Nullable
-    private ExecutablePlacement internalPlacement(TileMultiPart tile, MicroblockPart part) {
+    public ExecutablePlacement internalPlacement(TileMultiPart tile, MicroblockPart part) {
         BlockPos pos = tile.getBlockPos();
         if (TileMultiPart.isUnobstructed(level, pos, part) && tile.canAddPart(part)) {
             return new ExecutablePlacement.AdditionPlacement(pos, part);
@@ -147,12 +147,12 @@ public class MicroblockPlacement {
     }
 
     @Nullable
-    private ExecutablePlacement externalPlacement(int slot) {
+    public ExecutablePlacement externalPlacement(int slot) {
         return externalPlacement(create(size, slot, material));
     }
 
     @Nullable
-    private ExecutablePlacement externalPlacement(MicroblockPart part) {
+    public ExecutablePlacement externalPlacement(MicroblockPart part) {
         BlockPos pos = this.pos.relative(Direction.from3DDataValue(side));
         if (TileMultiPart.canPlacePart(new OffsetUseOnContext(new UseOnContext(player, hand, hit)), part)) {
             return new ExecutablePlacement.AdditionPlacement(pos, part);
@@ -160,11 +160,11 @@ public class MicroblockPlacement {
         return null;
     }
 
-    private static double getHitDepth(Vector3 vHit, int side) {
+    public static double getHitDepth(Vector3 vHit, int side) {
         return vHit.copy().scalarProject(Rotation.axes[side]) + (side % 2 ^ 1);
     }
 
-    private MicroblockPart create(int size, int slot, MicroMaterial material) {
+    public MicroblockPart create(int size, int slot, MicroMaterial material) {
         MicroblockPart part = microFactory.create(level.isClientSide, material);
         part.setShape(size, slot);
         return part;

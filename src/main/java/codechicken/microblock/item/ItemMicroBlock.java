@@ -74,7 +74,7 @@ public class ItemMicroBlock extends Item {
 
         BlockHitResult hit = RayTracer.retraceBlock(level, player, ctx.getClickedPos());
         if (hit != null) {
-            ExecutablePlacement placement = new MicroblockPlacement(player, ctx.getHand(), hit, size, material, !player.abilities.instabuild, factory.placementProperties()).apply();
+            ExecutablePlacement placement = new MicroblockPlacement(player, ctx.getHand(), hit, size, material, !player.abilities.instabuild, factory.placementProperties()).calculate();
             if (placement == null) return InteractionResult.FAIL;
 
             if (!level.isClientSide) {

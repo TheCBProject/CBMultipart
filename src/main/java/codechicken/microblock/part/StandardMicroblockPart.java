@@ -42,11 +42,6 @@ public abstract class StandardMicroblockPart extends MicroblockPart implements I
     }
 
     @Override
-    public VoxelShape getShape(CollisionContext context) {
-        return VoxelShapeCache.getShape(getBounds());
-    }
-
-    @Override
     public VoxelShape getPartialOcclusionShape() {
         return getShape(CollisionContext.empty());
     }

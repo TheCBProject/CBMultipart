@@ -1,31 +1,33 @@
-package codechicken.microblock.part.corner;
+package codechicken.microblock.part.edge;
 
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.factory.StandardMicroFactory;
 import codechicken.microblock.part.PlacementProperties;
 import codechicken.microblock.part.StandardMicroblockPart;
 
+import static codechicken.microblock.part.edge.EdgePlacementProperties.EDGE_PLACEMENT;
+
 /**
  * Created by covers1624 on 21/10/22.
  */
-public class CornerMicroFactory extends StandardMicroFactory {
+public class EdgeMicroFactory extends StandardMicroFactory {
 
-    public CornerMicroFactory() {
-        super(2);
+    public EdgeMicroFactory() {
+        super(3);
     }
 
     @Override
     public PlacementProperties placementProperties() {
-        return CornerPlacementProperties.CORNER_PLACEMENT;
+        return EDGE_PLACEMENT;
     }
 
     @Override
     public StandardMicroblockPart create(boolean client, MicroMaterial material) {
-        return new CornerMicroblockPart(material);
+        return new EdgeMicroblockPart(material);
     }
 
     @Override
     public int getItemSlot() {
-        return 7;
+        return 15;
     }
 }

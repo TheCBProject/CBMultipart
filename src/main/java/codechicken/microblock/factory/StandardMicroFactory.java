@@ -1,6 +1,7 @@
 package codechicken.microblock.factory;
 
 import codechicken.microblock.api.MicroMaterial;
+import codechicken.microblock.part.PlacementProperties;
 import codechicken.microblock.part.StandardMicroblockPart;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -26,4 +27,6 @@ public abstract class StandardMicroFactory extends MicroblockPartFactory {
     public abstract StandardMicroblockPart create(boolean client, MicroMaterial material);
 
     public abstract int getItemSlot();
+
+    public abstract PlacementProperties placementProperties();
 }

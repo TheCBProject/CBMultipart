@@ -28,6 +28,4 @@ public abstract class MicroblockPartFactory extends MultiPartType<MicroblockPart
     public MicroblockPart createPartClient(MCDataInput packet) {
         return create(true, packet.readRegistryIdUnsafe(MicroMaterialRegistries.MICRO_MATERIALS));
     }
-
-    public abstract PlacementProperties placementProperties();
 }
