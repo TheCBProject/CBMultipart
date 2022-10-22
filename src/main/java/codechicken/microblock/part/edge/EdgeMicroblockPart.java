@@ -3,15 +3,12 @@ package codechicken.microblock.part.edge;
 import codechicken.lib.raytracer.VoxelShapeCache;
 import codechicken.lib.vec.*;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.factory.StandardMicroFactory;
+import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.StandardMicroblockPart;
-import codechicken.microblock.util.MaskedCuboid;
 import codechicken.multipart.api.part.TEdgePart;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-
-import java.util.List;
 
 /**
  * Created by covers1624 on 21/10/22.

@@ -1,6 +1,6 @@
 package codechicken.microblock.part.corner;
 
-import codechicken.microblock.factory.MicroblockPartFactory;
+import codechicken.microblock.part.MicroblockPartFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.PlacementGrid;
 import codechicken.microblock.part.PlacementProperties;

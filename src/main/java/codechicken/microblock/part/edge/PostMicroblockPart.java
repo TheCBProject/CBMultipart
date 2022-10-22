@@ -7,7 +7,7 @@ import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Transformation;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.factory.MicroblockPartFactory;
+import codechicken.microblock.part.MicroblockPartFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.MicroblockPart;
 import codechicken.microblock.part.face.FaceMicroblockPart;

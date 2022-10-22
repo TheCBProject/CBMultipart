@@ -6,14 +6,11 @@ import codechicken.lib.vec.Scale;
 import codechicken.lib.vec.Transformation;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.factory.StandardMicroFactory;
+import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.StandardMicroblockPart;
-import codechicken.microblock.util.MaskedCuboid;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-
-import java.util.List;
 
 /**
  * Created by covers1624 on 21/10/22.

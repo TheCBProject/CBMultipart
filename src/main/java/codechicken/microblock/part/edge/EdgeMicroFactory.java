@@ -1,7 +1,7 @@
 package codechicken.microblock.part.edge;
 
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.factory.StandardMicroFactory;
+import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.part.PlacementProperties;
 import codechicken.microblock.part.StandardMicroblockPart;
 

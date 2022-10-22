@@ -7,7 +7,7 @@ import codechicken.lib.vec.Matrix4;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.factory.StandardMicroFactory;
+import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.part.MicroblockPart;
 import com.mojang.blaze3d.vertex.PoseStack;

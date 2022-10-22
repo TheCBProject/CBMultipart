@@ -1,7 +1,7 @@
 package codechicken.microblock.part.edge;
 
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.factory.MicroblockPartFactory;
+import codechicken.microblock.part.MicroblockPartFactory;
 
 /**
  * Created by covers1624 on 21/10/22.

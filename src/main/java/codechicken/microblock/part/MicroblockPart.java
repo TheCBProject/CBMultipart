@@ -4,7 +4,6 @@ import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.factory.MicroblockPartFactory;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.microblock.util.MicroMaterialRegistry;

@@ -1,4 +1,4 @@
-package codechicken.microblock.factory;
+package codechicken.microblock.part;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.microblock.api.MicroMaterial;

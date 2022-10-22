@@ -8,7 +8,7 @@ import codechicken.lib.vec.Transformation;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.ISlottedHollowConnect;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.factory.StandardMicroFactory;
+import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.StandardMicroblockPart;
 import codechicken.microblock.part.face.FaceMicroblockPart;

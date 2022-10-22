@@ -3,7 +3,6 @@ package codechicken.microblock.part;
 import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.factory.MicroblockPartFactory;
 import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.block.TileMultiPart;
 import codechicken.multipart.util.ControlKeyModifier;

@@ -1,6 +1,6 @@
 package codechicken.microblock.part.hollow;
 
-import codechicken.microblock.factory.MicroblockPartFactory;
+import codechicken.microblock.part.MicroblockPartFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.PlacementGrid;
 import codechicken.microblock.part.face.FaceEdgeGrid;

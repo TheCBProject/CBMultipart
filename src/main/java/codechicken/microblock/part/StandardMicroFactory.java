@@ -1,8 +1,6 @@
-package codechicken.microblock.factory;
+package codechicken.microblock.part;
 
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.part.PlacementProperties;
-import codechicken.microblock.part.StandardMicroblockPart;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;

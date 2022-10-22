@@ -1,6 +1,6 @@
 package codechicken.microblock.part.edge;
 
-import codechicken.microblock.factory.MicroblockPartFactory;
+import codechicken.microblock.part.MicroblockPartFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.*;
 import codechicken.multipart.api.part.TMultiPart;

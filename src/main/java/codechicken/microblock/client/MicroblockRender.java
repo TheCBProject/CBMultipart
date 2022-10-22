@@ -13,7 +13,7 @@ import codechicken.lib.vec.Scale;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.factory.StandardMicroFactory;
+import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.part.ExecutablePlacement;

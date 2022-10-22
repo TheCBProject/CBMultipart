@@ -1,10 +1,8 @@
 package codechicken.microblock.part;
 
 import codechicken.lib.data.MCDataInput;
-import codechicken.lib.raytracer.VoxelShapeCache;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.factory.StandardMicroFactory;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.microblock.util.MicroOcclusionHelper;
 import codechicken.multipart.api.part.TMultiPart;
