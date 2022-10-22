@@ -59,11 +59,6 @@ public class CornerMicroblockPart extends StandardMicroblockPart {
     }
 
     @Override
-    public List<MaskedCuboid> getRenderCuboids(boolean isInventory) {
-        return List.of(new MaskedCuboid(getBounds(), 0));
-    }
-
-    @Override
     public StandardMicroFactory getMicroFactory() {
         return CBMicroblockModContent.CORNER_MICROBLOCK_PART.get();
     }

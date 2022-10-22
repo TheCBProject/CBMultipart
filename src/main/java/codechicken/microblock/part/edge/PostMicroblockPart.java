@@ -1,5 +1,6 @@
 package codechicken.microblock.part.edge;
 
+import codechicken.lib.data.MCDataInput;
 import codechicken.lib.raytracer.VoxelShapeCache;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Rotation;
@@ -11,11 +12,13 @@ import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.MicroblockPart;
 import codechicken.microblock.part.face.FaceMicroblockPart;
 import codechicken.microblock.util.MaskedCuboid;
+import codechicken.microblock.util.MicroOcclusionHelper;
 import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.api.part.TNormalOcclusionPart;
 import codechicken.multipart.api.part.TPartialOcclusionPart;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -39,6 +42,11 @@ public class PostMicroblockPart extends MicroblockPart implements TPartialOcclus
             }
         }
     }
+
+    @Nullable
+    public Cuboid6 renderBounds1 = null;
+    @Nullable
+    public Cuboid6 renderBounds2 = null;
 
     public PostMicroblockPart(MicroMaterial material) {
         super(material);
@@ -66,7 +74,15 @@ public class PostMicroblockPart extends MicroblockPart implements TPartialOcclus
 
     @Override
     public List<MaskedCuboid> getRenderCuboids(boolean isInventory) {
-        return List.of(new MaskedCuboid(getBounds(), 0));
+        if (isInventory) return List.of(new MaskedCuboid(getBounds(), 0));
+
+        MaskedCuboid a = new MaskedCuboid(renderBounds1, 0);
+        if (renderBounds2 == null) return List.of(a);
+
+        return List.of(
+                a,
+                new MaskedCuboid(renderBounds2, 0)
+        );
     }
 
     @Override
@@ -90,5 +106,68 @@ public class PostMicroblockPart extends MicroblockPart implements TPartialOcclus
         }
 
         return TNormalOcclusionPart.super.occlusionTest(npart);
+    }
+
+    @Override
+    public void onPartChanged(@Nullable TMultiPart part) {
+        super.onPartChanged(part);
+        if (level().isClientSide) {
+            recalcBounds();
+        }
+    }
+
+    @Override
+    public void onAdded() {
+        super.onAdded();
+        if (level().isClientSide) {
+            recalcBounds();
+        }
+    }
+
+    @Override
+    public void readUpdate(MCDataInput packet) {
+        super.readUpdate(packet);
+        if (level().isClientSide) {
+            recalcBounds();
+        }
+    }
+
+    public void recalcBounds() {
+        renderBounds1 = getBounds().copy();
+        renderBounds2 = null;
+
+        shrinkFace(getShapeSlot() << 1);
+        shrinkFace(getShapeSlot() << 1 | 1);
+
+        for (TMultiPart part : tile().getPartList()) {
+            if (part instanceof PostMicroblockPart post) {
+                shrinkPost(post);
+            }
+        }
+    }
+
+    private void shrinkFace(int fSide) {
+        if (tile().getSlottedPart(fSide) instanceof FaceMicroblockPart fPart) {
+            MicroOcclusionHelper.shrink(renderBounds1, fPart.getBounds(), fSide);
+        }
+    }
+
+    private void shrinkPost(PostMicroblockPart post) {
+        if (post == this) return;
+        if (thisShrinks(post)) {
+            if (renderBounds2 == null) {
+                renderBounds2 = getBounds().copy();
+            }
+            MicroOcclusionHelper.shrink(renderBounds1, post.getBounds(), getShapeSlot() << 1 | 1);
+            MicroOcclusionHelper.shrink(renderBounds2, post.getBounds(), getShapeSlot() << 1);
+        }
+
+    }
+
+    private boolean thisShrinks(PostMicroblockPart other) {
+        if (getSize() != other.getSize()) return getSize() < other.getSize();
+        if (isTransparent() != other.isTransparent()) return isTransparent();
+
+        return getShapeSlot() > other.getShapeSlot();
     }
 }

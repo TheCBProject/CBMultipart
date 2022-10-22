@@ -27,7 +27,7 @@ public class MicroOcclusionHelper {
         if (shrinkTest(p, other)) {
             shrink(renderBounds, other.getBounds(), shrinkSide(p.getSlot(), other.getSlot()));
         } else if (other.getSlot() < 6 && !other.isTransparent()) { // other gets full face, we didn't shrink, flag rendermask
-            boolean flag = switch(other.getSlot()) {
+            boolean flag = switch (other.getSlot()) {
                 case 0 -> renderBounds.min.y <= 0;
                 case 1 -> renderBounds.max.y >= 1;
                 case 2 -> renderBounds.min.z <= 0;
@@ -108,14 +108,10 @@ public class MicroOcclusionHelper {
         };
     }
 
-    public static void recalcBounds(IMicroShrinkRender p, Cuboid6 renderBounds) {
-        if (p.getSlot() < 6) {
-            shrink(p, renderBounds, 6);
-        } else if (p.getSlot() < 15) {
-            shrink(p, renderBounds, 15);
-        } else {
-            shrink(p, renderBounds, 27);
-        }
+    public static int recalcBounds(IMicroShrinkRender p, Cuboid6 renderBounds) {
+        if (p.getSlot() < 6) return shrink(p, renderBounds, 6);
+        if (p.getSlot() < 15) return shrink(p, renderBounds, 15);
+        return shrink(p, renderBounds, 27);
     }
 
     public static int shapePriority(int slot) {

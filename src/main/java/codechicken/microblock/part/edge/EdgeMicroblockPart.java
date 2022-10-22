@@ -56,11 +56,6 @@ public class EdgeMicroblockPart extends StandardMicroblockPart implements TEdgeP
     }
 
     @Override
-    public List<MaskedCuboid> getRenderCuboids(boolean isInventory) {
-        return List.of(new MaskedCuboid(getBounds(), 0));
-    }
-
-    @Override
     public StandardMicroFactory getMicroFactory() {
         return CBMicroblockModContent.EDGE_MICROBLOCK_PART.get();
     }
