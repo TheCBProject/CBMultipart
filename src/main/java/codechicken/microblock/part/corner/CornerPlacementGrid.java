@@ -1,9 +1,12 @@
 package codechicken.microblock.part.corner;
 
+import codechicken.lib.vec.Line3;
 import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.part.PlacementGrid;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.covers1624.quack.util.LazyValue;
+
+import java.util.List;
 
 /**
  * Created by covers1624 on 21/10/22.
@@ -11,26 +14,18 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 public class CornerPlacementGrid extends PlacementGrid {
 
     public static final CornerPlacementGrid CORNER_GRID = new CornerPlacementGrid();
+    private static final LazyValue<List<Line3>> LINES = new LazyValue<>(() -> List.of(
+            new Line3(-0.5, 0, -0.5, -0.5, 0, 0.5),
+            new Line3(-0.5, 0, 0.5, 0.5, 0, 0.5),
+            new Line3(0.5, 0, 0.5, 0.5, 0, -0.5),
+            new Line3(0.5, 0, -0.5, -0.5, 0, -0.5),
+            new Line3(0, 0, -0.5, 0, 0, 0.5),
+            new Line3(-0.5, 0, 0, 0.5, 0, 0)
+    ));
 
     @Override
-    protected void bufferLines(VertexConsumer cons, Vector3 norm) {
-        cons.vertex(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).normal((float) norm.x, (float) norm.y, (float) norm.z).endVertex();
-        cons.vertex(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).normal((float) norm.x, (float) norm.y, (float) norm.z).endVertex();
-
-        cons.vertex(-0.5, 0, 0.5).color(0f, 0f, 0f, 1f).normal((float) norm.x, (float) norm.y, (float) norm.z).endVertex();
-        cons.vertex(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).normal((float) norm.x, (float) norm.y, (float) norm.z).endVertex();
-
-        cons.vertex(0.5, 0, 0.5).color(0f, 0f, 0f, 1f).normal((float) norm.x, (float) norm.y, (float) norm.z).endVertex();
-        cons.vertex(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).normal((float) norm.x, (float) norm.y, (float) norm.z).endVertex();
-
-        cons.vertex(0.5, 0, -0.5).color(0f, 0f, 0f, 1f).normal((float) norm.x, (float) norm.y, (float) norm.z).endVertex();
-        cons.vertex(-0.5, 0, -0.5).color(0f, 0f, 0f, 1f).normal((float) norm.x, (float) norm.y, (float) norm.z).endVertex();
-
-        cons.vertex(0, 0, -0.5).color(0f, 0f, 0f, 1f).normal((float) norm.x, (float) norm.y, (float) norm.z).endVertex();
-        cons.vertex(0, 0, 0.5).color(0f, 0f, 0f, 1f).normal((float) norm.x, (float) norm.y, (float) norm.z).endVertex();
-
-        cons.vertex(-0.5, 0, 0).color(0f, 0f, 0f, 1f).normal((float) norm.x, (float) norm.y, (float) norm.z).endVertex();
-        cons.vertex(0.5, 0, 0).color(0f, 0f, 0f, 1f).normal((float) norm.x, (float) norm.y, (float) norm.z).endVertex();
+    public List<Line3> getOverlayLines() {
+        return LINES.get();
     }
 
     @Override
