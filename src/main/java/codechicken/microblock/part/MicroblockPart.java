@@ -7,7 +7,7 @@ import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.factory.MicroblockPartFactory;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.util.MaskedCuboid;
-import codechicken.microblock.util.MicroMaterialRegistries;
+import codechicken.microblock.util.MicroMaterialRegistry;
 import codechicken.multipart.api.MultiPartType;
 import codechicken.multipart.api.part.AbstractMultiPart;
 import codechicken.multipart.util.PartRayTraceResult;
@@ -58,7 +58,7 @@ public abstract class MicroblockPart extends AbstractMultiPart {
 
     @Override
     public void writeDesc(MCDataOutput packet) {
-        packet.writeRegistryIdUnsafe(MicroMaterialRegistries.MICRO_MATERIALS, material);
+        packet.writeRegistryIdUnsafe(MicroMaterialRegistry.MICRO_MATERIALS, material);
         packet.writeByte(shape);
     }
 
@@ -87,7 +87,7 @@ public abstract class MicroblockPart extends AbstractMultiPart {
     public void load(CompoundTag tag) {
         shape = tag.getByte("shape");
         // TODO redundant because of `createServer`
-        material = MicroMaterialRegistries.getMaterial(tag.getString("material"));
+        material = MicroMaterialRegistry.getMaterial(tag.getString("material"));
     }
 
     public abstract Cuboid6 getBounds();

@@ -3,7 +3,7 @@ package codechicken.microblock;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.init.ClientInit;
 import codechicken.microblock.init.DataGenerators;
-import codechicken.microblock.util.MicroMaterialRegistries;
+import codechicken.microblock.util.MicroMaterialRegistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
@@ -19,7 +19,7 @@ public class CBMicroblock {
     public static final String MOD_ID = "cb_microblock";
 
     public CBMicroblock() {
-        MicroMaterialRegistries.init();
+        MicroMaterialRegistry.init();
         CBMicroblockModContent.init();
 
         DataGenerators.init();

@@ -6,7 +6,7 @@ import codechicken.microblock.factory.StandardMicroFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.ExecutablePlacement;
 import codechicken.microblock.part.MicroblockPlacement;
-import codechicken.microblock.util.MicroMaterialRegistries;
+import codechicken.microblock.util.MicroMaterialRegistry;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -55,7 +55,7 @@ public class ItemMicroBlock extends Item {
 
         for (StandardMicroFactory factory : StandardMicroFactory.FACTORIES.values()) {
             for (int size : new int[] { 1, 2, 4 }) {
-                for (MicroMaterial microMaterial : MicroMaterialRegistries.MICRO_MATERIALS) {
+                for (MicroMaterial microMaterial : MicroMaterialRegistry.MICRO_MATERIALS) {
                     items.add(create(factory.factoryId, size, microMaterial));
                 }
             }
@@ -117,7 +117,7 @@ public class ItemMicroBlock extends Item {
     public static MicroMaterial getMaterialFromStack(ItemStack stack) {
         if (!stack.getOrCreateTag().contains(MATERIAL_TAG)) return null;
 
-        return MicroMaterialRegistries.getMaterial(stack.getOrCreateTag().getString(MATERIAL_TAG));
+        return MicroMaterialRegistry.getMaterial(stack.getOrCreateTag().getString(MATERIAL_TAG));
     }
 
     public static ItemStack create(int factoryId, int size, MicroMaterial material) {

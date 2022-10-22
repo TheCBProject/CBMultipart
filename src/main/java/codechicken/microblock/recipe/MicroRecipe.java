@@ -6,7 +6,7 @@ import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.item.SawItem;
-import codechicken.microblock.util.MicroMaterialRegistries;
+import codechicken.microblock.util.MicroMaterialRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -265,7 +265,7 @@ public class MicroRecipe extends CustomRecipe {
     @Nullable
     public static MicroMaterial findMaterial(ItemStack stack) {
         if (stack.isEmpty()) return null;
-        for (MicroMaterial material : MicroMaterialRegistries.MICRO_MATERIALS.getValues()) {
+        for (MicroMaterial material : MicroMaterialRegistry.MICRO_MATERIALS.getValues()) {
             ItemStack mStack = material.getItem();
             if (mStack.is(stack.getItem()) && ItemStack.tagMatches(mStack, stack)) {
                 return material;

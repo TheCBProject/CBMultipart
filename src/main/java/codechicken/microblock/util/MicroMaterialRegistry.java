@@ -13,7 +13,7 @@ import static codechicken.microblock.CBMicroblock.MOD_ID;
 /**
  * Created by covers1624 on 26/6/22.
  */
-public class MicroMaterialRegistries {
+public class MicroMaterialRegistry {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized");
 
@@ -22,7 +22,7 @@ public class MicroMaterialRegistries {
     public static void init() {
         LOCK.lock();
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(MicroMaterialRegistries::createRegistries);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(MicroMaterialRegistry::createRegistries);
     }
 
     private static void createRegistries(NewRegistryEvent event) {

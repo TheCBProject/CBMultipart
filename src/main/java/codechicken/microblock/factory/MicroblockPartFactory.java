@@ -3,8 +3,7 @@ package codechicken.microblock.factory;
 import codechicken.lib.data.MCDataInput;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.part.MicroblockPart;
-import codechicken.microblock.part.PlacementProperties;
-import codechicken.microblock.util.MicroMaterialRegistries;
+import codechicken.microblock.util.MicroMaterialRegistry;
 import codechicken.multipart.api.MultiPartType;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
@@ -20,13 +19,13 @@ public abstract class MicroblockPartFactory extends MultiPartType<MicroblockPart
     @Nullable
     @Override
     public MicroblockPart createPartServer(CompoundTag tag) {
-        return create(false, MicroMaterialRegistries.getMaterial(tag.getString("material")));
+        return create(false, MicroMaterialRegistry.getMaterial(tag.getString("material")));
     }
 
     @NotNull
     @Override
     public MicroblockPart createPartClient(MCDataInput packet) {
-        return create(true, packet.readRegistryIdUnsafe(MicroMaterialRegistries.MICRO_MATERIALS));
+        return create(true, packet.readRegistryIdUnsafe(MicroMaterialRegistry.MICRO_MATERIALS));
     }
 
     public abstract float getResistanceFactor();
