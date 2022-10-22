@@ -127,6 +127,11 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements TFac
     }
 
     @Override
+    public boolean occlusionTest(TMultiPart npart) {
+        return TNormalOcclusionPart.super.occlusionTest(npart) && super.occlusionTest(npart);
+    }
+
+    @Override
     public int redstoneConductionMap() {
         return 0x10;
     }
