@@ -6,7 +6,6 @@ import codechicken.asm.ObfMapping;
 import codechicken.mixin.api.*;
 import codechicken.mixin.forge.ForgeMixinBackend;
 import codechicken.mixin.forge.SidedGenerator;
-import codechicken.mixin.scala.MixinScalaLanguageSupport;
 import codechicken.mixin.util.JavaTraitGenerator;
 import codechicken.mixin.util.SimpleDebugger;
 import codechicken.mixin.util.Utils;
@@ -51,6 +50,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultiPart, MultiPartG
 
     private static final Logger logger = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
+    @Nullable
     private static final SimpleDebugger.DumpType DEBUG_TYPE = parseType(System.getProperty("codechicken.multipart.debug", null));
 
     public static final MultiPartGenerator INSTANCE = new MultiPartGenerator();
@@ -101,9 +101,6 @@ public class MultiPartGenerator extends SidedGenerator<TileMultiPart, MultiPartG
     public void registerPassThroughInterface(String iFace, boolean client, boolean server) {
         iFace = Utils.asmName(iFace);
         MixinFactory.TraitKey key = registerPassthroughTrait(iFace);
-        if (key == null) {
-            return;
-        }
         String tName = key.getTName();
         registerTrait(iFace, client ? tName : null, server ? tName : null);
     }
@@ -130,7 +127,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultiPart, MultiPartG
         if (tile instanceof TileMultiPart && traits.equals(getTraitsForClass(tile.getClass()))) {
             return (TileMultiPart) tile;
         }
-        return construct(traits).newInstance(pos, CBMultipartModContent.blockMultipart.defaultBlockState());
+        return construct(traits).newInstance(pos, CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState());
     }
 
     public TraitKey registerPassthroughTrait(@AsmName String iName) {
@@ -315,7 +312,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultiPart, MultiPartG
         TileMultiPart newInstance(BlockPos pos, BlockState state);
     }
 
-    private static SimpleDebugger.DumpType parseType(String value) {
+    private static SimpleDebugger.DumpType parseType(@Nullable String value) {
         if (value == null) {
             return null;
         }
@@ -331,6 +328,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultiPart, MultiPartG
 
     @Deprecated //Remove in 1.16.3
     private static Collection<Class<? extends MixinLanguageSupport>> getMixinSupports() {
+        // TODO load the Scala language support if scala is present.
         return ImmutableList.of(MixinLanguageSupport.JavaMixinLanguageSupport.class);
     }
 }

@@ -55,8 +55,7 @@ public class TTileChangeTile extends TileMultiPart {
         }
         boolean weak = diff == 2;
         List<TMultiPart> jPartList = getPartList();
-        for (int i = 0, jPartListSize = jPartList.size(); i < jPartListSize; i++) {
-            TMultiPart part = jPartList.get(i);
+        for (TMultiPart part : jPartList) {
             if (part instanceof INeighborTileChangePart) {
                 ((INeighborTileChangePart) part).onNeighborTileChanged(side, weak);
             }

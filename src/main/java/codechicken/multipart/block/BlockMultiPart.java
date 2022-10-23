@@ -294,6 +294,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
         world.removeBlock(pos, false);
     }
 
+    @Nullable
     public static TileMultiPart getTile(BlockEntity tile) {
         if (tile instanceof TileMultiPart mp) {
             return mp;
@@ -301,6 +302,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
         return null;
     }
 
+    @Nullable
     public static TileMultiPart getTile(BlockGetter world, BlockPos pos) {
         if (world.getBlockEntity(pos) instanceof TileMultiPart tile) {
             if (!tile.getPartList().isEmpty()) {
@@ -310,6 +312,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
         return null;
     }
 
+    @Nullable
     public static TMultiPart getPart(BlockGetter world, BlockPos pos, int slot) {
         TileMultiPart tile = getTile(world, pos);
         if (tile != null) {
@@ -318,6 +321,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
         return null;
     }
 
+    @Nullable
     public static PartRayTraceResult retracePart(BlockGetter world, BlockPos pos, Player player) {
         return RayTracer.retraceBlock(world, player, pos) instanceof PartRayTraceResult hit ? hit : null;
     }

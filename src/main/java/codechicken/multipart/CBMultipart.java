@@ -27,10 +27,9 @@ public class CBMultipart {
     public static final String MOD_ID = "cb_multipart";
 
     public CBMultipart() {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        CBMultipartModContent.init(modEventBus);
-        MultiPartRegistries.init(modEventBus);
-        DataGenerators.init(modEventBus);
+        CBMultipartModContent.init();
+        MultiPartRegistries.init();
+        DataGenerators.init();
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ClientInit::init);
 

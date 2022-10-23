@@ -3,45 +3,35 @@ package codechicken.multipart.init;
 import codechicken.multipart.block.BlockMultiPart;
 import codechicken.multipart.util.MultiPartLoadHandler.TileNBTContainer;
 import net.covers1624.quack.util.CrashLock;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.ObjectHolder;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 
 import static codechicken.multipart.CBMultipart.MOD_ID;
 
 /**
  * Created by covers1624 on 2/9/20.
  */
-@ObjectHolder (MOD_ID)
+
 public class CBMultipartModContent {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
+    private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registry.BLOCK_REGISTRY, MOD_ID);
+    private static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(Registry.BLOCK_ENTITY_TYPE_REGISTRY, MOD_ID);
 
-    @ObjectHolder ("multipart")
-    public static BlockMultiPart blockMultipart;
+    public static final RegistryObject<BlockMultiPart> MULTIPART_BLOCK = BLOCKS.register("multipart", BlockMultiPart::new);
 
-    @ObjectHolder ("saved_multipart")
-    public static BlockEntityType<?> tileMultipartType;
+    public static final RegistryObject<BlockEntityType<?>> MULTIPART_TILE_TYPE = TILES.register("saved_multipart", () ->
+            BlockEntityType.Builder.of(TileNBTContainer::new, MULTIPART_BLOCK.get()).build(null));
 
-    public static void init(IEventBus eventBus) {
+    public static void init() {
         LOCK.lock();
-        eventBus.addGenericListener(Block.class, CBMultipartModContent::onRegisterBlocks);
-        eventBus.addGenericListener(BlockEntityType.class, CBMultipartModContent::onRegisterTiles);
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        BLOCKS.register(bus);
+        TILES.register(bus);
     }
-
-    private static void onRegisterBlocks(RegistryEvent.Register<Block> event) {
-        IForgeRegistry<Block> r = event.getRegistry();
-        r.register(new BlockMultiPart().setRegistryName("multipart"));
-    }
-
-    private static void onRegisterTiles(RegistryEvent.Register<BlockEntityType<?>> event) {
-        IForgeRegistry<BlockEntityType<?>> r = event.getRegistry();
-        r.register(BlockEntityType.Builder.of(TileNBTContainer::new, blockMultipart).build(null)
-                .setRegistryName("saved_multipart")
-        );
-    }
-
 }

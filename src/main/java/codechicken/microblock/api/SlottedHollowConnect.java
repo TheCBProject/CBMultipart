@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Range;
 /**
  * Implement on center attached parts that can connect through Hollow covers to adjust the hole size of the cover.
  */
-public interface ISlottedHollowConnect {
+public interface SlottedHollowConnect {
 
     /**
      * @param side The side of the block on which the cover resides.

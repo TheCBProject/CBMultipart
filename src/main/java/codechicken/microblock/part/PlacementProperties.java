@@ -1,5 +1,7 @@
 package codechicken.microblock.part;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Created by covers1624 on 20/10/22.
  */
@@ -19,6 +21,7 @@ public abstract class PlacementProperties {
 
     public abstract PlacementGrid placementGrid();
 
+    @Nullable
     public ExecutablePlacement customPlacement(MicroblockPlacement placement) {
         return null;
     }

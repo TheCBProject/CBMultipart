@@ -6,7 +6,6 @@ import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.network.MultiPartSPH;
 import io.netty.buffer.Unpooled;
 import net.covers1624.quack.util.CrashLock;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -17,6 +16,7 @@ import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -62,12 +62,14 @@ public class MultiPartLoadHandler {
         private boolean loaded;
         //The NBT of the tile.
         //We save this back out in case something breaks.
+        @Nullable
         public CompoundTag tag;
 
+        @Nullable
         public CompoundTag updateTag;
 
         public TileNBTContainer(BlockPos pos, BlockState state) {
-            super(CBMultipartModContent.tileMultipartType, pos, state);
+            super(CBMultipartModContent.MULTIPART_TILE_TYPE.get(), pos, state);
         }
 
         //Handle initial desc sync
@@ -83,9 +85,7 @@ public class MultiPartLoadHandler {
         @Override
         public void load(CompoundTag compound) {
             super.load(compound);
-            if (compound != null) {
-                tag = compound.copy();
-            }
+            tag = compound.copy();
         }
 
         @Override

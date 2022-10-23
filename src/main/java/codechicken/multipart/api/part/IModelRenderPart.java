@@ -5,13 +5,14 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Companion to {@link PartBakedModelRenderer}
  */
 public interface IModelRenderPart extends TMultiPart {
 
-    boolean canRenderInLayer(RenderType layer);
+    boolean canRenderInLayer(@Nullable RenderType layer);
 
     BlockState getCurrentState();
 

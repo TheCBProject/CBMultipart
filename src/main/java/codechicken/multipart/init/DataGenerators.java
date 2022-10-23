@@ -6,6 +6,7 @@ import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 import static codechicken.multipart.CBMultipart.MOD_ID;
@@ -17,9 +18,9 @@ public class DataGenerators {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
 
-    public static void init(IEventBus eventBus) {
+    public static void init() {
         LOCK.lock();
-        eventBus.addListener(DataGenerators::gatherDataGenerators);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(DataGenerators::gatherDataGenerators);
     }
 
     public static void gatherDataGenerators(GatherDataEvent event) {
@@ -37,15 +38,10 @@ public class DataGenerators {
         }
 
         @Override
-        public String getName() {
-            return "CBMultipart BlockStates";
-        }
-
-        @Override
         protected void registerStatesAndModels() {
             ModelFile model = models()
                     .withExistingParent("dummy", "block");
-            simpleBlock(CBMultipartModContent.blockMultipart, model);
+            simpleBlock(CBMultipartModContent.MULTIPART_BLOCK.get(), model);
         }
     }
 }

@@ -22,7 +22,6 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Created by covers1624 on 20/10/22.
  */
-// TODO make this all static?
 public class MicroblockPlacement {
 
     public final Player player;
@@ -75,11 +74,11 @@ public class MicroblockPlacement {
         doExpand = internal && !gTile.getRight() && !player.isCrouching() && !(oppMod && useOppMod) && pp.expand(slot, side);
     }
 
+    @Nullable
     public ExecutablePlacement calculate() {
         ExecutablePlacement customPlacement = pp.customPlacement(this);
         if (customPlacement != null) return customPlacement;
 
-        // TODO impossible now as we use Direction ordinal?
         if (slot < 0) return null;
 
         if (doExpand) {
@@ -124,7 +123,7 @@ public class MicroblockPlacement {
 
     @Nullable
     public ExecutablePlacement expand(MicroblockPart mPart, MicroblockPart nPart) {
-        BlockPos pos = mPart.tile().getBlockPos();
+        BlockPos pos = mPart.pos();
         if (TileMultiPart.isUnobstructed(level, pos, nPart) && mPart.tile().canReplacePart(mPart, nPart)) {
             return new ExecutablePlacement.ExpandingPlacement(pos, nPart, mPart);
         }

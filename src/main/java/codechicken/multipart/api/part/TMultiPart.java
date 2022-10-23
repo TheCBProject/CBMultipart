@@ -28,6 +28,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -50,15 +51,30 @@ public interface TMultiPart {
      *
      * @return The {@link TileMultiPart}.
      */
+    @Contract (pure = true)
     TileMultiPart tile();
+
+    /**
+     * @return If this part has an attached {@link TileMultiPart}.
+     */
+    boolean hasTile();
 
     /**
      * Get the {@link Level} the container {@link TileMultiPart} is inside.
      *
      * @return The {@link Level}.
      */
+    @Contract (pure = true)
     default Level level() {
-        return tile() != null ? tile().getLevel() : null;
+        assert tile().getLevel() != null;
+        return tile().getLevel();
+    }
+
+    /**
+     * @return If this part has a {@link Level} attached.
+     */
+    default boolean hasLevel() {
+        return tile().hasLevel();
     }
 
     /**
@@ -66,6 +82,7 @@ public interface TMultiPart {
      *
      * @return The {@link BlockPos}.
      */
+    @Contract (pure = true)
     default BlockPos pos() {
         return tile().getBlockPos();
     }
@@ -75,6 +92,7 @@ public interface TMultiPart {
      *
      * @return The {@link CapabilityCache}.
      */
+    @Contract (pure = true)
     default CapabilityCache capCache() {
         return tile().getCapCache();
     }
@@ -85,6 +103,7 @@ public interface TMultiPart {
      * @return The {@link MultiPartType}.
      * @see MultiPartType
      */
+    @Contract (pure = true)
     MultiPartType<?> getType();
 
     /**

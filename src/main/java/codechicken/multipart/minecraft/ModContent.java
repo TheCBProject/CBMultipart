@@ -31,7 +31,6 @@ import java.util.function.Supplier;
  * Created by covers1624 on 1/9/20.
  */
 @ObjectHolder ("minecraft")
-//@Mod.EventBusSubscriber (modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD) //TODO JavaFML Loader
 public class ModContent {
 
     @ObjectHolder ("torch")

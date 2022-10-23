@@ -55,6 +55,9 @@ public class NormalOcclusionTest {
 
         @Override
         public MultiPartType<?> getType() {
+            // Yes, this returns null, however should only be used
+            // inside the occlusion engine, making this safe.
+            //noinspection ConstantConditions
             return null;
         }
 

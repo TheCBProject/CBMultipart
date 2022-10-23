@@ -1,6 +1,7 @@
 package codechicken.multipart.util;
 
 import codechicken.lib.raytracer.SubHitBlockHitResult;
+import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.block.TileMultiPart;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.core.BlockPos;
@@ -34,26 +35,24 @@ public class MultipartVoxelShape extends VoxelShape {
     @Override
     public BlockHitResult clip(Vec3 start, Vec3 end, BlockPos pos) {
 
-        return tile.getPartList().stream()
-                .map(part -> {
-                    BlockHitResult hit = part.getInteractionShape().clip(start, end, pos);
-                    if (hit == null) {
-                        hit = part.getShape(CollisionContext.empty()).clip(start, end, pos);
-                    }
-                    if (hit == null) {
-                        return null;
-                    }
-                    PartRayTraceResult result;
-                    if (hit instanceof SubHitBlockHitResult sHit) {
-                        result = new PartRayTraceResult(part, sHit);
-                    } else {
-                        result = new PartRayTraceResult(part, hit, start);
-                    }
-                    return result;
-                })
-                .filter(Objects::nonNull)
-                .sorted()
-                .findFirst()
-                .orElse(null);
+        PartRayTraceResult closest = null;
+        for (TMultiPart part : tile.getPartList()) {
+            BlockHitResult hit = part.getInteractionShape().clip(start, end, pos);
+            if (hit == null) {
+                hit = part.getShape(CollisionContext.empty()).clip(start, end, pos);
+            }
+            if (hit == null) continue;
+
+            PartRayTraceResult result;
+            if (hit instanceof SubHitBlockHitResult sHit) {
+                result = new PartRayTraceResult(part, sHit);
+            } else {
+                result = new PartRayTraceResult(part, hit, start);
+            }
+            if (closest == null || result.compareTo(closest) < 0) {
+                closest = result;
+            }
+        }
+        return closest;
     }
 }

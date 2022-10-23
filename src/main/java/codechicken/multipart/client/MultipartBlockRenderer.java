@@ -34,7 +34,7 @@ public class MultipartBlockRenderer implements ICCBlockRenderer {
 
     @Override
     public boolean canHandleBlock(BlockAndTintGetter world, BlockPos pos, BlockState blockState) {
-        return blockState.getBlock() == CBMultipartModContent.blockMultipart;
+        return blockState.getBlock() == CBMultipartModContent.MULTIPART_BLOCK.get();
     }
 
     @Override

@@ -132,8 +132,6 @@ public abstract class MicroblockPart extends AbstractMultiPart {
 
     @Override
     public float getStrength(Player player, PartRayTraceResult hit) {
-        if (material == null) return super.getStrength(player, hit);
-
         return material.getStrength(player);
     }
 

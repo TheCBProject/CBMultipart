@@ -106,7 +106,8 @@ public class RedstoneInteractions {
                 }
 
                 return 1 << Rotation.rotationTo(side & 6, fside);
-            } else if (p instanceof IMaskedRedstonePart part) {
+            }
+            if (p instanceof IMaskedRedstonePart part) {
                 return part.getConnectionMask(side);
             }
             return 0x1F;
@@ -148,10 +149,7 @@ public class RedstoneInteractions {
          * Due to vanilla's inadequecy with redstone/logic on walls
          */
         if (block == Blocks.REDSTONE_WIRE || block == Blocks.COMPARATOR) {
-            if (side != 0) {
-                return power ? 0x1F : 4;
-            }
-            return 0;
+            return power ? 0x1F : 4;
         }
 
         if (block == Blocks.REPEATER) { //stupid minecraft hardcodes

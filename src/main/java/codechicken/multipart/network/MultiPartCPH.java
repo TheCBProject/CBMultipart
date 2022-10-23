@@ -21,22 +21,10 @@ public class MultiPartCPH implements ICustomPacketHandler.IClientPacketHandler {
     @Override
     public void handlePacket(PacketCustom packet, Minecraft mc, ClientPacketListener handler) {
         switch (packet.getType()) {
-            case C_TILE_DESC: {
-                handleTileDescPacket(packet, mc);
-                break;
-            }
-            case C_ADD_PART: {
-                handleAddPart(packet, mc);
-                break;
-            }
-            case C_REM_PART: {
-                handleRemPart(packet, mc);
-                break;
-            }
-            case C_PART_UPDATE: {
-                handleUpdatePacket(packet, mc);
-                break;
-            }
+            case C_TILE_DESC -> handleTileDescPacket(packet, mc);
+            case C_ADD_PART -> handleAddPart(packet, mc);
+            case C_REM_PART -> handleRemPart(packet, mc);
+            case C_PART_UPDATE -> handleUpdatePacket(packet, mc);
         }
     }
 

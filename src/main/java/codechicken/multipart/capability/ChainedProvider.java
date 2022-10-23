@@ -5,6 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
@@ -14,6 +15,7 @@ import java.util.Arrays;
 public class ChainedProvider implements ICapabilityProvider {
 
     public ICapabilityProvider provider;
+    @Nullable
     public ChainedProvider next;
 
     private Capability<?>[] seenCaps = new Capability[0];
@@ -23,7 +25,7 @@ public class ChainedProvider implements ICapabilityProvider {
         this(provider, null);
     }
 
-    public ChainedProvider(ICapabilityProvider provider, ChainedProvider next) {
+    public ChainedProvider(ICapabilityProvider provider, @Nullable ChainedProvider next) {
         this.provider = provider;
         this.next = next;
     }
@@ -47,6 +49,7 @@ public class ChainedProvider implements ICapabilityProvider {
         }
     }
 
+    @Nullable
     public ChainedProvider remove(ICapabilityProvider p) {
         if (provider == p) {
             invalidate(null);
@@ -68,7 +71,7 @@ public class ChainedProvider implements ICapabilityProvider {
         }
     }
 
-    public void invalidate(Capability<?> cap) {
+    public void invalidate(@Nullable Capability<?> cap) {
         if (cap == null) {
             for (int i = 0; i < seenCaps.length; i++) {
                 seenCaps[i] = null;

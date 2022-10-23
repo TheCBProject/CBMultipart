@@ -96,16 +96,16 @@ public class PostMicroblockPart extends MicroblockPart implements TPartialOcclus
     }
 
     @Override
-    public boolean occlusionTest(TMultiPart npart) {
-        if (npart instanceof PostMicroblockPart post) {
+    public boolean occlusionTest(TMultiPart nPart) {
+        if (nPart instanceof PostMicroblockPart post) {
             return post.getShapeSlot() != getShapeSlot();
         }
 
-        if (npart instanceof FaceMicroblockPart facePart && (facePart.getSlot() >> 1) == getShapeSlot()) {
+        if (nPart instanceof FaceMicroblockPart facePart && (facePart.getSlot() >> 1) == getShapeSlot()) {
             return true;
         }
 
-        return TNormalOcclusionPart.super.occlusionTest(npart);
+        return TNormalOcclusionPart.super.occlusionTest(nPart);
     }
 
     @Override

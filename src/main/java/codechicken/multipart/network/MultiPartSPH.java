@@ -36,14 +36,8 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
     @Override
     public void handlePacket(PacketCustom packet, ServerPlayer sender, ServerGamePacketListenerImpl handler) {
         switch (packet.getType()) {
-            case S_CONTROL_KEY_MODIFIER: {
-                ControlKeyModifier.setIsControlDown(sender, packet.readBoolean());
-                break;
-            }
-            case S_MULTIPART_PLACEMENT: {
-                PlacementConversionHandler.place(sender, packet.readBoolean() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, sender.level);
-                break;
-            }
+            case S_CONTROL_KEY_MODIFIER -> ControlKeyModifier.setIsControlDown(sender, packet.readBoolean());
+            case S_MULTIPART_PLACEMENT -> PlacementConversionHandler.place(sender, packet.readBoolean() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, sender.level);
         }
     }
 

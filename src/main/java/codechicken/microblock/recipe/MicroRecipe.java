@@ -74,12 +74,13 @@ public class MicroRecipe extends CustomRecipe {
         int factory = microFactory(first);
         int size = microSize(first);
         MicroMaterial material = microMaterial(first);
-        if (first.isEmpty() || !first.is(MICRO_BLOCK_ITEM.get()) || factory != 0) return ItemStack.EMPTY;
+        if (material == null) return ItemStack.EMPTY;
+        if (!first.is(MICRO_BLOCK_ITEM.get()) || factory != 0) return ItemStack.EMPTY;
 
         for (int i = 0; i <= 8; i++) {
             if (i == 4) continue;
             ItemStack item = cont.getItem(i);
-            if (item.isEmpty() || !item.is(MICRO_BLOCK_ITEM.get()) ||
+            if (!item.is(MICRO_BLOCK_ITEM.get()) ||
                     microMaterial(item) != material || microFactory(item) != factory || microSize(item) != size) {
                 return ItemStack.EMPTY;
             }
@@ -115,6 +116,7 @@ public class MicroRecipe extends CustomRecipe {
             }
         }
 
+        if (material == null) return ItemStack.EMPTY;
         if (count <= 1) return ItemStack.EMPTY;
 
         return switch (mcrFactory) {
@@ -132,13 +134,10 @@ public class MicroRecipe extends CustomRecipe {
                         break;
                     }
                 }
-                if (base == -1) {
-                    yield create(size / 8, 0, 8, material);
-                } else if (base <= smallest) {
-                    yield ItemStack.EMPTY;
-                } else {
-                    yield create(size / base, mcrFactory, base, material);
-                }
+
+                if (base == -1) yield create(size / 8, 0, 8, material);
+                if (base <= smallest) yield ItemStack.EMPTY;
+                yield create(size / base, mcrFactory, base, material);
             }
             default -> ItemStack.EMPTY;
         };
@@ -208,7 +207,10 @@ public class MicroRecipe extends CustomRecipe {
             return ItemStack.EMPTY;
         }
 
-        return create(1, 0, microSize(cover), microMaterial(cover));
+        MicroMaterial material = microMaterial(cover);
+        if (material == null) return ItemStack.EMPTY;
+
+        return create(1, 0, microSize(cover), material);
     }
 
     @Nullable

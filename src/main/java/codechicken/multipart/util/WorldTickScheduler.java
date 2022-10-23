@@ -3,8 +3,8 @@ package codechicken.multipart.util;
 import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.api.part.TRandomTickPart;
 import codechicken.multipart.block.TileMultiPart;
+import net.covers1624.quack.collection.StreamableIterable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -16,6 +16,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.capabilities.CapabilityToken;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -116,8 +117,7 @@ class WorldTickScheduler {
             for (SavedTickEntry savedTick : savedTicks) {
                 //Use map to avoid loading locks.
                 BlockEntity tileEntity = chunk.getBlockEntities().get(savedTick.pos);
-                if (tileEntity instanceof TileMultiPart) {
-                    TileMultiPart tile = (TileMultiPart) tileEntity;
+                if (tileEntity instanceof TileMultiPart tile) {
                     scheduledTicks.add(new PartTickEntry(tile.getPartList().get(savedTick.idx), savedTick.time, false));
                 }
             }
@@ -143,7 +143,7 @@ class WorldTickScheduler {
             while (itr.hasNext()) {
                 PartTickEntry entry = itr.next();
                 if (entry.time <= time) {
-                    if (entry.part.tile() != null) {
+                    if (entry.part.hasTile()) {
                         if (entry.random) {
                             if (entry.part instanceof TRandomTickPart) {
                                 ((TRandomTickPart) entry.part).randomTick();
@@ -169,7 +169,7 @@ class WorldTickScheduler {
             CompoundTag tag = new CompoundTag();
 
             ListTag scheduledTicks = new ListTag();
-            instance.scheduledTicks.stream()
+            StreamableIterable.of(instance.scheduledTicks)
                     .map(PartTickEntry::write)
                     .filter(Objects::nonNull)
                     .forEach(scheduledTicks::add);
@@ -182,7 +182,7 @@ class WorldTickScheduler {
 
         public void readNBT(ChunkScheduler instance, Tag nbt) {
             CompoundTag tag = (CompoundTag) nbt;
-            tag.getList("ticks", 10).stream()
+            StreamableIterable.of(tag.getList("ticks", 10))
                     .map(e -> ((CompoundTag) e))
                     .map(SavedTickEntry::new)
                     .forEach(instance.savedTicks::add);
@@ -201,15 +201,15 @@ class WorldTickScheduler {
             this.random = random;
         }
 
+        @Nullable
         public CompoundTag write() {
-            if (part.tile() != null) {
-                CompoundTag tag = new CompoundTag();
-                tag.put("pos", NbtUtils.writeBlockPos(part.pos()));
-                tag.putInt("idx", part.tile().getPartList().indexOf(part));
-                tag.putLong("time", time);
-                return tag;
-            }
-            return null;
+            if (!part.hasTile()) return null;
+
+            CompoundTag tag = new CompoundTag();
+            tag.put("pos", NbtUtils.writeBlockPos(part.pos()));
+            tag.putInt("idx", part.tile().getPartList().indexOf(part));
+            tag.putLong("time", time);
+            return tag;
         }
     }
 

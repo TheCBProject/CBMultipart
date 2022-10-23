@@ -5,6 +5,7 @@ import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.trait.TCapabilityTile;
 import net.minecraft.core.Direction;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by covers1624 on 7/1/21.
@@ -12,5 +13,5 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 @MultiPartMarker (TCapabilityTile.class)
 public interface ICapabilityProviderPart extends TMultiPart, ICapabilityProvider {
 
-    boolean hasCapabilities(Direction dir);
+    boolean hasCapabilities(@Nullable Direction dir);
 }

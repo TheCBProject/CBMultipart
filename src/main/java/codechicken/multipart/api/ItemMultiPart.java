@@ -12,6 +12,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SoundType;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by covers1624 on 1/1/21.
@@ -22,6 +23,7 @@ public abstract class ItemMultiPart extends Item {
         super(properties);
     }
 
+    @Nullable
     public abstract TMultiPart newPart(UseOnContext context);
 
     @Override

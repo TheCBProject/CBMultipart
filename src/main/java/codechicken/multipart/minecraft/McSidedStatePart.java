@@ -48,11 +48,6 @@ public abstract class McSidedStatePart extends McStatePart implements TFacePart 
     }
 
     @Override
-    public boolean solid(int side) {
-        return false;
-    }
-
-    @Override
     public int redstoneConductionMap() {
         return 0x1F;
     }

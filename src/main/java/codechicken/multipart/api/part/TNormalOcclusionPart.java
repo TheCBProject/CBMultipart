@@ -12,7 +12,7 @@ public interface TNormalOcclusionPart extends TMultiPart {
     VoxelShape getOcclusionShape();
 
     @Override
-    default boolean occlusionTest(TMultiPart npart) {
-        return NormalOcclusionTest.test(this, npart);
+    default boolean occlusionTest(TMultiPart nPart) {
+        return NormalOcclusionTest.test(this, nPart);
     }
 }

@@ -25,6 +25,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 
@@ -90,6 +91,7 @@ public abstract class McStatePart extends AbstractMultiPart implements TNormalOc
         return EmptyModelData.INSTANCE;
     }
 
+    @Nullable
     public TMultiPart setStateOnPlacement(BlockPlaceContext context) {
         state = defaultBlockState().getBlock().getStateForPlacement(context);
         return this;
@@ -141,8 +143,8 @@ public abstract class McStatePart extends AbstractMultiPart implements TNormalOc
     }
 
     @Override
-    public boolean occlusionTest(TMultiPart npart) {
-        return NormalOcclusionTest.test(this, npart);
+    public boolean occlusionTest(TMultiPart nPart) {
+        return NormalOcclusionTest.test(this, nPart);
     }
 
     @Override

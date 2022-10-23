@@ -32,11 +32,11 @@ public class ClientInit {
     }
 
     private static void onClientInit(FMLClientSetupEvent event) {
-        ItemBlockRenderTypes.setRenderLayer(CBMultipartModContent.blockMultipart, e -> true);
-        BlockRenderingRegistry.registerRenderer(CBMultipartModContent.blockMultipart, new MultipartBlockRenderer());
+        ItemBlockRenderTypes.setRenderLayer(CBMultipartModContent.MULTIPART_BLOCK.get(), e -> true);
+        BlockRenderingRegistry.registerRenderer(CBMultipartModContent.MULTIPART_BLOCK.get(), new MultipartBlockRenderer());
     }
 
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        BlockEntityRenderers.register(CBMultipartModContent.tileMultipartType, MultipartTileRenderer::new);
+        BlockEntityRenderers.register(CBMultipartModContent.MULTIPART_TILE_TYPE.get(), MultipartTileRenderer::new);
     }
 }

@@ -1,6 +1,5 @@
 package codechicken.microblock.api;
 
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -10,7 +9,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.registries.ForgeRegistryEntry.UncheckedRegistryEntry;
@@ -78,6 +76,7 @@ public abstract class MicroMaterial extends UncheckedRegistryEntry<MicroMaterial
      *
      * @return The {@link SoundType}.
      */
+    @Nullable
     public abstract SoundType getSound();
 
     /**

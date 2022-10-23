@@ -16,14 +16,15 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
@@ -38,12 +39,12 @@ public class MultiPartRegistries {
     private static final Logger logger = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
 
-    private static ForgeRegistry<MultiPartType<?>> MULTIPART_TYPES;
+    public static IForgeRegistry<MultiPartType<?>> MULTIPART_TYPES;
     private static IForgeRegistry<PartConverter> PART_CONVERTERS;
 
-    public static void init(IEventBus eventBus) {
+    public static void init() {
         LOCK.lock();
-        eventBus.addListener(MultiPartRegistries::createRegistries);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(MultiPartRegistries::createRegistries);
     }
 
     private static void createRegistries(NewRegistryEvent event) {
@@ -78,7 +79,7 @@ public class MultiPartRegistries {
         if (!MULTIPART_TYPES.containsKey(name)) {
             throw new RuntimeException("MultiPartType with name '" + name + "' is not registered.");
         }
-        data.writeVarInt(MULTIPART_TYPES.getID(name));
+        data.writeRegistryIdUnsafe(MULTIPART_TYPES, type);
         part.writeDesc(data);
     }
 
@@ -95,8 +96,7 @@ public class MultiPartRegistries {
      * @return The TMultiPart.
      */
     public static TMultiPart readPart(MCDataInput data) {
-        int id = data.readVarInt();
-        MultiPartType<?> type = MULTIPART_TYPES.getValue(id);
+        MultiPartType<?> type = data.readRegistryIdUnsafe(MULTIPART_TYPES);
         TMultiPart part = type.createPartClient(data);
         part.readDesc(data);
         return part;
@@ -156,6 +156,7 @@ public class MultiPartRegistries {
                 .orElse(Collections.emptyList());
     }
 
+    @Nullable
     public static TMultiPart convertItem(UseOnContext context) {
         return PART_CONVERTERS.getValues().stream()
                 .map(c -> c.convert(context))

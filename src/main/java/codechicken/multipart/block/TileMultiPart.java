@@ -14,6 +14,8 @@ import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.network.MultiPartSPH;
 import codechicken.multipart.util.*;
 import com.google.common.base.Preconditions;
+import net.covers1624.quack.collection.ColUtils;
+import net.covers1624.quack.collection.StreamableIterable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -37,6 +39,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,28 +56,34 @@ import java.util.stream.StreamSupport;
 public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
 
     private List<TMultiPart> partList = new CopyOnWriteArrayList<>();
-    private CapabilityCache capabilityCache = new CapabilityCache();
+    private final CapabilityCache capabilityCache = new CapabilityCache();
 
-    private final MergedVoxelShapeHolder<TMultiPart> outlineShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
-            .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
+    private final MergedVoxelShapeHolder<TMultiPart> outlineShapeHolder = new MergedVoxelShapeHolder<>(
+            e -> new MultipartVoxelShape(e, this)
+    );
 
-    private final MergedVoxelShapeHolder<TMultiPart> collisionShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
-            .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
+    private final MergedVoxelShapeHolder<TMultiPart> collisionShapeHolder = new MergedVoxelShapeHolder<>(
+            e -> new MultipartVoxelShape(e, this)
+    );
 
-    private final MergedVoxelShapeHolder<TMultiPart> occlusionShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
-            .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
+    private final MergedVoxelShapeHolder<TMultiPart> occlusionShapeHolder = new MergedVoxelShapeHolder<>(
+            e -> new MultipartVoxelShape(e, this)
+    );
 
-    private final MergedVoxelShapeHolder<TMultiPart> interactionShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
-            .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
+    private final MergedVoxelShapeHolder<TMultiPart> interactionShapeHolder = new MergedVoxelShapeHolder<>(
+            e -> new MultipartVoxelShape(e, this)
+    );
 
-    private final MergedVoxelShapeHolder<TMultiPart> supportShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
-            .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
+    private final MergedVoxelShapeHolder<TMultiPart> supportShapeHolder = new MergedVoxelShapeHolder<>(
+            e -> new MultipartVoxelShape(e, this)
+    );
 
-    private final MergedVoxelShapeHolder<TMultiPart> visualShapeHolder = new MergedVoxelShapeHolder<TMultiPart>()
-            .setPostProcessHook(e -> new MultipartVoxelShape(e, this));
+    private final MergedVoxelShapeHolder<TMultiPart> visualShapeHolder = new MergedVoxelShapeHolder<>(
+            e -> new MultipartVoxelShape(e, this)
+    );
 
     public TileMultiPart(BlockPos pos, BlockState state) {
-        super(CBMultipartModContent.tileMultipartType, pos, state);
+        super(CBMultipartModContent.MULTIPART_TILE_TYPE.get(), pos, state);
     }
 
     // TODO Mixin compiler needs to support ctors with arguments, provided they are identical to the base class ctor.
@@ -171,6 +180,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      * <p>
      * Overriden by {@link codechicken.multipart.trait.TSlottedTile}
      */
+    @Nullable
     public TMultiPart getSlottedPart(int slot) { return null; }
 
     /**
@@ -182,7 +192,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
 
     public void operate(Consumer<TMultiPart> cons) {
         for (TMultiPart part : partList) {
-            if (part.tile() != null) {
+            if (part.hasTile()) {
                 cons.accept(part);
             }
         }
@@ -243,11 +253,11 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
         if (oPart != nPart && partList.contains(nPart)) {
             return false;
         }
-        return occlusionTest(new FilteredCollectionView<>(partList, e -> e != oPart), nPart);
+        return occlusionTest(StreamableIterable.of(partList).filter(e -> e != oPart), nPart);
     }
 
-    public boolean occlusionTest(Collection<TMultiPart> parts, TMultiPart nPart) {
-        return parts.stream().allMatch(part -> part.occlusionTest(nPart) && nPart.occlusionTest(part));
+    public boolean occlusionTest(Iterable<TMultiPart> parts, TMultiPart nPart) {
+        return ColUtils.allMatch(parts, part -> part.occlusionTest(nPart) && nPart.occlusionTest(part));
     }
 
     public void addPart_impl(TMultiPart part) {
@@ -270,11 +280,13 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
         ((AbstractMultiPart) part).bind(this);
     }
 
+    @Nullable
     public TileMultiPart remPart(TMultiPart part) {
         Preconditions.checkArgument(!level.isClientSide, "Cannot remove MultiParts from a client tile.");
         return remPart_impl(part);
     }
 
+    @Nullable
     public TileMultiPart remPart_impl(TMultiPart part) {
         remPart_do(part, !level.isClientSide);
 
@@ -462,7 +474,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      */
     public void notifyTileChange() {
         if (level != null) {
-            level.updateNeighborsAt(worldPosition, CBMultipartModContent.blockMultipart);
+            level.updateNeighborsAt(worldPosition, CBMultipartModContent.MULTIPART_BLOCK.get());
         }
     }
 
@@ -470,19 +482,19 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      * Called by parts when they have changed in some form that affects the world.
      * Notifies neighbor blocks, the world and parts that share this host and recalculates lighting
      */
-    public void notifyPartChange(TMultiPart part) {
+    public void notifyPartChange(@Nullable TMultiPart part) {
         internalPartChange(part);
 
-        BlockState state = CBMultipartModContent.blockMultipart.defaultBlockState();
+        BlockState state = CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState();
         level.sendBlockUpdated(worldPosition, state, state, 3);
-        level.updateNeighborsAt(worldPosition, CBMultipartModContent.blockMultipart);
+        level.updateNeighborsAt(worldPosition, CBMultipartModContent.MULTIPART_BLOCK.get());
         level.getChunkSource().getLightEngine().checkBlock(worldPosition);
     }
 
     /**
      * Notifies parts sharing this host of a change
      */
-    public void internalPartChange(TMultiPart part) {
+    public void internalPartChange(@Nullable TMultiPart part) {
         operate(e -> {
             if (e != part) {
                 e.onPartChanged(part);
@@ -535,7 +547,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      * Helper function for calling a second level notify on a side (eg indirect power from a lever)
      */
     public void notifyNeighborChange(Direction side) {
-        level.updateNeighborsAt(worldPosition.relative(side), CBMultipartModContent.blockMultipart);
+        level.updateNeighborsAt(worldPosition.relative(side), CBMultipartModContent.MULTIPART_BLOCK.get());
     }
 
     public void notifyNeighborChange(int side) {
@@ -607,7 +619,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
         BlockEntity t = world.getBlockEntity(pos);
         TileMultiPart tile = MultiPartGenerator.INSTANCE.generateCompositeTile(t, pos, parts, true);
         if (tile != t) {
-            world.setBlockAndUpdate(pos, CBMultipartModContent.blockMultipart.defaultBlockState());
+            world.setBlockAndUpdate(pos, CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState());
             MultiPartHelper.silentAddTile(world, pos, tile);
         }
 
@@ -619,6 +631,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
     /**
      * Creates this tile from an NBT tag
      */
+    @Nullable
     public static TileMultiPart fromNBT(CompoundTag tag, BlockPos pos) {
         ListTag partList = tag.getList("parts", 10);
         List<TMultiPart> parts = new ArrayList<>();
@@ -645,10 +658,10 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
     }
 
     private static TileMultiPart partRemoved(TileMultiPart tile) {
-        TileMultiPart newTile = MultiPartGenerator.INSTANCE.generateCompositeTile(tile, tile.getBlockPos(), tile.getPartList(), tile.getLevel().isClientSide);
+        TileMultiPart newTile = MultiPartGenerator.INSTANCE.generateCompositeTile(tile, tile.getBlockPos(), tile.getPartList(), tile.level.isClientSide);
         if (tile != newTile) {
             tile.setValid(false);
-            MultiPartHelper.silentAddTile(tile.getLevel(), tile.getBlockPos(), newTile);
+            MultiPartHelper.silentAddTile(tile.level, tile.getBlockPos(), newTile);
             newTile.from(tile);
             newTile.notifyTileChange();
         }

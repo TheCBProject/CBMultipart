@@ -11,11 +11,13 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RedstoneTorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
 public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, TRandomTickPart {
 
+    @Nullable
     private BurnoutEntry burnout;
 
     public RedstoneTorchPart() {
@@ -180,6 +182,7 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
         }
 
         long timeout;
+        @Nullable
         BurnoutEntry next;
     }
 }

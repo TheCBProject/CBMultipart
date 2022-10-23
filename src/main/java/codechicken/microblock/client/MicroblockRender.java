@@ -13,11 +13,11 @@ import codechicken.lib.vec.Scale;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.part.ExecutablePlacement;
 import codechicken.microblock.part.MicroblockPlacement;
+import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.util.MaskedCuboid;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -50,7 +50,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Random;
 
 import static codechicken.microblock.CBMicroblock.MOD_ID;
@@ -131,7 +130,7 @@ public class MicroblockRender {
         renderCuboids(ccrs, ((BlockMicroMaterial) material).state, null, placement.part.getRenderCuboids(true));
     }
 
-    public static boolean renderCuboids(CCRenderState ccrs, BlockState state, RenderType layer, Iterable<MaskedCuboid> cuboids) {
+    public static boolean renderCuboids(CCRenderState ccrs, BlockState state, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids) {
         PipelineState pipeState = PIPELINES.get();
         BakedVertexSource vertexSource = BakedVertexSource.instance();
         Random randy = new Random();
@@ -165,7 +164,7 @@ public class MicroblockRender {
         return ret;
     }
 
-    private static boolean renderQuad(CCRenderState ccrs, BakedVertexSource vs, PipelineState pipeState, BlockColors blockColors, RenderType layer, BakedQuad quad, BlockState state, BlockAndTintGetter level, BlockPos pos, Iterable<MaskedCuboid> cuboids) {
+    private static boolean renderQuad(CCRenderState ccrs, BakedVertexSource vs, PipelineState pipeState, BlockColors blockColors, @Nullable RenderType layer, BakedQuad quad, BlockState state, @Nullable BlockAndTintGetter level, @Nullable BlockPos pos, Iterable<MaskedCuboid> cuboids) {
         BakedPipeline pipeline = pipeState.pipeline;
         QuadClamper clamper = pipeState.clamper;
         QuadFaceStripper faceStripper = pipeState.faceStripper;

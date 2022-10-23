@@ -8,11 +8,9 @@ import codechicken.multipart.capability.ChainedProvider;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
 
 /**
@@ -30,7 +28,7 @@ public class TCapabilityTile extends TileMultiPart {
     private ChainedProvider[] providers = new ChainedProvider[7];
 
     @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+    public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
         ChainedProvider p = providers[ordinal(side)];
         if (p != null) {
             return p.getCapability(cap, side);
@@ -101,7 +99,7 @@ public class TCapabilityTile extends TileMultiPart {
     }
 
     @Override
-    public void internalPartChange(TMultiPart part) {
+    public void internalPartChange(@Nullable TMultiPart part) {
         super.internalPartChange(part);
         if (!(part instanceof ICapabilityProviderPart)) {
             return;
@@ -138,7 +136,7 @@ public class TCapabilityTile extends TileMultiPart {
         }
     }
 
-    private static int ordinal(Direction side) {
+    private static int ordinal(@Nullable Direction side) {
         return side == null ? 6 : side.ordinal();
     }
 }

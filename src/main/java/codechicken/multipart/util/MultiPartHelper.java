@@ -14,6 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
@@ -34,6 +35,7 @@ public class MultiPartHelper {
      * @param pos   The position.
      * @return The tile.
      */
+    @Nullable
     public static TileMultiPart getOrConvertTile(Level world, BlockPos pos) {
         return getOrConvertTile2(world, pos).getLeft();
     }
@@ -47,7 +49,7 @@ public class MultiPartHelper {
      * @return A Pair result of, the tile if it exists null otherwise, and a boolean flag if the tile
      * exists as a result of conversion.
      */
-    public static Pair<TileMultiPart, Boolean> getOrConvertTile2(Level world, BlockPos pos) {
+    public static Pair<@Nullable TileMultiPart, Boolean> getOrConvertTile2(Level world, BlockPos pos) {
         BlockEntity t = world.getBlockEntity(pos);
         if (t instanceof TileMultiPart) {
             return Pair.of((TileMultiPart) t, false);
@@ -97,7 +99,7 @@ public class MultiPartHelper {
                 //Callback to the part, so it can do stuff to inworld tile before it gets nuked.
                 TMultiPart head = newTile.getPartList().get(0);
                 head.invalidateConvertedTile();
-                world.setBlock(pos, CBMultipartModContent.blockMultipart.defaultBlockState(), 0);
+                world.setBlock(pos, CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState(), 0);
                 silentAddTile(world, pos, newTile);
                 PacketCustom.sendToChunk(new ClientboundBlockUpdatePacket(world, pos), world, pos);
                 head.onConverted();
@@ -111,15 +113,15 @@ public class MultiPartHelper {
                 //concat traits and generate new tile.
                 ImmutableSet<MixinFactory.TraitKey> newTraits = ImmutableSet.<MixinFactory.TraitKey>builder()//
                         .addAll(tileTraits).addAll(traits).build();
-                newTile = MultiPartGenerator.INSTANCE.construct(newTraits).newInstance(pos, CBMultipartModContent.blockMultipart.defaultBlockState());
+                newTile = MultiPartGenerator.INSTANCE.construct(newTraits).newInstance(pos, CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState());
                 newTile.setValid(false);
                 silentAddTile(world, pos, newTile);
                 newTile.from(tile);
             }
         } else {
             //Nothing exists in world, just create a new tile with the required traits.
-            world.setBlock(pos, CBMultipartModContent.blockMultipart.defaultBlockState(), 0);
-            newTile = MultiPartGenerator.INSTANCE.construct(traits).newInstance(pos, CBMultipartModContent.blockMultipart.defaultBlockState());
+            world.setBlock(pos, CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState(), 0);
+            newTile = MultiPartGenerator.INSTANCE.construct(traits).newInstance(pos, CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState());
             silentAddTile(world, pos, newTile);
         }
         //actually add the part to the tile.

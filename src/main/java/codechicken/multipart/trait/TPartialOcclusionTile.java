@@ -7,9 +7,11 @@ import codechicken.multipart.block.TileMultiPart;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -21,7 +23,9 @@ import java.util.List;
 public class TPartialOcclusionTile extends TileMultiPart {
 
     //Static cache.
+    @Nullable
     private static TPartialOcclusionTile lastOcclusionTestedTile;
+    @Nullable
     private static VoxelShape lastOcclusionTestedShape;
     private static boolean lastOcclusionTestedResult;
 
@@ -44,7 +48,7 @@ public class TPartialOcclusionTile extends TileMultiPart {
     }
 
     @Override
-    public boolean occlusionTest(Collection<TMultiPart> parts, TMultiPart npart) {
+    public boolean occlusionTest(Iterable<TMultiPart> parts, TMultiPart npart) {
         if (npart instanceof TPartialOcclusionPart newPart) {
             VoxelShape newShape = newPart.getPartialOcclusionShape();
             if (lastOcclusionTestedTile != this || lastOcclusionTestedShape != newShape) {
@@ -60,8 +64,8 @@ public class TPartialOcclusionTile extends TileMultiPart {
         return super.occlusionTest(parts, npart);
     }
 
-    private static boolean partialOcclusionTest(Collection<TMultiPart> allParts, TPartialOcclusionPart newPart) {
-        List<TPartialOcclusionPart> parts = new ArrayList<>(allParts.size() + 1);
+    private static boolean partialOcclusionTest(Iterable<TMultiPart> allParts, TPartialOcclusionPart newPart) {
+        List<TPartialOcclusionPart> parts = new LinkedList<>();
         for (TMultiPart part : allParts) {
             if (part instanceof TPartialOcclusionPart) {
                 parts.add((TPartialOcclusionPart) part);

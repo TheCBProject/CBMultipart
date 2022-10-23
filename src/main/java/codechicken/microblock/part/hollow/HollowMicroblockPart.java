@@ -6,7 +6,7 @@ import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Transformation;
 import codechicken.lib.vec.Vector3;
-import codechicken.microblock.api.ISlottedHollowConnect;
+import codechicken.microblock.api.SlottedHollowConnect;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.StandardMicroFactory;
@@ -25,7 +25,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,7 +65,7 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements TFac
     }
 
     public int getHoleSize() {
-        if (tile() != null && tile().getSlottedPart(6) instanceof ISlottedHollowConnect part) {
+        if (hasTile() && tile().getSlottedPart(6) instanceof SlottedHollowConnect part) {
             return MathHelper.clip(part.getHoleSize(getSlot()), 1, 11);
         }
         return 8;
@@ -115,8 +114,8 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements TFac
     }
 
     @Override
-    public boolean occlusionTest(TMultiPart npart) {
-        return TNormalOcclusionPart.super.occlusionTest(npart) && super.occlusionTest(npart);
+    public boolean occlusionTest(TMultiPart nPart) {
+        return TNormalOcclusionPart.super.occlusionTest(nPart) && super.occlusionTest(nPart);
     }
 
     @Override

@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
@@ -78,6 +79,7 @@ public class TorchPart extends McSidedStatePart implements AnimateTickPart {
         return WALL_OCCLUSION[getSide().get2DDataValue()];
     }
 
+    @Nullable
     @Override
     public TMultiPart setStateOnPlacement(BlockPlaceContext context) {
         BlockState wallState = getWallBlock().getStateForPlacement(context);

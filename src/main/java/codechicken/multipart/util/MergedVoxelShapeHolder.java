@@ -2,6 +2,7 @@ package codechicken.multipart.util;
 
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -16,12 +17,13 @@ public class MergedVoxelShapeHolder<T> {
     private final Set<VoxelShape> shapeParts = new HashSet<>();
     private final Set<VoxelShape> partCache = new HashSet<>();
 
-    private VoxelShape mergedShape;
-    private Function<VoxelShape, VoxelShape> postProcess;
+    private final Function<VoxelShape, VoxelShape> postProcess;
 
-    public MergedVoxelShapeHolder<T> setPostProcessHook(Function<VoxelShape, VoxelShape> postProcess) {
+    @Nullable
+    private VoxelShape mergedShape;
+
+    public MergedVoxelShapeHolder(Function<VoxelShape, VoxelShape> postProcess) {
         this.postProcess = postProcess;
-        return this;
     }
 
     public void clear() {
