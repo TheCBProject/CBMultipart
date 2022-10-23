@@ -118,24 +118,24 @@ public class ModContent {
         }
 
         @Override
-        public InteractionResultHolder<Collection<TMultiPart>> convert(LevelAccessor world, BlockPos pos, BlockState state) {
+        public ConversionResult<Collection<TMultiPart>> convert(LevelAccessor world, BlockPos pos, BlockState state) {
             if (blocks.length == 0) {
                 return PartConverter.emptyResultList();
             }
             if (ArrayUtils.contains(blocks, state.getBlock())) {
-                return InteractionResultHolder.success(Collections.singleton(blockFactory.apply(state)));
+                return ConversionResult.success(Collections.singleton(blockFactory.apply(state)));
             }
             return super.convert(world, pos, state);
         }
 
         @Override
-        public InteractionResultHolder<TMultiPart> convert(UseOnContext context) {
+        public ConversionResult<TMultiPart> convert(UseOnContext context) {
             if (context.getItemInHand().getItem() != item) {
                 return emptyResult();
             }
             TMultiPart result = factory.get().setStateOnPlacement(new BlockPlaceContext(context));
             if (result != null) {
-                return InteractionResultHolder.success(result);
+                return ConversionResult.success(result);
             }
             return super.convert(context);
         }

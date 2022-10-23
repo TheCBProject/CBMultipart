@@ -15,7 +15,6 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -150,9 +149,9 @@ public class MultiPartRegistries {
     public static Collection<TMultiPart> convertBlock(LevelAccessor world, BlockPos pos, BlockState state) {
         return PART_CONVERTERS.getValues().stream()
                 .map(c -> c.convert(world, pos, state))
-                .filter(e -> e.getResult() == InteractionResult.SUCCESS)
+                .filter(e -> e.success())
                 .findFirst()
-                .map(InteractionResultHolder::getObject)
+                .map(PartConverter.ConversionResult::result)
                 .orElse(Collections.emptyList());
     }
 
@@ -160,9 +159,9 @@ public class MultiPartRegistries {
     public static TMultiPart convertItem(UseOnContext context) {
         return PART_CONVERTERS.getValues().stream()
                 .map(c -> c.convert(context))
-                .filter(e -> e.getResult() == InteractionResult.SUCCESS)
+                .filter(e -> e.success())
                 .findFirst()
-                .map(InteractionResultHolder::getObject)
+                .map(PartConverter.ConversionResult::result)
                 .orElse(null);
     }
 
