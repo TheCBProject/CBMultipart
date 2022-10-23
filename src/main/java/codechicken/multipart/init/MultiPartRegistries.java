@@ -5,13 +5,12 @@ import codechicken.lib.data.MCDataOutput;
 import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.MultiPartType;
 import codechicken.multipart.api.PartConverter;
+import codechicken.multipart.api.PartConverter.ConversionResult;
 import codechicken.multipart.api.part.TMultiPart;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
@@ -146,23 +145,27 @@ public class MultiPartRegistries {
         return part;
     }
 
-    public static Collection<TMultiPart> convertBlock(LevelAccessor world, BlockPos pos, BlockState state) {
-        return PART_CONVERTERS.getValues().stream()
-                .map(c -> c.convert(world, pos, state))
-                .filter(e -> e.success())
-                .findFirst()
-                .map(PartConverter.ConversionResult::result)
-                .orElse(Collections.emptyList());
+    public static Collection<TMultiPart> convertBlock(LevelAccessor level, BlockPos pos, BlockState state) {
+        for (PartConverter conv : PART_CONVERTERS.getValues()) {
+            ConversionResult<Collection<TMultiPart>> result = conv.convert(level, pos, state);
+            if (result.success()) {
+                assert result.result() != null;
+                return result.result();
+            }
+        }
+        return List.of();
     }
 
     @Nullable
     public static TMultiPart convertItem(UseOnContext context) {
-        return PART_CONVERTERS.getValues().stream()
-                .map(c -> c.convert(context))
-                .filter(e -> e.success())
-                .findFirst()
-                .map(PartConverter.ConversionResult::result)
-                .orElse(null);
+        for (PartConverter conv : PART_CONVERTERS.getValues()) {
+            ConversionResult<TMultiPart> result = conv.convert(context);
+            if (result.success()) {
+                assert result.result() != null;
+                return result.result();
+            }
+        }
+        return null;
     }
 
 }

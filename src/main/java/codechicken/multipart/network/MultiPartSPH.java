@@ -21,10 +21,9 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static codechicken.multipart.network.MultiPartNetwork.*;
 
@@ -49,21 +48,19 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
     }
 
     public static void sendDescUpdates(List<ServerPlayer> players, Collection<BlockEntity> tiles) {
-        if (tiles.isEmpty()) {
-            return;
+        if (tiles.isEmpty()) return;
+
+        List<Pair<TileMultiPart, MCByteStream>> data = new LinkedList<>();
+        for (BlockEntity tile : tiles) {
+            if (!(tile instanceof TileMultiPart partTile)) continue;
+            data.add(LazyValuePair.of(partTile, t -> {
+                MCByteStream stream = new MCByteStream();
+                t.writeDesc(stream);
+                return stream;
+            }));
         }
-        List<Pair<TileMultiPart, MCByteStream>> data = tiles.stream()
-                .filter(e -> e instanceof TileMultiPart)
-                .map(e -> (TileMultiPart) e)
-                .map(tile -> LazyValuePair.of(tile, t -> {
-                    MCByteStream stream = new MCByteStream();
-                    t.writeDesc(stream);
-                    return stream;
-                }))
-                .collect(Collectors.toList());
-        if (data.isEmpty()) {
-            return;
-        }
+        if (data.isEmpty()) return;
+
         for (ServerPlayer player : players) {
             sendDescUpdateTo(player, data);
         }
