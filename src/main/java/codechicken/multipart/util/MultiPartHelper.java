@@ -12,7 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
@@ -134,8 +134,9 @@ public class MultiPartHelper {
      * Swaps the tile directly on the chunk.
      */
     public static void silentAddTile(Level world, BlockPos pos, BlockEntity tile) {
-        ChunkAccess chunk = world.getChunk(pos);
+        LevelChunk chunk = world.getChunkAt(pos);
         chunk.setBlockEntity(tile);
+        chunk.updateBlockEntityTicker(tile);
     }
     //endregion
 }

@@ -1,7 +1,10 @@
 package codechicken.multipart.block;
 
 import codechicken.lib.raytracer.RayTracer;
+import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.init.CBMultipartModContent;
+import codechicken.multipart.trait.extern.ITickableTile;
 import codechicken.multipart.util.MultiPartLoadHandler;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.Minecraft;
@@ -19,6 +22,8 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Material;
@@ -53,6 +58,17 @@ public class BlockMultiPart extends Block implements EntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new MultiPartLoadHandler.TileNBTContainer(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        if (type != CBMultipartModContent.MULTIPART_TILE_TYPE.get()) return null;
+        return (level1, pos, state1, tile) -> {
+            if (tile instanceof ITickableTile t) {
+                t.tick();
+            }
+        };
     }
 
     @Override
