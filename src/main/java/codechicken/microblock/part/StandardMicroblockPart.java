@@ -113,7 +113,7 @@ public abstract class StandardMicroblockPart extends MicroblockPart implements I
     }
 
     @Override
-    public List<MaskedCuboid> getRenderCuboids(boolean isInventory) {
+    public Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory) {
         if (isInventory) return List.of(new MaskedCuboid(getBounds(), 0));
 
         return List.of(new MaskedCuboid(renderBounds, renderMask));

@@ -2,6 +2,7 @@ package codechicken.microblock.client;
 
 import codechicken.lib.render.CCRenderState;
 import codechicken.microblock.api.BlockMicroMaterial;
+import codechicken.microblock.api.MicroMaterialClient;
 import codechicken.microblock.part.MicroblockPart;
 import codechicken.multipart.api.part.render.PartRenderer;
 import net.minecraft.client.renderer.RenderType;
@@ -16,9 +17,10 @@ public class MicroBlockPartRenderer implements PartRenderer<MicroblockPart> {
 
     @Override
     public boolean renderStatic(MicroblockPart part, @Nullable RenderType layer, CCRenderState ccrs) {
-        if (layer == null || part.getMaterial().canRenderInLayer(layer)) {
-            return MicroblockRender.renderCuboids(ccrs, ((BlockMicroMaterial) part.getMaterial()).state, layer, part.getRenderCuboids(false));
+        MicroMaterialClient clientMaterial = MicroMaterialClient.get(part.material);
+        if (clientMaterial != null) {
+            return clientMaterial.renderCuboids(ccrs, layer, part.getRenderCuboids(false));
         }
-        return PartRenderer.super.renderStatic(part, layer, ccrs);
+        return false;
     }
 }

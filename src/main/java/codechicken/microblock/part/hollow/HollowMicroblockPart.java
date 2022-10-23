@@ -8,14 +8,15 @@ import codechicken.lib.vec.Transformation;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.ISlottedHollowConnect;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
+import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.part.StandardMicroblockPart;
 import codechicken.microblock.part.face.FaceMicroblockPart;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.multipart.api.part.TFacePart;
 import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.api.part.TNormalOcclusionPart;
+import com.google.common.collect.Iterables;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
@@ -178,7 +179,7 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements TFac
     }
 
     @Override
-    public List<MaskedCuboid> getRenderCuboids(boolean isInventory) {
+    public Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory) {
         if (isInventory) {
             return buildBoxes(getBounds(), 0, false);
         }
@@ -186,10 +187,10 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements TFac
             return buildBoxes(renderBounds, renderMask, false);
         }
 
-        List<MaskedCuboid> boxes = new ArrayList<>(12);
-        buildBoxes(boxes, renderBounds, renderMask | 1 << getSlot(), false);
-        buildBoxes(boxes, Cuboid6.full, ~(1 << getSlot()), true);
-        return boxes;
+        return Iterables.concat(
+                buildBoxes(renderBounds, renderMask | 1 << getSlot(), false),
+                buildBoxes(Cuboid6.full, ~(1 << getSlot()), true)
+        );
     }
 
     @Override
@@ -199,12 +200,6 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements TFac
     }
 
     private List<MaskedCuboid> buildBoxes(Cuboid6 c, int sideMask, boolean face) {
-        List<MaskedCuboid> boxes = new ArrayList<>(6);
-        buildBoxes(boxes, c, sideMask, face);
-        return boxes;
-    }
-
-    private void buildBoxes(List<MaskedCuboid> boxes, Cuboid6 c, int sideMask, boolean face) {
         int size = renderMask >> 8;
         double d1 = 0.5 - size / 32D;
         double d2 = 0.5 + size / 32D;
@@ -222,42 +217,48 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements TFac
                     iMask = 0x3C;
                 }
 
-                boxes.add(new MaskedCuboid(new Cuboid6(d1, y1, d2, d2, y2, z2), 0x3B | iMask)); //-z internal
-                boxes.add(new MaskedCuboid(new Cuboid6(d1, y1, z1, d2, y2, d1), 0x37 | iMask)); //+z internal
+                return List.of(
+                        new MaskedCuboid(new Cuboid6(d1, y1, d2, d2, y2, z2), 0x3B | iMask), //-z internal
+                        new MaskedCuboid(new Cuboid6(d1, y1, z1, d2, y2, d1), 0x37 | iMask), //+z internal
 
-                boxes.add(new MaskedCuboid(new Cuboid6(d2, y1, d1, x2, y2, d2), sideMask & 0x23 | 0xC | iMask)); //-x internal -y+y+x external
-                boxes.add(new MaskedCuboid(new Cuboid6(x1, y1, d1, d1, y2, d2), sideMask & 0x13 | 0xC | iMask)); //+x internal -y+y-x external
+                        new MaskedCuboid(new Cuboid6(d2, y1, d1, x2, y2, d2), sideMask & 0x23 | 0xC | iMask), //-x internal -y+y+x external
+                        new MaskedCuboid(new Cuboid6(x1, y1, d1, d1, y2, d2), sideMask & 0x13 | 0xC | iMask), //+x internal -y+y-x external
 
-                boxes.add(new MaskedCuboid(new Cuboid6(x1, y1, d2, x2, y2, z2), sideMask & 0x3B | 4 | iMask)); //-y+y+z-x+x external
-                boxes.add(new MaskedCuboid(new Cuboid6(x1, y1, z1, x2, y2, d1), sideMask & 0x37 | 8 | iMask)); //-y+y-z-x+x external
+                        new MaskedCuboid(new Cuboid6(x1, y1, d2, x2, y2, z2), sideMask & 0x3B | 4 | iMask), //-y+y+z-x+x external
+                        new MaskedCuboid(new Cuboid6(x1, y1, z1, x2, y2, d1), sideMask & 0x37 | 8 | iMask) //-y+y-z-x+x external
+                );
             }
             case 2, 3 -> {
                 if (face) {
                     iMask = 0x33;
                 }
 
-                boxes.add(new MaskedCuboid(new Cuboid6(d2, d1, z1, x2, d2, z2), 0x2F | iMask)); //-x internal
-                boxes.add(new MaskedCuboid(new Cuboid6(x1, d1, z1, d1, d2, z2), 0x1F | iMask)); //+x internal
+                return List.of(
+                        new MaskedCuboid(new Cuboid6(d2, d1, z1, x2, d2, z2), 0x2F | iMask), //-x internal
+                        new MaskedCuboid(new Cuboid6(x1, d1, z1, d1, d2, z2), 0x1F | iMask), //+x internal
 
-                boxes.add(new MaskedCuboid(new Cuboid6(d1, d2, z1, d2, y2, z2), sideMask & 0xE | 0x30 | iMask)); //-y internal -z+z+y external
-                boxes.add(new MaskedCuboid(new Cuboid6(d1, y1, z1, d2, d1, z2), sideMask & 0xD | 0x30 | iMask)); //+y internal -z+z-y external
+                        new MaskedCuboid(new Cuboid6(d1, d2, z1, d2, y2, z2), sideMask & 0xE | 0x30 | iMask), //-y internal -z+z+y external
+                        new MaskedCuboid(new Cuboid6(d1, y1, z1, d2, d1, z2), sideMask & 0xD | 0x30 | iMask), //+y internal -z+z-y external
 
-                boxes.add(new MaskedCuboid(new Cuboid6(d2, y1, z1, x2, y2, z2), sideMask & 0x2F | 0x10 | iMask)); //-z+z+x-y+y external
-                boxes.add(new MaskedCuboid(new Cuboid6(x1, y1, z1, d1, y2, z2), sideMask & 0x1F | 0x20 | iMask)); //-z+z-x-y+y external
+                        new MaskedCuboid(new Cuboid6(d2, y1, z1, x2, y2, z2), sideMask & 0x2F | 0x10 | iMask), //-z+z+x-y+y external
+                        new MaskedCuboid(new Cuboid6(x1, y1, z1, d1, y2, z2), sideMask & 0x1F | 0x20 | iMask) //-z+z-x-y+y external
+                );
             }
             case 4, 5 -> {
                 if (face) {
                     iMask = 0xF;
                 }
 
-                boxes.add(new MaskedCuboid(new Cuboid6(x1, d2, d1, x2, y2, d2), 0x3E | iMask)); //-y internal
-                boxes.add(new MaskedCuboid(new Cuboid6(x1, y1, d1, x2, d1, d2), 0x3D | iMask)); //+y internal
+                return List.of(
+                        new MaskedCuboid(new Cuboid6(x1, d2, d1, x2, y2, d2), 0x3E | iMask), //-y internal
+                        new MaskedCuboid(new Cuboid6(x1, y1, d1, x2, d1, d2), 0x3D | iMask), //+y internal
 
-                boxes.add(new MaskedCuboid(new Cuboid6(x1, d1, d2, x2, d2, z2), sideMask & 0x38 | 3 | iMask)); //-z internal -x+x+z external
-                boxes.add(new MaskedCuboid(new Cuboid6(x1, d1, z1, x2, d2, d1), sideMask & 0x34 | 3 | iMask)); //+z internal -x+x-z external
+                        new MaskedCuboid(new Cuboid6(x1, d1, d2, x2, d2, z2), sideMask & 0x38 | 3 | iMask), //-z internal -x+x+z external
+                        new MaskedCuboid(new Cuboid6(x1, d1, z1, x2, d2, d1), sideMask & 0x34 | 3 | iMask), //+z internal -x+x-z external
 
-                boxes.add(new MaskedCuboid(new Cuboid6(x1, d2, z1, x2, y2, z2), sideMask & 0x3E | 1 | iMask)); //-x+x+y-z+z external
-                boxes.add(new MaskedCuboid(new Cuboid6(x1, y1, z1, x2, d1, z2), sideMask & 0x3D | 2 | iMask)); //-x+x-y-z+z external
+                        new MaskedCuboid(new Cuboid6(x1, d2, z1, x2, y2, z2), sideMask & 0x3E | 1 | iMask), //-x+x+y-z+z external
+                        new MaskedCuboid(new Cuboid6(x1, y1, z1, x2, d1, z2), sideMask & 0x3D | 2 | iMask) //-x+x-y-z+z external
+                );
             }
             default -> throw new IllegalStateException("Unexpected value: " + getSlot());
         }

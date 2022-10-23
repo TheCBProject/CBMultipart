@@ -131,7 +131,7 @@ public class MicroblockRender {
         renderCuboids(ccrs, ((BlockMicroMaterial) material).state, null, placement.part.getRenderCuboids(true));
     }
 
-    public static boolean renderCuboids(CCRenderState ccrs, BlockState state, RenderType layer, List<MaskedCuboid> cuboids) {
+    public static boolean renderCuboids(CCRenderState ccrs, BlockState state, RenderType layer, Iterable<MaskedCuboid> cuboids) {
         PipelineState pipeState = PIPELINES.get();
         BakedVertexSource vertexSource = BakedVertexSource.instance();
         Random randy = new Random();
@@ -165,7 +165,7 @@ public class MicroblockRender {
         return ret;
     }
 
-    private static boolean renderQuad(CCRenderState ccrs, BakedVertexSource vs, PipelineState pipeState, BlockColors blockColors, RenderType layer, BakedQuad quad, BlockState state, BlockAndTintGetter level, BlockPos pos, List<MaskedCuboid> cuboids) {
+    private static boolean renderQuad(CCRenderState ccrs, BakedVertexSource vs, PipelineState pipeState, BlockColors blockColors, RenderType layer, BakedQuad quad, BlockState state, BlockAndTintGetter level, BlockPos pos, Iterable<MaskedCuboid> cuboids) {
         BakedPipeline pipeline = pipeState.pipeline;
         QuadClamper clamper = pipeState.clamper;
         QuadFaceStripper faceStripper = pipeState.faceStripper;

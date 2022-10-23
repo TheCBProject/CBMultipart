@@ -73,7 +73,7 @@ public class PostMicroblockPart extends MicroblockPart implements TPartialOcclus
     }
 
     @Override
-    public List<MaskedCuboid> getRenderCuboids(boolean isInventory) {
+    public Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory) {
         if (isInventory) return List.of(new MaskedCuboid(getBounds(), 0));
 
         MaskedCuboid a = new MaskedCuboid(renderBounds1, 0);

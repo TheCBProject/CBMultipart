@@ -123,7 +123,7 @@ public abstract class MicroblockPart extends AbstractMultiPart {
         return super.getCloneStack(hit);
     }
 
-    public abstract List<MaskedCuboid> getRenderCuboids(boolean isInventory);
+    public abstract Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory);
 
     @Override
     public final MultiPartType<?> getType() {

@@ -51,7 +51,7 @@ public class FaceMicroblockPart extends StandardMicroblockPart implements TFaceP
     }
 
     @Override
-    public List<MaskedCuboid> getRenderCuboids(boolean isInventory) {
+    public Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory) {
         if (isInventory) return List.of(new MaskedCuboid(getBounds(), 0));
 
         if (isTransparent()) return List.of(new MaskedCuboid(renderBounds, renderMask));

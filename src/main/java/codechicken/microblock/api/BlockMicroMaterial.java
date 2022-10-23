@@ -1,5 +1,8 @@
 package codechicken.microblock.api;
 
+import codechicken.lib.render.CCRenderState;
+import codechicken.microblock.client.MicroblockRender;
+import codechicken.microblock.util.MaskedCuboid;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
@@ -15,17 +18,17 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.common.TierSortingRegistry;
-import net.minecraftforge.registries.ForgeRegistryEntry.UncheckedRegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
 /**
  * Created by covers1624 on 26/6/22.
  */
-public class BlockMicroMaterial extends UncheckedRegistryEntry<MicroMaterial> implements MicroMaterial {
+public class BlockMicroMaterial extends MicroMaterial {
 
     public final BlockState state;
 
@@ -40,16 +43,6 @@ public class BlockMicroMaterial extends UncheckedRegistryEntry<MicroMaterial> im
 
     protected void setRegistryName() {
         setRegistryName(makeMaterialKey(state));
-    }
-
-    @Override
-    public boolean canRenderInLayer(RenderType layer) {
-        return ItemBlockRenderTypes.canRenderInLayer(state, layer);
-    }
-
-    @Override
-    public RenderType getItemRenderLayer() {
-        return ItemBlockRenderTypes.getRenderType(state, true);
     }
 
     @Override
@@ -96,6 +89,25 @@ public class BlockMicroMaterial extends UncheckedRegistryEntry<MicroMaterial> im
     @Override
     public float getExplosionResistance(BlockGetter level, BlockPos pos, Explosion explosion) {
         return state.getExplosionResistance(level, pos, explosion);
+    }
+
+    @Override
+    public void initializeClient(Consumer<MicroMaterialClient> cons) {
+        cons.accept(new MicroMaterialClient() {
+
+            @Override
+            public RenderType getItemRenderLayer() {
+                return ItemBlockRenderTypes.getRenderType(state, true);
+            }
+
+            @Override
+            public boolean renderCuboids(CCRenderState ccrs, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids) {
+                if (layer == null || ItemBlockRenderTypes.canRenderInLayer(state, layer)) {
+                    return MicroblockRender.renderCuboids(ccrs, state, layer, cuboids);
+                }
+                return false;
+            }
+        });
     }
 
     /**

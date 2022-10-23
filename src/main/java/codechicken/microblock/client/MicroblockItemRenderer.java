@@ -7,6 +7,7 @@ import codechicken.lib.vec.Matrix4;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
+import codechicken.microblock.api.MicroMaterialClient;
 import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.part.MicroblockPart;
@@ -30,6 +31,9 @@ public class MicroblockItemRenderer implements IItemRenderer {
 
         if (material == null || factory == null) return;
 
+        MicroMaterialClient clientMaterial = MicroMaterialClient.get(material);
+        if (clientMaterial == null) return;
+
         MicroblockPart part = factory.create(true, material);
         part.setShape(size, factory.getItemSlot());
 
@@ -41,9 +45,9 @@ public class MicroblockItemRenderer implements IItemRenderer {
         ccrs.brightness = packedLight;
         ccrs.overlay = packedOverlay;
 
-        RenderType layer = part.getMaterial().getItemRenderLayer();
+        RenderType layer = clientMaterial.getItemRenderLayer();
         ccrs.bind(layer, buffers, mat);
-        MicroblockRender.renderCuboids(ccrs, ((BlockMicroMaterial) material).state, null, part.getRenderCuboids(true));
+        clientMaterial.renderCuboids(ccrs, null, part.getRenderCuboids(true));
     }
 
     @Override
