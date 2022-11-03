@@ -1,10 +1,10 @@
 package codechicken.multipart.block;
 
 import codechicken.lib.raytracer.RayTracer;
-import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.init.CBMultipartModContent;
-import codechicken.multipart.api.ITickableTile;
-import codechicken.multipart.util.MultiPartLoadHandler;
+import codechicken.multipart.api.TickableTile;
+import codechicken.multipart.util.MultipartLoadHandler;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -44,9 +44,9 @@ import java.util.Random;
 /**
  * Created by covers1624 on 1/1/21.
  */
-public class BlockMultiPart extends Block implements EntityBlock {
+public class BlockMultipart extends Block implements EntityBlock {
 
-    public BlockMultiPart() {
+    public BlockMultipart() {
         super(Block.Properties.of(Material.STONE)
                 .dynamicShape()
                 .noOcclusion()
@@ -56,7 +56,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new MultiPartLoadHandler.TileNBTContainer(pos, state);
+        return new MultipartLoadHandler.TileNBTContainer(pos, state);
     }
 
     @Nullable
@@ -64,7 +64,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         if (type != CBMultipartModContent.MULTIPART_TILE_TYPE.get()) return null;
         return (level1, pos, state1, tile) -> {
-            if (tile instanceof ITickableTile t) {
+            if (tile instanceof TickableTile t) {
                 t.tick();
             }
         };
@@ -77,43 +77,43 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         return tile == null ? Shapes.empty() : tile.getShape(context);
     }
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         return tile == null ? Shapes.empty() : tile.getCollisionShape(context);
     }
 
     @Override
     public VoxelShape getOcclusionShape(BlockState state, BlockGetter world, BlockPos pos) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         return tile == null ? Shapes.empty() : tile.getRenderOcclusionShape();
     }
 
     @Override
     public VoxelShape getInteractionShape(BlockState state, BlockGetter world, BlockPos pos) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         return tile == null ? Shapes.empty() : tile.getInteractionShape();
     }
 
     @Override
     public VoxelShape getBlockSupportShape(BlockState state, BlockGetter world, BlockPos pos) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         return tile == null ? Shapes.empty() : tile.getBlockSupportShape();
     }
 
     @Override
     public VoxelShape getVisualShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         return tile == null ? Shapes.empty() : tile.getVisualShape(context);
     }
 
     @Override
     public float getExplosionResistance(BlockState state, BlockGetter world, BlockPos pos, Explosion explosion) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         if (tile != null) {
             return tile.getExplosionResistance(explosion);
         }
@@ -122,7 +122,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public int getLightEmission(BlockState state, BlockGetter world, BlockPos pos) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         if (tile != null) {
             return tile.getLightEmission();
         }
@@ -131,7 +131,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public float getDestroyProgress(BlockState state, Player player, BlockGetter world, BlockPos pos) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         PartRayTraceResult hit = retracePart(world, pos, player);
         if (tile != null && hit != null) {
             return tile.getDestroyProgress(player, hit);
@@ -141,7 +141,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
-        TileMultiPart tile = getTile(level, pos);
+        TileMultipart tile = getTile(level, pos);
         PartRayTraceResult hit = retracePart(level, pos, player);
         level.levelEvent(player, 2001, pos, Block.getId(state));
 
@@ -161,7 +161,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
-        TileMultiPart tile = getTile(builder.getParameter(LootContextParams.BLOCK_ENTITY));//TODO
+        TileMultipart tile = getTile(builder.getParameter(LootContextParams.BLOCK_ENTITY));//TODO
         if (tile != null) {
             return tile.getDrops();
         }
@@ -171,7 +171,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
-        TileMultiPart tile = getTile(level, pos);
+        TileMultipart tile = getTile(level, pos);
         PartRayTraceResult hit = retracePart(level, pos, player);
         if (tile != null && hit != null) {
             return tile.getCloneStack(hit);
@@ -182,7 +182,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit_) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         PartRayTraceResult hit = retracePart(world, pos, player);
         if (tile != null && hit != null) {
             return tile.use(player, hit, hand);
@@ -192,7 +192,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public void attack(BlockState state, Level world, BlockPos pos, Player player) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         PartRayTraceResult hit = retracePart(world, pos, player);
         if (tile != null && hit != null) {
             tile.attack(player, hit);
@@ -202,7 +202,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public void entityInside(BlockState state, Level world, BlockPos pos, Entity entity) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         if (tile != null) {
             tile.entityInside(entity);
         }
@@ -210,7 +210,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public void stepOn(Level world, BlockPos pos, BlockState state, Entity entity) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         if (tile != null) {
             tile.stepOn(entity);
         }
@@ -218,7 +218,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         if (tile != null) {
             tile.onNeighborBlockChanged(fromPos);
         }
@@ -226,7 +226,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public void onNeighborChange(BlockState state, LevelReader world, BlockPos pos, BlockPos neighbor) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         if (tile != null) {
             tile.onNeighborTileChange(neighbor);
         }
@@ -234,7 +234,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public boolean getWeakChanges(BlockState state, LevelReader world, BlockPos pos) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         if (tile != null) {
             return tile.getWeakChanges();
         }
@@ -248,7 +248,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction side) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         if (tile != null) {
             return side != null && tile.canConnectRedstone(side.ordinal() ^ 1);// 'side' is respect to connecting block, we want with respect to this block
         }
@@ -257,7 +257,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public int getDirectSignal(BlockState state, BlockGetter world, BlockPos pos, Direction side) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         if (tile != null) {
             return tile.getDirectSignal(side.ordinal() ^ 1);// 'side' is respect to connecting block, we want with respect to this block
         }
@@ -266,7 +266,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 
     @Override
     public int getSignal(BlockState state, BlockGetter world, BlockPos pos, Direction side) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         if (tile != null) {
             return tile.getSignal(side.ordinal() ^ 1);// 'side' is respect to connecting block, we want with respect to this block
         }
@@ -276,7 +276,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
     @Override
     @OnlyIn (Dist.CLIENT)
     public void animateTick(BlockState state, Level world, BlockPos pos, Random rand) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         if (tile != null) {
             tile.animateTick(rand);
         }
@@ -301,7 +301,7 @@ public class BlockMultiPart extends Block implements EntityBlock {
 //    }
 
     public static void dropAndDestroy(Level world, BlockPos pos) {
-        TileMultiPart tile = getTile(world, pos);
+        TileMultipart tile = getTile(world, pos);
         if (tile != null && !world.isClientSide) {
             tile.dropItems(tile.getDrops());
         }
@@ -310,16 +310,16 @@ public class BlockMultiPart extends Block implements EntityBlock {
     }
 
     @Nullable
-    public static TileMultiPart getTile(BlockEntity tile) {
-        if (tile instanceof TileMultiPart mp) {
+    public static TileMultipart getTile(BlockEntity tile) {
+        if (tile instanceof TileMultipart mp) {
             return mp;
         }
         return null;
     }
 
     @Nullable
-    public static TileMultiPart getTile(BlockGetter world, BlockPos pos) {
-        if (world.getBlockEntity(pos) instanceof TileMultiPart tile) {
+    public static TileMultipart getTile(BlockGetter world, BlockPos pos) {
+        if (world.getBlockEntity(pos) instanceof TileMultipart tile) {
             if (!tile.getPartList().isEmpty()) {
                 return tile;
             }
@@ -328,8 +328,8 @@ public class BlockMultiPart extends Block implements EntityBlock {
     }
 
     @Nullable
-    public static TMultiPart getPart(BlockGetter world, BlockPos pos, int slot) {
-        TileMultiPart tile = getTile(world, pos);
+    public static MultiPart getPart(BlockGetter world, BlockPos pos, int slot) {
+        TileMultipart tile = getTile(world, pos);
         if (tile != null) {
             return tile.getSlottedPart(slot);
         }

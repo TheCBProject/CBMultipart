@@ -7,7 +7,7 @@ import codechicken.multipart.trait.TTickableTile;
  * Created by covers1624 on 18/9/20.
  */
 @MultiPartMarker (TTickableTile.class)
-public interface ITickablePart {
+public interface TickablePart {
 
     void tick();
 }

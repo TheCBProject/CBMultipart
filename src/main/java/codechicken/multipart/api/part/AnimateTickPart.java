@@ -13,7 +13,7 @@ import java.util.Random;
  * Created by covers1624 on 2/9/20.
  */
 @MultiPartMarker (TAnimateTickTile.class)
-public interface AnimateTickPart extends TMultiPart {
+public interface AnimateTickPart extends MultiPart {
 
     void animateTick(Random random);
 }

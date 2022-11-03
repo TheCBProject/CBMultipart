@@ -1,9 +1,9 @@
 package codechicken.multipart.api;
 
-import codechicken.multipart.api.part.AbstractMultiPart;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.api.part.TNormalOcclusionPart;
-import codechicken.multipart.api.part.TPartialOcclusionPart;
+import codechicken.multipart.api.part.BaseMultipart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.api.part.NormalOcclusionPart;
+import codechicken.multipart.api.part.PartialOcclusionPart;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -16,19 +16,19 @@ public class NormalOcclusionTest {
     /**
      * Test if part1 is occluded by part2 in any way.
      * <p>
-     * Checks both {@link TNormalOcclusionPart#getOcclusionShape()} and
-     * {@link TPartialOcclusionPart#getPartialOcclusionShape()} on part2.
+     * Checks both {@link NormalOcclusionPart#getOcclusionShape()} and
+     * {@link PartialOcclusionPart#getPartialOcclusionShape()} on part2.
      *
      * @param part1 The first part.
      * @param part2 The other part.
      * @return If part1 is occluded by part2 in any way.
      */
-    public static boolean test(TNormalOcclusionPart part1, TMultiPart part2) {
+    public static boolean test(NormalOcclusionPart part1, MultiPart part2) {
         VoxelShape shape = Shapes.empty();
-        if (part2 instanceof TNormalOcclusionPart p) {
+        if (part2 instanceof NormalOcclusionPart p) {
             shape = Shapes.or(shape, p.getOcclusionShape());
         }
-        if (part2 instanceof TPartialOcclusionPart p) {
+        if (part2 instanceof PartialOcclusionPart p) {
             shape = Shapes.or(shape, p.getPartialOcclusionShape());
         }
 
@@ -36,16 +36,16 @@ public class NormalOcclusionTest {
     }
 
     /**
-     * Wraps the given {@link VoxelShape} to a {@link TNormalOcclusionPart} for the purpose of occlusion testing.
+     * Wraps the given {@link VoxelShape} to a {@link NormalOcclusionPart} for the purpose of occlusion testing.
      *
      * @param shape The shape.
      * @return The wrapped VoxelShape part.
      */
-    public static TNormalOcclusionPart of(VoxelShape shape) {
+    public static NormalOcclusionPart of(VoxelShape shape) {
         return new NormallyOccludedPart(shape);
     }
 
-    private static class NormallyOccludedPart extends AbstractMultiPart implements TNormalOcclusionPart {
+    private static class NormallyOccludedPart extends BaseMultipart implements NormalOcclusionPart {
 
         private final VoxelShape shape;
 
@@ -54,7 +54,7 @@ public class NormalOcclusionTest {
         }
 
         @Override
-        public MultiPartType<?> getType() {
+        public MultipartType<?> getType() {
             // Yes, this returns null, however should only be used
             // inside the occlusion engine, making this safe.
             //noinspection ConstantConditions

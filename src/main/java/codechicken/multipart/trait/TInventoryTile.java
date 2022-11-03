@@ -2,8 +2,8 @@ package codechicken.multipart.trait;
 
 import codechicken.lib.util.ArrayUtils;
 import codechicken.multipart.api.annotation.MultiPartTrait;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.block.TileMultipart;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.core.Direction;
@@ -22,7 +22,7 @@ import java.util.List;
  */
 @MultiPartTrait (Container.class)
 @MultiPartTrait (WorldlyContainer.class)
-public class TInventoryTile extends TileMultiPart implements WorldlyContainer {
+public class TInventoryTile extends TileMultipart implements WorldlyContainer {
 
     private List<Container> invList = new ArrayList<>();
 
@@ -31,7 +31,7 @@ public class TInventoryTile extends TileMultiPart implements WorldlyContainer {
     private int[][] faceSlots = ArrayUtils.fill(new int[6][0], null);
 
     @Override
-    public void copyFrom(TileMultiPart that) {
+    public void copyFrom(TileMultipart that) {
         super.copyFrom(that);
         if (that instanceof TInventoryTile) {
             invList = ((TInventoryTile) that).invList;
@@ -40,7 +40,7 @@ public class TInventoryTile extends TileMultiPart implements WorldlyContainer {
     }
 
     @Override
-    public void bindPart(TMultiPart part) {
+    public void bindPart(MultiPart part) {
         super.bindPart(part);
         if (part instanceof Container) {
             invList.add((Container) part);
@@ -49,7 +49,7 @@ public class TInventoryTile extends TileMultiPart implements WorldlyContainer {
     }
 
     @Override
-    public void partRemoved(TMultiPart part, int p) {
+    public void partRemoved(MultiPart part, int p) {
         super.partRemoved(part, p);
         if (part instanceof Container) {
             invList.remove(part);

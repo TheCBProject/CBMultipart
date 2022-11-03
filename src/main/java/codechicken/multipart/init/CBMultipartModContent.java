@@ -1,7 +1,7 @@
 package codechicken.multipart.init;
 
-import codechicken.multipart.block.BlockMultiPart;
-import codechicken.multipart.util.MultiPartLoadHandler.TileNBTContainer;
+import codechicken.multipart.block.BlockMultipart;
+import codechicken.multipart.util.MultipartLoadHandler.TileNBTContainer;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Block;
@@ -23,7 +23,7 @@ public class CBMultipartModContent {
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registry.BLOCK_REGISTRY, MOD_ID);
     private static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(Registry.BLOCK_ENTITY_TYPE_REGISTRY, MOD_ID);
 
-    public static final RegistryObject<BlockMultiPart> MULTIPART_BLOCK = BLOCKS.register("multipart", BlockMultiPart::new);
+    public static final RegistryObject<BlockMultipart> MULTIPART_BLOCK = BLOCKS.register("multipart", BlockMultipart::new);
 
     public static final RegistryObject<BlockEntityType<?>> MULTIPART_TILE_TYPE = TILES.register("saved_multipart", () ->
             BlockEntityType.Builder.of(TileNBTContainer::new, MULTIPART_BLOCK.get()).build(null));

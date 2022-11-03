@@ -1,18 +1,18 @@
 package codechicken.multipart.api.part;
 
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.block.TileMultipart;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by covers1624 on 6/6/22.
  */
-public abstract class AbstractMultiPart implements TMultiPart {
+public abstract class BaseMultipart implements MultiPart {
 
     @Nullable
-    private TileMultiPart tile;
+    private TileMultipart tile;
 
     @Override
-    public final TileMultiPart tile() {
+    public final TileMultipart tile() {
         assert tile != null;
         return tile;
     }
@@ -22,7 +22,7 @@ public abstract class AbstractMultiPart implements TMultiPart {
         return tile != null;
     }
 
-    public final void bind(TileMultiPart tile) {
+    public final void bind(TileMultipart tile) {
         this.tile = tile;
     }
 }

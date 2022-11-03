@@ -4,10 +4,10 @@ import codechicken.lib.render.CCRenderState;
 import codechicken.lib.render.block.ICCBlockRenderer;
 import codechicken.lib.render.buffer.TransformingVertexConsumer;
 import codechicken.multipart.api.MultipartClientRegistry;
-import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.render.PartRenderer;
-import codechicken.multipart.block.BlockMultiPart;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.block.BlockMultipart;
+import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.util.PartRayTraceResult;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -39,7 +39,7 @@ public class MultipartBlockRenderer implements ICCBlockRenderer {
 
     @Override
     public boolean renderBlock(BlockState state, BlockPos pos, BlockAndTintGetter world, PoseStack mStack, VertexConsumer builder, Random random, IModelData data) {
-        TileMultiPart tile = BlockMultiPart.getTile(world, pos);
+        TileMultipart tile = BlockMultipart.getTile(world, pos);
         if (tile != null) {
             CCRenderState ccrs = CCRenderState.instance();
             ccrs.reset();
@@ -52,7 +52,7 @@ public class MultipartBlockRenderer implements ICCBlockRenderer {
 
     @Override
     public void renderBreaking(BlockState state, BlockPos pos, BlockAndTintGetter world, PoseStack mStack, VertexConsumer builder, IModelData data) {
-        TileMultiPart tile = BlockMultiPart.getTile(world, pos);
+        TileMultipart tile = BlockMultipart.getTile(world, pos);
         if (tile != null) {
             CCRenderState ccrs = CCRenderState.instance();
             ccrs.reset();
@@ -66,9 +66,9 @@ public class MultipartBlockRenderer implements ICCBlockRenderer {
         }
     }
 
-    private boolean renderStatic(TileMultiPart tile, RenderType type, CCRenderState ccrs) {
+    private boolean renderStatic(TileMultipart tile, RenderType type, CCRenderState ccrs) {
         boolean ret = false;
-        for (TMultiPart part : tile.getPartList()) {
+        for (MultiPart part : tile.getPartList()) {
             PartRenderer<?> renderer = MultipartClientRegistry.getRenderer(part.getType());
             if (renderer != null) {
                 ret |= renderer.renderStatic(unsafeCast(part), type, ccrs);
@@ -77,7 +77,7 @@ public class MultipartBlockRenderer implements ICCBlockRenderer {
         return ret;
     }
 
-    private void renderBreaking(TileMultiPart tile, CCRenderState ccrs) {
+    private void renderBreaking(TileMultipart tile, CCRenderState ccrs) {
         if (Minecraft.getInstance().hitResult instanceof PartRayTraceResult hit) {
             PartRenderer<?> renderer = MultipartClientRegistry.getRenderer(hit.part.getType());
             if (renderer != null) {

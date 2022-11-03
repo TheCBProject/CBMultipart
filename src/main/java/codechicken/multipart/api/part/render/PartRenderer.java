@@ -2,7 +2,7 @@ package codechicken.multipart.api.part.render;
 
 import codechicken.lib.render.CCRenderState;
 import codechicken.multipart.api.MultipartClientRegistry;
-import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.util.PartRayTraceResult;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -19,7 +19,7 @@ import net.minecraftforge.client.event.DrawSelectionEvent;
 import javax.annotation.Nullable;
 
 /**
- * Responsible for all rendering related operations of a {@link TMultiPart}.
+ * Responsible for all rendering related operations of a {@link MultiPart}.
  * <p>
  * Registered via {@link MultipartClientRegistry#register}.
  * <p>
@@ -27,7 +27,7 @@ import javax.annotation.Nullable;
  *
  * @see PartBakedModelRenderer
  */
-public interface PartRenderer<T extends TMultiPart> {
+public interface PartRenderer<T extends MultiPart> {
 
     /**
      * Render the static, unmoving faces of this part into the world renderer.
@@ -49,7 +49,7 @@ public interface PartRenderer<T extends TMultiPart> {
      * <p>
      * It is illegal to perform raw GL calls within this method. You will not have a valid GL context, or, a context from another thread.
      *
-     * @param part  The {@link TMultiPart} being rendered.
+     * @param part  The {@link MultiPart} being rendered.
      * @param layer The block {@link RenderType} layer being rendered. <code>null</code> for {@link #renderBreaking}
      * @param ccrs  The {@link CCRenderState} instance to render with.
      * @return If any vertices were drawn.
@@ -61,7 +61,7 @@ public interface PartRenderer<T extends TMultiPart> {
     /**
      * Override how your part displays its breaking progress overlay.
      * <p>
-     * By default, this method will delegate to {@link #renderStatic(TMultiPart, RenderType, CCRenderState)}
+     * By default, this method will delegate to {@link #renderStatic(MultiPart, RenderType, CCRenderState)}
      * using a <code>null</code> {@link RenderType}.
      * <p>
      * You shouldn't need to override this, in most cases the defaults will work just fine.
@@ -81,7 +81,7 @@ public interface PartRenderer<T extends TMultiPart> {
      * <p>
      * It is illegal to perform raw GL calls within this method. You will not have a valid GL context, or, a context from another thread.
      *
-     * @param part The {@link TMultiPart} being rendered.
+     * @param part The {@link MultiPart} being rendered.
      * @param ccrs The {@link CCRenderState} instance to render with.
      */
     default void renderBreaking(T part, CCRenderState ccrs) {
@@ -91,7 +91,7 @@ public interface PartRenderer<T extends TMultiPart> {
     /**
      * Render the dynamic, changing faces of this part and/or other glfx.
      *
-     * @param part          The {@link TMultiPart} being rendered.
+     * @param part          The {@link MultiPart} being rendered.
      * @param mStack        The {@link PoseStack} to apply.
      * @param buffers       The {@link MultiBufferSource} storage.
      * @param packedLight   The packed LightMap coords to use. See {@link LightTexture}.
@@ -105,7 +105,7 @@ public interface PartRenderer<T extends TMultiPart> {
      * <p>
      * This is called with the context of {@link DrawSelectionEvent.HighlightBlock}.
      *
-     * @param part         The {@link TMultiPart} being rendered.
+     * @param part         The {@link MultiPart} being rendered.
      * @param hit          The {@link PartRayTraceResult}.
      * @param info         The {@link Camera} camera info.
      * @param mStack       The {@link PoseStack} to apply.

@@ -6,14 +6,14 @@ import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.StandardMicroblockPart;
-import codechicken.multipart.api.part.TEdgePart;
+import codechicken.multipart.api.part.EdgePart;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * Created by covers1624 on 21/10/22.
  */
-public class EdgeMicroblockPart extends StandardMicroblockPart implements TEdgePart {
+public class EdgeMicroblockPart extends StandardMicroblockPart implements EdgePart {
 
     public static final Cuboid6[] aBounds = new Cuboid6[256];
     public static final VoxelShape[] aShapes = new VoxelShape[256];

@@ -1,7 +1,7 @@
 package codechicken.multipart.minecraft;
 
-import codechicken.multipart.api.MultiPartType;
-import codechicken.multipart.api.part.redstone.IFaceRedstonePart;
+import codechicken.multipart.api.MultipartType;
+import codechicken.multipart.api.part.redstone.FaceRedstonePart;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -16,23 +16,23 @@ import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
-public class ButtonPart extends McSidedStatePart implements IFaceRedstonePart {
+public class ButtonPart extends McSidedStatePart implements FaceRedstonePart {
 
-    private final MultiPartType<?> type;
+    private final MultipartType<?> type;
     private final ButtonBlock block;
 
-    public ButtonPart(MultiPartType<?> type, ButtonBlock block) {
+    public ButtonPart(MultipartType<?> type, ButtonBlock block) {
         this(type, block, block.defaultBlockState());
     }
 
-    public ButtonPart(MultiPartType<?> type, ButtonBlock block, BlockState state) {
+    public ButtonPart(MultipartType<?> type, ButtonBlock block, BlockState state) {
         super(state);
         this.type = type;
         this.block = block;
     }
 
     @Override
-    public MultiPartType<?> getType() {
+    public MultipartType<?> getType() {
         return type;
     }
 

@@ -1,9 +1,9 @@
 package codechicken.multipart.minecraft;
 
-import codechicken.multipart.api.MultiPartType;
+import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.RedstoneInteractions;
-import codechicken.multipart.api.part.TRandomTickPart;
-import codechicken.multipart.api.part.redstone.IFaceRedstonePart;
+import codechicken.multipart.api.part.RandomTickPart;
+import codechicken.multipart.api.part.redstone.FaceRedstonePart;
 import codechicken.multipart.util.TickScheduler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
-public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, TRandomTickPart {
+public class RedstoneTorchPart extends TorchPart implements FaceRedstonePart, RandomTickPart {
 
     @Nullable
     private BurnoutEntry burnout;
@@ -28,7 +28,7 @@ public class RedstoneTorchPart extends TorchPart implements IFaceRedstonePart, T
     }
 
     @Override
-    public MultiPartType<?> getType() {
+    public MultipartType<?> getType() {
         return ModContent.redstoneTorchPartType;
     }
 

@@ -1,12 +1,12 @@
 package codechicken.multipart.trait;
 
 import codechicken.multipart.api.annotation.MultiPartTrait;
-import codechicken.multipart.api.part.TEdgePart;
-import codechicken.multipart.api.part.TFacePart;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.api.part.redstone.IRedstonePart;
-import codechicken.multipart.block.TileMultiPart;
-import codechicken.multipart.trait.extern.IRedstoneTile;
+import codechicken.multipart.api.part.EdgePart;
+import codechicken.multipart.api.part.FacePart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.api.part.redstone.RedstonePart;
+import codechicken.multipart.block.TileMultipart;
+import codechicken.multipart.trait.extern.RedstoneTile;
 
 import static codechicken.lib.vec.Rotation.rotateSide;
 import static codechicken.multipart.api.RedstoneInteractions.connectionMask;
@@ -16,15 +16,15 @@ import static codechicken.multipart.util.PartMap.edgeBetween;
 /**
  * Created by covers1624 on 31/12/20.
  */
-@MultiPartTrait (IRedstonePart.class)
-public class TRedstoneTile extends TileMultiPart implements IRedstoneTile {
+@MultiPartTrait (RedstonePart.class)
+public class TRedstoneTile extends TileMultipart implements RedstoneTile {
 
     @Override
     public int getDirectSignal(int side) {
         int max = 0;
-        for (TMultiPart part : getPartList()) {
-            if (part instanceof IRedstonePart) {
-                int l = ((IRedstonePart) part).strongPowerLevel(side);
+        for (MultiPart part : getPartList()) {
+            if (part instanceof RedstonePart) {
+                int l = ((RedstonePart) part).strongPowerLevel(side);
                 if (l > max) {
                     max = l;
                 }
@@ -47,7 +47,7 @@ public class TRedstoneTile extends TileMultiPart implements IRedstoneTile {
     public int getConnectionMask(int side) {
         int mask = openConnections(side);
         int res = 0;
-        for (TMultiPart part : getPartList()) {
+        for (MultiPart part : getPartList()) {
             res |= connectionMask(part, side) & mask;
         }
         return res;
@@ -57,9 +57,9 @@ public class TRedstoneTile extends TileMultiPart implements IRedstoneTile {
     public int weakPowerLevel(int side, int mask) {
         int tMask = openConnections(side) & mask;
         int max = 0;
-        for (TMultiPart part : getPartList()) {
+        for (MultiPart part : getPartList()) {
             if ((connectionMask(part, side) & tMask) > 0) {
-                int l = ((IRedstonePart) part).weakPowerLevel(side);
+                int l = ((RedstonePart) part).weakPowerLevel(side);
                 if (l > max) {
                     max = l;
                 }
@@ -83,17 +83,17 @@ public class TRedstoneTile extends TileMultiPart implements IRedstoneTile {
     }
 
     private int redstoneConductionF(int i) {
-        TMultiPart part = getSlottedPart(i);
-        if (part instanceof TFacePart) {
-            return ((TFacePart) part).redstoneConductionMap();
+        MultiPart part = getSlottedPart(i);
+        if (part instanceof FacePart) {
+            return ((FacePart) part).redstoneConductionMap();
         }
         return 0x1F;
     }
 
     private boolean redstoneConductionE(int i) {
-        TMultiPart part = getSlottedPart(i);
-        if (part instanceof TEdgePart) {
-            return ((TEdgePart) part).conductsRedstone();
+        MultiPart part = getSlottedPart(i);
+        if (part instanceof EdgePart) {
+            return ((EdgePart) part).conductsRedstone();
         }
         return true;
     }

@@ -1,9 +1,9 @@
 package codechicken.multipart.trait;
 
-import codechicken.multipart.api.ICapabilityProviderPart;
+import codechicken.multipart.api.part.CapabilityProviderPart;
 import codechicken.multipart.api.annotation.MultiPartTrait;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.capability.ChainedProvider;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
@@ -16,8 +16,8 @@ import java.util.Collection;
 /**
  * Created by covers1624 on 7/1/21.
  */
-@MultiPartTrait (ICapabilityProviderPart.class)
-public class TCapabilityTile extends TileMultiPart {
+@MultiPartTrait (CapabilityProviderPart.class)
+public class TCapabilityTile extends TileMultipart {
 
     //null and all sides.
     private static final Direction[] N_SIDES = Util.make(new Direction[7], arr -> {
@@ -37,7 +37,7 @@ public class TCapabilityTile extends TileMultiPart {
     }
 
     @Override
-    public void copyFrom(TileMultiPart that) {
+    public void copyFrom(TileMultipart that) {
         super.copyFrom(that);
         if (that instanceof TCapabilityTile thatCapTile) {
             providers = thatCapTile.providers;
@@ -45,9 +45,9 @@ public class TCapabilityTile extends TileMultiPart {
     }
 
     @Override
-    public void bindPart(TMultiPart _part) {
+    public void bindPart(MultiPart _part) {
         super.bindPart(_part);
-        if (!(_part instanceof ICapabilityProviderPart part)) return;
+        if (!(_part instanceof CapabilityProviderPart part)) return;
 
         for (Direction side : N_SIDES) {
             if (!part.hasCapabilities(side)) continue;
@@ -68,9 +68,9 @@ public class TCapabilityTile extends TileMultiPart {
     }
 
     @Override
-    public void partRemoved(TMultiPart _part, int p) {
+    public void partRemoved(MultiPart _part, int p) {
         super.partRemoved(_part, p);
-        if (!(_part instanceof ICapabilityProviderPart part)) {
+        if (!(_part instanceof CapabilityProviderPart part)) {
             return;
         }
 
@@ -99,26 +99,26 @@ public class TCapabilityTile extends TileMultiPart {
     }
 
     @Override
-    public void internalPartChange(@Nullable TMultiPart part) {
+    public void internalPartChange(@Nullable MultiPart part) {
         super.internalPartChange(part);
-        if (!(part instanceof ICapabilityProviderPart)) {
+        if (!(part instanceof CapabilityProviderPart)) {
             return;
         }
 
-        invalidateFor((ICapabilityProviderPart) part);
+        invalidateFor((CapabilityProviderPart) part);
     }
 
     @Override
-    public void multiPartChange(Collection<TMultiPart> parts) {
+    public void multiPartChange(Collection<MultiPart> parts) {
         super.multiPartChange(parts);
 
-        for (TMultiPart part : parts) {
-            if (!(part instanceof ICapabilityProviderPart)) continue;
-            invalidateFor((ICapabilityProviderPart) part);
+        for (MultiPart part : parts) {
+            if (!(part instanceof CapabilityProviderPart)) continue;
+            invalidateFor((CapabilityProviderPart) part);
         }
     }
 
-    private void invalidateFor(ICapabilityProviderPart part) {
+    private void invalidateFor(CapabilityProviderPart part) {
         for (Direction side : N_SIDES) {
             int s = ordinal(side);
             if (providers[s] == null) continue;

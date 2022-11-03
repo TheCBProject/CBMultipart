@@ -7,14 +7,12 @@ import codechicken.multipart.init.ClientInit;
 import codechicken.multipart.init.DataGenerators;
 import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.network.MultiPartNetwork;
-import codechicken.multipart.util.MultiPartGenerator;
-import codechicken.multipart.util.MultiPartLoadHandler;
+import codechicken.multipart.util.MultipartGenerator;
+import codechicken.multipart.util.MultipartLoadHandler;
 import codechicken.multipart.util.TickScheduler;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import static codechicken.multipart.CBMultipart.MOD_ID;
 
@@ -33,8 +31,8 @@ public class CBMultipart {
 
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ClientInit::init);
 
-        MultiPartGenerator.INSTANCE.loadAnnotations();
-        MultiPartLoadHandler.init();
+        MultipartGenerator.INSTANCE.loadAnnotations();
+        MultipartLoadHandler.init();
         MultiPartNetwork.init();
         PlacementConversionHandler.init();
         TickScheduler.init();

@@ -1,6 +1,6 @@
 package codechicken.multipart.internal.mixin;
 
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.CBMultipartModContent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -25,7 +25,7 @@ public class TileEntityMixin {
     private static void onLoadStatic(BlockPos pos, BlockState state, CompoundTag tag, CallbackInfoReturnable<BlockEntity> cir) {
         String s = tag.getString("id");
         if (CBMultipartModContent.MULTIPART_TILE_TYPE.get().getRegistryName().toString().equals(s)) {
-            cir.setReturnValue(TileMultiPart.fromNBT(tag, pos));
+            cir.setReturnValue(TileMultipart.fromNBT(tag, pos));
         }
     }
 }

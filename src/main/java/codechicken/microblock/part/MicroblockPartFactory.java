@@ -2,9 +2,8 @@ package codechicken.microblock.part;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.part.MicroblockPart;
 import codechicken.microblock.util.MicroMaterialRegistry;
-import codechicken.multipart.api.MultiPartType;
+import codechicken.multipart.api.MultipartType;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Created by covers1624 on 26/6/22.
  */
-public abstract class MicroblockPartFactory extends MultiPartType<MicroblockPart> {
+public abstract class MicroblockPartFactory extends MultipartType<MicroblockPart> {
 
     public abstract MicroblockPart create(boolean client, MicroMaterial material);
 

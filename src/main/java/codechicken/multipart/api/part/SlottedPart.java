@@ -10,7 +10,7 @@ import codechicken.multipart.trait.TSlottedTile;
  * Marker interface for TSlottedTile
  */
 @MultiPartMarker (TSlottedTile.class)
-public interface TSlottedPart extends TMultiPart {
+public interface SlottedPart extends MultiPart {
 
     /**
      * a bitmask of slots that this part fills. slot x is 1<<x

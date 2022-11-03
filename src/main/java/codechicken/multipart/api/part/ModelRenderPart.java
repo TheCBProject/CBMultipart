@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Companion to {@link PartBakedModelRenderer}
  */
-public interface IModelRenderPart extends TMultiPart {
+public interface ModelRenderPart extends MultiPart {
 
     boolean canRenderInLayer(@Nullable RenderType layer);
 

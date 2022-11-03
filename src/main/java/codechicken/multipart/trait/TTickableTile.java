@@ -1,10 +1,10 @@
 package codechicken.multipart.trait;
 
 import codechicken.multipart.api.annotation.MultiPartTrait;
-import codechicken.multipart.api.part.ITickablePart;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.block.TileMultiPart;
-import codechicken.multipart.api.ITickableTile;
+import codechicken.multipart.api.part.TickablePart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.block.TileMultipart;
+import codechicken.multipart.api.TickableTile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,13 +12,13 @@ import java.util.List;
 /**
  * Created by covers1624 on 18/9/20.
  */
-@MultiPartTrait (ITickablePart.class)
-public class TTickableTile extends TileMultiPart implements ITickableTile {
+@MultiPartTrait (TickablePart.class)
+public class TTickableTile extends TileMultipart implements TickableTile {
 
-    private final List<ITickablePart> tickingParts = new ArrayList<>();
+    private final List<TickablePart> tickingParts = new ArrayList<>();
 
     @Override
-    public void copyFrom(TileMultiPart that) {
+    public void copyFrom(TileMultipart that) {
         super.copyFrom(that);
         if (that instanceof TTickableTile) {
             tickingParts.clear();
@@ -27,17 +27,17 @@ public class TTickableTile extends TileMultiPart implements ITickableTile {
     }
 
     @Override
-    public void bindPart(TMultiPart part) {
+    public void bindPart(MultiPart part) {
         super.bindPart(part);
-        if (part instanceof ITickablePart p) {
+        if (part instanceof TickablePart p) {
             tickingParts.add(p);
         }
     }
 
     @Override
-    public void partRemoved(TMultiPart part, int p) {
+    public void partRemoved(MultiPart part, int p) {
         super.partRemoved(part, p);
-        if (part instanceof ITickablePart) {
+        if (part instanceof TickablePart) {
             tickingParts.remove(part);
         }
     }
@@ -52,8 +52,8 @@ public class TTickableTile extends TileMultiPart implements ITickableTile {
     public void tick() {
         getCapCache().tick();
         for (int i = 0, tickingPartsSize = tickingParts.size(); i < tickingPartsSize; i++) {
-            ITickablePart part = tickingParts.get(i);
-            if (((TMultiPart) part).tile() != null) {
+            TickablePart part = tickingParts.get(i);
+            if (((MultiPart) part).tile() != null) {
                 part.tick();
             }
         }

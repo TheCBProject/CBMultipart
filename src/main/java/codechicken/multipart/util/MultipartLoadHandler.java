@@ -1,8 +1,8 @@
 package codechicken.multipart.util;
 
 import codechicken.lib.data.MCDataByteBuf;
-import codechicken.multipart.api.ITickableTile;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.api.TickableTile;
+import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.network.MultiPartSPH;
 import io.netty.buffer.Unpooled;
@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Created by covers1624 on 13/5/20.
  */
-public class MultiPartLoadHandler {
+public class MultipartLoadHandler {
 
     private static final Logger logger = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
@@ -32,7 +32,7 @@ public class MultiPartLoadHandler {
     public static void init() {
         LOCK.lock();
 
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, MultiPartLoadHandler::onChunkLoad);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, MultipartLoadHandler::onChunkLoad);
     }
 
     // TODO move this to a Mixin.
@@ -42,14 +42,14 @@ public class MultiPartLoadHandler {
             for (BlockEntity be : List.copyOf(chunk.getBlockEntities().values())) {
                 if (be instanceof TileNBTContainer tile && tile.updateTag != null) {
                     byte[] data = tile.updateTag.getByteArray("data");
-                    TileMultiPart.handleDescPacket(tile.getLevel(), tile.getBlockPos(), new MCDataByteBuf(Unpooled.wrappedBuffer(data)));
+                    TileMultipart.handleDescPacket(tile.getLevel(), tile.getBlockPos(), new MCDataByteBuf(Unpooled.wrappedBuffer(data)));
                 }
             }
         }
     }
 
     //This is a fallback in the event that our Mixin does not get hit.
-    public static class TileNBTContainer extends BlockEntity implements ITickableTile {
+    public static class TileNBTContainer extends BlockEntity implements TickableTile {
 
         //Store the number of ticks this tile has existed for.
         //We use this to remove the tile from the ticking list
@@ -105,7 +105,7 @@ public class MultiPartLoadHandler {
 
             if (!failed && !loaded) {
                 if (tag != null) {
-                    TileMultiPart newTile = TileMultiPart.fromNBT(tag, getBlockPos());
+                    TileMultipart newTile = TileMultipart.fromNBT(tag, getBlockPos());
                     if (newTile != null) {
                         newTile.clearRemoved();
                         level.setBlockEntity(newTile);

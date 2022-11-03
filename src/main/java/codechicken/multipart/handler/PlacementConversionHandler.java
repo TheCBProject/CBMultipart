@@ -2,10 +2,10 @@ package codechicken.multipart.handler;
 
 import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.raytracer.RayTracer;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.MultiPartRegistries;
-import codechicken.multipart.util.MultiPartHelper;
+import codechicken.multipart.util.MultipartHelper;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
@@ -66,15 +66,15 @@ public class PlacementConversionHandler {
 
         BlockPos pos = hit.getBlockPos().relative(hit.getDirection());
         UseOnContext ctx = new UseOnContext(player, hand, hit);
-        TMultiPart part = MultiPartRegistries.convertItem(ctx);
-        TileMultiPart tile = MultiPartHelper.getOrConvertTile(world, pos);
+        MultiPart part = MultiPartRegistries.convertItem(ctx);
+        TileMultipart tile = MultipartHelper.getOrConvertTile(world, pos);
 
         if (part == null || tile == null || !tile.canAddPart(part)) {
             return false;
         }
 
         if (!world.isClientSide) {
-            TileMultiPart.addPart(world, pos, part);
+            TileMultipart.addPart(world, pos, part);
             SoundType sound = part.getPlacementSound(ctx);
             if (sound != null) {
                 world.playSound(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, sound.getPlaceSound(), SoundSource.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);

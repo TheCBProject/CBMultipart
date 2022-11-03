@@ -3,10 +3,10 @@ package codechicken.multipart.network;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.MultiPartRegistries;
-import codechicken.multipart.util.MultiPartHelper;
+import codechicken.multipart.util.MultipartHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
@@ -32,19 +32,19 @@ public class MultiPartCPH implements ICustomPacketHandler.IClientPacketHandler {
         int num = packet.readVarInt();
         for (int i = 0; i < num; i++) {
             BlockPos pos = packet.readPos();
-            TileMultiPart.handleDescPacket(mc.level, pos, packet);
+            TileMultipart.handleDescPacket(mc.level, pos, packet);
         }
     }
 
     public static void handleAddPart(MCDataInput packet, Minecraft mc) {
         BlockPos pos = packet.readPos();
-        MultiPartHelper.addPart(mc.level, pos, MultiPartRegistries.readPart(packet));
+        MultipartHelper.addPart(mc.level, pos, MultiPartRegistries.readPart(packet));
     }
 
     public static void handleRemPart(MCDataInput packet, Minecraft mc) {
         byte partIndex = packet.readByte();
         BlockPos pos = packet.readPos();
-        if (mc.level.getBlockEntity(pos) instanceof TileMultiPart tile) {
+        if (mc.level.getBlockEntity(pos) instanceof TileMultipart tile) {
             tile.remPart_impl(tile.getPartList().get(partIndex));
         }
     }
@@ -52,8 +52,8 @@ public class MultiPartCPH implements ICustomPacketHandler.IClientPacketHandler {
     public static void handleUpdatePacket(MCDataInput packet, Minecraft mc) {
         int partIndex = packet.readByte();
         BlockPos pos = packet.readPos();
-        if (mc.level.getBlockEntity(pos) instanceof TileMultiPart tile) {
-            TMultiPart part = tile.getPartList().get(partIndex);
+        if (mc.level.getBlockEntity(pos) instanceof TileMultipart tile) {
+            MultiPart part = tile.getPartList().get(partIndex);
             if (part != null) {
                 part.readUpdate(packet);
             }

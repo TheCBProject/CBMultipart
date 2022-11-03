@@ -13,7 +13,7 @@ import codechicken.microblock.part.face.FaceMicroFactory;
 import codechicken.microblock.part.hollow.HollowMicroFactory;
 import codechicken.microblock.recipe.MicroRecipe;
 import codechicken.multipart.CBMultipart;
-import codechicken.multipart.api.MultiPartType;
+import codechicken.multipart.api.MultipartType;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -38,7 +38,7 @@ public class CBMicroblockModContent {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registry.ITEM_REGISTRY, CBMicroblock.MOD_ID);
-    private static final DeferredRegister<MultiPartType<?>> MULTIPART_TYPES = DeferredRegister.create(new ResourceLocation(CBMultipart.MOD_ID, "multipart_types"), CBMicroblock.MOD_ID);
+    private static final DeferredRegister<MultipartType<?>> MULTIPART_TYPES = DeferredRegister.create(new ResourceLocation(CBMultipart.MOD_ID, "multipart_types"), CBMicroblock.MOD_ID);
     private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registry.RECIPE_SERIALIZER_REGISTRY, CBMicroblock.MOD_ID);
 
     public static final SimpleCreativeTab MICRO_TAB = new SimpleCreativeTab("cb_microblock", () -> new ItemStack(Blocks.STONE)) {

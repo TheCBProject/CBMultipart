@@ -3,10 +3,10 @@ package codechicken.multipart.client;
 import codechicken.lib.render.RenderUtils;
 import codechicken.lib.vec.Matrix4;
 import codechicken.multipart.api.MultipartClientRegistry;
-import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.render.PartRenderer;
-import codechicken.multipart.block.BlockMultiPart;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.block.BlockMultipart;
+import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.util.PartRayTraceResult;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
@@ -35,10 +35,10 @@ public class ClientEventHandler {
         BlockHitResult target = event.getTarget();
         if (!(target instanceof PartRayTraceResult hit)) return;
 
-        TileMultiPart tile = BlockMultiPart.getTile(camera.getEntity().level, target.getBlockPos());
+        TileMultipart tile = BlockMultipart.getTile(camera.getEntity().level, target.getBlockPos());
         if (tile == null) return;
 
-        TMultiPart part = hit.part;
+        MultiPart part = hit.part;
 
         PartRenderer<?> renderer = MultipartClientRegistry.getRenderer(part.getType());
 

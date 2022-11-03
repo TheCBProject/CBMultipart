@@ -5,8 +5,8 @@ import codechicken.lib.vec.Cuboid6;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.microblock.util.MicroOcclusionHelper;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.api.part.TPartialOcclusionPart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.api.part.PartialOcclusionPart;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +22,7 @@ import static codechicken.multipart.util.PartMap.unpackEdgeBits;
  * <p>
  * Created by covers1624 on 27/6/22.
  */
-public abstract class StandardMicroblockPart extends MicroblockPart implements IMicroOcclusion, TPartialOcclusionPart, IMicroShrinkRender {
+public abstract class StandardMicroblockPart extends MicroblockPart implements IMicroOcclusion, PartialOcclusionPart, IMicroShrinkRender {
 
     @Nullable
     public Cuboid6 renderBounds = null;
@@ -56,7 +56,7 @@ public abstract class StandardMicroblockPart extends MicroblockPart implements I
     }
 
     @Override
-    public boolean occlusionTest(TMultiPart npart) {
+    public boolean occlusionTest(MultiPart npart) {
         if (!super.occlusionTest(npart)) {
             return false;
         }
@@ -120,7 +120,7 @@ public abstract class StandardMicroblockPart extends MicroblockPart implements I
     }
 
     @Override
-    public void onPartChanged(@Nullable TMultiPart part) {
+    public void onPartChanged(@Nullable MultiPart part) {
         super.onPartChanged(part);
         if (level().isClientSide) {
             recalcBounds();

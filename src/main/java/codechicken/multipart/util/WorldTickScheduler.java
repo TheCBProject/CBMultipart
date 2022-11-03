@@ -1,8 +1,8 @@
 package codechicken.multipart.util;
 
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.api.part.TRandomTickPart;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.api.part.RandomTickPart;
+import codechicken.multipart.block.TileMultipart;
 import net.covers1624.quack.collection.StreamableIterable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -80,7 +80,7 @@ class WorldTickScheduler {
             this.chunk = chunk;
         }
 
-        public void addScheduledTick(TMultiPart part, int time) {
+        public void addScheduledTick(MultiPart part, int time) {
             PartTickEntry entry = new PartTickEntry(part, worldScheduler.world.getGameTime() + time, false);
             if (ticking) {
                 pendingScheduled.add(entry);
@@ -90,11 +90,11 @@ class WorldTickScheduler {
             }
         }
 
-        public void loadRandomTick(TMultiPart part) {
+        public void loadRandomTick(MultiPart part) {
             addRandomTick(part, worldScheduler.world.getGameTime() + nextRandomTick());
         }
 
-        public void addRandomTick(TMultiPart part, long time) {
+        public void addRandomTick(MultiPart part, long time) {
             PartTickEntry entry = new PartTickEntry(part, time, true);
             if (ticking) {
                 pendingRandom.add(entry);
@@ -117,7 +117,7 @@ class WorldTickScheduler {
             for (SavedTickEntry savedTick : savedTicks) {
                 //Use map to avoid loading locks.
                 BlockEntity tileEntity = chunk.getBlockEntities().get(savedTick.pos);
-                if (tileEntity instanceof TileMultiPart tile) {
+                if (tileEntity instanceof TileMultipart tile) {
                     scheduledTicks.add(new PartTickEntry(tile.getPartList().get(savedTick.idx), savedTick.time, false));
                 }
             }
@@ -145,8 +145,8 @@ class WorldTickScheduler {
                 if (entry.time <= time) {
                     if (entry.part.hasTile()) {
                         if (entry.random) {
-                            if (entry.part instanceof TRandomTickPart) {
-                                ((TRandomTickPart) entry.part).randomTick();
+                            if (entry.part instanceof RandomTickPart) {
+                                ((RandomTickPart) entry.part).randomTick();
                             }
                             addRandomTick(entry.part, time + nextRandomTick());
                         } else {
@@ -191,11 +191,11 @@ class WorldTickScheduler {
 
     private static class PartTickEntry {
 
-        public final TMultiPart part;
+        public final MultiPart part;
         public final long time;
         public final boolean random;
 
-        private PartTickEntry(TMultiPart part, long time, boolean random) {
+        private PartTickEntry(MultiPart part, long time, boolean random) {
             this.part = part;
             this.time = time;
             this.random = random;

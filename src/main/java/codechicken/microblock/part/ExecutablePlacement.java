@@ -1,6 +1,6 @@
 package codechicken.microblock.part;
 
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.block.TileMultipart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -31,7 +31,7 @@ public abstract class ExecutablePlacement {
 
         @Override
         public void place(Level level, Player player, ItemStack stack) {
-            TileMultiPart.addPart(level, pos, part);
+            TileMultipart.addPart(level, pos, part);
         }
 
         @Override

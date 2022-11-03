@@ -1,6 +1,6 @@
 package codechicken.multipart.trait;
 
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.block.TileMultipart;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -8,7 +8,7 @@ import net.minecraft.core.BlockPos;
 /**
  * Manual trait implemented on every client side TileMultiPart.
  */
-public class TileMultipartClient extends TileMultiPart {
+public class TileMultipartClient extends TileMultipart {
 
     @Override
     public boolean isClientTile() {

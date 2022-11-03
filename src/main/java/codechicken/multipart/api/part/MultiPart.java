@@ -4,9 +4,9 @@ import codechicken.lib.capability.CapabilityCache;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.vec.Cuboid6;
-import codechicken.multipart.api.MultiPartType;
+import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.PartConverter;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.network.MultiPartSPH;
 import codechicken.multipart.util.PartRayTraceResult;
 import codechicken.multipart.util.TickScheduler;
@@ -37,30 +37,30 @@ import java.util.function.Consumer;
 /**
  * Represents a Multipart.
  * <p>
- * All Multipart implementations are expected to extend from {@link AbstractMultiPart}.
+ * All Multipart implementations are expected to extend from {@link BaseMultipart}.
  * <p>
  * Created by covers1624 on 6/6/22.
  */
-public interface TMultiPart {
+public interface MultiPart {
 
     /**
-     * Get the underlying {@link TileMultiPart} this part is inside.
+     * Get the underlying {@link TileMultipart} this part is inside.
      * <p>
      * The implementation of this function is INTERNAL, it is expected that
-     * all Multiparts extend from {@link AbstractMultiPart}.
+     * all Multiparts extend from {@link BaseMultipart}.
      *
-     * @return The {@link TileMultiPart}.
+     * @return The {@link TileMultipart}.
      */
     @Contract (pure = true)
-    TileMultiPart tile();
+    TileMultipart tile();
 
     /**
-     * @return If this part has an attached {@link TileMultiPart}.
+     * @return If this part has an attached {@link TileMultipart}.
      */
     boolean hasTile();
 
     /**
-     * Get the {@link Level} the container {@link TileMultiPart} is inside.
+     * Get the {@link Level} the container {@link TileMultipart} is inside.
      *
      * @return The {@link Level}.
      */
@@ -78,7 +78,7 @@ public interface TMultiPart {
     }
 
     /**
-     * The {@link BlockPos} of the container {@link TileMultiPart}.
+     * The {@link BlockPos} of the container {@link TileMultipart}.
      *
      * @return The {@link BlockPos}.
      */
@@ -98,13 +98,13 @@ public interface TMultiPart {
     }
 
     /**
-     * Returns the {@link MultiPartType} registry entry for this part.
+     * Returns the {@link MultipartType} registry entry for this part.
      *
-     * @return The {@link MultiPartType}.
-     * @see MultiPartType
+     * @return The {@link MultipartType}.
+     * @see MultipartType
      */
     @Contract (pure = true)
-    MultiPartType<?> getType();
+    MultipartType<?> getType();
 
     /**
      * Write all the data required to describe a client version of this part to the packet.
@@ -169,7 +169,7 @@ public interface TMultiPart {
      * @param npart The part to run the test against.
      * @return {@code true} if both this part and {@code npart} are able to share this block space.
      */
-    default boolean occlusionTest(TMultiPart npart) {
+    default boolean occlusionTest(MultiPart npart) {
         return true;
     }
 
@@ -198,7 +198,7 @@ public interface TMultiPart {
     }
 
     /**
-     * Harvest this part, removing it from the container {@link TileMultiPart}
+     * Harvest this part, removing it from the container {@link TileMultipart}
      * and dropping any items if necessary.
      *
      * @param player The {@link Player} harvesting the part.
@@ -233,7 +233,7 @@ public interface TMultiPart {
     /**
      * Get the explosion resistance for this part.
      * <p>
-     * The explosion resistance for the host {@link TileMultiPart} is the
+     * The explosion resistance for the host {@link TileMultipart} is the
      * maximum explosion resistance for all contained parts.
      *
      * @param explosion The {@link Explosion}.
@@ -416,7 +416,7 @@ public interface TMultiPart {
      *
      * @param part The part which changed. May be {@code null} if multiple parts are changed.
      */
-    default void onPartChanged(@Nullable TMultiPart part) { }
+    default void onPartChanged(@Nullable MultiPart part) { }
 
     /**
      * Called when a scheduled tick is executed.

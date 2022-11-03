@@ -3,7 +3,7 @@ package codechicken.multipart.api.part;
 /**
  * Interface which must be implemented by parts that go in an edge slot.
  */
-public interface TEdgePart extends TSlottedPart {
+public interface EdgePart extends SlottedPart {
 
     /**
      * Return true if this part can conduct redstone signal or let redstone signal pass through it.

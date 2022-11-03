@@ -16,7 +16,7 @@ import java.util.List;
  * <p>
  * Created by covers1624 on 6/6/22.
  */
-public interface TIconHitEffectsPart extends TMultiPart {
+public interface IconHitEffectsPart extends MultiPart {
 
     Cuboid6 getBounds();
 
@@ -39,7 +39,7 @@ public interface TIconHitEffectsPart extends TMultiPart {
     }
 
     @OnlyIn (Dist.CLIENT)
-    static void addHitEffects(TIconHitEffectsPart part, PartRayTraceResult hit, ParticleEngine engine) {
+    static void addHitEffects(IconHitEffectsPart part, PartRayTraceResult hit, ParticleEngine engine) {
         CustomParticleHandler.addBlockHitEffects(
                 part.level(),
                 part.getBounds().copy().add(part.pos()),
@@ -50,12 +50,12 @@ public interface TIconHitEffectsPart extends TMultiPart {
     }
 
     @OnlyIn (Dist.CLIENT)
-    static void addDestroyEffects(TIconHitEffectsPart part, ParticleEngine engine) {
+    static void addDestroyEffects(IconHitEffectsPart part, ParticleEngine engine) {
         addDestroyEffects(part, engine, true);
     }
 
     @OnlyIn (Dist.CLIENT)
-    static void addDestroyEffects(TIconHitEffectsPart part, ParticleEngine engine, boolean scaleDensity) {
+    static void addDestroyEffects(IconHitEffectsPart part, ParticleEngine engine, boolean scaleDensity) {
         List<TextureAtlasSprite> icons = new ArrayList<>(6);
         for (int i = 0; i < 6; i++) {
             icons.add(i, part.getBrokenIcon(i));

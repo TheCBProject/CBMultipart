@@ -2,9 +2,9 @@ package codechicken.multipart.client;
 
 import codechicken.lib.render.CCRenderState;
 import codechicken.multipart.api.MultipartClientRegistry;
-import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.render.PartRenderer;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.block.TileMultipart;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -23,12 +23,12 @@ public class MultipartTileRenderer implements BlockEntityRenderer<BlockEntity> {
 
     @Override
     public void render(BlockEntity t, float partialTicks, PoseStack mStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
-        if (!(t instanceof TileMultiPart tile)) return;
+        if (!(t instanceof TileMultipart tile)) return;
         CCRenderState ccrs = CCRenderState.instance();
         ccrs.reset();
         ccrs.brightness = packedLight;
         ccrs.overlay = packedOverlay;
-        for (TMultiPart p : tile.getPartList()) {
+        for (MultiPart p : tile.getPartList()) {
             PartRenderer<?> renderer = MultipartClientRegistry.getRenderer(p.getType());
             if (renderer != null) {
                 renderer.renderDynamic(unsafeCast(p), mStack, buffers, packedLight, packedOverlay, partialTicks);

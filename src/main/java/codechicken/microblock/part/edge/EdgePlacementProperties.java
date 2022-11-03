@@ -3,7 +3,7 @@ package codechicken.microblock.part.edge;
 import codechicken.microblock.part.MicroblockPartFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.*;
-import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.util.PartMap;
 import codechicken.multipart.util.PartRayTraceResult;
 
@@ -41,7 +41,7 @@ public class EdgePlacementProperties extends PlacementProperties {
         PostMicroblockPart part = postFactory.create(placement.level.isClientSide, placement.material);
         part.setShape(placement.size, placement.side >> 1);
         if (placement.doExpand) {
-            TMultiPart hPart = ((PartRayTraceResult) placement.hit).part;
+            MultiPart hPart = ((PartRayTraceResult) placement.hit).part;
             if (hPart.getType() == postFactory) {
                 MicroblockPart mPart = (MicroblockPart) hPart;
                 if (mPart.material == placement.material && mPart.getSize() + placement.size < 8) {

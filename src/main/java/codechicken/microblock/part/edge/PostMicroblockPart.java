@@ -13,9 +13,9 @@ import codechicken.microblock.part.MicroblockPart;
 import codechicken.microblock.part.face.FaceMicroblockPart;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.microblock.util.MicroOcclusionHelper;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.api.part.TNormalOcclusionPart;
-import codechicken.multipart.api.part.TPartialOcclusionPart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.api.part.NormalOcclusionPart;
+import codechicken.multipart.api.part.PartialOcclusionPart;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * Created by covers1624 on 21/10/22.
  */
-public class PostMicroblockPart extends MicroblockPart implements TPartialOcclusionPart, TNormalOcclusionPart {
+public class PostMicroblockPart extends MicroblockPart implements PartialOcclusionPart, NormalOcclusionPart {
 
     public static final Cuboid6[] aBounds = new Cuboid6[256];
     public static final VoxelShape[] aShapes = new VoxelShape[256];
@@ -96,7 +96,7 @@ public class PostMicroblockPart extends MicroblockPart implements TPartialOcclus
     }
 
     @Override
-    public boolean occlusionTest(TMultiPart nPart) {
+    public boolean occlusionTest(MultiPart nPart) {
         if (nPart instanceof PostMicroblockPart post) {
             return post.getShapeSlot() != getShapeSlot();
         }
@@ -105,11 +105,11 @@ public class PostMicroblockPart extends MicroblockPart implements TPartialOcclus
             return true;
         }
 
-        return TNormalOcclusionPart.super.occlusionTest(nPart);
+        return NormalOcclusionPart.super.occlusionTest(nPart);
     }
 
     @Override
-    public void onPartChanged(@Nullable TMultiPart part) {
+    public void onPartChanged(@Nullable MultiPart part) {
         super.onPartChanged(part);
         if (level().isClientSide) {
             recalcBounds();
@@ -139,7 +139,7 @@ public class PostMicroblockPart extends MicroblockPart implements TPartialOcclus
         shrinkFace(getShapeSlot() << 1);
         shrinkFace(getShapeSlot() << 1 | 1);
 
-        for (TMultiPart part : tile().getPartList()) {
+        for (MultiPart part : tile().getPartList()) {
             if (part instanceof PostMicroblockPart post) {
                 shrinkPost(post);
             }

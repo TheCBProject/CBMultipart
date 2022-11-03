@@ -1,12 +1,12 @@
 package codechicken.microblock.part;
 
 import codechicken.lib.vec.Cuboid6;
-import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.api.part.MultiPart;
 
 /**
  * Created by covers1624 on 10/7/22.
  */
-public interface IMicroShrinkRender extends TMultiPart {
+public interface IMicroShrinkRender extends MultiPart {
 
     int getPriorityClass();
 

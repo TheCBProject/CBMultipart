@@ -13,9 +13,9 @@ import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.part.StandardMicroblockPart;
 import codechicken.microblock.part.face.FaceMicroblockPart;
 import codechicken.microblock.util.MaskedCuboid;
-import codechicken.multipart.api.part.TFacePart;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.api.part.TNormalOcclusionPart;
+import codechicken.multipart.api.part.FacePart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.api.part.NormalOcclusionPart;
 import com.google.common.collect.Iterables;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Created by covers1624 on 20/10/22.
  */
-public class HollowMicroblockPart extends StandardMicroblockPart implements TFacePart, TNormalOcclusionPart {
+public class HollowMicroblockPart extends StandardMicroblockPart implements FacePart, NormalOcclusionPart {
 
     private static final Int2ObjectMap<VoxelShape> OCCLUSION_SHAPE_CACHE = Int2ObjectMaps.synchronize(new Int2ObjectArrayMap<>());
     private static final Int2ObjectMap<VoxelShape> COLLISION_SHAPE_CACHE = Int2ObjectMaps.synchronize(new Int2ObjectArrayMap<>());
@@ -114,8 +114,8 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements TFac
     }
 
     @Override
-    public boolean occlusionTest(TMultiPart nPart) {
-        return TNormalOcclusionPart.super.occlusionTest(nPart) && super.occlusionTest(nPart);
+    public boolean occlusionTest(MultiPart nPart) {
+        return NormalOcclusionPart.super.occlusionTest(nPart) && super.occlusionTest(nPart);
     }
 
     @Override

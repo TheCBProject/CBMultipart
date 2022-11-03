@@ -1,8 +1,8 @@
 package codechicken.multipart.minecraft;
 
 import codechicken.lib.data.MCDataInput;
-import codechicken.multipart.api.MultiPartType;
-import codechicken.multipart.api.part.redstone.IFaceRedstonePart;
+import codechicken.multipart.api.MultipartType;
+import codechicken.multipart.api.part.redstone.FaceRedstonePart;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class LeverPart extends McSidedStatePart implements IFaceRedstonePart {
+public class LeverPart extends McSidedStatePart implements FaceRedstonePart {
 
     public LeverPart() {
     }
@@ -26,7 +26,7 @@ public class LeverPart extends McSidedStatePart implements IFaceRedstonePart {
     }
 
     @Override
-    public MultiPartType<?> getType() {
+    public MultipartType<?> getType() {
         return ModContent.leverPartType;
     }
 

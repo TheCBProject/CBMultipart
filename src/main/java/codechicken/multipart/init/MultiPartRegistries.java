@@ -3,10 +3,10 @@ package codechicken.multipart.init;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.multipart.CBMultipart;
-import codechicken.multipart.api.MultiPartType;
+import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.PartConverter;
 import codechicken.multipart.api.PartConverter.ConversionResult;
-import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.api.part.MultiPart;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -37,7 +37,7 @@ public class MultiPartRegistries {
     private static final Logger logger = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
 
-    public static IForgeRegistry<MultiPartType<?>> MULTIPART_TYPES;
+    public static IForgeRegistry<MultipartType<?>> MULTIPART_TYPES;
     private static IForgeRegistry<PartConverter> PART_CONVERTERS;
 
     public static void init() {
@@ -46,10 +46,10 @@ public class MultiPartRegistries {
     }
 
     private static void createRegistries(NewRegistryEvent event) {
-        event.create(new RegistryBuilder<MultiPartType<?>>()
+        event.create(new RegistryBuilder<MultipartType<?>>()
                 .setName(new ResourceLocation(CBMultipart.MOD_ID, "multipart_types"))
-                .setType(unsafeCast(MultiPartType.class))
-                .disableSaving(), e -> MULTIPART_TYPES = (ForgeRegistry<MultiPartType<?>>) e);
+                .setType(unsafeCast(MultipartType.class))
+                .disableSaving(), e -> MULTIPART_TYPES = (ForgeRegistry<MultipartType<?>>) e);
         event.create(new RegistryBuilder<PartConverter>()
                         .setName(new ResourceLocation(CBMultipart.MOD_ID, "part_converters"))
                         .setType(PartConverter.class)
@@ -61,18 +61,18 @@ public class MultiPartRegistries {
     }
 
     /**
-     * Writes a {@link TMultiPart} to the provided {@link MCDataOutput} stream.
-     * The part must have a valid {@link TMultiPart#getType()}.
+     * Writes a {@link MultiPart} to the provided {@link MCDataOutput} stream.
+     * The part must have a valid {@link MultiPart#getType()}.
      * <p>
-     * First looks up the ID for the parts {@link MultiPartType} from
-     * {@link TMultiPart#getType()}, written to the packet as {@link MCDataOutput#writeVarInt(int)}
-     * followed by {@link TMultiPart#writeDesc(MCDataOutput)}.
+     * First looks up the ID for the parts {@link MultipartType} from
+     * {@link MultiPart#getType()}, written to the packet as {@link MCDataOutput#writeVarInt(int)}
+     * followed by {@link MultiPart#writeDesc(MCDataOutput)}.
      *
      * @param data The stream to write the data to.
-     * @param part The {@link TMultiPart} to write to said stream.
+     * @param part The {@link MultiPart} to write to said stream.
      */
-    public static void writePart(MCDataOutput data, TMultiPart part) {
-        MultiPartType<?> type = Objects.requireNonNull(part.getType());
+    public static void writePart(MCDataOutput data, MultiPart part) {
+        MultipartType<?> type = Objects.requireNonNull(part.getType());
         ResourceLocation name = Objects.requireNonNull(type.getRegistryName());
         if (!MULTIPART_TYPES.containsKey(name)) {
             throw new RuntimeException("MultiPartType with name '" + name + "' is not registered.");
@@ -82,10 +82,10 @@ public class MultiPartRegistries {
     }
 
     /**
-     * Reads a {@link TMultiPart} from a stream.
-     * First reads a {@link MultiPartType} id using {@link MCDataInput#readVarInt()}
-     * then calls {@link MultiPartType#createPartClient(MCDataInput)}, following that
-     * calls {@link TMultiPart#readDesc(MCDataInput)}.
+     * Reads a {@link MultiPart} from a stream.
+     * First reads a {@link MultipartType} id using {@link MCDataInput#readVarInt()}
+     * then calls {@link MultipartType#createPartClient(MCDataInput)}, following that
+     * calls {@link MultiPart#readDesc(MCDataInput)}.
      * <p>
      * This method expects the part to be read without errors, errors
      * will cause the entire part space to break.
@@ -93,26 +93,26 @@ public class MultiPartRegistries {
      * @param data The stream to read from.
      * @return The TMultiPart.
      */
-    public static TMultiPart readPart(MCDataInput data) {
-        MultiPartType<?> type = data.readRegistryIdUnsafe(MULTIPART_TYPES);
-        TMultiPart part = type.createPartClient(data);
+    public static MultiPart readPart(MCDataInput data) {
+        MultipartType<?> type = data.readRegistryIdUnsafe(MULTIPART_TYPES);
+        MultiPart part = type.createPartClient(data);
         part.readDesc(data);
         return part;
     }
 
     /**
-     * Saves a {@link TMultiPart} to an NBT tag.
-     * The part must have a valid {@link TMultiPart#getType()}.
+     * Saves a {@link MultiPart} to an NBT tag.
+     * The part must have a valid {@link MultiPart#getType()}.
      * <p>
-     * First writes {@link MultiPartType#getRegistryName()} to the 'id'
-     * tag, then calls {@link TMultiPart#save(CompoundTag)}.
+     * First writes {@link MultipartType#getRegistryName()} to the 'id'
+     * tag, then calls {@link MultiPart#save(CompoundTag)}.
      *
      * @param nbt  The NBT tag to write to.
-     * @param part The {@link TMultiPart} to write.
+     * @param part The {@link MultiPart} to write.
      * @return The same NBT tag provided.
      */
-    public static CompoundTag savePart(CompoundTag nbt, TMultiPart part) {
-        MultiPartType<?> type = Objects.requireNonNull(part.getType());
+    public static CompoundTag savePart(CompoundTag nbt, MultiPart part) {
+        MultipartType<?> type = Objects.requireNonNull(part.getType());
         ResourceLocation name = Objects.requireNonNull(type.getRegistryName());
         nbt.putString("id", name.toString());
         part.save(nbt);
@@ -120,34 +120,34 @@ public class MultiPartRegistries {
     }
 
     /**
-     * Loads a {@link TMultiPart} from an NBT tag.
-     * First looks up the {@link MultiPartType} from the 'id' tag,
-     * Missing {@link MultiPartType}s are currently ignored and destroyed,
-     * then calls {@link MultiPartType#createPartServer(CompoundTag)}
-     * if the result is non null, then calls {@link TMultiPart#load(CompoundTag)}.
+     * Loads a {@link MultiPart} from an NBT tag.
+     * First looks up the {@link MultipartType} from the 'id' tag,
+     * Missing {@link MultipartType}s are currently ignored and destroyed,
+     * then calls {@link MultipartType#createPartServer(CompoundTag)}
+     * if the result is non null, then calls {@link MultiPart#load(CompoundTag)}.
      *
      * @param nbt The NBT tag to read from.
-     * @return The new {@link TMultiPart} instance, or null.
+     * @return The new {@link MultiPart} instance, or null.
      */
     @Nullable
-    public static TMultiPart loadPart(CompoundTag nbt) {
+    public static MultiPart loadPart(CompoundTag nbt) {
         ResourceLocation name = new ResourceLocation(nbt.getString("id"));
-        MultiPartType<?> type = MULTIPART_TYPES.getValue(name);
+        MultipartType<?> type = MULTIPART_TYPES.getValue(name);
         if (type == null) {
             //TODO 'dummy' parts to save these.
             logger.error("Missing mapping for MultiPartType with ID: {}", name);
             return null;
         }
-        TMultiPart part = type.createPartServer(nbt);
+        MultiPart part = type.createPartServer(nbt);
         if (part != null) {
             part.load(nbt);
         }
         return part;
     }
 
-    public static Collection<TMultiPart> convertBlock(LevelAccessor level, BlockPos pos, BlockState state) {
+    public static Collection<MultiPart> convertBlock(LevelAccessor level, BlockPos pos, BlockState state) {
         for (PartConverter conv : PART_CONVERTERS.getValues()) {
-            ConversionResult<Collection<TMultiPart>> result = conv.convert(level, pos, state);
+            ConversionResult<Collection<MultiPart>> result = conv.convert(level, pos, state);
             if (result.success()) {
                 assert result.result() != null;
                 return result.result();
@@ -157,9 +157,9 @@ public class MultiPartRegistries {
     }
 
     @Nullable
-    public static TMultiPart convertItem(UseOnContext context) {
+    public static MultiPart convertItem(UseOnContext context) {
         for (PartConverter conv : PART_CONVERTERS.getValues()) {
-            ConversionResult<TMultiPart> result = conv.convert(context);
+            ConversionResult<MultiPart> result = conv.convert(context);
             if (result.success()) {
                 assert result.result() != null;
                 return result.result();

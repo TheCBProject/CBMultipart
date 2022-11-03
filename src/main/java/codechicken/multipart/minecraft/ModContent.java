@@ -1,12 +1,11 @@
 package codechicken.multipart.minecraft;
 
 import codechicken.lib.util.ArrayUtils;
-import codechicken.multipart.api.MultiPartType;
+import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.PartConverter;
-import codechicken.multipart.api.SimpleMultiPartType;
-import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.api.SimpleMultipartType;
+import codechicken.multipart.api.part.MultiPart;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -34,48 +33,48 @@ import java.util.function.Supplier;
 public class ModContent {
 
     @ObjectHolder ("torch")
-    public static MultiPartType<TorchPart> torchPartType;
+    public static MultipartType<TorchPart> torchPartType;
 
     @ObjectHolder ("redstone_torch")
-    public static MultiPartType<RedstoneTorchPart> redstoneTorchPartType;
+    public static MultipartType<RedstoneTorchPart> redstoneTorchPartType;
 
     @ObjectHolder ("lever")
-    public static MultiPartType<LeverPart> leverPartType;
+    public static MultipartType<LeverPart> leverPartType;
 
     @ObjectHolder ("stone_button")
-    public static MultiPartType<ButtonPart.StoneButtonPart> stoneButtonPartType;
+    public static MultipartType<ButtonPart.StoneButtonPart> stoneButtonPartType;
 
     @ObjectHolder ("oak_button")
-    public static MultiPartType<ButtonPart.OakButtonPart> oakButtonPartType;
+    public static MultipartType<ButtonPart.OakButtonPart> oakButtonPartType;
     @ObjectHolder ("spruce_button")
-    public static MultiPartType<ButtonPart.SpruceButtonPart> spruceButtonPartType;
+    public static MultipartType<ButtonPart.SpruceButtonPart> spruceButtonPartType;
     @ObjectHolder ("birch_button")
-    public static MultiPartType<ButtonPart.BirchButtonPart> birchButtonPartType;
+    public static MultipartType<ButtonPart.BirchButtonPart> birchButtonPartType;
     @ObjectHolder ("jungle_button")
-    public static MultiPartType<ButtonPart.JungleButtonPart> jungleButtonPartType;
+    public static MultipartType<ButtonPart.JungleButtonPart> jungleButtonPartType;
     @ObjectHolder ("acacia_button")
-    public static MultiPartType<ButtonPart.AcaciaButtonPart> acaciaButtonPartType;
+    public static MultipartType<ButtonPart.AcaciaButtonPart> acaciaButtonPartType;
     @ObjectHolder ("dark_oak_button")
-    public static MultiPartType<ButtonPart.DarkOakButtonPart> darkOakButtonPartType;
+    public static MultipartType<ButtonPart.DarkOakButtonPart> darkOakButtonPartType;
 
     @SubscribeEvent
-    public static void onRegisterMultiParts(RegistryEvent.Register<MultiPartType<?>> event) {
-        IForgeRegistry<MultiPartType<?>> r = event.getRegistry();
+    public static void onRegisterMultiParts(RegistryEvent.Register<MultipartType<?>> event) {
+        IForgeRegistry<MultipartType<?>> r = event.getRegistry();
         ModContainer container = ModLoadingContext.get().getActiveContainer();
         ModLoadingContext.get().setActiveContainer(null);
 
-        r.register(new SimpleMultiPartType<>(e -> new TorchPart()).setRegistryName("torch"));
-        r.register(new SimpleMultiPartType<>(e -> new RedstoneTorchPart()).setRegistryName("redstone_torch"));
-        r.register(new SimpleMultiPartType<>(e -> new LeverPart()).setRegistryName("lever"));
+        r.register(new SimpleMultipartType<>(e -> new TorchPart()).setRegistryName("torch"));
+        r.register(new SimpleMultipartType<>(e -> new RedstoneTorchPart()).setRegistryName("redstone_torch"));
+        r.register(new SimpleMultipartType<>(e -> new LeverPart()).setRegistryName("lever"));
 
-        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.StoneButtonPart()).setRegistryName("stone_button"));
+        r.register(new SimpleMultipartType<>(e -> new ButtonPart.StoneButtonPart()).setRegistryName("stone_button"));
 
-        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.OakButtonPart()).setRegistryName("oak_button"));
-        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.SpruceButtonPart()).setRegistryName("spruce_button"));
-        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.BirchButtonPart()).setRegistryName("birch_button"));
-        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.JungleButtonPart()).setRegistryName("jungle_button"));
-        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.AcaciaButtonPart()).setRegistryName("acacia_button"));
-        r.register(new SimpleMultiPartType<>(e -> new ButtonPart.DarkOakButtonPart()).setRegistryName("dark_oak_button"));
+        r.register(new SimpleMultipartType<>(e -> new ButtonPart.OakButtonPart()).setRegistryName("oak_button"));
+        r.register(new SimpleMultipartType<>(e -> new ButtonPart.SpruceButtonPart()).setRegistryName("spruce_button"));
+        r.register(new SimpleMultipartType<>(e -> new ButtonPart.BirchButtonPart()).setRegistryName("birch_button"));
+        r.register(new SimpleMultipartType<>(e -> new ButtonPart.JungleButtonPart()).setRegistryName("jungle_button"));
+        r.register(new SimpleMultipartType<>(e -> new ButtonPart.AcaciaButtonPart()).setRegistryName("acacia_button"));
+        r.register(new SimpleMultipartType<>(e -> new ButtonPart.DarkOakButtonPart()).setRegistryName("dark_oak_button"));
 
         ModLoadingContext.get().setActiveContainer(container);
     }
@@ -118,7 +117,7 @@ public class ModContent {
         }
 
         @Override
-        public ConversionResult<Collection<TMultiPart>> convert(LevelAccessor world, BlockPos pos, BlockState state) {
+        public ConversionResult<Collection<MultiPart>> convert(LevelAccessor world, BlockPos pos, BlockState state) {
             if (blocks.length == 0) {
                 return PartConverter.emptyResultList();
             }
@@ -129,11 +128,11 @@ public class ModContent {
         }
 
         @Override
-        public ConversionResult<TMultiPart> convert(UseOnContext context) {
+        public ConversionResult<MultiPart> convert(UseOnContext context) {
             if (context.getItemInHand().getItem() != item) {
                 return emptyResult();
             }
-            TMultiPart result = factory.get().setStateOnPlacement(new BlockPlaceContext(context));
+            MultiPart result = factory.get().setStateOnPlacement(new BlockPlaceContext(context));
             if (result != null) {
                 return ConversionResult.success(result);
             }

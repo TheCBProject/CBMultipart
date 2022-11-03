@@ -7,8 +7,8 @@ import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.microblock.util.MicroMaterialRegistry;
-import codechicken.multipart.api.MultiPartType;
-import codechicken.multipart.api.part.AbstractMultiPart;
+import codechicken.multipart.api.MultipartType;
+import codechicken.multipart.api.part.BaseMultipart;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * Created by covers1624 on 26/6/22.
  */
-public abstract class MicroblockPart extends AbstractMultiPart {
+public abstract class MicroblockPart extends BaseMultipart {
 
     public MicroMaterial material;
     public byte shape = 0;
@@ -126,7 +126,7 @@ public abstract class MicroblockPart extends AbstractMultiPart {
     public abstract Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory);
 
     @Override
-    public final MultiPartType<?> getType() {
+    public final MultipartType<?> getType() {
         return getMicroFactory();
     }
 

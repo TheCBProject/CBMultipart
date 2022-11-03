@@ -4,9 +4,9 @@ import codechicken.lib.raytracer.VoxelShapeCache;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Vector3;
-import codechicken.multipart.api.MultiPartType;
+import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.part.AnimateTickPart;
-import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.api.part.MultiPart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
@@ -44,7 +44,7 @@ public class TorchPart extends McSidedStatePart implements AnimateTickPart {
     }
 
     @Override
-    public MultiPartType<?> getType() {
+    public MultipartType<?> getType() {
         return ModContent.torchPartType;
     }
 
@@ -81,7 +81,7 @@ public class TorchPart extends McSidedStatePart implements AnimateTickPart {
 
     @Nullable
     @Override
-    public TMultiPart setStateOnPlacement(BlockPlaceContext context) {
+    public MultiPart setStateOnPlacement(BlockPlaceContext context) {
         BlockState wallState = getWallBlock().getStateForPlacement(context);
 
         Level world = context.getLevel();

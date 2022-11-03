@@ -1,16 +1,14 @@
 package codechicken.multipart.trait;
 
 import codechicken.multipart.api.annotation.MultiPartTrait;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.api.part.TPartialOcclusionPart;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.api.part.PartialOcclusionPart;
+import codechicken.multipart.block.TileMultipart;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,8 +17,8 @@ import java.util.List;
  * <p>
  * Created by covers1624 on 2/9/20.
  */
-@MultiPartTrait (TPartialOcclusionPart.class)
-public class TPartialOcclusionTile extends TileMultiPart {
+@MultiPartTrait (PartialOcclusionPart.class)
+public class TPartialOcclusionTile extends TileMultipart {
 
     //Static cache.
     @Nullable
@@ -30,26 +28,26 @@ public class TPartialOcclusionTile extends TileMultiPart {
     private static boolean lastOcclusionTestedResult;
 
     @Override
-    public void bindPart(TMultiPart newPart) {
+    public void bindPart(MultiPart newPart) {
         super.bindPart(newPart);
 
-        if (newPart instanceof TPartialOcclusionPart && lastOcclusionTestedTile == this) {
+        if (newPart instanceof PartialOcclusionPart && lastOcclusionTestedTile == this) {
             lastOcclusionTestedTile = null;
         }
     }
 
     @Override
-    public void partRemoved(TMultiPart remPart, int p) {
+    public void partRemoved(MultiPart remPart, int p) {
         super.partRemoved(remPart, p);
 
-        if (remPart instanceof TPartialOcclusionPart && lastOcclusionTestedTile == this) {
+        if (remPart instanceof PartialOcclusionPart && lastOcclusionTestedTile == this) {
             lastOcclusionTestedTile = null;
         }
     }
 
     @Override
-    public boolean occlusionTest(Iterable<TMultiPart> parts, TMultiPart npart) {
-        if (npart instanceof TPartialOcclusionPart newPart) {
+    public boolean occlusionTest(Iterable<MultiPart> parts, MultiPart npart) {
+        if (npart instanceof PartialOcclusionPart newPart) {
             VoxelShape newShape = newPart.getPartialOcclusionShape();
             if (lastOcclusionTestedTile != this || lastOcclusionTestedShape != newShape) {
                 lastOcclusionTestedTile = this;
@@ -64,21 +62,21 @@ public class TPartialOcclusionTile extends TileMultiPart {
         return super.occlusionTest(parts, npart);
     }
 
-    private static boolean partialOcclusionTest(Iterable<TMultiPart> allParts, TPartialOcclusionPart newPart) {
-        List<TPartialOcclusionPart> parts = new LinkedList<>();
-        for (TMultiPart part : allParts) {
-            if (part instanceof TPartialOcclusionPart) {
-                parts.add((TPartialOcclusionPart) part);
+    private static boolean partialOcclusionTest(Iterable<MultiPart> allParts, PartialOcclusionPart newPart) {
+        List<PartialOcclusionPart> parts = new LinkedList<>();
+        for (MultiPart part : allParts) {
+            if (part instanceof PartialOcclusionPart) {
+                parts.add((PartialOcclusionPart) part);
             }
         }
         parts.add(newPart);
 
-        for (TPartialOcclusionPart part1 : parts) {
+        for (PartialOcclusionPart part1 : parts) {
             if (part1.allowCompleteOcclusion()) {
                 continue;
             }
             VoxelShape uniqueShape = part1.getPartialOcclusionShape();
-            for (TPartialOcclusionPart part2 : parts) {
+            for (PartialOcclusionPart part2 : parts) {
                 if (part1 != part2) {
                     uniqueShape = Shapes.join(uniqueShape, part2.getPartialOcclusionShape(), BooleanOp.ONLY_FIRST);
                 }

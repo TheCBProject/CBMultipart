@@ -2,7 +2,7 @@ package codechicken.microblock.util;
 
 import codechicken.lib.vec.Cuboid6;
 import codechicken.microblock.part.IMicroShrinkRender;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.block.TileMultipart;
 
 import static codechicken.multipart.util.PartMap.edgeAxisMask;
 import static codechicken.multipart.util.PartMap.unpackEdgeBits;
@@ -45,7 +45,7 @@ public class MicroOcclusionHelper {
 
     public static int shrink(IMicroShrinkRender p, Cuboid6 renderBounds, int m) {
         int renderMask = 0;
-        TileMultiPart tile = p.tile();
+        TileMultipart tile = p.tile();
         for (int i = 0; i < m; i++) {
             if (i != p.getSlot()) {
                 if (tile.getSlottedPart(i) instanceof IMicroShrinkRender other) {

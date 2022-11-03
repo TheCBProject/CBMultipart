@@ -8,7 +8,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
  * <p>
  * Used in conjunction with {@link TickScheduler}
  */
-public interface TRandomTickPart extends TMultiPart {
+public interface RandomTickPart extends MultiPart {
 
     /**
      * Called on random update.

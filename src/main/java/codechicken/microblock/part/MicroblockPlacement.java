@@ -3,10 +3,10 @@ package codechicken.microblock.part;
 import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.util.ControlKeyModifier;
-import codechicken.multipart.util.MultiPartHelper;
+import codechicken.multipart.util.MultipartHelper;
 import codechicken.multipart.util.OffsetUseOnContext;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.core.BlockPos;
@@ -36,8 +36,8 @@ public class MicroblockPlacement {
     public final MicroblockPartFactory microFactory;
     public final BlockPos pos;
     public final Vector3 vHit;
-    public final Pair<TileMultiPart, Boolean> gTile;
-    public final TileMultiPart hTile;
+    public final Pair<TileMultipart, Boolean> gTile;
+    public final TileMultipart hTile;
     public final int side;
     public final int slot;
     public final int oSlot;
@@ -61,7 +61,7 @@ public class MicroblockPlacement {
         microFactory = pp.microFactory();
         pos = hit.getBlockPos();
         vHit = new Vector3(hit.getLocation()).subtract(pos);
-        gTile = MultiPartHelper.getOrConvertTile2(level, pos);
+        gTile = MultipartHelper.getOrConvertTile2(level, pos);
         hTile = gTile.getLeft();
         side = hit.getDirection().ordinal();
         slot = pp.placementGrid().getHitSlot(vHit, side);
@@ -82,7 +82,7 @@ public class MicroblockPlacement {
         if (slot < 0) return null;
 
         if (doExpand) {
-            TMultiPart hPart = ((PartRayTraceResult) hit).part;
+            MultiPart hPart = ((PartRayTraceResult) hit).part;
             if (hPart.getType() == microFactory) {
                 StandardMicroblockPart mPart = (StandardMicroblockPart) hPart;
                 if (mPart.material == material && mPart.getSize() + size < 8) {
@@ -124,21 +124,21 @@ public class MicroblockPlacement {
     @Nullable
     public ExecutablePlacement expand(MicroblockPart mPart, MicroblockPart nPart) {
         BlockPos pos = mPart.pos();
-        if (TileMultiPart.isUnobstructed(level, pos, nPart) && mPart.tile().canReplacePart(mPart, nPart)) {
+        if (TileMultipart.isUnobstructed(level, pos, nPart) && mPart.tile().canReplacePart(mPart, nPart)) {
             return new ExecutablePlacement.ExpandingPlacement(pos, nPart, mPart);
         }
         return null;
     }
 
     @Nullable
-    public ExecutablePlacement internalPlacement(TileMultiPart tile, int slot) {
+    public ExecutablePlacement internalPlacement(TileMultipart tile, int slot) {
         return internalPlacement(tile, create(size, slot, material));
     }
 
     @Nullable
-    public ExecutablePlacement internalPlacement(TileMultiPart tile, MicroblockPart part) {
+    public ExecutablePlacement internalPlacement(TileMultipart tile, MicroblockPart part) {
         BlockPos pos = tile.getBlockPos();
-        if (TileMultiPart.isUnobstructed(level, pos, part) && tile.canAddPart(part)) {
+        if (TileMultipart.isUnobstructed(level, pos, part) && tile.canAddPart(part)) {
             return new ExecutablePlacement.AdditionPlacement(pos, part);
         }
         return null;
@@ -152,7 +152,7 @@ public class MicroblockPlacement {
     @Nullable
     public ExecutablePlacement externalPlacement(MicroblockPart part) {
         BlockPos pos = this.pos.relative(Direction.from3DDataValue(side));
-        if (TileMultiPart.canPlacePart(new OffsetUseOnContext(new UseOnContext(player, hand, hit)), part)) {
+        if (TileMultipart.canPlacePart(new OffsetUseOnContext(new UseOnContext(player, hand, hit)), part)) {
             return new ExecutablePlacement.AdditionPlacement(pos, part);
         }
         return null;

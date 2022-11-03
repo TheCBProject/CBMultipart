@@ -5,8 +5,8 @@ import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.util.LazyValuePair;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.handler.PlacementConversionHandler;
 import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.util.ControlKeyModifier;
@@ -41,7 +41,7 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
     }
 
     //region Send C_TILE_DESC
-    public static void sendDescUpdate(TileMultiPart tile) {
+    public static void sendDescUpdate(TileMultipart tile) {
         ServerLevel world = (ServerLevel) tile.getLevel();
         List<ServerPlayer> players = world.getChunkSource().chunkMap.getPlayers(new ChunkPos(tile.getBlockPos()), false);
         sendDescUpdates(players, Collections.singleton(tile));
@@ -50,9 +50,9 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
     public static void sendDescUpdates(List<ServerPlayer> players, Collection<BlockEntity> tiles) {
         if (tiles.isEmpty()) return;
 
-        List<Pair<TileMultiPart, MCByteStream>> data = new LinkedList<>();
+        List<Pair<TileMultipart, MCByteStream>> data = new LinkedList<>();
         for (BlockEntity tile : tiles) {
-            if (!(tile instanceof TileMultiPart partTile)) continue;
+            if (!(tile instanceof TileMultipart partTile)) continue;
             data.add(LazyValuePair.of(partTile, t -> {
                 MCByteStream stream = new MCByteStream();
                 t.writeDesc(stream);
@@ -66,10 +66,10 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
         }
     }
 
-    private static void sendDescUpdateTo(ServerPlayer player, List<Pair<TileMultiPart, MCByteStream>> data) {
+    private static void sendDescUpdateTo(ServerPlayer player, List<Pair<TileMultipart, MCByteStream>> data) {
         PacketCustom packet = new PacketCustom(NET_CHANNEL, C_TILE_DESC);
         packet.writeVarInt(data.size());
-        for (Pair<TileMultiPart, MCByteStream> entry : data) {
+        for (Pair<TileMultipart, MCByteStream> entry : data) {
             packet.writePos(entry.getLeft().getBlockPos());
             packet.append(entry.getRight().getBytes());
         }
@@ -78,7 +78,7 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
     //endregion
 
     //region Send C_ADD_PART
-    public static void sendAddPart(TileMultiPart tile, TMultiPart part) {
+    public static void sendAddPart(TileMultipart tile, MultiPart part) {
         ServerLevel world = (ServerLevel) tile.getLevel();
         MCByteStream stream = new MCByteStream();
         MultiPartRegistries.writePart(stream, part);
@@ -93,7 +93,7 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
     //endregion
 
     //region Send C_REM_PART
-    public static void sendRemPart(TileMultiPart tile, int partIdx) {
+    public static void sendRemPart(TileMultipart tile, int partIdx) {
         ServerLevel world = (ServerLevel) tile.getLevel();
         world.getChunkSource().chunkMap.getPlayers(new ChunkPos(tile.getBlockPos()), false)
                 .forEach(player -> {
@@ -106,7 +106,7 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
     //endregion
 
     //region Send C_PART_UPDATE
-    public static void dispatchPartUpdate(TMultiPart part, Consumer<MCDataOutput> func) {
+    public static void dispatchPartUpdate(MultiPart part, Consumer<MCDataOutput> func) {
         ServerLevel world = (ServerLevel) part.level();
         MCByteStream stream = new MCByteStream();
         func.accept(stream);

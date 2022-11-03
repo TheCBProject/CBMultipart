@@ -1,20 +1,20 @@
 package codechicken.multipart.api;
 
 import codechicken.lib.data.MCDataInput;
-import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.api.part.MultiPart;
 import net.minecraft.nbt.CompoundTag;
 
 /**
- * A simple implementation of {@link MultiPartType} providing
+ * A simple implementation of {@link MultipartType} providing
  * a unified callback to create the part for each side.
  * <p>
  * Created by covers1624 on 3/17/20.
  */
-public class SimpleMultiPartType<T extends TMultiPart> extends MultiPartType<T> {
+public class SimpleMultipartType<T extends MultiPart> extends MultipartType<T> {
 
     private final SimpleMultiPartTypeFactory<T> factory;
 
-    public SimpleMultiPartType(SimpleMultiPartTypeFactory<T> factory) {
+    public SimpleMultipartType(SimpleMultiPartTypeFactory<T> factory) {
         this.factory = factory;
     }
 
@@ -28,7 +28,7 @@ public class SimpleMultiPartType<T extends TMultiPart> extends MultiPartType<T> 
         return factory.create(true);
     }
 
-    public interface SimpleMultiPartTypeFactory<T extends TMultiPart> {
+    public interface SimpleMultiPartTypeFactory<T extends MultiPart> {
 
         T create(boolean client);
     }

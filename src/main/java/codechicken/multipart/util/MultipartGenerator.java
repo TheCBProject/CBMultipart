@@ -10,8 +10,8 @@ import codechicken.mixin.util.JavaTraitGenerator;
 import codechicken.mixin.util.SimpleDebugger;
 import codechicken.mixin.util.Utils;
 import codechicken.multipart.api.annotation.MultiPartTrait;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.CBMultipartModContent;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -47,22 +47,22 @@ import static org.objectweb.asm.Opcodes.*;
  * TODO allow parallel registration of traits. Requires mixin compiler changes. (parallel stream processing of annotations)
  * Created by covers1624 on 4/5/20.
  */
-public class MultiPartGenerator extends SidedGenerator<TileMultiPart, MultiPartGenerator.Factory, TMultiPart> {
+public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartGenerator.Factory, MultiPart> {
 
     private static final Logger logger = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
     @Nullable
     private static final SimpleDebugger.DumpType DEBUG_TYPE = parseType(System.getProperty("codechicken.multipart.debug", null));
 
-    public static final MultiPartGenerator INSTANCE = new MultiPartGenerator();
+    public static final MultipartGenerator INSTANCE = new MultipartGenerator();
     public static final MixinCompiler MIXIN_COMPILER = INSTANCE.getMixinCompiler();
 
     private final Map<String, TraitKey> passthroughTraits = new HashMap<>();
 
     private final MixinFactory.TraitKey clientTrait = registerTrait(asmName("codechicken.multipart.trait.TileMultipartClient"));
 
-    private MultiPartGenerator() {
-        super(MixinCompiler.create(new ForgeMixinBackend(), makeDebugger(), getMixinSupports()), TileMultiPart.class, Factory.class, "cmp");
+    private MultipartGenerator() {
+        super(MixinCompiler.create(new ForgeMixinBackend(), makeDebugger(), getMixinSupports()), TileMultipart.class, Factory.class, "cmp");
         Optional<MixinLanguageSupport.JavaMixinLanguageSupport> javaSupport = mixinCompiler.findLanguageSupport("java");
         javaSupport//
                 .orElseThrow(() -> new RuntimeException("Unable to find JavaMixinLanguageSupport instance..."))//
@@ -112,21 +112,21 @@ public class MultiPartGenerator extends SidedGenerator<TileMultiPart, MultiPartG
         loadAnnotations(MultiPartTrait.class, MultiPartTrait.TraitList.class);
     }
 
-    public ImmutableSet<MixinFactory.TraitKey> getTraits(TMultiPart part, boolean client) {
+    public ImmutableSet<MixinFactory.TraitKey> getTraits(MultiPart part, boolean client) {
         return getTraits(Collections.singleton(part), client);
     }
 
-    public ImmutableSet<MixinFactory.TraitKey> getTraits(Collection<TMultiPart> parts, boolean client) {
+    public ImmutableSet<MixinFactory.TraitKey> getTraits(Collection<MultiPart> parts, boolean client) {
         return StreamableIterable.concat(
                 client ? StreamableIterable.of(clientTrait) : StreamableIterable.of(),
                 StreamableIterable.of(parts).flatMap(e -> getTraitsForObject(e, client))
         ).toImmutableSet();
     }
 
-    public TileMultiPart generateCompositeTile(@Nullable BlockEntity tile, BlockPos pos, Collection<TMultiPart> parts, boolean client) {
+    public TileMultipart generateCompositeTile(@Nullable BlockEntity tile, BlockPos pos, Collection<MultiPart> parts, boolean client) {
         ImmutableSet<MixinFactory.TraitKey> traits = getTraits(parts, client);
-        if (tile instanceof TileMultiPart && traits.equals(getTraitsForClass(tile.getClass()))) {
-            return (TileMultiPart) tile;
+        if (tile instanceof TileMultipart && traits.equals(getTraitsForClass(tile.getClass()))) {
+            return (TileMultipart) tile;
         }
         return construct(traits).newInstance(pos, CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState());
     }
@@ -310,7 +310,7 @@ public class MultiPartGenerator extends SidedGenerator<TileMultiPart, MultiPartG
 
     public interface Factory {
 
-        TileMultiPart newInstance(BlockPos pos, BlockState state);
+        TileMultipart newInstance(BlockPos pos, BlockState state);
     }
 
     private static SimpleDebugger.DumpType parseType(@Nullable String value) {

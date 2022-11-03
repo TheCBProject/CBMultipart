@@ -1,12 +1,12 @@
 package codechicken.multipart.api;
 
 import codechicken.lib.vec.Rotation;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.api.part.redstone.IFaceRedstonePart;
-import codechicken.multipart.api.part.redstone.IMaskedRedstonePart;
-import codechicken.multipart.api.part.redstone.IRedstonePart;
-import codechicken.multipart.api.tile.IRedstoneConnector;
-import codechicken.multipart.trait.extern.IRedstoneTile;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.api.part.redstone.FaceRedstonePart;
+import codechicken.multipart.api.part.redstone.MaskedRedstonePart;
+import codechicken.multipart.api.part.redstone.RedstonePart;
+import codechicken.multipart.api.tile.RedstoneConnector;
+import codechicken.multipart.trait.extern.RedstoneTile;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,7 +28,7 @@ import java.util.Set;
 public class RedstoneInteractions {
 
     /**
-     * Hardcoded vanilla overrides for Block.canConnectRedstone {@link IRedstoneConnectorBlock}
+     * Hardcoded vanilla overrides for Block.canConnectRedstone {@link RedstoneConnectorBlock}
      */
     private static final Set<Block> FULL_VANILLA_BLOCKS = ImmutableSet.<Block>builder()
             .add(Blocks.REDSTONE_TORCH)
@@ -48,8 +48,8 @@ public class RedstoneInteractions {
     /**
      * Get the direct power to p on side
      */
-    public static int getPowerTo(TMultiPart p, int side) {
-        int oc = ((IRedstoneTile) p.tile()).openConnections(side);
+    public static int getPowerTo(MultiPart p, int side) {
+        int oc = ((RedstoneTile) p.tile()).openConnections(side);
         return getPowerTo(p.level(), p.pos(), side, oc & connectionMask(p, side));
     }
 
@@ -64,13 +64,13 @@ public class RedstoneInteractions {
      * Get the direct power level provided by space (pos) on side with mask
      */
     public static int getPower(Level world, BlockPos pos, int side, int mask) {
-        if (world.getBlockEntity(pos) instanceof IRedstoneConnector cond) {
+        if (world.getBlockEntity(pos) instanceof RedstoneConnector cond) {
             return cond.weakPowerLevel(side, mask);
         }
 
         BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
-        if (block instanceof IRedstoneConnectorBlock bl) {
+        if (block instanceof RedstoneConnectorBlock bl) {
             return bl.weakPowerLevel(world, pos, side, mask);
         }
 
@@ -97,9 +97,9 @@ public class RedstoneInteractions {
     /**
      * Get the connection mask of part on side
      */
-    public static int connectionMask(TMultiPart p, int side) {
-        if (p instanceof IRedstonePart && ((IRedstonePart) p).canConnectRedstone(side)) {
-            if (p instanceof IFaceRedstonePart part) {
+    public static int connectionMask(MultiPart p, int side) {
+        if (p instanceof RedstonePart && ((RedstonePart) p).canConnectRedstone(side)) {
+            if (p instanceof FaceRedstonePart part) {
                 int fside = part.getFace();
                 if ((side & 6) == (fside & 6)) {
                     return 0x10;
@@ -107,7 +107,7 @@ public class RedstoneInteractions {
 
                 return 1 << Rotation.rotationTo(side & 6, fside);
             }
-            if (p instanceof IMaskedRedstonePart part) {
+            if (p instanceof MaskedRedstonePart part) {
                 return part.getConnectionMask(side);
             }
             return 0x1F;
@@ -119,13 +119,13 @@ public class RedstoneInteractions {
      * @param power If true, don't test canConnectRedstone on blocks, just get a power transmission mask rather than a visual connection
      */
     public static int getConnectionMask(LevelReader world, BlockPos pos, int side, boolean power) {
-        if (world.getBlockEntity(pos) instanceof IRedstoneConnector cond) {
+        if (world.getBlockEntity(pos) instanceof RedstoneConnector cond) {
             return cond.getConnectionMask(side);
         }
 
         BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
-        if (block instanceof IRedstoneConnectorBlock bl) {
+        if (block instanceof RedstoneConnectorBlock bl) {
             bl.getConnectionMask(world, pos, side);
         }
         return vanillaConnectionMask(world, pos, state, side, power);

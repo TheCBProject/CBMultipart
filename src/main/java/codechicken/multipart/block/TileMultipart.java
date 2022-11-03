@@ -7,8 +7,8 @@ import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
 import codechicken.lib.world.IChunkLoadTile;
-import codechicken.multipart.api.part.AbstractMultiPart;
-import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.api.part.BaseMultipart;
+import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.network.MultiPartSPH;
@@ -51,52 +51,52 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * The host tile, capable of containing {@link TMultiPart} instances.
+ * The host tile, capable of containing {@link MultiPart} instances.
  */
-public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
+public class TileMultipart extends BlockEntity implements IChunkLoadTile {
 
-    private List<TMultiPart> partList = new CopyOnWriteArrayList<>();
+    private List<MultiPart> partList = new CopyOnWriteArrayList<>();
     private final CapabilityCache capabilityCache = new CapabilityCache();
 
-    private final MergedVoxelShapeHolder<TMultiPart> outlineShapeHolder = new MergedVoxelShapeHolder<>(
+    private final MergedVoxelShapeHolder<MultiPart> outlineShapeHolder = new MergedVoxelShapeHolder<>(
             e -> new MultipartVoxelShape(e, this)
     );
 
-    private final MergedVoxelShapeHolder<TMultiPart> collisionShapeHolder = new MergedVoxelShapeHolder<>(
+    private final MergedVoxelShapeHolder<MultiPart> collisionShapeHolder = new MergedVoxelShapeHolder<>(
             e -> new MultipartVoxelShape(e, this)
     );
 
-    private final MergedVoxelShapeHolder<TMultiPart> occlusionShapeHolder = new MergedVoxelShapeHolder<>(
+    private final MergedVoxelShapeHolder<MultiPart> occlusionShapeHolder = new MergedVoxelShapeHolder<>(
             e -> new MultipartVoxelShape(e, this)
     );
 
-    private final MergedVoxelShapeHolder<TMultiPart> interactionShapeHolder = new MergedVoxelShapeHolder<>(
+    private final MergedVoxelShapeHolder<MultiPart> interactionShapeHolder = new MergedVoxelShapeHolder<>(
             e -> new MultipartVoxelShape(e, this)
     );
 
-    private final MergedVoxelShapeHolder<TMultiPart> supportShapeHolder = new MergedVoxelShapeHolder<>(
+    private final MergedVoxelShapeHolder<MultiPart> supportShapeHolder = new MergedVoxelShapeHolder<>(
             e -> new MultipartVoxelShape(e, this)
     );
 
-    private final MergedVoxelShapeHolder<TMultiPart> visualShapeHolder = new MergedVoxelShapeHolder<>(
+    private final MergedVoxelShapeHolder<MultiPart> visualShapeHolder = new MergedVoxelShapeHolder<>(
             e -> new MultipartVoxelShape(e, this)
     );
 
-    public TileMultiPart(BlockPos pos, BlockState state) {
+    public TileMultipart(BlockPos pos, BlockState state) {
         super(CBMultipartModContent.MULTIPART_TILE_TYPE.get(), pos, state);
     }
 
     // TODO Mixin compiler needs to support ctors with arguments, provided they are identical to the base class ctor.
-    protected TileMultiPart() {
+    protected TileMultipart() {
         this(null, null);
         throw new UnsupportedOperationException("Exists for traits.");
     }
 
-    public List<TMultiPart> getPartList() {
+    public List<MultiPart> getPartList() {
         return partList;
     }
 
-    public void from(TileMultiPart that) {
+    public void from(TileMultipart that) {
         copyFrom(that);
         loadFrom(that);
         that.loadTo(this);
@@ -108,7 +108,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      * This method should be used for copying all the data from the fields in that container tile.
      * This method will be automatically generated on java tile traits with fields if it is not overridden.
      */
-    public void copyFrom(TileMultiPart that) {
+    public void copyFrom(TileMultipart that) {
         partList = that.partList;
         markShapeChange();
     }
@@ -116,8 +116,8 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
     /**
      * Used to load the newly accuired data from copyFrom.
      */
-    public void loadFrom(TileMultiPart that) {
-        partList.forEach(e -> ((AbstractMultiPart) e).bind(this));
+    public void loadFrom(TileMultipart that) {
+        partList.forEach(e -> ((BaseMultipart) e).bind(this));
     }
 
     /**
@@ -128,7 +128,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      *
      * @param that The new tile
      */
-    public void loadTo(TileMultiPart that) { }
+    public void loadTo(TileMultipart that) { }
 
     /**
      * Remove all parts from internal cache.
@@ -145,21 +145,21 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      * <p>
      * Provided for trait overrides, do not call externally.
      */
-    public void bindPart(TMultiPart part) { }
+    public void bindPart(MultiPart part) { }
 
     /**
      * Called when a part is added (placement).
      * <p>
      * Provided for trait overrides, do not call externally.
      */
-    public void partAdded(TMultiPart part) { }
+    public void partAdded(MultiPart part) { }
 
     /**
      * Remove this part from internal cache.
      * <p>
      * Provided for trait overrides, do not call externally.
      */
-    public void partRemoved(TMultiPart part, int p) { }
+    public void partRemoved(MultiPart part, int p) { }
 
     /**
      * Blank implementation
@@ -181,7 +181,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      * Overriden by {@link codechicken.multipart.trait.TSlottedTile}
      */
     @Nullable
-    public TMultiPart getSlottedPart(int slot) { return null; }
+    public MultiPart getSlottedPart(int slot) { return null; }
 
     /**
      * Called when the Tile is marked as removed via {@link #setRemoved()}.
@@ -190,8 +190,8 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      */
     public void onRemoved() { }
 
-    public void operate(Consumer<TMultiPart> cons) {
-        for (TMultiPart part : partList) {
+    public void operate(Consumer<MultiPart> cons) {
+        for (MultiPart part : partList) {
             if (part.hasTile()) {
                 cons.accept(part);
             }
@@ -205,7 +205,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         ListTag parts = new ListTag();
-        for (TMultiPart part : partList) {
+        for (MultiPart part : partList) {
             parts.add(MultiPartRegistries.savePart(new CompoundTag(), part));
         }
         tag.put("parts", parts);
@@ -228,7 +228,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      */
     public void writeDesc(MCDataOutput packet) {
         packet.writeByte(partList.size());
-        for (TMultiPart part : partList) {
+        for (MultiPart part : partList) {
             MultiPartRegistries.writePart(packet, part);
         }
     }
@@ -236,7 +236,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
 
     //region *** Adding/Removing parts ***
 
-    public boolean canAddPart(TMultiPart part) {
+    public boolean canAddPart(MultiPart part) {
         return !partList.contains(part) && occlusionTest(partList, part);
     }
 
@@ -249,18 +249,18 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      * 2. Call canReplacePart(part, part)
      * 3. If canReplacePart succeeds, perform connection, else, revert bounding box
      */
-    public boolean canReplacePart(TMultiPart oPart, TMultiPart nPart) {
+    public boolean canReplacePart(MultiPart oPart, MultiPart nPart) {
         if (oPart != nPart && partList.contains(nPart)) {
             return false;
         }
         return occlusionTest(StreamableIterable.of(partList).filter(e -> e != oPart), nPart);
     }
 
-    public boolean occlusionTest(Iterable<TMultiPart> parts, TMultiPart nPart) {
+    public boolean occlusionTest(Iterable<MultiPart> parts, MultiPart nPart) {
         return ColUtils.allMatch(parts, part -> part.occlusionTest(nPart) && nPart.occlusionTest(part));
     }
 
-    public void addPart_impl(TMultiPart part) {
+    public void addPart_impl(MultiPart part) {
         if (!level.isClientSide) MultiPartSPH.sendAddPart(this, part);
 
         addPart_do(part);
@@ -272,26 +272,26 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
         markRender();
     }
 
-    public void addPart_do(TMultiPart part) {
+    public void addPart_do(MultiPart part) {
 
         partList.add(part);
         bindPart(part);
         markShapeChange();
-        ((AbstractMultiPart) part).bind(this);
+        ((BaseMultipart) part).bind(this);
     }
 
     @Nullable
-    public TileMultiPart remPart(TMultiPart part) {
+    public TileMultipart remPart(MultiPart part) {
         Preconditions.checkArgument(!level.isClientSide, "Cannot remove MultiParts from a client tile.");
         return remPart_impl(part);
     }
 
     @Nullable
-    public TileMultiPart remPart_impl(TMultiPart part) {
+    public TileMultipart remPart_impl(MultiPart part) {
         remPart_do(part, !level.isClientSide);
 
         if (!isRemoved()) {
-            TileMultiPart tile = partRemoved(this);
+            TileMultipart tile = partRemoved(this);
             tile.notifyPartChange(part);
             tile.setChanged();
             tile.markRender();
@@ -301,7 +301,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
         return null;
     }
 
-    private int remPart_do(TMultiPart part, boolean sendPacket) {
+    private int remPart_do(MultiPart part, boolean sendPacket) {
         int idx = partList.indexOf(part);
         if (idx < 0) {
             throw new IllegalArgumentException("Tried to remove a non-existent part");
@@ -314,7 +314,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
 
         partRemoved(part, idx);
         part.onRemoved();
-        ((AbstractMultiPart) part).bind(null);
+        ((BaseMultipart) part).bind(null);
         markShapeChange();
         recalcLight(false, true);
 
@@ -322,12 +322,12 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
         return idx;
     }
 
-    private void loadParts(Iterable<TMultiPart> parts) {
+    private void loadParts(Iterable<MultiPart> parts) {
         clearParts();
         parts.forEach(this::addPart_do);
         if (level != null) {
             if (level.isClientSide) {
-                operate(TMultiPart::onWorldJoin);
+                operate(MultiPart::onWorldJoin);
             }
             notifyPartChange(null);
         }
@@ -347,7 +347,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
             super.setRemoved();
             onRemoved();
             if (level != null) {
-                partList.forEach(TMultiPart::onWorldSeparate);
+                partList.forEach(MultiPart::onWorldSeparate);
             }
         }
     }
@@ -365,11 +365,11 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
 
     public VoxelShape getCollisionShape(CollisionContext context) { return collisionShapeHolder.update(partList, part -> part.getCollisionShape(context)); }
 
-    public VoxelShape getRenderOcclusionShape() { return occlusionShapeHolder.update(partList, TMultiPart::getRenderOcclusionShape); }
+    public VoxelShape getRenderOcclusionShape() { return occlusionShapeHolder.update(partList, MultiPart::getRenderOcclusionShape); }
 
-    public VoxelShape getInteractionShape() { return interactionShapeHolder.update(partList, TMultiPart::getInteractionShape); }
+    public VoxelShape getInteractionShape() { return interactionShapeHolder.update(partList, MultiPart::getInteractionShape); }
 
-    public VoxelShape getBlockSupportShape() { return supportShapeHolder.update(partList, TMultiPart::getBlockSupportShape); }
+    public VoxelShape getBlockSupportShape() { return supportShapeHolder.update(partList, MultiPart::getBlockSupportShape); }
 
     public VoxelShape getVisualShape(CollisionContext context) { return visualShapeHolder.update(partList, part -> part.getVisualShape(context)); }
 
@@ -379,7 +379,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
 
     public List<ItemStack> getDrops() {
         return partList.stream()
-                .map(TMultiPart::getDrops)
+                .map(MultiPart::getDrops)
                 .flatMap(e -> StreamSupport.stream(e.spliterator(), false))
                 .collect(Collectors.toList());
     }
@@ -397,7 +397,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
 
     public int getLightEmission() {
         return partList.stream()
-                .mapToInt(TMultiPart::getLightEmission)
+                .mapToInt(MultiPart::getLightEmission)
                 .max()
                 .orElse(0);
     }
@@ -408,7 +408,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
 
     @Override
     public void onChunkUnloaded() {
-        operate(TMultiPart::onChunkUnload);
+        operate(MultiPart::onChunkUnload);
     }
 
     @Override
@@ -418,7 +418,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
 
     public void onMoved() {
         capabilityCache.setWorldPos(level, worldPosition);
-        operate(TMultiPart::onMoved);
+        operate(MultiPart::onMoved);
     }
 
     public InteractionResult use(Player player, PartRayTraceResult hit, InteractionHand hand) {
@@ -482,7 +482,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      * Called by parts when they have changed in some form that affects the world.
      * Notifies neighbor blocks, the world and parts that share this host and recalculates lighting
      */
-    public void notifyPartChange(@Nullable TMultiPart part) {
+    public void notifyPartChange(@Nullable MultiPart part) {
         internalPartChange(part);
 
         BlockState state = CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState();
@@ -494,7 +494,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
     /**
      * Notifies parts sharing this host of a change
      */
-    public void internalPartChange(@Nullable TMultiPart part) {
+    public void internalPartChange(@Nullable MultiPart part) {
         operate(e -> {
             if (e != part) {
                 e.onPartChanged(part);
@@ -505,7 +505,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
     /**
      * Notifies all parts not in the passed collection of a change from all the parts in the collection
      */
-    public void multiPartChange(Collection<TMultiPart> parts) {
+    public void multiPartChange(Collection<MultiPart> parts) {
         operate(p -> {
             if (!parts.contains(p)) {
                 parts.forEach(p::onPartChanged);
@@ -567,7 +567,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
     }
     //endregion
 
-    public static boolean canPlacePart(UseOnContext context, TMultiPart part) {
+    public static boolean canPlacePart(UseOnContext context, MultiPart part) {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
 
@@ -575,7 +575,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
             return false;
         }
 
-        TileMultiPart tile = MultiPartHelper.getOrConvertTile(level, pos);
+        TileMultipart tile = MultipartHelper.getOrConvertTile(level, pos);
         if (tile != null) {
             return tile.canAddPart(part);
         }
@@ -585,7 +585,7 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
         return true;
     }
 
-    public static boolean isUnobstructed(Level world, BlockPos pos, TMultiPart part) {
+    public static boolean isUnobstructed(Level world, BlockPos pos, MultiPart part) {
         return world.isUnobstructed(null, part.getCollisionShape(CollisionContext.empty()).move(pos.getX(), pos.getY(), pos.getZ()));
     }
 
@@ -601,15 +601,15 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      * Adds a part to a block space. canPlacePart should always be called first.
      * The addition of parts on the client is handled internally.
      */
-    public static TileMultiPart addPart(Level world, BlockPos pos, TMultiPart part) {
-        return MultiPartHelper.addPart(world, pos, part);
+    public static TileMultipart addPart(Level world, BlockPos pos, MultiPart part) {
+        return MultipartHelper.addPart(world, pos, part);
     }
 
     /**
      * Constructs this tile and its parts from a desc packet
      */
     public static void handleDescPacket(Level world, BlockPos pos, MCDataInput packet) {
-        List<TMultiPart> parts = new ArrayList<>();
+        List<MultiPart> parts = new ArrayList<>();
         int nParts = packet.readUByte();
         for (int i = 0; i < nParts; i++) {
             parts.add(MultiPartRegistries.readPart(packet));
@@ -617,10 +617,10 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
         if (parts.isEmpty()) return;
 
         BlockEntity t = world.getBlockEntity(pos);
-        TileMultiPart tile = MultiPartGenerator.INSTANCE.generateCompositeTile(t, pos, parts, true);
+        TileMultipart tile = MultipartGenerator.INSTANCE.generateCompositeTile(t, pos, parts, true);
         if (tile != t) {
             world.setBlockAndUpdate(pos, CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState());
-            MultiPartHelper.silentAddTile(world, pos, tile);
+            MultipartHelper.silentAddTile(world, pos, tile);
         }
 
         tile.loadParts(parts);
@@ -632,19 +632,19 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
      * Creates this tile from an NBT tag
      */
     @Nullable
-    public static TileMultiPart fromNBT(CompoundTag tag, BlockPos pos) {
+    public static TileMultipart fromNBT(CompoundTag tag, BlockPos pos) {
         ListTag partList = tag.getList("parts", 10);
-        List<TMultiPart> parts = new ArrayList<>();
+        List<MultiPart> parts = new ArrayList<>();
 
         for (int i = 0; i < partList.size(); i++) {
-            TMultiPart part = MultiPartRegistries.loadPart(partList.getCompound(i));
+            MultiPart part = MultiPartRegistries.loadPart(partList.getCompound(i));
             if (part != null) {
                 parts.add(part);
             }
         }
         if (parts.isEmpty()) return null;
 
-        TileMultiPart tile = MultiPartGenerator.INSTANCE.generateCompositeTile(null, pos, parts, false);
+        TileMultipart tile = MultipartGenerator.INSTANCE.generateCompositeTile(null, pos, parts, false);
         tile.load(tag);
         tile.loadParts(parts);
         return tile;
@@ -657,11 +657,11 @@ public class TileMultiPart extends BlockEntity implements IChunkLoadTile {
         level.addFreshEntity(item);
     }
 
-    private static TileMultiPart partRemoved(TileMultiPart tile) {
-        TileMultiPart newTile = MultiPartGenerator.INSTANCE.generateCompositeTile(tile, tile.getBlockPos(), tile.getPartList(), tile.level.isClientSide);
+    private static TileMultipart partRemoved(TileMultipart tile) {
+        TileMultipart newTile = MultipartGenerator.INSTANCE.generateCompositeTile(tile, tile.getBlockPos(), tile.getPartList(), tile.level.isClientSide);
         if (tile != newTile) {
             tile.setValid(false);
-            MultiPartHelper.silentAddTile(tile.level, tile.getBlockPos(), newTile);
+            MultipartHelper.silentAddTile(tile.level, tile.getBlockPos(), newTile);
             newTile.from(tile);
             newTile.notifyTileChange();
         }

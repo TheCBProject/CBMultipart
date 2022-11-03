@@ -2,8 +2,8 @@ package codechicken.multipart.util;
 
 import codechicken.lib.capability.SimpleCapProvider;
 import codechicken.multipart.CBMultipart;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.api.part.TRandomTickPart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.api.part.RandomTickPart;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.Tag;
@@ -25,8 +25,8 @@ import org.jetbrains.annotations.Nullable;
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
 /**
- * Used to Schedule ticks for {@link TMultiPart} instances.
- * You probably want {@link TMultiPart#scheduleTick(int)} and {@link TRandomTickPart}.
+ * Used to Schedule ticks for {@link MultiPart} instances.
+ * You probably want {@link MultiPart#scheduleTick(int)} and {@link RandomTickPart}.
  * <p>
  * If 2 parts are scheduled on the same tick, there is no guarantee on which part will
  * receive their update first. If a tick is scheduled and the owning chunk unloaded,
@@ -129,7 +129,7 @@ public class TickScheduler {
      * @param part  The part to receive a tick.
      * @param ticks The number of ticks in the future.
      */
-    public static void scheduleTick(TMultiPart part, int ticks) {
+    public static void scheduleTick(MultiPart part, int ticks) {
         if (part.level() instanceof ServerLevel level) {
             ChunkAccess chunk = level.getChunk(part.pos());
             if (chunk instanceof LevelChunk lc) {
@@ -141,11 +141,11 @@ public class TickScheduler {
 
     /**
      * Loads random ticks for the given part.
-     * Called from {@link TRandomTickPart#onWorldJoin()}.
+     * Called from {@link RandomTickPart#onWorldJoin()}.
      *
      * @param part The part.
      */
-    public static void loadRandomTick(TRandomTickPart part) {
+    public static void loadRandomTick(RandomTickPart part) {
         if (part.level() instanceof ServerLevel level) {
             ChunkAccess chunk = level.getChunk(part.pos());
             if (chunk instanceof LevelChunk) {
@@ -156,12 +156,12 @@ public class TickScheduler {
 
     /**
      * Loads random ticks for the given part.
-     * Called from {@link TRandomTickPart#onWorldJoin()}.
+     * Called from {@link RandomTickPart#onWorldJoin()}.
      *
      * @param part  The part.
      * @param chunk The chunk.
      */
-    public static void loadRandomTick(TRandomTickPart part, LevelChunk chunk) {
+    public static void loadRandomTick(RandomTickPart part, LevelChunk chunk) {
 
         WorldTickScheduler.ChunkScheduler chunkScheduler = WorldTickScheduler.getInstance(chunk);
         chunkScheduler.loadRandomTick(part);

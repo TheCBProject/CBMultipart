@@ -1,22 +1,22 @@
 package codechicken.multipart.trait;
 
 import codechicken.multipart.api.annotation.MultiPartTrait;
-import codechicken.multipart.api.part.TMultiPart;
-import codechicken.multipart.api.part.TSlottedPart;
-import codechicken.multipart.block.TileMultiPart;
+import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.api.part.SlottedPart;
+import codechicken.multipart.block.TileMultipart;
 
 import java.util.Arrays;
 
 /**
  * Created by covers1624 on 1/1/21.
  */
-@MultiPartTrait (TSlottedPart.class)
-public class TSlottedTile extends TileMultiPart {
+@MultiPartTrait (SlottedPart.class)
+public class TSlottedTile extends TileMultipart {
 
-    private TMultiPart[] v_partMap = new TMultiPart[27];
+    private MultiPart[] v_partMap = new MultiPart[27];
 
     @Override
-    public void copyFrom(TileMultiPart that) {
+    public void copyFrom(TileMultipart that) {
         super.copyFrom(that);
         if (that instanceof TSlottedTile) {
             v_partMap = ((TSlottedTile) that).v_partMap;
@@ -30,14 +30,14 @@ public class TSlottedTile extends TileMultiPart {
     }
 
     @Override
-    public TMultiPart getSlottedPart(int slot) {
+    public MultiPart getSlottedPart(int slot) {
         return v_partMap[slot];
     }
 
     @Override
-    public void partRemoved(TMultiPart part, int p) {
+    public void partRemoved(MultiPart part, int p) {
         super.partRemoved(part, p);
-        if (part instanceof TSlottedPart) {
+        if (part instanceof SlottedPart) {
             for (int i = 0; i < v_partMap.length; i++) {
                 if (v_partMap[i] == part) {
                     v_partMap[i] = null;
@@ -47,9 +47,9 @@ public class TSlottedTile extends TileMultiPart {
     }
 
     @Override
-    public boolean canAddPart(TMultiPart part) {
-        if (part instanceof TSlottedPart) {
-            int mask = ((TSlottedPart) part).getSlotMask();
+    public boolean canAddPart(MultiPart part) {
+        if (part instanceof SlottedPart) {
+            int mask = ((SlottedPart) part).getSlotMask();
             for (int i = 0; i < v_partMap.length; i++) {
                 if ((mask & 1 << i) != 0 && getSlottedPart(i) != null) {
                     return false;
@@ -61,10 +61,10 @@ public class TSlottedTile extends TileMultiPart {
     }
 
     @Override
-    public void bindPart(TMultiPart part) {
+    public void bindPart(MultiPart part) {
         super.bindPart(part);
-        if (part instanceof TSlottedPart) {
-            int mask = ((TSlottedPart) part).getSlotMask();
+        if (part instanceof SlottedPart) {
+            int mask = ((SlottedPart) part).getSlotMask();
             for (int i = 0; i < v_partMap.length; i++) {
                 if ((mask & 1 << i) > 0) {
                     v_partMap[i] = part;

@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 
-public abstract class McStatePart extends AbstractMultiPart implements TNormalOcclusionPart, IModelRenderPart, TIconHitEffectsPart {
+public abstract class McStatePart extends BaseMultipart implements NormalOcclusionPart, ModelRenderPart, IconHitEffectsPart {
 
     public BlockState state;
 
@@ -92,7 +92,7 @@ public abstract class McStatePart extends AbstractMultiPart implements TNormalOc
     }
 
     @Nullable
-    public TMultiPart setStateOnPlacement(BlockPlaceContext context) {
+    public MultiPart setStateOnPlacement(BlockPlaceContext context) {
         state = defaultBlockState().getBlock().getStateForPlacement(context);
         return this;
     }
@@ -143,7 +143,7 @@ public abstract class McStatePart extends AbstractMultiPart implements TNormalOc
     }
 
     @Override
-    public boolean occlusionTest(TMultiPart nPart) {
+    public boolean occlusionTest(MultiPart nPart) {
         return NormalOcclusionTest.test(this, nPart);
     }
 

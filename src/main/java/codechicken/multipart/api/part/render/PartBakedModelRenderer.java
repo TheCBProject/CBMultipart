@@ -1,8 +1,7 @@
 package codechicken.multipart.api.part.render;
 
 import codechicken.lib.render.CCRenderState;
-import codechicken.multipart.api.part.IModelRenderPart;
-import codechicken.multipart.api.part.TMultiPart;
+import codechicken.multipart.api.part.ModelRenderPart;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -20,7 +19,7 @@ import java.util.Random;
  * @see PartRenderer
  * Created by covers1624 on 7/11/21.
  */
-public interface PartBakedModelRenderer<T extends IModelRenderPart> extends PartRenderer<T> {
+public interface PartBakedModelRenderer<T extends ModelRenderPart> extends PartRenderer<T> {
 
     /**
      * Returns a new {@link PartBakedModelRenderer}.
@@ -28,7 +27,7 @@ public interface PartBakedModelRenderer<T extends IModelRenderPart> extends Part
      *
      * @return The {@link PartBakedModelRenderer} instance.
      */
-    static <T extends IModelRenderPart> PartBakedModelRenderer<T> simple() {
+    static <T extends ModelRenderPart> PartBakedModelRenderer<T> simple() {
         return new PartBakedModelRenderer<>() { };
     }
 
