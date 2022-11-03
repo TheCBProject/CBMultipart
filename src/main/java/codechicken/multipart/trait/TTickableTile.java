@@ -4,7 +4,7 @@ import codechicken.multipart.api.annotation.MultiPartTrait;
 import codechicken.multipart.api.part.ITickablePart;
 import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.block.TileMultiPart;
-import codechicken.multipart.trait.extern.ITickableTile;
+import codechicken.multipart.api.ITickableTile;
 
 import java.util.ArrayList;
 import java.util.List;

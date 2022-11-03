@@ -1,6 +1,7 @@
 package codechicken.multipart.util;
 
 import codechicken.lib.data.MCDataByteBuf;
+import codechicken.multipart.api.ITickableTile;
 import codechicken.multipart.block.TileMultiPart;
 import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.network.MultiPartSPH;
@@ -48,7 +49,7 @@ public class MultiPartLoadHandler {
     }
 
     //This is a fallback in the event that our Mixin does not get hit.
-    public static class TileNBTContainer extends BlockEntity {
+    public static class TileNBTContainer extends BlockEntity implements ITickableTile {
 
         //Store the number of ticks this tile has existed for.
         //We use this to remove the tile from the ticking list
@@ -96,6 +97,7 @@ public class MultiPartLoadHandler {
             }
         }
 
+        @Override
         public void tick() {
             if (level == null || level.isClientSide) {
                 return;

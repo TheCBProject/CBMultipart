@@ -1,10 +1,9 @@
 package codechicken.multipart.block;
 
 import codechicken.lib.raytracer.RayTracer;
-import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.part.TMultiPart;
 import codechicken.multipart.init.CBMultipartModContent;
-import codechicken.multipart.trait.extern.ITickableTile;
+import codechicken.multipart.api.ITickableTile;
 import codechicken.multipart.util.MultiPartLoadHandler;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.Minecraft;
