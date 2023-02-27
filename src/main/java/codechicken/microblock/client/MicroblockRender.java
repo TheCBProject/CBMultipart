@@ -114,7 +114,7 @@ public class MicroblockRender {
 
         factory.placementProperties().placementGrid().render(pStack, new Vector3(hit.getLocation()), hit.getDirection().ordinal(), buffers);
 
-        ExecutablePlacement placement = new MicroblockPlacement(player, hand, hit, size, material, !player.abilities.instabuild, factory.placementProperties()).calculate();
+        ExecutablePlacement placement = new MicroblockPlacement(player, hand, hit, size, material, !player.getAbilities().instabuild, factory.placementProperties()).calculate();
         if (placement == null) return;
 
         BlockPos pos = placement.pos;

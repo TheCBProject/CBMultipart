@@ -74,12 +74,12 @@ public class ItemMicroBlock extends Item {
 
         BlockHitResult hit = RayTracer.retraceBlock(level, player, ctx.getClickedPos());
         if (hit != null) {
-            ExecutablePlacement placement = new MicroblockPlacement(player, ctx.getHand(), hit, size, material, !player.abilities.instabuild, factory.placementProperties()).calculate();
+            ExecutablePlacement placement = new MicroblockPlacement(player, ctx.getHand(), hit, size, material, !player.getAbilities().instabuild, factory.placementProperties()).calculate();
             if (placement == null) return InteractionResult.FAIL;
 
             if (!level.isClientSide) {
                 placement.place(level, player, stack);
-                if (!player.abilities.instabuild) {
+                if (!player.getAbilities().instabuild) {
                     placement.consume(level, player, stack);
                 }
                 SoundType sound = material.getSound();
