@@ -1,12 +1,13 @@
 package codechicken.multipart.block;
 
 import codechicken.lib.raytracer.RayTracer;
+import codechicken.multipart.api.TickableTile;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.init.CBMultipartModContent;
-import codechicken.multipart.api.TickableTile;
 import codechicken.multipart.util.MultipartLoadHandler;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -35,11 +36,13 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.IBlockRenderProperties;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 
 /**
  * Created by covers1624 on 1/1/21.
@@ -51,6 +54,28 @@ public class BlockMultipart extends Block implements EntityBlock {
                 .dynamicShape()
                 .noOcclusion()
         );
+    }
+
+    @Override
+    public void initializeClient(Consumer<IBlockRenderProperties> consumer) {
+        consumer.accept(new IBlockRenderProperties() {
+            @Override
+            public boolean addHitEffects(BlockState state, Level level, HitResult target, ParticleEngine manager) {
+                if (target instanceof PartRayTraceResult hit) {
+                    TileMultipart tile = getTile(level, hit.getBlockPos());
+                    if (tile != null) {
+                        hit.part.addHitEffects(hit, manager);
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            public boolean addDestroyEffects(BlockState state, Level Level, BlockPos pos, ParticleEngine manager) {
+                // Just return true, we handle this ourselves in onDestroyedByPlayer
+                return true;
+            }
+        });
     }
 
     @Nullable
@@ -281,24 +306,6 @@ public class BlockMultipart extends Block implements EntityBlock {
             tile.animateTick(rand);
         }
     }
-
-//    @Override
-//    @OnlyIn (Dist.CLIENT)
-//    public boolean addHitEffects(BlockState state, World world, RayTraceResult blockHit, ParticleManager manager) {
-//        TileMultiPart tile = getTile(world, ((BlockRayTraceResult) blockHit).getBlockPos());
-//        if (tile != null && blockHit instanceof PartRayTraceResult) {
-//            PartRayTraceResult hit = (PartRayTraceResult) blockHit;
-//            hit.part.addHitEffects(hit, manager);
-//        }
-//        return true;
-//    }
-
-    // TODO client block properties stuffs
-//    @Override
-//    @OnlyIn (Dist.CLIENT)
-//    public boolean addDestroyEffects(BlockState state, World world, BlockPos pos, ParticleManager manager) {
-//        return true;
-//    }
 
     public static void dropAndDestroy(Level world, BlockPos pos) {
         TileMultipart tile = getTile(world, pos);

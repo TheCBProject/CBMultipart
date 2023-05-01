@@ -4,16 +4,20 @@ import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.microblock.api.MicroMaterial;
+import codechicken.microblock.api.MicroMaterialClient;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.microblock.util.MicroMaterialRegistry;
 import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.part.BaseMultipart;
 import codechicken.multipart.util.PartRayTraceResult;
+import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Explosion;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -115,7 +119,7 @@ public abstract class MicroblockPart extends BaseMultipart {
     @Override
     public ItemStack getCloneStack(PartRayTraceResult hit) {
         int size = getSize();
-        for (int s : new int[]{4, 2, 1}) {
+        for (int s : new int[] { 4, 2, 1 }) {
             if (size % s == 0 && size / s >= 1) {
                 return ItemMicroBlock.create(getItemFactoryId(), size, material);
             }
@@ -147,5 +151,23 @@ public abstract class MicroblockPart extends BaseMultipart {
     @Override
     public float getExplosionResistance(Explosion explosion) {
         return getMaterial().getExplosionResistance(level(), pos(), explosion) * getMicroFactory().getResistanceFactor();
+    }
+
+    @Override
+    @OnlyIn (Dist.CLIENT)
+    public void addHitEffects(PartRayTraceResult hit, ParticleEngine engine) {
+        MicroMaterialClient clientMaterial = MicroMaterialClient.get(material);
+        if (clientMaterial != null) {
+            clientMaterial.addHitEffects(this, hit, engine);
+        }
+    }
+
+    @Override
+    @OnlyIn (Dist.CLIENT)
+    public void addDestroyEffects(PartRayTraceResult hit, ParticleEngine engine) {
+        MicroMaterialClient clientMaterial = MicroMaterialClient.get(material);
+        if (clientMaterial != null) {
+            clientMaterial.addDestroyEffects(this, hit, engine);
+        }
     }
 }

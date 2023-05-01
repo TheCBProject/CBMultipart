@@ -1,10 +1,16 @@
 package codechicken.microblock.api;
 
 import codechicken.lib.render.CCRenderState;
+import codechicken.lib.render.particle.CustomParticleHandler;
 import codechicken.microblock.client.MicroblockRender;
+import codechicken.microblock.part.MicroblockPart;
 import codechicken.microblock.util.MaskedCuboid;
+import codechicken.multipart.util.PartRayTraceResult;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -13,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,6 +27,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.common.TierSortingRegistry;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -106,6 +114,31 @@ public class BlockMicroMaterial extends MicroMaterial {
                     return MicroblockRender.renderCuboids(ccrs, state, layer, cuboids);
                 }
                 return false;
+            }
+
+            @Override
+            public void addHitEffects(MicroblockPart part, PartRayTraceResult hit, ParticleEngine engine) {
+                CustomParticleHandler.addBlockHitEffects(
+                        part.level(),
+                        part.getBounds().copy().add(part.pos()),
+                        hit.getDirection(),
+                        getSprite(part.level(), part.pos()),
+                        engine
+                );
+            }
+
+            @Override
+            public void addDestroyEffects(MicroblockPart part, PartRayTraceResult hit, ParticleEngine engine) {
+                CustomParticleHandler.addBlockDestroyEffects(
+                        part.level(),
+                        part.getBounds().copy().add(part.pos()),
+                        List.of(getSprite(part.level(), part.pos())),
+                        engine
+                );
+            }
+
+            private TextureAtlasSprite getSprite(Level level, BlockPos pos) {
+                return Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getTexture(state, level, pos);
             }
         });
     }
