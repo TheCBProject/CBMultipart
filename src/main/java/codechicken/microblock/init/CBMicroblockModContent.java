@@ -12,6 +12,7 @@ import codechicken.microblock.part.edge.PostMicroblockFactory;
 import codechicken.microblock.part.face.FaceMicroFactory;
 import codechicken.microblock.part.hollow.HollowMicroFactory;
 import codechicken.microblock.recipe.MicroRecipe;
+import codechicken.microblock.util.MicroMaterialRegistry;
 import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.MultipartType;
 import net.covers1624.quack.util.CrashLock;
@@ -20,22 +21,27 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraftforge.registries.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+
+import java.nio.file.Paths;
 
 /**
  * Created by covers1624 on 26/6/22.
  */
 public class CBMicroblockModContent {
 
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registry.ITEM_REGISTRY, CBMicroblock.MOD_ID);
     private static final DeferredRegister<MultipartType<?>> MULTIPART_TYPES = DeferredRegister.create(new ResourceLocation(CBMultipart.MOD_ID, "multipart_types"), CBMicroblock.MOD_ID);
@@ -76,6 +82,7 @@ public class CBMicroblockModContent {
         RECIPE_SERIALIZERS.register(bus);
         bus.addGenericListener(MicroMaterial.class, CBMicroblockModContent::onRegisterMicroMaterials);
         bus.addListener(CBMicroblockModContent::onCommonSetup);
+        bus.addListener(CBMicroblockModContent::onProcessIMC);
     }
 
     private static void onCommonSetup(FMLCommonSetupEvent event) {
@@ -89,6 +96,11 @@ public class CBMicroblockModContent {
             }
         }
         MAX_SAW_TIER = tier;
+    }
+
+    private static void onProcessIMC(InterModProcessEvent event) {
+        processIMC(event);
+        MicroMaterialConfig.parse(Paths.get("config", "custom-micromaterials.cfg"));
     }
 
     private static void onRegisterMicroMaterials(RegistryEvent.Register<MicroMaterial> event) {
@@ -323,5 +335,38 @@ public class CBMicroblockModContent {
         r.register(new BlockMicroMaterial(Blocks.FIRE_CORAL_BLOCK)); //TODO Dies out of water
         r.register(new BlockMicroMaterial(Blocks.HORN_CORAL_BLOCK)); //TODO Dies out of water
         r.register(new BlockMicroMaterial(Blocks.BLUE_ICE)); //TODO speed
+    }
+
+    private static void processIMC(InterModProcessEvent event) {
+        ForgeRegistry<MicroMaterial> registry = (ForgeRegistry<MicroMaterial>) MicroMaterialRegistry.MICRO_MATERIALS;
+        registry.unfreeze();
+        event.getIMCStream().forEach(e -> {
+            if (!e.method().equals("micro_material")) return;
+
+            String sender = e.senderModId();
+            Object sent = e.messageSupplier().get();
+            MicroMaterial material;
+            if (sent instanceof Block b) {
+                material = new BlockMicroMaterial(b);
+            } else if (sent instanceof BlockState s) {
+                material = new BlockMicroMaterial(s);
+            } else {
+                LOGGER.error(
+                        "Mod {} tried to register a MicroMaterial with an invalid message. Object: '{}', Class: '{}'. IMC only supports Block or BlockState messages.",
+                        sender,
+                        sent,
+                        sent != null ? sent.getClass().getName() : null
+                );
+                return;
+            }
+
+            if (registry.containsKey(material.getRegistryName())) {
+                LOGGER.warn("Mod '{}' tried to register a duplicate MicroMaterial. '{}'. Ignoring.", sender, material.getRegistryName());
+                return;
+            }
+            registry.register(material);
+
+        });
+        registry.freeze();
     }
 }
