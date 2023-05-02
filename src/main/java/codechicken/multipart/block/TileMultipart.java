@@ -490,7 +490,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         );
         if (!(hit instanceof PartRayTraceResult pHit)) return null;
 
-        double dist = entityPos.copy().subtract(hit.getLocation()).magSquared();
+        double dist = entityPos.copy().subtract(hit.getLocation()).mag();
         if (!MathHelper.between(-0.01, dist, 0.01)) return null;
 
         return pHit;
