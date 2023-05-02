@@ -3,6 +3,7 @@ package codechicken.microblock.part;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.vec.Cuboid6;
+import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.api.MicroMaterialClient;
 import codechicken.microblock.item.ItemMicroBlock;
@@ -13,6 +14,7 @@ import codechicken.multipart.api.part.BaseMultipart;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Explosion;
@@ -168,6 +170,22 @@ public abstract class MicroblockPart extends BaseMultipart {
         MicroMaterialClient clientMaterial = MicroMaterialClient.get(material);
         if (clientMaterial != null) {
             clientMaterial.addDestroyEffects(this, hit, engine);
+        }
+    }
+
+    @Override
+    public void addLandingEffects(PartRayTraceResult hit, Vector3 entity, int numberOfParticles) {
+        MicroMaterialClient clientMaterial = MicroMaterialClient.get(material);
+        if (clientMaterial != null) {
+            clientMaterial.addLandingEffects(this, hit, entity, numberOfParticles);
+        }
+    }
+
+    @Override
+    public void addRunningEffects(PartRayTraceResult hit, Entity entity) {
+        MicroMaterialClient clientMaterial = MicroMaterialClient.get(material);
+        if (clientMaterial != null) {
+            clientMaterial.addRunningEffects(this, hit, entity);
         }
     }
 }

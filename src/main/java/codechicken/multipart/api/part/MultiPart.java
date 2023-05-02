@@ -4,6 +4,7 @@ import codechicken.lib.capability.CapabilityCache;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.vec.Cuboid6;
+import codechicken.lib.vec.Vector3;
 import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.PartConverter;
 import codechicken.multipart.block.TileMultipart;
@@ -454,6 +455,27 @@ public interface MultiPart {
      */
     @OnlyIn (Dist.CLIENT)
     default void addDestroyEffects(PartRayTraceResult hit, ParticleEngine engine) { }
+
+    /**
+     * Add particles and other effects when a player lands on this part.
+     *
+     * @param hit               The hit directly bellow the entities feet.
+     * @param entity            The position of the entity.
+     * @param numberOfParticles The number of particles to spawn.
+     */
+    @OnlyIn (Dist.CLIENT)
+    default void addLandingEffects(PartRayTraceResult hit, Vector3 entity, int numberOfParticles) { }
+
+    /**
+     * Add particles and other effects when a player runs over this part.
+     * <p>
+     * This is called on both the client and the server.
+     *
+     * @param hit    The hit directly bellow the players feet.
+     * @param entity The entity running.
+     */
+    @OnlyIn (Dist.CLIENT)
+    default void addRunningEffects(PartRayTraceResult hit, Entity entity) { }
 
     /**
      * Gets the bounds of this part for Frustum culling.

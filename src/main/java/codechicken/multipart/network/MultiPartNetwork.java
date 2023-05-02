@@ -19,6 +19,8 @@ public class MultiPartNetwork {
     public static final int C_REM_PART = 3;
     public static final int C_PART_UPDATE = 4;
 
+    public static final int C_LANDING_EFFECTS = 10;
+
     //Server handled.
     public static final int S_CONTROL_KEY_MODIFIER = 1;
     public static final int S_MULTIPART_PLACEMENT = 10;

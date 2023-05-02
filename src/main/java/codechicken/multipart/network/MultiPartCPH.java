@@ -25,6 +25,7 @@ public class MultiPartCPH implements ICustomPacketHandler.IClientPacketHandler {
             case C_ADD_PART -> handleAddPart(packet, mc);
             case C_REM_PART -> handleRemPart(packet, mc);
             case C_PART_UPDATE -> handleUpdatePacket(packet, mc);
+            case C_LANDING_EFFECTS -> handleLandingEffects(packet, mc);
         }
     }
 
@@ -57,6 +58,13 @@ public class MultiPartCPH implements ICustomPacketHandler.IClientPacketHandler {
             if (part != null) {
                 part.readUpdate(packet);
             }
+        }
+    }
+
+    private void handleLandingEffects(PacketCustom packet, Minecraft mc) {
+        BlockPos pos = packet.readPos();
+        if (mc.level.getBlockEntity(pos) instanceof TileMultipart tile) {
+            tile.addLandingEffects(packet.readVector(), packet.readVarInt());
         }
     }
 }

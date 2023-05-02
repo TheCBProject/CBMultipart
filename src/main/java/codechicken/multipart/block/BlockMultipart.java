@@ -1,18 +1,23 @@
 package codechicken.multipart.block;
 
+import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.raytracer.RayTracer;
+import codechicken.lib.vec.Vector3;
 import codechicken.multipart.api.TickableTile;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.init.CBMultipartModContent;
+import codechicken.multipart.network.MultiPartNetwork;
 import codechicken.multipart.util.MultipartLoadHandler;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -305,6 +310,27 @@ public class BlockMultipart extends Block implements EntityBlock {
         if (tile != null) {
             tile.animateTick(rand);
         }
+    }
+
+    @Override
+    public boolean addLandingEffects(BlockState state1, ServerLevel level, BlockPos pos, BlockState state2, LivingEntity entity, int numberOfParticles) {
+        PacketCustom packet = new PacketCustom(MultiPartNetwork.NET_CHANNEL, MultiPartNetwork.C_LANDING_EFFECTS);
+        packet.writePos(pos);
+        packet.writeVector(Vector3.fromEntity(entity));
+        packet.writeVarInt(numberOfParticles);
+        packet.sendToChunk(level, pos);
+        return true;
+    }
+
+    @Override
+    public boolean addRunningEffects(BlockState state, Level level, BlockPos pos, Entity entity) {
+        if (!level.isClientSide) return true;
+
+        TileMultipart tile = getTile(level, pos);
+        if (tile != null) {
+            tile.addRunningEffects(entity);
+        }
+        return true;
     }
 
     public static void dropAndDestroy(Level world, BlockPos pos) {

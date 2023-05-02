@@ -4,6 +4,7 @@ import codechicken.lib.capability.CapabilityCache;
 import codechicken.lib.data.MCDataByteBuf;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
+import codechicken.lib.math.MathHelper;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
 import codechicken.lib.world.IChunkLoadTile;
@@ -35,6 +36,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.capabilities.Capability;
@@ -464,6 +466,35 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     public void animateTick(Random random) { }
 
     public boolean isClientTile() { return false; }
+
+    public void addLandingEffects(Vector3 entity, int numberOfParticles) {
+        PartRayTraceResult hit = hitFeet(entity);
+        if (hit == null) return;
+
+        hit.part.addLandingEffects(hit, entity, numberOfParticles);
+    }
+
+    public void addRunningEffects(Entity entity) {
+        PartRayTraceResult hit = hitFeet(Vector3.fromEntity(entity));
+        if (hit == null) return;
+
+        hit.part.addRunningEffects(hit, entity);
+    }
+
+    @Nullable
+    private PartRayTraceResult hitFeet(Vector3 entityPos) {
+        BlockHitResult hit = getCollisionShape(CollisionContext.empty()).clip(
+                entityPos.copy().add(0, 0.01, 0).vec3(),
+                entityPos.copy().add(0, -0.01, 0).vec3(),
+                getBlockPos()
+        );
+        if (!(hit instanceof PartRayTraceResult pHit)) return null;
+
+        double dist = entityPos.copy().subtract(hit.getLocation()).magSquared();
+        if (!MathHelper.between(-0.01, dist, 0.01)) return null;
+
+        return pHit;
+    }
 
     //endregion
 
