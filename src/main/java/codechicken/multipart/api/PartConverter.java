@@ -37,7 +37,7 @@ public abstract class PartConverter extends ForgeRegistryEntry<PartConverter> {
     }
 
     /**
-     * Convert an {@link ItemStack} about to be placed into a MultiPart, into a {@link MultiPart} instance.
+     * Convert an {@link ItemStack} about to be placed into a {@link MultiPart} instance.
      *
      * @param context The {@link UseOnContext} for the placement.
      * @return A {@link ConversionResult}, providing the {@link MultiPart} instance if conversion
