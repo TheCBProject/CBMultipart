@@ -8,25 +8,27 @@ import codechicken.lib.model.pipeline.transformers.QuadReInterpolator;
 import codechicken.lib.model.pipeline.transformers.QuadTinter;
 import codechicken.lib.render.BakedVertexSource;
 import codechicken.lib.render.CCRenderState;
-import codechicken.lib.vec.Matrix4;
-import codechicken.lib.vec.Scale;
-import codechicken.lib.vec.Vector3;
+import codechicken.lib.render.buffer.TransformingVertexConsumer;
+import codechicken.lib.vec.*;
 import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.part.ExecutablePlacement;
 import codechicken.microblock.part.MicroblockPlacement;
+import codechicken.microblock.part.PlacementGrid;
 import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.util.MaskedCuboid;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -50,6 +52,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.OptionalDouble;
 import java.util.Random;
 
 import static codechicken.microblock.CBMicroblock.MOD_ID;
@@ -67,6 +70,17 @@ public class MicroblockRender {
             .setTextureState(RenderType.BLOCK_SHEET)
             .setWriteMaskState(RenderType.COLOR_DEPTH_WRITE)
             .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
+            .createCompositeState(false)
+    );
+
+    private static final RenderType LINES = RenderType.create("lines", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, RenderType.CompositeState.builder()
+            .setShaderState(RenderType.RENDERTYPE_LINES_SHADER)
+            .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(2)))
+            .setLayeringState(RenderType.VIEW_OFFSET_Z_LAYERING)
+            .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
+            .setOutputState(RenderType.ITEM_ENTITY_TARGET)
+            .setWriteMaskState(RenderType.COLOR_DEPTH_WRITE)
+            .setCullState(RenderType.NO_CULL)
             .createCompositeState(false)
     );
 
@@ -112,7 +126,7 @@ public class MicroblockRender {
             return;
         }
 
-        factory.placementProperties().placementGrid().render(pStack, new Vector3(hit.getLocation()), hit.getDirection().ordinal(), buffers);
+        renderPlacementGrid(factory.placementProperties().placementGrid(), pStack, new Vector3(hit.getLocation()), hit.getDirection().ordinal(), buffers);
 
         ExecutablePlacement placement = new MicroblockPlacement(player, hand, hit, size, material, !player.getAbilities().instabuild, factory.placementProperties()).calculate();
         if (placement == null) return;
@@ -128,6 +142,31 @@ public class MicroblockRender {
         ccrs.bind(HIGHLIGHT_RENDER_TYPE, buffers, mat);
         ccrs.alphaOverride = 80;
         renderCuboids(ccrs, ((BlockMicroMaterial) material).state, null, placement.part.getRenderCuboids(true));
+    }
+
+    private static void renderPlacementGrid(PlacementGrid grid, PoseStack pStack, Vector3 hit, int side, MultiBufferSource buffers) {
+        Matrix4 mat = new Matrix4(pStack);
+        transformFace(hit, side, mat);
+        VertexConsumer cons = new TransformingVertexConsumer(buffers.getBuffer(LINES), mat);
+        for (Line3 line : grid.getOverlayLines()) {
+            bufferLinePair(cons, line.pt1, line.pt2, 0F, 0F, 0F, 1F);
+        }
+    }
+
+    private static void bufferLinePair(VertexConsumer builder, Vector3 v1, Vector3 v2, float r, float g, float b, float a) {
+        Vector3 vn = v1.copy().subtract(v2);
+        double d = vn.mag();
+        vn.divide(d);
+        builder.vertex(v1.x, v1.y, v1.z).color(r, g, b, a).normal((float) vn.x, (float) vn.y, (float) vn.z).endVertex();
+        builder.vertex(v2.x, v2.y, v2.z).color(r, g, b, a).normal((float) vn.x, (float) vn.y, (float) vn.z).endVertex();
+    }
+
+    private static void transformFace(Vector3 hit, int side, Matrix4 mat) {
+        Vector3 pos = hit.copy().floor().add(Vector3.CENTER);
+        mat.translate(pos);
+        mat.apply(Rotation.sideRotations[side]);
+        Vector3 rHit = pos.copy().subtract(hit).apply(Rotation.sideRotations[side ^ 1].inverse());
+        mat.translate(0, rHit.y - 0.002, 0);
     }
 
     public static boolean renderCuboids(CCRenderState ccrs, BlockState state, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids) {
