@@ -1,8 +1,10 @@
 package codechicken.multipart.api;
 
 import codechicken.lib.data.MCDataInput;
+import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.part.MultiPart;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,6 +12,11 @@ import org.jetbrains.annotations.Nullable;
  * Created by covers1624 on 3/16/20.
  */
 public abstract class MultipartType<T extends MultiPart> extends ForgeRegistryEntry<MultipartType<?>> {
+
+    /**
+     * The Forge registry name used by MultipartType.
+     */
+    public static final ResourceLocation MULTIPART_TYPES = new ResourceLocation(CBMultipart.MOD_ID, "multipart_types");
 
     // Internal.
     @Nullable

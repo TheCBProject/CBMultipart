@@ -47,7 +47,7 @@ public class MultiPartRegistries {
 
     private static void createRegistries(NewRegistryEvent event) {
         event.create(new RegistryBuilder<MultipartType<?>>()
-                .setName(new ResourceLocation(CBMultipart.MOD_ID, "multipart_types"))
+                .setName(MultipartType.MULTIPART_TYPES)
                 .setType(unsafeCast(MultipartType.class))
                 .disableSaving(), e -> MULTIPART_TYPES = (ForgeRegistry<MultipartType<?>>) e);
         event.create(new RegistryBuilder<PartConverter>()
