@@ -65,7 +65,7 @@ public class MicroblockRender {
     private static final RenderType HIGHLIGHT_RENDER_TYPE = RenderType.create(MOD_ID + ":highlight", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 255, RenderType.CompositeState.builder()
             .setShaderState(RenderType.BLOCK_SHADER)
             .setTextureState(RenderType.BLOCK_SHEET)
-            .setWriteMaskState(RenderType.COLOR_WRITE)
+            .setWriteMaskState(RenderType.COLOR_DEPTH_WRITE)
             .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
             .createCompositeState(false)
     );
