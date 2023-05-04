@@ -92,13 +92,13 @@ public interface PartRenderer<T extends MultiPart> {
      * Render the dynamic, changing faces of this part and/or other glfx.
      *
      * @param part          The {@link MultiPart} being rendered.
-     * @param mStack        The {@link PoseStack} to apply.
+     * @param pStack        The {@link PoseStack} to apply.
      * @param buffers       The {@link MultiBufferSource} storage.
      * @param packedLight   The packed LightMap coords to use. See {@link LightTexture}.
      * @param packedOverlay The packed Overlay coords to use. See {@link OverlayTexture}.
      * @param partialTicks  The game partial ticks.
      */
-    default void renderDynamic(T part, PoseStack mStack, MultiBufferSource buffers, int packedLight, int packedOverlay, float partialTicks) { }
+    default void renderDynamic(T part, PoseStack pStack, MultiBufferSource buffers, int packedLight, int packedOverlay, float partialTicks) { }
 
     /**
      * Override the drawing of the selection box around this part.
@@ -107,13 +107,13 @@ public interface PartRenderer<T extends MultiPart> {
      *
      * @param part         The {@link MultiPart} being rendered.
      * @param hit          The {@link PartRayTraceResult}.
-     * @param info         The {@link Camera} camera info.
-     * @param mStack       The {@link PoseStack} to apply.
+     * @param camera       The {@link Camera} camera info.
+     * @param pStack       The {@link PoseStack} to apply.
      * @param buffers      The {@link MultiBufferSource} storage.
      * @param partialTicks The game partial ticks.
      * @return If any custom rendering was applied. <code>false</code> for default {@link VoxelShape} based rendering.
      */
-    default boolean drawHighlight(T part, PartRayTraceResult hit, Camera info, PoseStack mStack, MultiBufferSource buffers, float partialTicks) {
+    default boolean drawHighlight(T part, PartRayTraceResult hit, Camera camera, PoseStack pStack, MultiBufferSource buffers, float partialTicks) {
         return false;
     }
 }
