@@ -42,7 +42,7 @@ public class ClientEventHandler {
 
         PartRenderer<?> renderer = MultipartClientRegistry.getRenderer(part.getType());
 
-        if (renderer != null && !renderer.drawHighlight(unsafeCast(part), hit, camera, mStack, buffers, partialTicks)) {
+        if (renderer == null || !renderer.drawHighlight(unsafeCast(part), hit, camera, mStack, buffers, partialTicks)) {
             Matrix4 mat = new Matrix4(mStack);
             mat.translate(hit.getBlockPos());
             RenderUtils.bufferShapeHitBox(mat, buffers, camera, part.getShape(CollisionContext.empty()));
