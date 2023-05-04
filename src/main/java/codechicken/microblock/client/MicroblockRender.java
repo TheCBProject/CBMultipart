@@ -78,7 +78,6 @@ public class MicroblockRender {
             .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(2)))
             .setLayeringState(RenderType.VIEW_OFFSET_Z_LAYERING)
             .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
-            .setOutputState(RenderType.ITEM_ENTITY_TARGET)
             .setWriteMaskState(RenderType.COLOR_DEPTH_WRITE)
             .setCullState(RenderType.NO_CULL)
             .createCompositeState(false)
