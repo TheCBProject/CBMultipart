@@ -43,6 +43,11 @@ public class TTileChangeTile extends TileMultipart {
     }
 
     @Override
+    public boolean getWeakChanges() {
+        return super.getWeakChanges() || weakTileChanges;
+    }
+
+    @Override
     public void onNeighborTileChange(BlockPos neighborPos) {
         super.onNeighborTileChange(neighborPos);
 
