@@ -3,9 +3,7 @@ package codechicken.microblock.client;
 import codechicken.lib.render.CCRenderState;
 import codechicken.lib.render.item.IItemRenderer;
 import codechicken.lib.util.TransformUtils;
-import codechicken.lib.vec.Matrix4;
 import codechicken.lib.vec.Vector3;
-import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.api.MicroMaterialClient;
 import codechicken.microblock.part.StandardMicroFactory;
@@ -37,8 +35,9 @@ public class MicroblockItemRenderer implements IItemRenderer {
         MicroblockPart part = factory.create(true, material);
         part.setShape(size, factory.getItemSlot());
 
-        Matrix4 mat = new Matrix4(mStack);
-        mat.translate(Vector3.CENTER.copy().subtract(part.getBounds().center()));
+        mStack.pushPose();
+        Vector3 offset = Vector3.CENTER.copy().subtract(part.getBounds().center());
+        mStack.translate(offset.x, offset.y, offset.z);
 
         CCRenderState ccrs = CCRenderState.instance();
         ccrs.reset();
@@ -46,8 +45,11 @@ public class MicroblockItemRenderer implements IItemRenderer {
         ccrs.overlay = packedOverlay;
 
         RenderType layer = clientMaterial.getItemRenderLayer();
-        ccrs.bind(layer, buffers, mat);
+        ccrs.bind(layer, buffers, mStack);
         clientMaterial.renderCuboids(ccrs, null, part.getRenderCuboids(true));
+
+        clientMaterial.renderDynamic(part, transformType, mStack, buffers, packedLight, packedOverlay, 0);
+        mStack.popPose();
     }
 
     @Override

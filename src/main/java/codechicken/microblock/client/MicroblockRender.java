@@ -65,7 +65,7 @@ public class MicroblockRender {
     private static final CrashLock LOCK = new CrashLock("Already Initialized");
     private static final ThreadLocal<PipelineState> PIPELINES = ThreadLocal.withInitial(PipelineState::create);
 
-    private static final RenderType HIGHLIGHT_RENDER_TYPE = RenderType.create(MOD_ID + ":highlight", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 255, RenderType.CompositeState.builder()
+    public static final RenderType HIGHLIGHT_RENDER_TYPE = RenderType.create(MOD_ID + ":highlight", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 255, RenderType.CompositeState.builder()
             .setShaderState(RenderType.BLOCK_SHADER)
             .setTextureState(RenderType.BLOCK_SHEET)
             .setWriteMaskState(RenderType.COLOR_DEPTH_WRITE)
