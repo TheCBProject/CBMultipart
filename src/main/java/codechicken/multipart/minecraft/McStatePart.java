@@ -129,7 +129,8 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
 
     @Override
     public VoxelShape getOcclusionShape() {
-        return state.getCollisionShape(null, null);
+        VoxelShape cShape = state.getCollisionShape(null, null);
+        return cShape.isEmpty() ? state.getShape(null, null) : cShape;
     }
 
     @Override
