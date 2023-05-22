@@ -153,6 +153,13 @@ public class ButtonPart extends McSidedStatePart implements FaceRedstonePart {
         public StoneButtonPart(BlockState state) { super(ModContent.stoneButtonPartType, (ButtonBlock) Blocks.STONE_BUTTON, state); }
     }
 
+    public static class PolishedBlackstoneButtonPart extends ButtonPart {
+
+        public PolishedBlackstoneButtonPart() { super(ModContent.polishedBlackstoneButtonPartType, (ButtonBlock) Blocks.POLISHED_BLACKSTONE_BUTTON); }
+
+        public PolishedBlackstoneButtonPart(BlockState state) { super(ModContent.polishedBlackstoneButtonPartType, (ButtonBlock) Blocks.POLISHED_BLACKSTONE_BUTTON, state); }
+    }
+
     public static class OakButtonPart extends ButtonPart {
 
         public OakButtonPart() { super(ModContent.oakButtonPartType, (ButtonBlock) Blocks.OAK_BUTTON); }
@@ -193,6 +200,20 @@ public class ButtonPart extends McSidedStatePart implements FaceRedstonePart {
         public DarkOakButtonPart() { super(ModContent.darkOakButtonPartType, (ButtonBlock) Blocks.DARK_OAK_BUTTON); }
 
         public DarkOakButtonPart(BlockState state) { super(ModContent.darkOakButtonPartType, (ButtonBlock) Blocks.DARK_OAK_BUTTON, state); }
+    }
+
+    public static class CrimsonButtonPart extends ButtonPart {
+
+        public CrimsonButtonPart() { super(ModContent.crimsonButtonPartType, (ButtonBlock) Blocks.CRIMSON_BUTTON); }
+
+        public CrimsonButtonPart(BlockState state) { super(ModContent.crimsonButtonPartType, (ButtonBlock) Blocks.CRIMSON_BUTTON, state); }
+    }
+
+    public static class WarpedButtonPart extends ButtonPart {
+
+        public WarpedButtonPart() { super(ModContent.warpedButtonPartType, (ButtonBlock) Blocks.WARPED_BUTTON); }
+
+        public WarpedButtonPart(BlockState state) { super(ModContent.warpedButtonPartType, (ButtonBlock) Blocks.WARPED_BUTTON, state); }
     }
 
 }
