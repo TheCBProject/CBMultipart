@@ -93,8 +93,12 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
 
     @Nullable
     public MultiPart setStateOnPlacement(BlockPlaceContext context) {
-        state = defaultBlockState().getBlock().getStateForPlacement(context);
-        return this;
+        BlockState state = defaultBlockState().getBlock().getStateForPlacement(context);
+        if (state != null) {
+            this.state = state;
+            return this;
+        }
+        return null;
     }
 
     @Override
