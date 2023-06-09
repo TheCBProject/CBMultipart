@@ -172,11 +172,11 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
         }
 
         {
-            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "bindPart", "(Lcodechicken/multipart/api/part/TMultipart;)V", null, null);
+            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "bindPart", "(Lcodechicken/multipart/api/part/MultiPart;)V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 1);
-            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/block/TileMultipart", "bindPart", "(Lcodechicken/multipart/api/part/TMultipart;)V", false);
+            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/block/TileMultipart", "bindPart", "(Lcodechicken/multipart/api/part/MultiPart;)V", false);
             mv.visitVarInsn(ALOAD, 1);
             mv.visitTypeInsn(INSTANCEOF, iName);
             Label l2 = new Label();
@@ -192,12 +192,12 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
         }
 
         {
-            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "partRemoved", "(Lcodechicken/multipart/api/part/TMultipart;I)V", null, null);
+            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "partRemoved", "(Lcodechicken/multipart/api/part/MultiPart;I)V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 1);
             mv.visitVarInsn(ILOAD, 2);
-            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/block/TileMultipart", "partRemoved", "(Lcodechicken/multipart/api/part/TMultipart;I)V", false);
+            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/block/TileMultipart", "partRemoved", "(Lcodechicken/multipart/api/part/MultiPart;I)V", false);
             mv.visitVarInsn(ALOAD, 1);
             mv.visitVarInsn(ALOAD, 0);
             mv.visitFieldInsn(GETFIELD, tName, vName, iDesc);
@@ -212,7 +212,7 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
             mv.visitEnd();
         }
         {
-            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "canAddPart", "(Lcodechicken/multipart/api/part/TMultipart;)Z", null, null);
+            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "canAddPart", "(Lcodechicken/multipart/api/part/MultiPart;)Z", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitFieldInsn(GETFIELD, tName, vName, iDesc);
@@ -226,7 +226,7 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
             mv.visitLabel(l1);
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 1);
-            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/block/TileMultipart", "canAddPart", "(Lcodechicken/multipart/api/part/TMultipart;)Z", false);
+            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/block/TileMultipart", "canAddPart", "(Lcodechicken/multipart/api/part/MultiPart;)Z", false);
             mv.visitInsn(IRETURN);
             mv.visitMaxs(-1, -1);
             mv.visitEnd();
