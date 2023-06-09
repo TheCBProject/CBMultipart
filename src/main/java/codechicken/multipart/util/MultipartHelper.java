@@ -77,6 +77,7 @@ public class MultipartHelper {
             silentAddTile(tile.getLevel(), tile.getBlockPos(), newTile);
             newTile.from(tile);
             newTile.notifyTileChange();
+            newTile.notifyShapeChange();
         }
         return newTile;
     }
