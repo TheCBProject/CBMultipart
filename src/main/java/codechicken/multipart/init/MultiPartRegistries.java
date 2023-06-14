@@ -2,7 +2,6 @@ package codechicken.multipart.init;
 
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
-import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.PartConverter;
 import codechicken.multipart.api.PartConverter.ConversionResult;
@@ -51,7 +50,7 @@ public class MultiPartRegistries {
                 .setType(unsafeCast(MultipartType.class))
                 .disableSaving(), e -> MULTIPART_TYPES = (ForgeRegistry<MultipartType<?>>) e);
         event.create(new RegistryBuilder<PartConverter>()
-                        .setName(new ResourceLocation(CBMultipart.MOD_ID, "part_converters"))
+                        .setName(PartConverter.PART_CONVERTERS)
                         .setType(PartConverter.class)
                         .disableOverrides()
                         .disableSaving()

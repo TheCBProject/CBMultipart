@@ -1,7 +1,9 @@
 package codechicken.multipart.api;
 
+import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.part.MultiPart;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.LevelAccessor;
@@ -16,6 +18,11 @@ import java.util.Collections;
  * Created by covers1624 on 4/17/20.
  */
 public abstract class PartConverter extends ForgeRegistryEntry<PartConverter> {
+
+    /**
+     * The Forge registry name used by PartConverter.
+     */
+    public static final ResourceLocation PART_CONVERTERS = new ResourceLocation(CBMultipart.MOD_ID, "part_converters");
 
     private static final ConversionResult<Collection<MultiPart>> EMPTY_LIST = new ConversionResult<>(Collections.emptyList(), false);
     private static final ConversionResult<MultiPart> EMPTY = new ConversionResult<>(null, false);

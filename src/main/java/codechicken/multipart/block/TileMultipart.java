@@ -52,6 +52,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static net.minecraft.world.level.block.Block.*;
+
 /**
  * The host tile, capable of containing {@link MultiPart} instances.
  */
@@ -295,6 +297,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         if (!isRemoved()) {
             TileMultipart tile = partRemoved(this);
             tile.notifyPartChange(part);
+            tile.notifyShapeChange();
             tile.setChanged();
             tile.markRender();
             return tile;
@@ -510,6 +513,17 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     }
 
     /**
+     * Notifies neighboring blocks that a shape has changed
+     */
+    public void notifyShapeChange() {
+        if (level != null) {
+            BlockState state = level.getBlockState(getBlockPos());
+            state.updateNeighbourShapes(level, getBlockPos(), UPDATE_ALL | UPDATE_KNOWN_SHAPE, UPDATE_LIMIT);
+            state.updateIndirectNeighbourShapes(level, getBlockPos(), UPDATE_ALL | UPDATE_KNOWN_SHAPE, UPDATE_LIMIT);
+        }
+    }
+
+    /**
      * Called by parts when they have changed in some form that affects the world.
      * Notifies neighbor blocks, the world and parts that share this host and recalculates lighting
      */
@@ -656,6 +670,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
 
         tile.loadParts(parts);
         tile.notifyTileChange();
+        tile.notifyShapeChange();
         tile.markRender();
     }
 
@@ -695,6 +710,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
             MultipartHelper.silentAddTile(tile.level, tile.getBlockPos(), newTile);
             newTile.from(tile);
             newTile.notifyTileChange();
+            newTile.notifyShapeChange();
         }
         return newTile;
     }

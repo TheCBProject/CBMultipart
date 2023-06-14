@@ -110,6 +110,7 @@ public class MultipartLoadHandler {
                         newTile.clearRemoved();
                         level.setBlockEntity(newTile);
                         newTile.notifyTileChange();
+                        newTile.notifyShapeChange();
                         MultiPartSPH.sendDescUpdate(newTile);
                     } else {
                         level.removeBlock(getBlockPos(), false);
