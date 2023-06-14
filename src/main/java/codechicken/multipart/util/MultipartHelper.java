@@ -96,15 +96,18 @@ public class MultipartHelper {
         TileMultipart newTile = tile;
         if (newTile != null) {
             //If we just converted an in-world block to a TileMultipart
-            if (converted) {//TODO, dont use head here? assume all parts are capable of receiving these callbacks
+            if (converted) {
                 //Callback to the part, so it can do stuff to inworld tile before it gets nuked.
-                MultiPart head = newTile.getPartList().get(0);
-                head.invalidateConvertedTile();
+                for (MultiPart cPart : newTile.getPartList()) {
+                    cPart.invalidateConvertedTile();
+                }
                 world.setBlock(pos, CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState(), 0);
                 silentAddTile(world, pos, newTile);
                 PacketCustom.sendToChunk(new ClientboundBlockUpdatePacket(world, pos), world, pos);
-                head.onConverted();
-                MultiPartSPH.sendAddPart(newTile, head); //TODO, what if a converter converts the tile to more than one part?
+                for (MultiPart cPart : newTile.getPartList()) {
+                    cPart.onConverted();
+                    MultiPartSPH.sendAddPart(newTile, cPart);
+                }
             }
 
             //Get the traits that exist on this TileMultipart instance.
