@@ -16,7 +16,7 @@ import codechicken.multipart.init.CBMultipartModContent;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
-import net.covers1624.quack.collection.StreamableIterable;
+import net.covers1624.quack.collection.FastStream;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -117,9 +117,9 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
     }
 
     public ImmutableSet<MixinFactory.TraitKey> getTraits(Collection<MultiPart> parts, boolean client) {
-        return StreamableIterable.concat(
-                client ? StreamableIterable.of(clientTrait) : StreamableIterable.of(),
-                StreamableIterable.of(parts).flatMap(e -> getTraitsForObject(e, client))
+        return FastStream.concat(
+                client ? FastStream.of(clientTrait) : FastStream.of(),
+                FastStream.of(parts).flatMap(e -> getTraitsForObject(e, client))
         ).toImmutableSet();
     }
 

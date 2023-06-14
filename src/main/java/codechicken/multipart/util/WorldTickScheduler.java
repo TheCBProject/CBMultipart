@@ -3,6 +3,7 @@ package codechicken.multipart.util;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.RandomTickPart;
 import codechicken.multipart.block.TileMultipart;
+import net.covers1624.quack.collection.FastStream;
 import net.covers1624.quack.collection.StreamableIterable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -169,7 +170,7 @@ class WorldTickScheduler {
             CompoundTag tag = new CompoundTag();
 
             ListTag scheduledTicks = new ListTag();
-            StreamableIterable.of(instance.scheduledTicks)
+            FastStream.of(instance.scheduledTicks)
                     .map(PartTickEntry::write)
                     .filter(Objects::nonNull)
                     .forEach(scheduledTicks::add);
@@ -182,7 +183,7 @@ class WorldTickScheduler {
 
         public void readNBT(ChunkScheduler instance, Tag nbt) {
             CompoundTag tag = (CompoundTag) nbt;
-            StreamableIterable.of(tag.getList("ticks", 10))
+            FastStream.of(tag.getList("ticks", 10))
                     .map(e -> ((CompoundTag) e))
                     .map(SavedTickEntry::new)
                     .forEach(instance.savedTicks::add);

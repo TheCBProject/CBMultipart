@@ -20,7 +20,7 @@ import com.google.common.collect.Iterables;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
-import net.covers1624.quack.collection.StreamableIterable;
+import net.covers1624.quack.collection.FastStream;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -53,7 +53,7 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements Face
                 pBoxes[i][3] = new Cuboid6(w1, 0, 1 - w1, 1 - w1, d, 1).apply(tr);
 
                 occBounds[i] = new Cuboid6(1 / 8D, 0, 1 / 8D, 7 / 8D, d, 7 / 8D).apply(tr);
-                pShapes[i] = StreamableIterable.of(pBoxes[i]).map(VoxelShapeCache::getShape).fold(Shapes.empty(), Shapes::or);
+                pShapes[i] = FastStream.of(pBoxes[i]).map(VoxelShapeCache::getShape).fold(Shapes.empty(), Shapes::or);
             }
         }
     }
@@ -136,21 +136,21 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements Face
         double z1 = c.min.z;
         double z2 = c.max.z;
         return switch (slot) {
-            case 0, 1 -> StreamableIterable.of(
+            case 0, 1 -> FastStream.of(
                             new Cuboid6(d2, y1, d1, x2, y2, d2),
                             new Cuboid6(x1, y1, d1, d1, y2, d2),
                             new Cuboid6(x1, y1, d2, x2, y2, z2),
                             new Cuboid6(x1, y1, z1, x2, y2, d1))
                     .map(VoxelShapeCache::getShape)
                     .fold(Shapes.empty(), Shapes::or);
-            case 2, 3 -> StreamableIterable.of(
+            case 2, 3 -> FastStream.of(
                             new Cuboid6(d1, d2, z1, d2, y2, z2),
                             new Cuboid6(d1, y1, z1, d2, d1, z2),
                             new Cuboid6(d2, y1, z1, x2, y2, z2),
                             new Cuboid6(x1, y1, z1, d1, y2, z2))
                     .map(VoxelShapeCache::getShape)
                     .fold(Shapes.empty(), Shapes::or);
-            case 4, 5 -> StreamableIterable.of(
+            case 4, 5 -> FastStream.of(
                             new Cuboid6(x1, d1, d2, x2, d2, z2),
                             new Cuboid6(x1, d1, z1, x2, d2, d1),
                             new Cuboid6(x1, d2, z1, x2, y2, z2),
@@ -167,7 +167,7 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements Face
         double t = (shape >> 4) / 8D;
 
         Transformation tr = Rotation.sideRotations[shape & 0xF].at(Vector3.CENTER);
-        return StreamableIterable.of(
+        return FastStream.of(
                         new Cuboid6(0, 0, 0, 1, t, d1),
                         new Cuboid6(0, 0, d2, 1, t, 1),
                         new Cuboid6(0, 0, d1, d1, t, d2),

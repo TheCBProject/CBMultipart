@@ -16,7 +16,7 @@ import codechicken.multipart.network.MultiPartSPH;
 import codechicken.multipart.util.*;
 import com.google.common.base.Preconditions;
 import net.covers1624.quack.collection.ColUtils;
-import net.covers1624.quack.collection.StreamableIterable;
+import net.covers1624.quack.collection.FastStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -257,7 +257,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         if (oPart != nPart && partList.contains(nPart)) {
             return false;
         }
-        return occlusionTest(StreamableIterable.of(partList).filter(e -> e != oPart), nPart);
+        return occlusionTest(FastStream.of(partList).filter(e -> e != oPart), nPart);
     }
 
     public boolean occlusionTest(Iterable<MultiPart> parts, MultiPart nPart) {
