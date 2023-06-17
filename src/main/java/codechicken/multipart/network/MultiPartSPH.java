@@ -7,14 +7,12 @@ import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.util.LazyValuePair;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
-import codechicken.multipart.handler.PlacementConversionHandler;
 import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.util.ControlKeyModifier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.apache.commons.lang3.tuple.Pair;
@@ -36,7 +34,6 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
     public void handlePacket(PacketCustom packet, ServerPlayer sender, ServerGamePacketListenerImpl handler) {
         switch (packet.getType()) {
             case S_CONTROL_KEY_MODIFIER -> ControlKeyModifier.setIsControlDown(sender, packet.readBoolean());
-            case S_MULTIPART_PLACEMENT -> PlacementConversionHandler.place(sender, packet.readBoolean() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, sender.level);
         }
     }
 

@@ -60,7 +60,7 @@ public abstract class ItemMultipart extends Item {
         return true;
     }
 
-    private static double getHitDepth(Vector3 vHit, int side) {
+    public static double getHitDepth(Vector3 vHit, int side) {
         return vHit.scalarProject(Rotation.axes[side]) + (side % 2 ^ 1);
     }
 

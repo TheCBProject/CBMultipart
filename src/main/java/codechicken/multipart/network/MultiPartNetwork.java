@@ -23,7 +23,6 @@ public class MultiPartNetwork {
 
     //Server handled.
     public static final int S_CONTROL_KEY_MODIFIER = 1;
-    public static final int S_MULTIPART_PLACEMENT = 10;
 
     public static EventNetworkChannel netChannel;
 
