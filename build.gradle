@@ -84,6 +84,7 @@ minecraft {
 configurations {
     shadow
     implementation.extendsFrom shadow
+    annotationProcessor.extendsFrom minecraft
 }
 
 repositories {
