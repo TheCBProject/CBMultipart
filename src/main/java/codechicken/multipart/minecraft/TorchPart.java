@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -82,19 +83,20 @@ public class TorchPart extends McSidedStatePart implements AnimateTickPart {
     @Nullable
     @Override
     public MultiPart setStateOnPlacement(BlockPlaceContext context) {
-        BlockState wallState = getWallBlock().getStateForPlacement(context);
 
         Level world = context.getLevel();
         BlockPos pos = context.getClickedPos();
+        Direction face = context.getClickedFace();
 
-        for (Direction dir : context.getNearestLookingDirections()) {
-            if (dir != Direction.UP) {
-                BlockState state = dir == Direction.DOWN ? getStandingBlock().getStateForPlacement(context) : wallState;
-                if (state != null && state.canSurvive(world, pos)) {
-                    this.state = state;
-                    return this;
-                }
-            }
+        if (face == Direction.DOWN) return null;
+
+        BlockState state = face == Direction.UP ?
+                getStandingBlock().defaultBlockState() :
+                getWallBlock().defaultBlockState().setValue(WallTorchBlock.FACING, face);
+
+        if (state.canSurvive(world, pos)) {
+            this.state = state;
+            return this;
         }
 
         return null;
