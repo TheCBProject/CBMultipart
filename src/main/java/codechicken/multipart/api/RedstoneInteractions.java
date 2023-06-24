@@ -126,7 +126,7 @@ public class RedstoneInteractions {
         BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
         if (block instanceof RedstoneConnectorBlock bl) {
-            bl.getConnectionMask(world, pos, side);
+            return bl.getConnectionMask(world, pos, side);
         }
         return vanillaConnectionMask(world, pos, state, side, power);
     }
