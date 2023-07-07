@@ -140,10 +140,6 @@ public class RedstoneInteractions {
             return 0x1F;
         }
 
-        if (side == 0) { //vanilla doesn't handle side 0
-            return power ? 0x1F : 0;
-        }
-
         /*
          * so that these can be conducted to from face parts on the other side of the block.
          * Due to vanilla's inadequecy with redstone/logic on walls
