@@ -5,10 +5,7 @@ import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
-import codechicken.multipart.util.ControlKeyModifier;
-import codechicken.multipart.util.MultipartHelper;
-import codechicken.multipart.util.OffsetUseOnContext;
-import codechicken.multipart.util.PartRayTraceResult;
+import codechicken.multipart.util.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -152,7 +149,7 @@ public class MicroblockPlacement {
     @Nullable
     public ExecutablePlacement externalPlacement(MicroblockPart part) {
         BlockPos pos = this.pos.relative(Direction.from3DDataValue(side));
-        if (TileMultipart.canPlacePart(new OffsetUseOnContext(new UseOnContext(player, hand, hit)), part)) {
+        if (TileMultipart.canPlacePart(new MultipartPlaceContext(player, hand, hit).applyOffset(), part)) {
             return new ExecutablePlacement.AdditionPlacement(pos, part);
         }
         return null;

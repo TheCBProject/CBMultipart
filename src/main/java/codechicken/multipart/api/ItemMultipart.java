@@ -1,10 +1,8 @@
 package codechicken.multipart.api;
 
-import codechicken.lib.vec.Rotation;
-import codechicken.lib.vec.Vector3;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
-import codechicken.multipart.util.OffsetUseOnContext;
+import codechicken.multipart.util.MultipartPlaceContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
@@ -12,6 +10,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SoundType;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -24,22 +23,28 @@ public abstract class ItemMultipart extends Item {
     }
 
     @Nullable
-    public abstract MultiPart newPart(UseOnContext context);
+    @Deprecated(since = "1.18.2", forRemoval = true) // Override newPart(MultipartPlaceContext) instead
+    public MultiPart newPart(UseOnContext context) {
+        throw new NotImplementedException();
+    }
+
+    @Nullable
+    public MultiPart newPart(MultipartPlaceContext context) {
+        return newPart((UseOnContext) context);
+    }
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
 
-        Vector3 vHit = new Vector3(context.getClickLocation()).subtract(context.getClickedPos());
-        double hitDepth = getHitDepth(vHit, context.getClickedFace().ordinal());
+        MultipartPlaceContext ctx = new MultipartPlaceContext(context);
 
-        if (hitDepth < 1 && place(context)) {
+        if (ctx.getHitDepth() < 1 && place(ctx)) {
             return InteractionResult.SUCCESS;
         }
-
-        return place(new OffsetUseOnContext(context)) ? InteractionResult.SUCCESS : InteractionResult.FAIL;
+        return place(ctx.applyOffset()) ? InteractionResult.SUCCESS : InteractionResult.FAIL;
     }
 
-    private boolean place(UseOnContext context) {
+    private boolean place(MultipartPlaceContext context) {
         Level world = context.getLevel();
         BlockPos pos = context.getClickedPos();
 
@@ -59,9 +64,4 @@ public abstract class ItemMultipart extends Item {
         }
         return true;
     }
-
-    public static double getHitDepth(Vector3 vHit, int side) {
-        return vHit.scalarProject(Rotation.axes[side]) + (side % 2 ^ 1);
-    }
-
 }

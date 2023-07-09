@@ -2,6 +2,7 @@ package codechicken.multipart.api;
 
 import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.util.MultipartPlaceContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -46,10 +47,15 @@ public abstract class PartConverter extends ForgeRegistryEntry<PartConverter> {
     /**
      * Convert an {@link ItemStack} about to be placed into a {@link MultiPart} instance.
      *
-     * @param context The {@link UseOnContext} for the placement.
+     * @param context The {@link MultipartPlaceContext} for the placement.
      * @return A {@link ConversionResult}, providing the {@link MultiPart} instance if conversion
      * was successful.
      */
+    public ConversionResult<MultiPart> convert(MultipartPlaceContext context) {
+        return convert((UseOnContext) context);
+    }
+
+    @Deprecated(since = "1.18.2", forRemoval = true) // Use convert(MultipartPlaceContext)
     public ConversionResult<MultiPart> convert(UseOnContext context) {
         return emptyResult();
     }
