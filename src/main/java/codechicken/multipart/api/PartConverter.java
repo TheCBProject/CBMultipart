@@ -9,7 +9,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -18,7 +17,7 @@ import java.util.Collections;
 /**
  * Created by covers1624 on 4/17/20.
  */
-public abstract class PartConverter extends ForgeRegistryEntry<PartConverter> {
+public abstract class PartConverter {
 
     /**
      * The Forge registry name used by PartConverter.
@@ -52,11 +51,6 @@ public abstract class PartConverter extends ForgeRegistryEntry<PartConverter> {
      * was successful.
      */
     public ConversionResult<MultiPart> convert(MultipartPlaceContext context) {
-        return convert((UseOnContext) context);
-    }
-
-    @Deprecated(since = "1.18.2", forRemoval = true) // Use convert(MultipartPlaceContext)
-    public ConversionResult<MultiPart> convert(UseOnContext context) {
         return emptyResult();
     }
 

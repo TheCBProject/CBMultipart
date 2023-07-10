@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.common.TierSortingRegistry;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -50,11 +51,6 @@ public class BlockMicroMaterial extends MicroMaterial {
 
     public BlockMicroMaterial(BlockState state) {
         this.state = state;
-        setRegistryName();
-    }
-
-    protected void setRegistryName() {
-        setRegistryName(makeMaterialKey(state));
     }
 
     @Override
@@ -113,11 +109,8 @@ public class BlockMicroMaterial extends MicroMaterial {
             }
 
             @Override
-            public boolean renderCuboids(CCRenderState ccrs, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids) {
-                if (layer == null || ItemBlockRenderTypes.canRenderInLayer(state, layer)) {
-                    return MicroblockRender.renderCuboids(ccrs, state, layer, cuboids);
-                }
-                return false;
+            public void renderCuboids(CCRenderState ccrs, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids) {
+                MicroblockRender.renderCuboids(ccrs, state, layer, cuboids);
             }
 
             @Override
@@ -186,7 +179,7 @@ public class BlockMicroMaterial extends MicroMaterial {
      */
     public static ResourceLocation makeMaterialKey(BlockState state) {
         Block block = state.getBlock();
-        StringBuilder path = new StringBuilder(block.getRegistryName().getPath());
+        StringBuilder path = new StringBuilder(ForgeRegistries.BLOCKS.getKey(block).getPath());
         if (!state.getProperties().isEmpty()) {
             path.append("//");
 
@@ -198,6 +191,6 @@ public class BlockMicroMaterial extends MicroMaterial {
                 path.append(property.getName()).append('.').append(property.getName(unsafeCast(entry.getValue())));
             }
         }
-        return new ResourceLocation(block.getRegistryName().getNamespace(), path.toString());
+        return new ResourceLocation(ForgeRegistries.BLOCKS.getKey(block).getNamespace(), path.toString());
     }
 }

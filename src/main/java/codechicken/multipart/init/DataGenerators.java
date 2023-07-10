@@ -5,9 +5,8 @@ import net.minecraft.data.DataGenerator;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 import static codechicken.multipart.CBMultipart.MOD_ID;
 
@@ -26,9 +25,8 @@ public class DataGenerators {
     public static void gatherDataGenerators(GatherDataEvent event) {
         DataGenerator gen = event.getGenerator();
         ExistingFileHelper files = event.getExistingFileHelper();
-        if (event.includeClient()) {
-            gen.addProvider(new BlockStates(gen, files));
-        }
+
+        gen.addProvider(event.includeClient(), new BlockStates(gen, files));
     }
 
     private static class BlockStates extends BlockStateProvider {

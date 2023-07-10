@@ -13,7 +13,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraftforge.client.event.DrawSelectionEvent;
+import net.minecraftforge.client.event.RenderHighlightEvent;
 import net.minecraftforge.common.MinecraftForge;
 
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
@@ -27,11 +27,11 @@ public class ClientEventHandler {
         MinecraftForge.EVENT_BUS.addListener(ClientEventHandler::onDrawBlockHighlight);
     }
 
-    private static void onDrawBlockHighlight(DrawSelectionEvent.HighlightBlock event) {
+    private static void onDrawBlockHighlight(RenderHighlightEvent.Block event) {
         Camera camera = event.getCamera();
         PoseStack mStack = event.getPoseStack();
         MultiBufferSource buffers = event.getMultiBufferSource();
-        float partialTicks = event.getPartialTicks();
+        float partialTicks = event.getPartialTick();
         BlockHitResult target = event.getTarget();
         if (!(target instanceof PartRayTraceResult hit)) return;
 

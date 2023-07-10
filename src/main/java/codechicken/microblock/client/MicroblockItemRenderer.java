@@ -1,19 +1,19 @@
 package codechicken.microblock.client;
 
+import codechicken.lib.model.PerspectiveModelState;
 import codechicken.lib.render.CCRenderState;
 import codechicken.lib.render.item.IItemRenderer;
 import codechicken.lib.util.TransformUtils;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.api.MicroMaterialClient;
-import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.part.MicroblockPart;
+import codechicken.microblock.part.StandardMicroFactory;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -53,7 +53,7 @@ public class MicroblockItemRenderer implements IItemRenderer {
     }
 
     @Override
-    public ModelState getModelTransform() {
+    public PerspectiveModelState getModelState() {
         return TransformUtils.DEFAULT_BLOCK;
     }
 

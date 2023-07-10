@@ -25,7 +25,7 @@ public abstract class MicroMaterialClient {
 
     public abstract RenderType getItemRenderLayer();
 
-    public abstract boolean renderCuboids(CCRenderState ccrs, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids);
+    public abstract void renderCuboids(CCRenderState ccrs, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids);
 
     public void renderDynamic(MicroblockPart part, @Nullable ItemTransforms.TransformType transformType, PoseStack pStack, MultiBufferSource buffers, int packedLight, int packedOverlay, float partialTicks) { }
 

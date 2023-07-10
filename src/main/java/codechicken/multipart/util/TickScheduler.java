@@ -17,7 +17,7 @@ import net.minecraftforge.common.capabilities.*;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.world.ChunkEvent;
+import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -98,7 +98,7 @@ public class TickScheduler {
     }
 
     private static void onChunkLoad(ChunkEvent.Load event) {
-        if (!(event.getWorld() instanceof ServerLevel) || !(event.getChunk() instanceof LevelChunk chunk)) {
+        if (!(event.getLevel() instanceof ServerLevel) || !(event.getChunk() instanceof LevelChunk chunk)) {
             return;
         }
         WorldTickScheduler.ChunkScheduler chunkScheduler = WorldTickScheduler.getInstance(chunk);
@@ -106,15 +106,15 @@ public class TickScheduler {
     }
 
     private static void onChunkUnload(ChunkEvent.Unload event) {
-        if (!(event.getWorld() instanceof ServerLevel level)) {
+        if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
         WorldTickScheduler worldScheduler = WorldTickScheduler.getInstance(level);
         worldScheduler.onChunkUnload(event.getChunk().getPos());
     }
 
-    private static void onWorldTick(TickEvent.WorldTickEvent event) {
-        if (!(event.world instanceof ServerLevel level) || event.phase != TickEvent.Phase.END) {
+    private static void onWorldTick(TickEvent.LevelTickEvent event) {
+        if (!(event.level instanceof ServerLevel level) || event.phase != TickEvent.Phase.END) {
             return;
         }
         WorldTickScheduler worldScheduler = WorldTickScheduler.getInstance(level);

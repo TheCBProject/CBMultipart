@@ -5,9 +5,9 @@ import codechicken.multipart.api.annotation.MultiPartTrait;
 import codechicken.multipart.api.part.AnimateTickPart;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
+import net.minecraft.util.RandomSource;
 
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by covers1624 on 2/9/20.
@@ -16,7 +16,7 @@ import java.util.Random;
 public class TAnimateTickTile extends TileMultipart {
 
     @Override
-    public void animateTick(Random random) {
+    public void animateTick(RandomSource random) {
         List<MultiPart> jPartList = getPartList();
         //noinspection ForLoopReplaceableByForEach
         for (int i = 0; i < jPartList.size(); i++) {

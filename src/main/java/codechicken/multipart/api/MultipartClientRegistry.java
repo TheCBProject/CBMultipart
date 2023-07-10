@@ -23,7 +23,7 @@ public class MultipartClientRegistry {
         if (type.renderer != null) {
             throw new IllegalArgumentException(
                     "Attempted to replace part renderer for: "
-                            + type.getRegistryType()
+                            + type.getRegistryName()
                             + ". Prev: " + type.renderer.getClass()
                             + ", New: " + renderer.getClass()
             );

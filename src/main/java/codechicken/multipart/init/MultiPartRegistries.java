@@ -14,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryBuilder;
@@ -26,8 +25,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
-
 /**
  * Created by covers1624 on 3/16/20.
  */
@@ -37,7 +34,7 @@ public class MultiPartRegistries {
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
 
     public static IForgeRegistry<MultipartType<?>> MULTIPART_TYPES;
-    private static IForgeRegistry<PartConverter> PART_CONVERTERS;
+    public static IForgeRegistry<PartConverter> PART_CONVERTERS;
 
     public static void init() {
         LOCK.lock();
@@ -47,11 +44,9 @@ public class MultiPartRegistries {
     private static void createRegistries(NewRegistryEvent event) {
         event.create(new RegistryBuilder<MultipartType<?>>()
                 .setName(MultipartType.MULTIPART_TYPES)
-                .setType(unsafeCast(MultipartType.class))
-                .disableSaving(), e -> MULTIPART_TYPES = (ForgeRegistry<MultipartType<?>>) e);
+                .disableSaving(), e -> MULTIPART_TYPES = e);
         event.create(new RegistryBuilder<PartConverter>()
                         .setName(PartConverter.PART_CONVERTERS)
-                        .setType(PartConverter.class)
                         .disableOverrides()
                         .disableSaving()
                         .disableSync(),
@@ -76,7 +71,7 @@ public class MultiPartRegistries {
         if (!MULTIPART_TYPES.containsKey(name)) {
             throw new RuntimeException("MultiPartType with name '" + name + "' is not registered.");
         }
-        data.writeRegistryIdUnsafe(MULTIPART_TYPES, type);
+        data.writeRegistryIdDirect(MULTIPART_TYPES, type);
         part.writeDesc(data);
     }
 
@@ -93,7 +88,7 @@ public class MultiPartRegistries {
      * @return The TMultiPart.
      */
     public static MultiPart readPart(MCDataInput data) {
-        MultipartType<?> type = data.readRegistryIdUnsafe(MULTIPART_TYPES);
+        MultipartType<?> type = data.readRegistryIdDirect(MULTIPART_TYPES);
         MultiPart part = type.createPartClient(data);
         part.readDesc(data);
         return part;

@@ -35,6 +35,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -45,15 +46,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.client.event.DrawSelectionEvent;
-import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraftforge.client.event.RenderHighlightEvent;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.OptionalDouble;
-import java.util.Random;
 
 import static codechicken.microblock.CBMicroblock.MOD_ID;
 
@@ -89,7 +88,7 @@ public class MicroblockRender {
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGH, MicroblockRender::onDrawHighlight);
     }
 
-    private static void onDrawHighlight(DrawSelectionEvent.HighlightBlock event) {
+    private static void onDrawHighlight(RenderHighlightEvent.Block event) {
         Camera camera = event.getCamera();
         if (camera.getEntity() instanceof Player player) {
             ItemStack stack = player.getMainHandItem();
@@ -101,7 +100,7 @@ public class MicroblockRender {
             PoseStack pStack = event.getPoseStack();
             pStack.pushPose();
             pStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
-            if (renderHighlight(player, InteractionHand.MAIN_HAND, stack, event.getTarget(), pStack, event.getMultiBufferSource(), event.getPartialTicks())) {
+            if (renderHighlight(player, InteractionHand.MAIN_HAND, stack, event.getTarget(), pStack, event.getMultiBufferSource(), event.getPartialTick())) {
                 event.setCanceled(true);
             }
 
@@ -168,10 +167,10 @@ public class MicroblockRender {
         mat.translate(0, rHit.y - 0.002, 0);
     }
 
-    public static boolean renderCuboids(CCRenderState ccrs, BlockState state, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids) {
+    public static void renderCuboids(CCRenderState ccrs, BlockState state, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids) {
         PipelineState pipeState = PIPELINES.get();
         BakedVertexSource vertexSource = BakedVertexSource.instance();
-        Random randy = new Random();
+        RandomSource randy = RandomSource.create();
 
         BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
         BlockColors blockColors = Minecraft.getInstance().getBlockColors();
@@ -180,29 +179,29 @@ public class MicroblockRender {
         BlockPos pos = null;
         long seed = 42L;
         BlockAndTintGetter level = null;
-        IModelData modelData = EmptyModelData.INSTANCE;
+        ModelData modelData = ModelData.EMPTY;
         if (layer != null) {
             pos = ccrs.lightMatrix.pos;
             seed = state.getSeed(pos);
             level = new MicroblockLevelProxy(ccrs.lightMatrix.access, pos, state);
             modelData = model.getModelData(level, pos, state, modelData);
+
+            if (!model.getRenderTypes(state, randy, modelData).contains(layer)) return;
         }
 
-        boolean ret = false;
         for (Direction face : Direction.BY_3D_DATA) {
             randy.setSeed(seed);
-            for (BakedQuad quad : model.getQuads(state, face, randy, modelData)) {
-                ret |= renderQuad(ccrs, vertexSource, pipeState, blockColors, layer, quad, state, level, pos, cuboids);
+            for (BakedQuad quad : model.getQuads(state, face, randy, modelData, layer)) {
+                renderQuad(ccrs, vertexSource, pipeState, blockColors, layer, quad, state, level, pos, cuboids);
             }
         }
         randy.setSeed(seed);
-        for (BakedQuad quad : model.getQuads(state, null, randy, modelData)) {
-            ret |= renderQuad(ccrs, vertexSource, pipeState, blockColors, layer, quad, state, level, pos, cuboids);
+        for (BakedQuad quad : model.getQuads(state, null, randy, modelData, layer)) {
+            renderQuad(ccrs, vertexSource, pipeState, blockColors, layer, quad, state, level, pos, cuboids);
         }
-        return ret;
     }
 
-    private static boolean renderQuad(CCRenderState ccrs, BakedVertexSource vs, PipelineState pipeState, BlockColors blockColors, @Nullable RenderType layer, BakedQuad quad, BlockState state, @Nullable BlockAndTintGetter level, @Nullable BlockPos pos, Iterable<MaskedCuboid> cuboids) {
+    private static void renderQuad(CCRenderState ccrs, BakedVertexSource vs, PipelineState pipeState, BlockColors blockColors, @Nullable RenderType layer, BakedQuad quad, BlockState state, @Nullable BlockAndTintGetter level, @Nullable BlockPos pos, Iterable<MaskedCuboid> cuboids) {
         BakedPipeline pipeline = pipeState.pipeline;
         QuadClamper clamper = pipeState.clamper;
         QuadFaceStripper faceStripper = pipeState.faceStripper;
@@ -223,10 +222,10 @@ public class MicroblockRender {
             pipeline.setElementState("tinter", quad.isTinted());
 
             pipeline.prepare(vs);
-            quad.pipe(pipeline);
+            pipeline.put(quad);
         }
 
-        if (vs.getVertexCount() <= 0) return false;
+        if (vs.getVertexCount() <= 0) return;
 
         ccrs.setModel(vs);
         if (layer != null) {
@@ -234,7 +233,6 @@ public class MicroblockRender {
         } else {
             ccrs.render();
         }
-        return true;
     }
 
     // Exists as a mixin target for mods which change the vertex formats.

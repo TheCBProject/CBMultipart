@@ -35,9 +35,9 @@ public class PlacementConversionHandler {
     }
 
     private static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        Level world = event.getWorld();
+        Level world = event.getLevel();
 
-        if (place(event.getPlayer(), event.getHand())) {
+        if (place(event.getEntity(), event.getHand())) {
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.sidedSuccess(world.isClientSide));
         }

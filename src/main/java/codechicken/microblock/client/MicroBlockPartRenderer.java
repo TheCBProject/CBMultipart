@@ -17,12 +17,11 @@ public class MicroBlockPartRenderer implements PartRenderer<MicroblockPart> {
     public static final MicroBlockPartRenderer INSTANCE = new MicroBlockPartRenderer();
 
     @Override
-    public boolean renderStatic(MicroblockPart part, @Nullable RenderType layer, CCRenderState ccrs) {
+    public void renderStatic(MicroblockPart part, @Nullable RenderType layer, CCRenderState ccrs) {
         MicroMaterialClient clientMaterial = MicroMaterialClient.get(part.material);
         if (clientMaterial != null) {
-            return clientMaterial.renderCuboids(ccrs, layer, part.getRenderCuboids(false));
+            clientMaterial.renderCuboids(ccrs, layer, part.getRenderCuboids(false));
         }
-        return false;
     }
 
     @Override

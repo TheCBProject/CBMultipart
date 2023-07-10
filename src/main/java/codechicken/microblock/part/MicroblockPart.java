@@ -63,7 +63,7 @@ public abstract class MicroblockPart extends BaseMultipart {
 
     @Override
     public void writeDesc(MCDataOutput packet) {
-        packet.writeRegistryIdUnsafe(MicroMaterialRegistry.MICRO_MATERIALS, material);
+        packet.writeRegistryIdDirect(MicroMaterialRegistry.MICRO_MATERIALS, material);
         packet.writeByte(shape);
     }
 

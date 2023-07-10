@@ -3,15 +3,17 @@ package codechicken.multipart.api;
 import codechicken.lib.data.MCDataInput;
 import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.init.MultiPartRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * Created by covers1624 on 3/16/20.
  */
-public abstract class MultipartType<T extends MultiPart> extends ForgeRegistryEntry<MultipartType<?>> {
+public abstract class MultipartType<T extends MultiPart> {
 
     /**
      * The Forge registry name used by MultipartType.
@@ -47,4 +49,8 @@ public abstract class MultipartType<T extends MultiPart> extends ForgeRegistryEn
      * @return The client-side part.
      */
     public abstract T createPartClient(MCDataInput packet);
+
+    public ResourceLocation getRegistryName() {
+        return Objects.requireNonNull(MultiPartRegistries.MULTIPART_TYPES.getKey(this));
+    }
 }
