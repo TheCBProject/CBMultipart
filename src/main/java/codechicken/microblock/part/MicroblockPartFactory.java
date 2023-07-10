@@ -18,13 +18,16 @@ public abstract class MicroblockPartFactory extends MultipartType<MicroblockPart
     @Nullable
     @Override
     public MicroblockPart createPartServer(CompoundTag tag) {
-        return create(false, MicroMaterialRegistry.getMaterial(tag.getString("material")));
+        MicroMaterial material = MicroMaterialRegistry.getMaterial(tag.getString("material"));
+        if (material == null) return null;
+
+        return create(false, material);
     }
 
     @NotNull
     @Override
     public MicroblockPart createPartClient(MCDataInput packet) {
-        return create(true, packet.readRegistryIdUnsafe(MicroMaterialRegistry.MICRO_MATERIALS));
+        return create(true, packet.readRegistryIdDirect(MicroMaterialRegistry.MICRO_MATERIALS));
     }
 
     public abstract float getResistanceFactor();

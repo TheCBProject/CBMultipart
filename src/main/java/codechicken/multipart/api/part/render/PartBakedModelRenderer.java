@@ -7,10 +7,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
-import java.util.Random;
 
 /**
  * A simple {@link PartRenderer} partial implementation to render a {@link BlockState}'s {@link BakedModel}.
@@ -32,12 +32,16 @@ public interface PartBakedModelRenderer<T extends ModelRenderPart> extends PartR
     }
 
     @Override
-    default boolean renderStatic(T part, @Nullable RenderType layer, CCRenderState ccrs) {
-        if (!part.canRenderInLayer(layer)) return false;
+    @SuppressWarnings("ConstantConditions")
+    default void renderStatic(T part, @Nullable RenderType layer, CCRenderState ccrs) {
 
         BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
-        Random randy = new Random();
-        return blockRenderer.renderBatched(
+        BlockState state = part.getCurrentState();
+        RandomSource randy = RandomSource.create();
+
+        if (layer != null && !blockRenderer.getBlockModel(state).getRenderTypes(state, randy, part.getModelData()).contains(layer)) return;
+
+        blockRenderer.renderBatched(
                 part.getCurrentState(),
                 part.pos(),
                 ccrs.lightMatrix.access,
@@ -45,7 +49,7 @@ public interface PartBakedModelRenderer<T extends ModelRenderPart> extends PartR
                 ccrs.getConsumer(),
                 true,
                 randy,
-                part.getModelData()
-        );
+                part.getModelData(),
+                layer); // Suppressed warning: Was not marked as nullable
     }
 }

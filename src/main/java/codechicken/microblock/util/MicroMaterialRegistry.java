@@ -7,6 +7,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryBuilder;
+import org.jetbrains.annotations.Nullable;
 
 import static codechicken.microblock.CBMicroblock.MOD_ID;
 
@@ -28,17 +29,18 @@ public class MicroMaterialRegistry {
     private static void createRegistries(NewRegistryEvent event) {
         event.create(new RegistryBuilder<MicroMaterial>()
                         .setName(new ResourceLocation(MOD_ID, "micro_material"))
-                        .setType(MicroMaterial.class)
                         .disableSaving()
                         .allowModification(),
                 e -> MICRO_MATERIALS = e
         );
     }
 
+    @Nullable
     public static MicroMaterial getMaterial(String name) {
         return getMaterial(new ResourceLocation(name));
     }
 
+    @Nullable
     public static MicroMaterial getMaterial(ResourceLocation name) {
         return MICRO_MATERIALS.getValue(name);
     }

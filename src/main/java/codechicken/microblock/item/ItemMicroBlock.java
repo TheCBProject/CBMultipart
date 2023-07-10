@@ -2,15 +2,13 @@ package codechicken.microblock.item;
 
 import codechicken.lib.raytracer.RayTracer;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.ExecutablePlacement;
 import codechicken.microblock.part.MicroblockPlacement;
+import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.util.MicroMaterialRegistry;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
@@ -43,15 +41,15 @@ public class ItemMicroBlock extends Item {
         StandardMicroFactory factory = getFactory(stack);
         int size = getSize(stack);
         if (material == null || factory == null) {
-            return new TextComponent("Unnamed");
+            return Component.literal("Unnamed");
         }
 
-        return new TranslatableComponent("item." + factory.getRegistryName().toString().replace(':', '.') + "." + size, material.getLocalizedName());
+        return Component.translatable("item." + factory.getRegistryName().toString().replace(':', '.') + "." + size, material.getLocalizedName());
     }
 
     @Override
     public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
-        if (!allowdedIn(tab)) return;
+        if (!allowedIn(tab)) return;
 
         for (StandardMicroFactory factory : StandardMicroFactory.FACTORIES.values()) {
             for (int size : new int[] { 1, 2, 4 }) {

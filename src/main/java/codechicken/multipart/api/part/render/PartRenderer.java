@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.client.event.DrawSelectionEvent;
+import net.minecraftforge.client.event.RenderHighlightEvent;
 
 import javax.annotation.Nullable;
 
@@ -52,10 +52,8 @@ public interface PartRenderer<T extends MultiPart> {
      * @param part  The {@link MultiPart} being rendered.
      * @param layer The block {@link RenderType} layer being rendered. <code>null</code> for {@link #renderBreaking}
      * @param ccrs  The {@link CCRenderState} instance to render with.
-     * @return If any vertices were drawn.
      */
-    default boolean renderStatic(T part, @Nullable RenderType layer, CCRenderState ccrs) {
-        return false;
+    default void renderStatic(T part, @Nullable RenderType layer, CCRenderState ccrs) {
     }
 
     /**
@@ -103,7 +101,7 @@ public interface PartRenderer<T extends MultiPart> {
     /**
      * Override the drawing of the selection box around this part.
      * <p>
-     * This is called with the context of {@link DrawSelectionEvent.HighlightBlock}.
+     * This is called with the context of {@link RenderHighlightEvent.Block}.
      *
      * @param part         The {@link MultiPart} being rendered.
      * @param hit          The {@link PartRayTraceResult}.

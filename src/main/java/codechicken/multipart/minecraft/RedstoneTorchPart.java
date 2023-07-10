@@ -6,14 +6,13 @@ import codechicken.multipart.api.part.RandomTickPart;
 import codechicken.multipart.api.part.redstone.FaceRedstonePart;
 import codechicken.multipart.util.TickScheduler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RedstoneTorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Random;
 
 public class RedstoneTorchPart extends TorchPart implements FaceRedstonePart, RandomTickPart {
 
@@ -47,7 +46,7 @@ public class RedstoneTorchPart extends TorchPart implements FaceRedstonePart, Ra
     }
 
     @Override
-    public void animateTick(Random random) {
+    public void animateTick(RandomSource random) {
         if (!active()) {
             return;
         }

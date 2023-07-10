@@ -10,8 +10,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import org.jetbrains.annotations.Nullable;
 
 import static codechicken.microblock.CBMicroblock.MOD_ID;
@@ -36,14 +36,10 @@ public class DataGenerators {
         DataGenerator gen = event.getGenerator();
         ExistingFileHelper files = event.getExistingFileHelper();
 
-        if (event.includeClient()) {
-            gen.addProvider(new ItemModels(gen, files));
-        }
+        gen.addProvider(event.includeClient(), new ItemModels(gen, files));
 
-        if (event.includeServer()) {
-            gen.addProvider(new ItemTagGen(gen, new BlockTagsProvider(gen), files));
-            gen.addProvider(new Recipes(gen));
-        }
+        gen.addProvider(event.includeServer(), new ItemTagGen(gen, new BlockTagsProvider(gen), files));
+        gen.addProvider(event.includeServer(), new Recipes(gen));
     }
 
     private static class ItemTagGen extends ItemTagsProvider {

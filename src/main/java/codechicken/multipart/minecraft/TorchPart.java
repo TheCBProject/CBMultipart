@@ -9,6 +9,7 @@ import codechicken.multipart.api.part.AnimateTickPart;
 import codechicken.multipart.api.part.MultiPart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -19,8 +20,6 @@ import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Random;
 
 public class TorchPart extends McSidedStatePart implements AnimateTickPart {
 
@@ -103,7 +102,7 @@ public class TorchPart extends McSidedStatePart implements AnimateTickPart {
     }
 
     @Override
-    public void animateTick(Random random) {
+    public void animateTick(RandomSource random) {
         state.getBlock().animateTick(state, level(), pos(), random);
     }
 }

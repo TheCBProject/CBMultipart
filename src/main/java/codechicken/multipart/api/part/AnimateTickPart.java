@@ -2,9 +2,8 @@ package codechicken.multipart.api.part;
 
 import codechicken.multipart.api.annotation.MultiPartMarker;
 import codechicken.multipart.trait.TAnimateTickTile;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
-
-import java.util.Random;
 
 /**
  * Parts that need to do random animation ticks can implement this.
@@ -15,5 +14,5 @@ import java.util.Random;
 @MultiPartMarker (TAnimateTickTile.class)
 public interface AnimateTickPart extends MultiPart {
 
-    void animateTick(Random random);
+    void animateTick(RandomSource random);
 }

@@ -6,7 +6,6 @@ import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.item.SawItem;
-import codechicken.microblock.part.MicroblockPartFactory;
 import codechicken.microblock.part.corner.CornerMicroFactory;
 import codechicken.microblock.part.edge.EdgeMicroFactory;
 import codechicken.microblock.part.edge.PostMicroblockFactory;
@@ -19,14 +18,16 @@ import codechicken.multipart.api.MultipartType;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
@@ -34,6 +35,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Paths;
@@ -41,6 +43,7 @@ import java.nio.file.Paths;
 /**
  * Created by covers1624 on 26/6/22.
  */
+@ApiStatus.Internal
 public class CBMicroblockModContent {
 
     private static final Logger LOGGER = LogManager.getLogger();
@@ -82,7 +85,7 @@ public class CBMicroblockModContent {
         ITEMS.register(bus);
         MULTIPART_TYPES.register(bus);
         RECIPE_SERIALIZERS.register(bus);
-        bus.addGenericListener(MicroMaterial.class, CBMicroblockModContent::onRegisterMicroMaterials);
+        bus.addListener(CBMicroblockModContent::onRegisterMicroMaterials);
         bus.addListener(CBMicroblockModContent::onCommonSetup);
         bus.addListener(CBMicroblockModContent::onProcessIMC);
     }
@@ -105,311 +108,331 @@ public class CBMicroblockModContent {
         MicroMaterialConfig.parse(Paths.get("config", "custom-micromaterials.cfg"));
     }
 
-    private static void onRegisterMicroMaterials(RegistryEvent.Register<MicroMaterial> event) {
+    private static void onRegisterMicroMaterials(RegisterEvent event) {
         // Note: Intentionally kept in same order as Blocks class
-        IForgeRegistry<MicroMaterial> r = event.getRegistry();
-        r.register(new BlockMicroMaterial(Blocks.STONE));
-        r.register(new BlockMicroMaterial(Blocks.GRANITE));
-        r.register(new BlockMicroMaterial(Blocks.POLISHED_GRANITE));
-        r.register(new BlockMicroMaterial(Blocks.DIORITE));
-        r.register(new BlockMicroMaterial(Blocks.POLISHED_DIORITE));
-        r.register(new BlockMicroMaterial(Blocks.ANDESITE));
-        r.register(new BlockMicroMaterial(Blocks.POLISHED_ANDESITE));
-        r.register(new BlockMicroMaterial(Blocks.GRASS_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.DIRT));
-        r.register(new BlockMicroMaterial(Blocks.COARSE_DIRT));
-        r.register(new BlockMicroMaterial(Blocks.PODZOL));
-        r.register(new BlockMicroMaterial(Blocks.COBBLESTONE));
-        r.register(new BlockMicroMaterial(Blocks.OAK_PLANKS));
-        r.register(new BlockMicroMaterial(Blocks.SPRUCE_PLANKS));
-        r.register(new BlockMicroMaterial(Blocks.BIRCH_PLANKS));
-        r.register(new BlockMicroMaterial(Blocks.JUNGLE_PLANKS));
-        r.register(new BlockMicroMaterial(Blocks.ACACIA_PLANKS));
-        r.register(new BlockMicroMaterial(Blocks.DARK_OAK_PLANKS));
-        r.register(new BlockMicroMaterial(Blocks.SAND)); //TODO Gravity?
-        r.register(new BlockMicroMaterial(Blocks.RED_SAND)); //TODO Gravity?
-        r.register(new BlockMicroMaterial(Blocks.GRAVEL));
-        r.register(new BlockMicroMaterial(Blocks.GOLD_ORE));
-        r.register(new BlockMicroMaterial(Blocks.DEEPSLATE_GOLD_ORE));
-        r.register(new BlockMicroMaterial(Blocks.IRON_ORE));
-        r.register(new BlockMicroMaterial(Blocks.DEEPSLATE_IRON_ORE));
-        r.register(new BlockMicroMaterial(Blocks.COAL_ORE));
-        r.register(new BlockMicroMaterial(Blocks.DEEPSLATE_COAL_ORE));
-        r.register(new BlockMicroMaterial(Blocks.NETHER_GOLD_ORE));
-        r.register(new BlockMicroMaterial(Blocks.OAK_LOG));
-        r.register(new BlockMicroMaterial(Blocks.SPRUCE_LOG));
-        r.register(new BlockMicroMaterial(Blocks.BIRCH_LOG));
-        r.register(new BlockMicroMaterial(Blocks.JUNGLE_LOG));
-        r.register(new BlockMicroMaterial(Blocks.ACACIA_LOG));
-        r.register(new BlockMicroMaterial(Blocks.DARK_OAK_LOG));
-        r.register(new BlockMicroMaterial(Blocks.STRIPPED_SPRUCE_LOG));
-        r.register(new BlockMicroMaterial(Blocks.STRIPPED_BIRCH_LOG));
-        r.register(new BlockMicroMaterial(Blocks.STRIPPED_JUNGLE_LOG));
-        r.register(new BlockMicroMaterial(Blocks.STRIPPED_ACACIA_LOG));
-        r.register(new BlockMicroMaterial(Blocks.STRIPPED_DARK_OAK_LOG));
-        r.register(new BlockMicroMaterial(Blocks.STRIPPED_OAK_LOG));
-        r.register(new BlockMicroMaterial(Blocks.OAK_WOOD));
-        r.register(new BlockMicroMaterial(Blocks.SPRUCE_WOOD));
-        r.register(new BlockMicroMaterial(Blocks.BIRCH_WOOD));
-        r.register(new BlockMicroMaterial(Blocks.JUNGLE_WOOD));
-        r.register(new BlockMicroMaterial(Blocks.ACACIA_WOOD));
-        r.register(new BlockMicroMaterial(Blocks.DARK_OAK_WOOD));
-        r.register(new BlockMicroMaterial(Blocks.STRIPPED_OAK_WOOD));
-        r.register(new BlockMicroMaterial(Blocks.STRIPPED_SPRUCE_WOOD));
-        r.register(new BlockMicroMaterial(Blocks.STRIPPED_BIRCH_WOOD));
-        r.register(new BlockMicroMaterial(Blocks.STRIPPED_JUNGLE_WOOD));
-        r.register(new BlockMicroMaterial(Blocks.STRIPPED_ACACIA_WOOD));
-        r.register(new BlockMicroMaterial(Blocks.STRIPPED_DARK_OAK_WOOD));
-        r.register(new BlockMicroMaterial(Blocks.OAK_LEAVES));
-        r.register(new BlockMicroMaterial(Blocks.SPRUCE_LEAVES));
-        r.register(new BlockMicroMaterial(Blocks.BIRCH_LEAVES));
-        r.register(new BlockMicroMaterial(Blocks.JUNGLE_LEAVES));
-        r.register(new BlockMicroMaterial(Blocks.ACACIA_LEAVES));
-        r.register(new BlockMicroMaterial(Blocks.DARK_OAK_LEAVES));
-        r.register(new BlockMicroMaterial(Blocks.AZALEA_LEAVES));
-        r.register(new BlockMicroMaterial(Blocks.FLOWERING_AZALEA_LEAVES));
-        r.register(new BlockMicroMaterial(Blocks.SPONGE));
-        r.register(new BlockMicroMaterial(Blocks.WET_SPONGE));
-        r.register(new BlockMicroMaterial(Blocks.GLASS));
-        r.register(new BlockMicroMaterial(Blocks.LAPIS_ORE));
-        r.register(new BlockMicroMaterial(Blocks.DEEPSLATE_LAPIS_ORE));
-        r.register(new BlockMicroMaterial(Blocks.LAPIS_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.SANDSTONE));
-        r.register(new BlockMicroMaterial(Blocks.CHISELED_SANDSTONE));
-        r.register(new BlockMicroMaterial(Blocks.CUT_SANDSTONE));
-        r.register(new BlockMicroMaterial(Blocks.WHITE_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.ORANGE_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.MAGENTA_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.LIGHT_BLUE_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.YELLOW_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.LIME_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.PINK_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.GRAY_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.LIGHT_GRAY_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.CYAN_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.PURPLE_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.BLUE_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.BROWN_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.GREEN_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.RED_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.BLACK_WOOL));
-        r.register(new BlockMicroMaterial(Blocks.GOLD_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.IRON_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.TNT)); //TODO, make explode?
-        r.register(new BlockMicroMaterial(Blocks.BOOKSHELF));
-        r.register(new BlockMicroMaterial(Blocks.MOSSY_COBBLESTONE));
-        r.register(new BlockMicroMaterial(Blocks.OBSIDIAN));
-        r.register(new BlockMicroMaterial(Blocks.DIAMOND_ORE));
-        r.register(new BlockMicroMaterial(Blocks.DEEPSLATE_DIAMOND_ORE));
-        r.register(new BlockMicroMaterial(Blocks.DIAMOND_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.CRAFTING_TABLE)); //TODO Actually function?
-        r.register(new BlockMicroMaterial(Blocks.REDSTONE_ORE));
-        r.register(new BlockMicroMaterial(Blocks.DEEPSLATE_REDSTONE_ORE));
-        r.register(new BlockMicroMaterial(Blocks.ICE));
-        r.register(new BlockMicroMaterial(Blocks.SNOW_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.CLAY));
-        r.register(new BlockMicroMaterial(Blocks.PUMPKIN));
-        r.register(new BlockMicroMaterial(Blocks.NETHERRACK));
-        r.register(new BlockMicroMaterial(Blocks.SOUL_SAND));
-        r.register(new BlockMicroMaterial(Blocks.SOUL_SOIL));
-        r.register(new BlockMicroMaterial(Blocks.BASALT));
-        r.register(new BlockMicroMaterial(Blocks.POLISHED_BASALT));
-        r.register(new BlockMicroMaterial(Blocks.GLOWSTONE));
-        r.register(new BlockMicroMaterial(Blocks.CARVED_PUMPKIN));
-        r.register(new BlockMicroMaterial(Blocks.JACK_O_LANTERN));
-        r.register(new BlockMicroMaterial(Blocks.WHITE_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.ORANGE_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.MAGENTA_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.LIGHT_BLUE_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.YELLOW_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.LIME_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.PINK_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.GRAY_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.LIGHT_GRAY_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.CYAN_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.PURPLE_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.BLUE_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.BROWN_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.GREEN_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.RED_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.BLACK_STAINED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.STONE_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.MOSSY_STONE_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.CRACKED_STONE_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.CHISELED_STONE_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.BROWN_MUSHROOM_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.RED_MUSHROOM_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.MUSHROOM_STEM));
-        r.register(new BlockMicroMaterial(Blocks.MELON));
-        r.register(new BlockMicroMaterial(Blocks.MYCELIUM));
-        r.register(new BlockMicroMaterial(Blocks.NETHER_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.END_STONE));
-        r.register(new BlockMicroMaterial(Blocks.REDSTONE_LAMP.defaultBlockState().setValue(RedstoneLampBlock.LIT, true)));
-        r.register(new BlockMicroMaterial(Blocks.EMERALD_ORE));
-        r.register(new BlockMicroMaterial(Blocks.DEEPSLATE_EMERALD_ORE));
-        r.register(new BlockMicroMaterial(Blocks.EMERALD_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.REDSTONE_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.NETHER_QUARTZ_ORE));
-        r.register(new BlockMicroMaterial(Blocks.QUARTZ_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.CHISELED_QUARTZ_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.QUARTZ_PILLAR));
-        r.register(new BlockMicroMaterial(Blocks.WHITE_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.ORANGE_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.MAGENTA_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.LIGHT_BLUE_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.YELLOW_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.LIME_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.PINK_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.GRAY_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.LIGHT_GRAY_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.CYAN_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.PURPLE_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.BLUE_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.BROWN_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.GREEN_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.RED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.BLACK_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.SLIME_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.PRISMARINE));
-        r.register(new BlockMicroMaterial(Blocks.PRISMARINE_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.DARK_PRISMARINE));
-        r.register(new BlockMicroMaterial(Blocks.SEA_LANTERN));
-        r.register(new BlockMicroMaterial(Blocks.HAY_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.COAL_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.PACKED_ICE));
-        r.register(new BlockMicroMaterial(Blocks.RED_SANDSTONE));
-        r.register(new BlockMicroMaterial(Blocks.CHISELED_RED_SANDSTONE));
-        r.register(new BlockMicroMaterial(Blocks.CUT_RED_SANDSTONE));
-        r.register(new BlockMicroMaterial(Blocks.SMOOTH_STONE));
-        r.register(new BlockMicroMaterial(Blocks.SMOOTH_SANDSTONE));
-        r.register(new BlockMicroMaterial(Blocks.SMOOTH_QUARTZ));
-        r.register(new BlockMicroMaterial(Blocks.SMOOTH_RED_SANDSTONE));
-        r.register(new BlockMicroMaterial(Blocks.PURPUR_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.PURPUR_PILLAR));
-        r.register(new BlockMicroMaterial(Blocks.END_STONE_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.DIRT_PATH));
-        r.register(new BlockMicroMaterial(Blocks.MAGMA_BLOCK)); //TODO Burn?
-        r.register(new BlockMicroMaterial(Blocks.NETHER_WART_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.RED_NETHER_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.BONE_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.WHITE_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.ORANGE_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.MAGENTA_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.LIGHT_BLUE_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.YELLOW_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.LIME_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.PINK_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.GRAY_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.LIGHT_GRAY_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.CYAN_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.PURPLE_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.BLUE_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.BROWN_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.GREEN_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.RED_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.BLACK_GLAZED_TERRACOTTA));
-        r.register(new BlockMicroMaterial(Blocks.WHITE_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.ORANGE_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.MAGENTA_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.LIGHT_BLUE_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.YELLOW_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.LIME_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.PINK_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.GRAY_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.LIGHT_GRAY_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.CYAN_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.PURPLE_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.BLUE_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.BROWN_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.GREEN_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.RED_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.BLACK_CONCRETE));
-        r.register(new BlockMicroMaterial(Blocks.WHITE_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.ORANGE_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.MAGENTA_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.LIGHT_BLUE_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.YELLOW_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.LIME_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.PINK_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.GRAY_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.LIGHT_GRAY_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.CYAN_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.PURPLE_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.BLUE_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.BROWN_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.GREEN_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.RED_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.BLACK_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
-        r.register(new BlockMicroMaterial(Blocks.DRIED_KELP_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.DEAD_TUBE_CORAL_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.DEAD_BRAIN_CORAL_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.DEAD_BUBBLE_CORAL_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.DEAD_FIRE_CORAL_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.DEAD_HORN_CORAL_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.TUBE_CORAL_BLOCK)); //TODO Dies out of water
-        r.register(new BlockMicroMaterial(Blocks.BRAIN_CORAL_BLOCK)); //TODO Dies out of water
-        r.register(new BlockMicroMaterial(Blocks.BUBBLE_CORAL_BLOCK)); //TODO Dies out of water
-        r.register(new BlockMicroMaterial(Blocks.FIRE_CORAL_BLOCK)); //TODO Dies out of water
-        r.register(new BlockMicroMaterial(Blocks.HORN_CORAL_BLOCK)); //TODO Dies out of water
-        r.register(new BlockMicroMaterial(Blocks.BLUE_ICE)); //TODO speed
-        r.register(new BlockMicroMaterial(Blocks.WARPED_NYLIUM));
-        r.register(new BlockMicroMaterial(Blocks.WARPED_WART_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.CRIMSON_NYLIUM));
-        r.register(new BlockMicroMaterial(Blocks.CRIMSON_PLANKS));
-        r.register(new BlockMicroMaterial(Blocks.WARPED_PLANKS));
-        r.register(new BlockMicroMaterial(Blocks.HONEY_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.HONEYCOMB_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.NETHERITE_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.ANCIENT_DEBRIS));
-        r.register(new BlockMicroMaterial(Blocks.CRYING_OBSIDIAN));
-        r.register(new BlockMicroMaterial(Blocks.LODESTONE));
-        r.register(new BlockMicroMaterial(Blocks.BLACKSTONE));
-        r.register(new BlockMicroMaterial(Blocks.POLISHED_BLACKSTONE));
-        r.register(new BlockMicroMaterial(Blocks.POLISHED_BLACKSTONE_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.CHISELED_POLISHED_BLACKSTONE));
-        r.register(new BlockMicroMaterial(Blocks.GILDED_BLACKSTONE));
-        r.register(new BlockMicroMaterial(Blocks.CHISELED_NETHER_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.CRACKED_NETHER_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.QUARTZ_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.AMETHYST_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.TUFF));
-        r.register(new BlockMicroMaterial(Blocks.CALCITE));
-        r.register(new BlockMicroMaterial(Blocks.TINTED_GLASS));
-        r.register(new BlockMicroMaterial(Blocks.OXIDIZED_COPPER));
-        r.register(new BlockMicroMaterial(Blocks.WEATHERED_COPPER));
-        r.register(new BlockMicroMaterial(Blocks.EXPOSED_COPPER));
-        r.register(new BlockMicroMaterial(Blocks.COPPER_BLOCK)); //TODO Oxidization (normal -> exposed -> weathered -> oxidized)
-        r.register(new BlockMicroMaterial(Blocks.COPPER_ORE));
-        r.register(new BlockMicroMaterial(Blocks.DEEPSLATE_COPPER_ORE));
-        r.register(new BlockMicroMaterial(Blocks.OXIDIZED_CUT_COPPER));
-        r.register(new BlockMicroMaterial(Blocks.WEATHERED_CUT_COPPER));
-        r.register(new BlockMicroMaterial(Blocks.EXPOSED_CUT_COPPER));
-        r.register(new BlockMicroMaterial(Blocks.CUT_COPPER)); //TODO Oxidization (normal -> exposed -> weathered -> oxidized)
-        r.register(new BlockMicroMaterial(Blocks.WAXED_COPPER_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.WAXED_WEATHERED_COPPER));
-        r.register(new BlockMicroMaterial(Blocks.WAXED_EXPOSED_COPPER));
-        r.register(new BlockMicroMaterial(Blocks.WAXED_OXIDIZED_COPPER));
-        r.register(new BlockMicroMaterial(Blocks.WAXED_OXIDIZED_CUT_COPPER));
-        r.register(new BlockMicroMaterial(Blocks.WAXED_WEATHERED_CUT_COPPER));
-        r.register(new BlockMicroMaterial(Blocks.WAXED_EXPOSED_CUT_COPPER));
-        r.register(new BlockMicroMaterial(Blocks.WAXED_CUT_COPPER));
-        r.register(new BlockMicroMaterial(Blocks.DRIPSTONE_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.ROOTED_DIRT));
-        r.register(new BlockMicroMaterial(Blocks.DEEPSLATE));
-        r.register(new BlockMicroMaterial(Blocks.COBBLED_DEEPSLATE));
-        r.register(new BlockMicroMaterial(Blocks.POLISHED_DEEPSLATE));
-        r.register(new BlockMicroMaterial(Blocks.DEEPSLATE_TILES));
-        r.register(new BlockMicroMaterial(Blocks.DEEPSLATE_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.CHISELED_DEEPSLATE));
-        r.register(new BlockMicroMaterial(Blocks.CRACKED_DEEPSLATE_BRICKS));
-        r.register(new BlockMicroMaterial(Blocks.CRACKED_DEEPSLATE_TILES));
-        r.register(new BlockMicroMaterial(Blocks.SMOOTH_BASALT));
-        r.register(new BlockMicroMaterial(Blocks.RAW_IRON_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.RAW_COPPER_BLOCK));
-        r.register(new BlockMicroMaterial(Blocks.RAW_GOLD_BLOCK));
+        event.register(MicroMaterialRegistry.MICRO_MATERIALS.getRegistryKey(), r -> {
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GRANITE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.POLISHED_GRANITE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DIORITE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.POLISHED_DIORITE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ANDESITE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.POLISHED_ANDESITE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GRASS_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DIRT));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.COARSE_DIRT));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PODZOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.COBBLESTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.OAK_PLANKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SPRUCE_PLANKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BIRCH_PLANKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.JUNGLE_PLANKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ACACIA_PLANKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DARK_OAK_PLANKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_PLANKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SAND)); //TODO Gravity?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.RED_SAND)); //TODO Gravity?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GRAVEL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GOLD_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEEPSLATE_GOLD_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.IRON_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEEPSLATE_IRON_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.COAL_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEEPSLATE_COAL_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.NETHER_GOLD_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.OAK_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SPRUCE_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BIRCH_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.JUNGLE_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ACACIA_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DARK_OAK_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_ROOTS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MUDDY_MANGROVE_ROOTS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_SPRUCE_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_BIRCH_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_JUNGLE_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_ACACIA_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_DARK_OAK_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_OAK_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_MANGROVE_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.OAK_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SPRUCE_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BIRCH_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.JUNGLE_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ACACIA_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DARK_OAK_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_OAK_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_SPRUCE_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_BIRCH_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_JUNGLE_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_ACACIA_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_DARK_OAK_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_MANGROVE_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.OAK_LEAVES));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SPRUCE_LEAVES));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BIRCH_LEAVES));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.JUNGLE_LEAVES));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ACACIA_LEAVES));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DARK_OAK_LEAVES));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_LEAVES));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.AZALEA_LEAVES));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.FLOWERING_AZALEA_LEAVES));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SPONGE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WET_SPONGE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LAPIS_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEEPSLATE_LAPIS_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LAPIS_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SANDSTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_SANDSTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CUT_SANDSTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WHITE_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ORANGE_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MAGENTA_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIGHT_BLUE_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.YELLOW_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIME_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PINK_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GRAY_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIGHT_GRAY_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CYAN_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PURPLE_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLUE_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BROWN_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GREEN_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.RED_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLACK_WOOL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GOLD_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.IRON_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.TNT)); //TODO, make explode?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BOOKSHELF));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MOSSY_COBBLESTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.OBSIDIAN));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DIAMOND_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEEPSLATE_DIAMOND_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DIAMOND_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CRAFTING_TABLE)); //TODO Actually function?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.REDSTONE_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEEPSLATE_REDSTONE_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ICE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SNOW_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CLAY));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PUMPKIN));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.NETHERRACK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SOUL_SAND));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SOUL_SOIL));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BASALT));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.POLISHED_BASALT));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GLOWSTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CARVED_PUMPKIN));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.JACK_O_LANTERN));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WHITE_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ORANGE_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MAGENTA_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIGHT_BLUE_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.YELLOW_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIME_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PINK_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GRAY_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIGHT_GRAY_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CYAN_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PURPLE_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLUE_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BROWN_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GREEN_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.RED_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLACK_STAINED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STONE_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MOSSY_STONE_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CRACKED_STONE_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_STONE_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PACKED_MUD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MUD_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BROWN_MUSHROOM_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.RED_MUSHROOM_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MUSHROOM_STEM));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MELON));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MYCELIUM));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.NETHER_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.END_STONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.REDSTONE_LAMP.defaultBlockState().setValue(RedstoneLampBlock.LIT, true))); //?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.EMERALD_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEEPSLATE_EMERALD_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.EMERALD_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.REDSTONE_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.NETHER_QUARTZ_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.QUARTZ_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_QUARTZ_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.QUARTZ_PILLAR));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WHITE_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ORANGE_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MAGENTA_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIGHT_BLUE_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.YELLOW_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIME_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PINK_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GRAY_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIGHT_GRAY_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CYAN_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PURPLE_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLUE_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BROWN_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GREEN_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.RED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLACK_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SLIME_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PRISMARINE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PRISMARINE_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DARK_PRISMARINE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SEA_LANTERN));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.HAY_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.COAL_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PACKED_ICE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.RED_SANDSTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_RED_SANDSTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CUT_RED_SANDSTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SMOOTH_STONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SMOOTH_SANDSTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SMOOTH_QUARTZ));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SMOOTH_RED_SANDSTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PURPUR_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PURPUR_PILLAR));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.END_STONE_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DIRT_PATH));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MAGMA_BLOCK)); //TODO Burn?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.NETHER_WART_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.RED_NETHER_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BONE_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WHITE_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ORANGE_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MAGENTA_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIGHT_BLUE_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.YELLOW_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIME_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PINK_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GRAY_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIGHT_GRAY_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CYAN_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PURPLE_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLUE_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BROWN_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GREEN_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.RED_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLACK_GLAZED_TERRACOTTA));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WHITE_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ORANGE_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MAGENTA_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIGHT_BLUE_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.YELLOW_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIME_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PINK_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GRAY_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIGHT_GRAY_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CYAN_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PURPLE_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLUE_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BROWN_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GREEN_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.RED_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLACK_CONCRETE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WHITE_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ORANGE_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MAGENTA_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIGHT_BLUE_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.YELLOW_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIME_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PINK_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GRAY_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LIGHT_GRAY_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CYAN_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PURPLE_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLUE_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BROWN_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GREEN_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.RED_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLACK_CONCRETE_POWDER)); //TODO Gravity -> Concrete?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DRIED_KELP_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEAD_TUBE_CORAL_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEAD_BRAIN_CORAL_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEAD_BUBBLE_CORAL_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEAD_FIRE_CORAL_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEAD_HORN_CORAL_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.TUBE_CORAL_BLOCK)); //TODO Dies out of water
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BRAIN_CORAL_BLOCK)); //TODO Dies out of water
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BUBBLE_CORAL_BLOCK)); //TODO Dies out of water
+            registerMaterial(r, new BlockMicroMaterial(Blocks.FIRE_CORAL_BLOCK)); //TODO Dies out of water
+            registerMaterial(r, new BlockMicroMaterial(Blocks.HORN_CORAL_BLOCK)); //TODO Dies out of water
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLUE_ICE)); //TODO speed
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WARPED_NYLIUM));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WARPED_WART_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CRIMSON_NYLIUM));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CRIMSON_PLANKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WARPED_PLANKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.HONEY_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.HONEYCOMB_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.NETHERITE_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ANCIENT_DEBRIS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CRYING_OBSIDIAN));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.LODESTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BLACKSTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.POLISHED_BLACKSTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.POLISHED_BLACKSTONE_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_POLISHED_BLACKSTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.GILDED_BLACKSTONE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_NETHER_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CRACKED_NETHER_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.QUARTZ_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.AMETHYST_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.TUFF));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CALCITE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.TINTED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.OXIDIZED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WEATHERED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.EXPOSED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.COPPER_BLOCK)); //TODO Oxidization (normal -> exposed -> weathered -> oxidized)
+            registerMaterial(r, new BlockMicroMaterial(Blocks.COPPER_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEEPSLATE_COPPER_ORE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.OXIDIZED_CUT_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WEATHERED_CUT_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.EXPOSED_CUT_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CUT_COPPER)); //TODO Oxidization (normal -> exposed -> weathered -> oxidized)
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_COPPER_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_WEATHERED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_EXPOSED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_OXIDIZED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_OXIDIZED_CUT_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_WEATHERED_CUT_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_EXPOSED_CUT_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_CUT_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DRIPSTONE_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.ROOTED_DIRT));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.MUD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEEPSLATE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.COBBLED_DEEPSLATE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.POLISHED_DEEPSLATE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEEPSLATE_TILES));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.DEEPSLATE_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_DEEPSLATE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CRACKED_DEEPSLATE_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CRACKED_DEEPSLATE_TILES));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SMOOTH_BASALT));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.RAW_IRON_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.RAW_COPPER_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.RAW_GOLD_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.OCHRE_FROGLIGHT));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.VERDANT_FROGLIGHT));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.PEARLESCENT_FROGLIGHT));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.REINFORCED_DEEPSLATE));
+        });
+    }
+
+    private static void registerMaterial(RegisterEvent.RegisterHelper<MicroMaterial> r, BlockMicroMaterial material) {
+        r.register(BlockMicroMaterial.makeMaterialKey(material.state), material);
     }
 
     private static void processIMC(InterModProcessEvent event) {
@@ -420,7 +443,7 @@ public class CBMicroblockModContent {
 
             String sender = e.senderModId();
             Object sent = e.messageSupplier().get();
-            MicroMaterial material;
+            BlockMicroMaterial material;
             if (sent instanceof Block b) {
                 material = new BlockMicroMaterial(b);
             } else if (sent instanceof BlockState s) {
@@ -435,11 +458,12 @@ public class CBMicroblockModContent {
                 return;
             }
 
-            if (registry.containsKey(material.getRegistryName())) {
-                LOGGER.warn("Mod '{}' tried to register a duplicate MicroMaterial. '{}'. Ignoring.", sender, material.getRegistryName());
+            ResourceLocation key = BlockMicroMaterial.makeMaterialKey(material.state);
+            if (registry.containsKey(key)) {
+                LOGGER.warn("Mod '{}' tried to register a duplicate MicroMaterial. '{}'. Ignoring.", sender, key);
                 return;
             }
-            registry.register(material);
+            registry.register(key, material);
 
         });
         registry.freeze();

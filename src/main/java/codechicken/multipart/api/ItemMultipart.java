@@ -10,7 +10,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SoundType;
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -23,15 +22,7 @@ public abstract class ItemMultipart extends Item {
     }
 
     @Nullable
-    @Deprecated(since = "1.18.2", forRemoval = true) // Override newPart(MultipartPlaceContext) instead
-    public MultiPart newPart(UseOnContext context) {
-        throw new NotImplementedException();
-    }
-
-    @Nullable
-    public MultiPart newPart(MultipartPlaceContext context) {
-        return newPart((UseOnContext) context);
-    }
+    public abstract MultiPart newPart(MultipartPlaceContext context);
 
     @Override
     public InteractionResult useOn(UseOnContext context) {

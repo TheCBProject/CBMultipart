@@ -6,10 +6,9 @@ import codechicken.multipart.util.ControlKeyModifier;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.ClientRegistry;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.lwjgl.glfw.GLFW;
 
@@ -26,11 +25,11 @@ public class ControlKeyHandler {
     public static void init() {
         LOCK.lock();
         MinecraftForge.EVENT_BUS.addListener(ControlKeyHandler::tick);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(ControlKeyHandler::setup);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(ControlKeyHandler::register);
     }
 
-    private static void setup(FMLClientSetupEvent event) {
-        ClientRegistry.registerKeyBinding(KEY);
+    private static void register(RegisterKeyMappingsEvent event) {
+        event.register(KEY);
     }
 
     private static void tick(TickEvent.ClientTickEvent event) {

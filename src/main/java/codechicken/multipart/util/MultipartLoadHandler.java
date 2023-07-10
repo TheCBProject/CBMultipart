@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.ChunkEvent;
+import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,7 +38,7 @@ public class MultipartLoadHandler {
     // TODO move this to a Mixin.
     // Vanilla fires BlockEntity.handleUpdateTag before the LevelChunk has been added to the world.
     private static void onChunkLoad(ChunkEvent.Load event) {
-        if (event.getWorld().isClientSide() && event.getChunk() instanceof LevelChunk chunk) {
+        if (event.getLevel().isClientSide() && event.getChunk() instanceof LevelChunk chunk) {
             for (BlockEntity be : List.copyOf(chunk.getBlockEntities().values())) {
                 if (be instanceof TileNBTContainer tile && tile.updateTag != null) {
                     byte[] data = tile.updateTag.getByteArray("data");

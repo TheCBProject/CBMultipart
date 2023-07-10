@@ -18,12 +18,12 @@ public class SawItem extends TieredItem {
     }
 
     @Override
-    public boolean hasContainerItem(ItemStack stack) {
+    public boolean hasCraftingRemainingItem(ItemStack stack) {
         return true;
     }
 
     @Override
-    public ItemStack getContainerItem(ItemStack stack) {
+    public ItemStack getCraftingRemainingItem(ItemStack stack) {
         if (canBeDepleted()) {
             if (stack.getDamageValue() + 1 >= stack.getMaxDamage()) {
                 return ItemStack.EMPTY;

@@ -113,10 +113,13 @@ public class MicroMaterialConfig {
                 state = state.setValue(property, SneakyUtils.unsafeCast(value.get()));
             }
         }
-        if (registry.containsKey(BlockMicroMaterial.makeMaterialKey(state))) {
+
+        ResourceLocation key = BlockMicroMaterial.makeMaterialKey(state);
+
+        if (registry.containsKey(key)) {
             LOGGER.warn("Skipping microblock config line {}. Micro material for BlockState {} already registered.", lineNumber, state);
             return;
         }
-        registry.register(new BlockMicroMaterial(state));
+        registry.register(key, new BlockMicroMaterial(state));
     }
 }

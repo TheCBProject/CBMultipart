@@ -18,12 +18,11 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.client.model.data.IModelData;
-
-import java.util.Random;
+import net.minecraftforge.client.model.data.ModelData;
+import org.jetbrains.annotations.Nullable;
 
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
@@ -33,48 +32,45 @@ import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 public class MultipartBlockRenderer implements ICCBlockRenderer {
 
     @Override
-    public boolean canHandleBlock(BlockAndTintGetter world, BlockPos pos, BlockState blockState) {
+    public boolean canHandleBlock(BlockAndTintGetter world, BlockPos pos, BlockState blockState, @Nullable RenderType renderType) {
         return blockState.getBlock() == CBMultipartModContent.MULTIPART_BLOCK.get();
     }
 
     @Override
-    public boolean renderBlock(BlockState state, BlockPos pos, BlockAndTintGetter world, PoseStack mStack, VertexConsumer builder, Random random, IModelData data) {
+    public void renderBlock(BlockState state, BlockPos pos, BlockAndTintGetter world, PoseStack mStack, VertexConsumer builder, RandomSource random, ModelData data, @Nullable RenderType renderType) {
         TileMultipart tile = BlockMultipart.getTile(world, pos);
-        if (tile != null) {
-            CCRenderState ccrs = CCRenderState.instance();
-            ccrs.reset();
-            ccrs.bind(new TransformingVertexConsumer(builder, mStack), DefaultVertexFormat.BLOCK);
-            ccrs.lightMatrix.locate(world, pos);
-            return renderStatic(tile, MinecraftForgeClient.getRenderType(), ccrs);
-        }
-        return false;
+        if (tile == null) return;
+
+        CCRenderState ccrs = CCRenderState.instance();
+        ccrs.reset();
+        ccrs.bind(new TransformingVertexConsumer(builder, mStack), DefaultVertexFormat.BLOCK);
+        ccrs.lightMatrix.locate(world, pos);
+        renderStatic(tile, renderType, ccrs);
     }
 
     @Override
-    public void renderBreaking(BlockState state, BlockPos pos, BlockAndTintGetter world, PoseStack mStack, VertexConsumer builder, IModelData data) {
+    public void renderBreaking(BlockState state, BlockPos pos, BlockAndTintGetter world, PoseStack mStack, VertexConsumer builder, ModelData data) {
         TileMultipart tile = BlockMultipart.getTile(world, pos);
-        if (tile != null) {
-            CCRenderState ccrs = CCRenderState.instance();
-            ccrs.reset();
-            mStack.pushPose();
-            ccrs.bind(new TransformingVertexConsumer(builder, mStack), DefaultVertexFormat.BLOCK);
-            ccrs.overlay = OverlayTexture.NO_OVERLAY;
-            ccrs.brightness = LevelRenderer.getLightColor(world, state, pos);
-            ccrs.lightMatrix.locate(world, pos);
-            renderBreaking(tile, ccrs);
-            mStack.popPose();
-        }
+        if (tile == null) return;
+
+        CCRenderState ccrs = CCRenderState.instance();
+        ccrs.reset();
+        mStack.pushPose();
+        ccrs.bind(new TransformingVertexConsumer(builder, mStack), DefaultVertexFormat.BLOCK);
+        ccrs.overlay = OverlayTexture.NO_OVERLAY;
+        ccrs.brightness = LevelRenderer.getLightColor(world, state, pos);
+        ccrs.lightMatrix.locate(world, pos);
+        renderBreaking(tile, ccrs);
+        mStack.popPose();
     }
 
-    private boolean renderStatic(TileMultipart tile, RenderType type, CCRenderState ccrs) {
-        boolean ret = false;
+    private void renderStatic(TileMultipart tile, @Nullable RenderType type, CCRenderState ccrs) {
         for (MultiPart part : tile.getPartList()) {
             PartRenderer<?> renderer = MultipartClientRegistry.getRenderer(part.getType());
             if (renderer != null) {
-                ret |= renderer.renderStatic(unsafeCast(part), type, ccrs);
+                renderer.renderStatic(unsafeCast(part), type, ccrs);
             }
         }
-        return ret;
     }
 
     private void renderBreaking(TileMultipart tile, CCRenderState ccrs) {

@@ -24,7 +24,7 @@ public class TileEntityMixin {
     )
     private static void onLoadStatic(BlockPos pos, BlockState state, CompoundTag tag, CallbackInfoReturnable<BlockEntity> cir) {
         String s = tag.getString("id");
-        if (CBMultipartModContent.MULTIPART_TILE_TYPE.get().getRegistryName().toString().equals(s)) {
+        if (CBMultipartModContent.MULTIPART_TILE_TYPE.getId().toString().equals(s)) {
             cir.setReturnValue(TileMultipart.fromNBT(tag, pos));
         }
     }

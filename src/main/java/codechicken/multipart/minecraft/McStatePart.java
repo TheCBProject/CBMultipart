@@ -7,8 +7,6 @@ import codechicken.multipart.api.NormalOcclusionTest;
 import codechicken.multipart.api.part.*;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -23,8 +21,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.data.EmptyModelData;
-import net.minecraftforge.client.model.data.IModelData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -77,18 +73,8 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
     }
 
     @Override
-    public boolean canRenderInLayer(RenderType layer) {
-        return ItemBlockRenderTypes.canRenderInLayer(state, layer);
-    }
-
-    @Override
     public BlockState getCurrentState() {
         return state;
-    }
-
-    @Override
-    public IModelData getModelData() {
-        return EmptyModelData.INSTANCE;
     }
 
     @Nullable
