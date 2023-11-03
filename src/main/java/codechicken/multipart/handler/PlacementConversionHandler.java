@@ -1,13 +1,11 @@
 package codechicken.multipart.handler;
 
 import codechicken.lib.raytracer.RayTracer;
-import codechicken.lib.vec.Vector3;
-import codechicken.multipart.api.ItemMultipart;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.util.MultipartHelper;
-import codechicken.multipart.util.OffsetUseOnContext;
+import codechicken.multipart.util.MultipartPlaceContext;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
@@ -15,7 +13,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.phys.BlockHitResult;
@@ -55,20 +52,16 @@ public class PlacementConversionHandler {
         if (hit.getType() == HitResult.Type.MISS) {
             return false;
         }
-        double hitDepth = ItemMultipart.getHitDepth(
-                new Vector3(hit.getLocation()).subtract(hit.getBlockPos()),
-                hit.getDirection().ordinal()
-        );
-        UseOnContext ctx = new UseOnContext(player, hand, hit);
 
-        if (hitDepth < 1 && place(player, hand, ctx)) {
+        MultipartPlaceContext ctx = new MultipartPlaceContext(player, hand, hit);
+
+        if (ctx.getHitDepth() < 1 && place(player, hand, ctx)) {
             return true;
         }
-
-        return place(player, hand, new OffsetUseOnContext(ctx));
+        return place(player, hand, ctx.applyOffset());
     }
 
-    private static boolean place(Player player, InteractionHand hand, UseOnContext ctx) {
+    private static boolean place(Player player, InteractionHand hand, MultipartPlaceContext ctx) {
         Level world = ctx.getLevel();
         BlockPos pos = ctx.getClickedPos();
 

@@ -6,11 +6,11 @@ import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.PartConverter;
 import codechicken.multipart.api.PartConverter.ConversionResult;
 import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.util.MultipartPlaceContext;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -156,7 +156,7 @@ public class MultiPartRegistries {
     }
 
     @Nullable
-    public static MultiPart convertItem(UseOnContext context) {
+    public static MultiPart convertItem(MultipartPlaceContext context) {
         for (PartConverter conv : PART_CONVERTERS.getValues()) {
             ConversionResult<MultiPart> result = conv.convert(context);
             if (result.success()) {

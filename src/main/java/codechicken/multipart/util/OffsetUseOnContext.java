@@ -6,6 +6,7 @@ import net.minecraft.world.item.context.UseOnContext;
 /**
  * Created by covers1624 on 1/1/21.
  */
+@Deprecated(since = "1.18.2", forRemoval = true) // Use MultipartPlaceContext
 public class OffsetUseOnContext extends UseOnContext {
 
     private final BlockPos pos;

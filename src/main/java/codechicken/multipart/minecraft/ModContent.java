@@ -5,11 +5,10 @@ import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.PartConverter;
 import codechicken.multipart.api.SimpleMultipartType;
 import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.util.MultipartPlaceContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -145,11 +144,11 @@ public class ModContent {
         }
 
         @Override
-        public ConversionResult<MultiPart> convert(UseOnContext context) {
+        public ConversionResult<MultiPart> convert(MultipartPlaceContext context) {
             if (context.getItemInHand().getItem() != item) {
                 return emptyResult();
             }
-            MultiPart result = factory.get().setStateOnPlacement(new BlockPlaceContext(context));
+            MultiPart result = factory.get().setStateOnPlacement(context);
             if (result != null) {
                 return ConversionResult.success(result);
             }

@@ -12,10 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Set;
@@ -31,17 +28,6 @@ public class RedstoneInteractions {
      * Hardcoded vanilla overrides for Block.canConnectRedstone {@link RedstoneConnectorBlock}
      */
     private static final Set<Block> FULL_VANILLA_BLOCKS = ImmutableSet.<Block>builder()
-            .add(Blocks.REDSTONE_TORCH)
-            .add(Blocks.REDSTONE_WALL_TORCH)
-            .add(Blocks.LEVER)
-            .add(Blocks.STONE_BUTTON)
-            .add(Blocks.BIRCH_BUTTON)
-            .add(Blocks.ACACIA_BUTTON)
-            .add(Blocks.DARK_OAK_BUTTON)
-            .add(Blocks.JUNGLE_BUTTON)
-            .add(Blocks.OAK_BUTTON)
-            .add(Blocks.SPRUCE_BUTTON)
-            .add(Blocks.REDSTONE_BLOCK)
             .add(Blocks.REDSTONE_LAMP)
             .build();
 
@@ -126,7 +112,7 @@ public class RedstoneInteractions {
         BlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
         if (block instanceof RedstoneConnectorBlock bl) {
-            bl.getConnectionMask(world, pos, side);
+            return bl.getConnectionMask(world, pos, side);
         }
         return vanillaConnectionMask(world, pos, state, side, power);
     }
@@ -140,18 +126,25 @@ public class RedstoneInteractions {
             return 0x1F;
         }
 
-        if (side == 0) { //vanilla doesn't handle side 0
-            return power ? 0x1F : 0;
-        }
-
         /*
-         * so that these can be conducted to from face parts on the other side of the block.
-         * Due to vanilla's inadequecy with redstone/logic on walls
+         * Manual overrides for FaceRedstonePart-like blocks, which can connect:
+         *  - on the 4 edges about the affixed face
+         *  - through the center on or opposite the affixed face
          */
-        if (block == Blocks.REDSTONE_WIRE || block == Blocks.COMPARATOR) {
+
+        // Dust
+        if (block == Blocks.REDSTONE_WIRE) {
+            if (side == 1) return 0;
             return power ? 0x1F : 4;
         }
 
+        // Comparator
+        if (block == Blocks.COMPARATOR) {
+            if (side == 0 || side == 1) return 0;
+            return power ? 0x1F : 4;
+        }
+
+        // Repeaters
         if (block == Blocks.REPEATER) { //stupid minecraft hardcodes
             int fside = state.getValue(HorizontalDirectionalBlock.FACING).ordinal();
             if ((side & 6) == (fside & 6)) {
@@ -159,6 +152,45 @@ public class RedstoneInteractions {
             }
             return 0;
         }
+
+        // Standing torches
+        if (block == Blocks.REDSTONE_TORCH) {
+            if (power) return 0x1F;
+
+            if (side == 0 || side == 1) { // Top or bottom face
+                return 0x10;
+            }
+            // Edge touching side 0
+            return 4;
+        }
+
+        // Wall torches
+        if (block == Blocks.REDSTONE_WALL_TORCH) {
+            if (power) return 0x1F;
+
+            int fside = state.getValue(RedstoneWallTorchBlock.FACING).getOpposite().ordinal();
+            if ((side & 6) == (fside & 6)) {
+                return 0x10;
+            }
+
+            // Edge between attached face and queried face
+            return 1 << Rotation.rotationTo(side & 6, fside);
+        }
+
+        // Buttons and levers
+        if (block instanceof ButtonBlock || block instanceof LeverBlock) {
+            if (power) return 0x1F;
+
+            int fside = FaceAttachedHorizontalDirectionalBlock.getConnectedDirection(state).getOpposite().ordinal();
+            if ((side & 6) == (fside & 6)) {
+                return 0x10;
+            }
+
+            // Edge between attached face and queried face
+            return 1 << Rotation.rotationTo(side & 6, fside);
+        }
+
+        // For all other blocks, rely on canConnectRedstone logic
         if (power || block.canConnectRedstone(state, world, pos, Direction.from3DDataValue(side))) {
             return 0x1F;
         }

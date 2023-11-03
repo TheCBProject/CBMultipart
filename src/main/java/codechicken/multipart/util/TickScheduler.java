@@ -162,9 +162,10 @@ public class TickScheduler {
      * @param chunk The chunk.
      */
     public static void loadRandomTick(RandomTickPart part, LevelChunk chunk) {
-
-        WorldTickScheduler.ChunkScheduler chunkScheduler = WorldTickScheduler.getInstance(chunk);
-        chunkScheduler.loadRandomTick(part);
+        if (chunk.getLevel() instanceof ServerLevel) {
+            WorldTickScheduler.ChunkScheduler chunkScheduler = WorldTickScheduler.getInstance(chunk);
+            chunkScheduler.loadRandomTick(part);
+        }
     }
 
 }

@@ -1,8 +1,10 @@
 package codechicken.multipart.minecraft;
 
 import codechicken.multipart.api.MultipartType;
+import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.redstone.FaceRedstonePart;
 import codechicken.multipart.util.PartRayTraceResult;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -10,11 +12,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import org.jetbrains.annotations.Nullable;
 
 public class ButtonPart extends McSidedStatePart implements FaceRedstonePart {
 
@@ -49,6 +55,24 @@ public class ButtonPart extends McSidedStatePart implements FaceRedstonePart {
     @Override
     public Direction getSide() {
         return FaceAttachedHorizontalDirectionalBlock.getConnectedDirection(state).getOpposite();
+    }
+
+    @Override
+    public @Nullable MultiPart setStateOnPlacement(BlockPlaceContext context) {
+        Direction face = context.getClickedFace();
+
+        BlockState state = switch (face) {
+            case DOWN -> defaultBlockState().setValue(ButtonBlock.FACE, AttachFace.CEILING).setValue(ButtonBlock.FACING, context.getHorizontalDirection());
+            case UP -> defaultBlockState().setValue(ButtonBlock.FACE, AttachFace.FLOOR).setValue(ButtonBlock.FACING, context.getHorizontalDirection());
+            default -> defaultBlockState().setValue(ButtonBlock.FACE, AttachFace.WALL).setValue(ButtonBlock.FACING, face);
+        };
+
+        if (state.canSurvive(context.getLevel(), context.getClickedPos())) {
+            this.state = state;
+            return this;
+        }
+
+        return null;
     }
 
     public int delay() {
