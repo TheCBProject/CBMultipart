@@ -7,13 +7,11 @@ import codechicken.microblock.part.ExecutablePlacement;
 import codechicken.microblock.part.MicroblockPlacement;
 import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.util.MicroMaterialRegistry;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -47,18 +45,19 @@ public class ItemMicroBlock extends Item {
         return Component.translatable("item." + factory.getRegistryName().toString().replace(':', '.') + "." + size, material.getLocalizedName());
     }
 
-    @Override
-    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
-        if (!allowedIn(tab)) return;
-
-        for (StandardMicroFactory factory : StandardMicroFactory.FACTORIES.values()) {
-            for (int size : new int[] { 1, 2, 4 }) {
-                for (MicroMaterial microMaterial : MicroMaterialRegistry.MICRO_MATERIALS) {
-                    items.add(create(factory.factoryId, size, microMaterial));
-                }
-            }
-        }
-    }
+    //TODO?
+//    @Override
+//    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
+//        if (!allowedIn(tab)) return;
+//
+//        for (StandardMicroFactory factory : StandardMicroFactory.FACTORIES.values()) {
+//            for (int size : new int[] { 1, 2, 4 }) {
+//                for (MicroMaterial microMaterial : MicroMaterialRegistry.MICRO_MATERIALS) {
+//                    items.add(create(factory.factoryId, size, microMaterial));
+//                }
+//            }
+//        }
+//    }
 
     @Override
     public InteractionResult useOn(UseOnContext ctx) {

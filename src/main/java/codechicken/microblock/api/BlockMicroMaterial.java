@@ -65,7 +65,7 @@ public class BlockMicroMaterial extends MicroMaterial {
 
     @Override
     public float getStrength(Player player) {
-        return state.getDestroyProgress(player, player.level, new BlockPos(0, -1, 0));
+        return state.getDestroyProgress(player, player.level(), new BlockPos(0, -1, 0));
     }
 
     @Override

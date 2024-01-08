@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -27,7 +28,7 @@ public abstract class MicroMaterialClient {
 
     public abstract void renderCuboids(CCRenderState ccrs, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids);
 
-    public void renderDynamic(MicroblockPart part, @Nullable ItemTransforms.TransformType transformType, PoseStack pStack, MultiBufferSource buffers, int packedLight, int packedOverlay, float partialTicks) { }
+    public void renderDynamic(MicroblockPart part, @Nullable ItemDisplayContext transformType, PoseStack pStack, MultiBufferSource buffers, int packedLight, int packedOverlay, float partialTicks) { }
 
     public void addHitEffects(MicroblockPart part, PartRayTraceResult hit, ParticleEngine engine) { }
 

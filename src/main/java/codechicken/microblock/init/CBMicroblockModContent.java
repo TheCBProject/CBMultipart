@@ -1,6 +1,5 @@
 package codechicken.microblock.init;
 
-import codechicken.lib.gui.SimpleCreativeTab;
 import codechicken.microblock.CBMicroblock;
 import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
@@ -16,14 +15,12 @@ import codechicken.microblock.util.MicroMaterialRegistry;
 import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.MultipartType;
 import net.covers1624.quack.util.CrashLock;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RedstoneLampBlock;
@@ -48,24 +45,24 @@ public class CBMicroblockModContent {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
-    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registry.ITEM_REGISTRY, CBMicroblock.MOD_ID);
+    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, CBMicroblock.MOD_ID);
     private static final DeferredRegister<MultipartType<?>> MULTIPART_TYPES = DeferredRegister.create(new ResourceLocation(CBMultipart.MOD_ID, "multipart_types"), CBMicroblock.MOD_ID);
-    private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registry.RECIPE_SERIALIZER_REGISTRY, CBMicroblock.MOD_ID);
+    private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, CBMicroblock.MOD_ID);
 
-    public static final SimpleCreativeTab MICRO_TAB = new SimpleCreativeTab("cb_microblock", () -> ItemMicroBlock.create(1, 2, MicroMaterialRegistry.getMaterial(BlockMicroMaterial.makeMaterialKey(Blocks.GRASS_BLOCK.defaultBlockState())))) {
-        @Override
-        public boolean hasSearchBar() {
-            return true;
-        }
-    };
+    //TODO Creative tab
+//    public static final CreativeModeTab MICRO_TAB = CreativeModeTab.builder()
+//            .title(Component.translatable("itemGroup.cb_microblock"))
+//            .icon(() -> ItemMicroBlock.create(1, 2, MicroMaterialRegistry.getMaterial(BlockMicroMaterial.makeMaterialKey(Blocks.GRASS_BLOCK.defaultBlockState()))))
+//            .withSearchBar()
+//            .build();
 
-    public static final RegistryObject<ItemMicroBlock> MICRO_BLOCK_ITEM = ITEMS.register("microblock", () -> new ItemMicroBlock(new Item.Properties().tab(MICRO_TAB)));
+    public static final RegistryObject<ItemMicroBlock> MICRO_BLOCK_ITEM = ITEMS.register("microblock", () -> new ItemMicroBlock(new Item.Properties()));
 
-    public static final RegistryObject<Item> STONE_ROD_ITEM = ITEMS.register("stone_rod", () -> new Item(new Item.Properties().tab(CreativeModeTab.TAB_MATERIALS)));
+    public static final RegistryObject<Item> STONE_ROD_ITEM = ITEMS.register("stone_rod", () -> new Item(new Item.Properties()));
 
-    public static final RegistryObject<SawItem> STONE_SAW = ITEMS.register("stone_saw", () -> new SawItem(Tiers.STONE, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).setNoRepair()));
-    public static final RegistryObject<SawItem> IRON_SAW = ITEMS.register("iron_saw", () -> new SawItem(Tiers.IRON, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).setNoRepair()));
-    public static final RegistryObject<SawItem> DIAMOND_SAW = ITEMS.register("diamond_saw", () -> new SawItem(Tiers.DIAMOND, new Item.Properties().tab(CreativeModeTab.TAB_TOOLS).setNoRepair()));
+    public static final RegistryObject<SawItem> STONE_SAW = ITEMS.register("stone_saw", () -> new SawItem(Tiers.STONE, new Item.Properties().setNoRepair()));
+    public static final RegistryObject<SawItem> IRON_SAW = ITEMS.register("iron_saw", () -> new SawItem(Tiers.IRON, new Item.Properties().setNoRepair()));
+    public static final RegistryObject<SawItem> DIAMOND_SAW = ITEMS.register("diamond_saw", () -> new SawItem(Tiers.DIAMOND, new Item.Properties().setNoRepair()));
 
     public static final RegistryObject<FaceMicroFactory> FACE_MICROBLOCK_PART = MULTIPART_TYPES.register("face", FaceMicroFactory::new);
     public static final RegistryObject<HollowMicroFactory> HOLLOW_MICROBLOCK_PART = MULTIPART_TYPES.register("hollow", HollowMicroFactory::new);
@@ -73,7 +70,7 @@ public class CBMicroblockModContent {
     public static final RegistryObject<EdgeMicroFactory> EDGE_MICROBLOCK_PART = MULTIPART_TYPES.register("edge", EdgeMicroFactory::new);
     public static final RegistryObject<PostMicroblockFactory> POST_MICROBLOCK_PART = MULTIPART_TYPES.register("post", PostMicroblockFactory::new);
 
-    public static final RegistryObject<SimpleRecipeSerializer<?>> MICRO_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("microblock", () -> new SimpleRecipeSerializer<>(MicroRecipe::new));
+    public static final RegistryObject<SimpleCraftingRecipeSerializer<?>> MICRO_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("microblock", () -> new SimpleCraftingRecipeSerializer<>(MicroRecipe::new));
 
     @Nullable
     public static Tier MAX_SAW_TIER;

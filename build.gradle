@@ -1,25 +1,11 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        jcenter()
-        maven { url = "https://files.minecraftforge.net/maven/" }
-        maven { url = "https://repo.spongepowered.org/maven/" }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+'
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-    }
-}
-
 plugins {
     id 'java'
     id 'maven-publish'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
     id "net.covers1624.signing" version '1.1.4'
+    id 'net.neoforged.gradle' version '[6.0.18,6.2)'
+    id 'org.spongepowered.mixin' version '0.7.+'
 }
-
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: "org.spongepowered.mixin"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -94,10 +80,10 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
+    minecraft "net.neoforged:forge:${config.mc_version}-${config.forge_version}"
 
     //Mod deps
-    implementation fg.deobf("codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:universal")
+    implementation fg.deobf("codechicken:CodeChickenLib:1.19.2-${config.ccl_version}:universal")
 //    compileOnly fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}")
 
     //Packed into built jar.
@@ -152,7 +138,7 @@ processResources {
 jar.enabled = false//Disable normal jar, is replaced by ShadowJar.
 shadowJar {
     finalizedBy 'reobfShadowJar'
-    classifier 'universal'
+    archiveClassifier = 'universal'
     manifest {
         attributes 'Specification-Title': archivesBaseName
         attributes 'Specification-Vendor': 'covers1624'
@@ -172,7 +158,7 @@ shadowJar {
 
 task srcJar(type: Jar) {
     from sourceSets.main.allSource
-    classifier = 'sources'
+    archiveClassifier = 'sources'
 }
 
 build.dependsOn shadowJar

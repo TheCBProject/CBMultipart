@@ -32,8 +32,8 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -55,7 +55,8 @@ import java.util.function.Consumer;
 public class BlockMultipart extends Block implements EntityBlock {
 
     public BlockMultipart() {
-        super(Block.Properties.of(Material.STONE)
+        super(Block.Properties.of()
+                .mapColor(MapColor.STONE)
                 .dynamicShape()
                 .noOcclusion()
         );
@@ -190,7 +191,7 @@ public class BlockMultipart extends Block implements EntityBlock {
     }
 
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         TileMultipart tile = getTile(builder.getParameter(LootContextParams.BLOCK_ENTITY));//TODO
         if (tile != null) {
             return tile.getDrops();

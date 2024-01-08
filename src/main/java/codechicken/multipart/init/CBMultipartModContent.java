@@ -3,12 +3,12 @@ package codechicken.multipart.init;
 import codechicken.multipart.block.BlockMultipart;
 import codechicken.multipart.util.MultipartLoadHandler.TileNBTContainer;
 import net.covers1624.quack.util.CrashLock;
-import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 import static codechicken.multipart.CBMultipart.MOD_ID;
@@ -20,8 +20,8 @@ import static codechicken.multipart.CBMultipart.MOD_ID;
 public class CBMultipartModContent {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
-    private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registry.BLOCK_REGISTRY, MOD_ID);
-    private static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(Registry.BLOCK_ENTITY_TYPE_REGISTRY, MOD_ID);
+    private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MOD_ID);
+    private static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MOD_ID);
 
     public static final RegistryObject<BlockMultipart> MULTIPART_BLOCK = BLOCKS.register("multipart", BlockMultipart::new);
 

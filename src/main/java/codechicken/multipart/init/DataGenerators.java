@@ -2,6 +2,7 @@ package codechicken.multipart.init;
 
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -24,15 +25,16 @@ public class DataGenerators {
 
     public static void gatherDataGenerators(GatherDataEvent event) {
         DataGenerator gen = event.getGenerator();
+        PackOutput output = gen.getPackOutput();
         ExistingFileHelper files = event.getExistingFileHelper();
 
-        gen.addProvider(event.includeClient(), new BlockStates(gen, files));
+        gen.addProvider(event.includeClient(), new BlockStates(output, files));
     }
 
     private static class BlockStates extends BlockStateProvider {
 
-        public BlockStates(DataGenerator gen, ExistingFileHelper exFileHelper) {
-            super(gen, MOD_ID, exFileHelper);
+        public BlockStates(PackOutput output, ExistingFileHelper exFileHelper) {
+            super(output, MOD_ID, exFileHelper);
         }
 
         @Override

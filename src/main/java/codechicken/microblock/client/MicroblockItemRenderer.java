@@ -14,6 +14,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -22,7 +23,7 @@ import net.minecraft.world.item.ItemStack;
 public class MicroblockItemRenderer implements IItemRenderer {
 
     @Override
-    public void renderItem(ItemStack stack, ItemTransforms.TransformType transformType, PoseStack mStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
+    public void renderItem(ItemStack stack, ItemDisplayContext transformType, PoseStack mStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
         MicroMaterial material = ItemMicroBlock.getMaterialFromStack(stack);
         StandardMicroFactory factory = ItemMicroBlock.getFactory(stack);
         int size = ItemMicroBlock.getSize(stack);

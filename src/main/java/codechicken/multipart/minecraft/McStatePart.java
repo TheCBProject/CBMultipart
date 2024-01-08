@@ -9,6 +9,7 @@ import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.entity.player.Player;
@@ -58,7 +59,8 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
 
     @Override
     public void load(CompoundTag tag) {
-        state = NbtUtils.readBlockState(tag.getCompound("state"));
+        //TODO is this right?
+        state = NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), tag.getCompound("state"));
     }
 
     @Override
@@ -69,7 +71,7 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
 
     @Override
     public void readDesc(MCDataInput packet) {
-        state = NbtUtils.readBlockState(packet.readCompoundNBT());
+        state = NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), packet.readCompoundNBT());
     }
 
     @Override
@@ -89,7 +91,7 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
 
     @Override
     public float getStrength(Player player, PartRayTraceResult hit) {
-        return state.getDestroyProgress(player, player.level, new BlockPos(0, -1, 0));
+        return state.getDestroyProgress(player, player.level(), new BlockPos(0, -1, 0));
     }
 
     @Override

@@ -35,7 +35,7 @@ public class ClientEventHandler {
         BlockHitResult target = event.getTarget();
         if (!(target instanceof PartRayTraceResult hit)) return;
 
-        TileMultipart tile = BlockMultipart.getTile(camera.getEntity().level, target.getBlockPos());
+        TileMultipart tile = BlockMultipart.getTile(camera.getEntity().level(), target.getBlockPos());
         if (tile == null) return;
 
         MultiPart part = hit.part;

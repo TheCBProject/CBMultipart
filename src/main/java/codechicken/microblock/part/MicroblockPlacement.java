@@ -5,12 +5,14 @@ import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
-import codechicken.multipart.util.*;
+import codechicken.multipart.util.ControlKeyModifier;
+import codechicken.multipart.util.MultipartHelper;
+import codechicken.multipart.util.MultipartPlaceContext;
+import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import org.apache.commons.lang3.tuple.Pair;
@@ -54,7 +56,7 @@ public class MicroblockPlacement {
         this.checkMaterial = checkMaterial;
         this.pp = pp;
 
-        level = player.level;
+        level = player.level();
         microFactory = pp.microFactory();
         pos = hit.getBlockPos();
         vHit = new Vector3(hit.getLocation()).subtract(pos);

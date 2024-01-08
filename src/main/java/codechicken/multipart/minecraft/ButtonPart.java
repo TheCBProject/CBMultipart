@@ -4,7 +4,6 @@ import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.redstone.FaceRedstonePart;
 import codechicken.multipart.util.PartRayTraceResult;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -13,7 +12,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
@@ -76,11 +74,11 @@ public class ButtonPart extends McSidedStatePart implements FaceRedstonePart {
     }
 
     public int delay() {
-        return sensitive() ? 30 : 20;
+        return block.ticksToStayPressed;
     }
 
-    public boolean sensitive() {
-        return block.sensitive;
+    public boolean canArrowsPress() {
+        return block.arrowsCanPress;
     }
 
     @Override
@@ -132,7 +130,7 @@ public class ButtonPart extends McSidedStatePart implements FaceRedstonePart {
     }
 
     private void updateState() {
-        boolean arrows = sensitive() && !level().getEntitiesOfClass(Arrow.class, getShape(CollisionContext.empty()).bounds().move(pos())).isEmpty();
+        boolean arrows = canArrowsPress() && !level().getEntitiesOfClass(Arrow.class, getShape(CollisionContext.empty()).bounds().move(pos())).isEmpty();
         boolean pressed = pressed();
 
         if (arrows != pressed) {

@@ -7,10 +7,12 @@ import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.item.SawItem;
 import codechicken.microblock.util.MicroMaterialRegistry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
@@ -26,8 +28,8 @@ public class MicroRecipe extends CustomRecipe {
 
     private static final int[] splitMap = { 3, 3, -1, 2 };
 
-    public MicroRecipe(ResourceLocation id) {
-        super(id);
+    public MicroRecipe(ResourceLocation id, CraftingBookCategory category) {
+        super(id, category);
     }
 
     @Override
@@ -36,13 +38,13 @@ public class MicroRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack getResultItem() {
+    public ItemStack getResultItem(RegistryAccess pRegistryAccess) {
         return ItemMicroBlock.create(1, 1, BlockMicroMaterial.makeMaterialKey(Blocks.STONE.defaultBlockState()));
     }
 
     @Override
     public boolean matches(CraftingContainer cont, Level level) {
-        return !assemble(cont).isEmpty();
+        return !getAssemblyResult(cont).isEmpty();
     }
 
     @Override
@@ -51,7 +53,11 @@ public class MicroRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer cont) {
+    public ItemStack assemble(CraftingContainer cont, RegistryAccess reg) {
+        return getAssemblyResult(cont);
+    }
+
+    private ItemStack getAssemblyResult(CraftingContainer cont) {
         var res = getHollowResult(cont);
         if (!res.isEmpty()) return res;
 
@@ -269,7 +275,7 @@ public class MicroRecipe extends CustomRecipe {
         if (stack.isEmpty()) return null;
         for (MicroMaterial material : MicroMaterialRegistry.MICRO_MATERIALS.getValues()) {
             ItemStack mStack = material.getItem();
-            if (mStack.is(stack.getItem()) && ItemStack.tagMatches(mStack, stack)) {
+            if (ItemStack.isSameItemSameTags(mStack, stack)) {
                 return material;
             }
         }

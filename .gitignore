@@ -24,3 +24,6 @@
 # Include Important Folders
 !src/
 !libs/
+
+# Exclude stuff under above inclusions
+.cache
