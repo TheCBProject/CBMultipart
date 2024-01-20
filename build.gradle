@@ -83,7 +83,7 @@ dependencies {
     minecraft "net.neoforged:forge:${config.mc_version}-${config.forge_version}"
 
     //Mod deps
-    implementation fg.deobf("codechicken:CodeChickenLib:1.19.2-${config.ccl_version}:universal")
+    implementation fg.deobf("io.codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:universal")
 //    compileOnly fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}")
 
     //Packed into built jar.
