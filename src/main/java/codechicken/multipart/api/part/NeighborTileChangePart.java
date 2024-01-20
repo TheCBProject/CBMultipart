@@ -1,13 +1,10 @@
 package codechicken.multipart.api.part;
 
-import codechicken.multipart.api.annotation.MultiPartMarker;
-import codechicken.multipart.trait.TTileChangeTile;
 import net.minecraft.core.Direction;
 
 /**
  * Mixin interface for parts that want to be notified of neighbor tile change events (comparators or inventory maintainers)
  */
-@MultiPartMarker (TTileChangeTile.class)
 public interface NeighborTileChangePart extends MultiPart {
 
     /**

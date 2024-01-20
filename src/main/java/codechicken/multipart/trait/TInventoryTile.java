@@ -1,16 +1,17 @@
 package codechicken.multipart.trait;
 
 import codechicken.lib.util.ArrayUtils;
-import codechicken.multipart.api.annotation.MultiPartTrait;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.Container;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -20,8 +21,6 @@ import java.util.List;
 /**
  * Created by covers1624 on 1/1/21.
  */
-@MultiPartTrait (Container.class)
-@MultiPartTrait (WorldlyContainer.class)
 public class TInventoryTile extends TileMultipart implements WorldlyContainer {
 
     private List<Container> invList = new ArrayList<>();
@@ -29,6 +28,10 @@ public class TInventoryTile extends TileMultipart implements WorldlyContainer {
     private int sizeSum = 0;
     private int[] invSize = new int[0];
     private int[][] faceSlots = ArrayUtils.fill(new int[6][0], null);
+
+    public TInventoryTile(BlockPos pos, BlockState state) {
+        super(pos, state);
+    }
 
     @Override
     public void copyFrom(TileMultipart that) {

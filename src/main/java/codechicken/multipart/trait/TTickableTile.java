@@ -1,10 +1,11 @@
 package codechicken.multipart.trait;
 
-import codechicken.multipart.api.annotation.MultiPartTrait;
 import codechicken.multipart.api.part.TickablePart;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.api.TickableTile;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,10 +13,13 @@ import java.util.List;
 /**
  * Created by covers1624 on 18/9/20.
  */
-@MultiPartTrait (TickablePart.class)
 public class TTickableTile extends TileMultipart implements TickableTile {
 
     private final List<TickablePart> tickingParts = new ArrayList<>();
+
+    public TTickableTile(BlockPos pos, BlockState state) {
+        super(pos, state);
+    }
 
     @Override
     public void copyFrom(TileMultipart that) {

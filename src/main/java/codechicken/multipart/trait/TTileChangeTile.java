@@ -1,23 +1,25 @@
 package codechicken.multipart.trait;
 
 import codechicken.lib.math.MathHelper;
-import codechicken.mixin.forge.TraitSide;
-import codechicken.multipart.api.annotation.MultiPartTrait;
-import codechicken.multipart.api.part.NeighborTileChangePart;
 import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.api.part.NeighborTileChangePart;
 import codechicken.multipart.block.TileMultipart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 
 /**
  * Created by covers1624 on 23/9/20.
  */
-@MultiPartTrait (value = NeighborTileChangePart.class, side = TraitSide.SERVER)
 public class TTileChangeTile extends TileMultipart {
 
     private boolean weakTileChanges = false;
+
+    public TTileChangeTile(BlockPos pos, BlockState state) {
+        super(pos, state);
+    }
 
     @Override
     public void copyFrom(TileMultipart that) {

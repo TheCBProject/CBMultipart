@@ -1,9 +1,10 @@
 package codechicken.multipart.trait;
 
-import codechicken.multipart.api.annotation.MultiPartTrait;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.PartialOcclusionPart;
 import codechicken.multipart.block.TileMultipart;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -17,7 +18,6 @@ import java.util.List;
  * <p>
  * Created by covers1624 on 2/9/20.
  */
-@MultiPartTrait (PartialOcclusionPart.class)
 public class TPartialOcclusionTile extends TileMultipart {
 
     //Static cache.
@@ -26,6 +26,10 @@ public class TPartialOcclusionTile extends TileMultipart {
     @Nullable
     private static VoxelShape lastOcclusionTestedShape;
     private static boolean lastOcclusionTestedResult;
+
+    public TPartialOcclusionTile(BlockPos pos, BlockState state) {
+        super(pos, state);
+    }
 
     @Override
     public void bindPart(MultiPart newPart) {

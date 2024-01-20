@@ -90,12 +90,6 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         super(CBMultipartModContent.MULTIPART_TILE_TYPE.get(), pos, state);
     }
 
-    // TODO Mixin compiler needs to support ctors with arguments, provided they are identical to the base class ctor.
-    protected TileMultipart() {
-        this(null, null);
-        throw new UnsupportedOperationException("Exists for traits.");
-    }
-
     public List<MultiPart> getPartList() {
         return partList;
     }

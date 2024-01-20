@@ -1,19 +1,23 @@
 package codechicken.multipart.trait;
 
-import codechicken.multipart.api.annotation.MultiPartTrait;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.SlottedPart;
 import codechicken.multipart.block.TileMultipart;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Arrays;
 
 /**
  * Created by covers1624 on 1/1/21.
  */
-@MultiPartTrait (SlottedPart.class)
 public class TSlottedTile extends TileMultipart {
 
     private MultiPart[] v_partMap = new MultiPart[27];
+
+    public TSlottedTile(BlockPos pos, BlockState state) {
+        super(pos, state);
+    }
 
     @Override
     public void copyFrom(TileMultipart that) {

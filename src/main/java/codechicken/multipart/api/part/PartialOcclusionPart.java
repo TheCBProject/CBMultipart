@@ -1,7 +1,5 @@
 package codechicken.multipart.api.part;
 
-import codechicken.multipart.api.annotation.MultiPartMarker;
-import codechicken.multipart.trait.TPartialOcclusionTile;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
@@ -11,7 +9,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * <p>
  * This part marker is managed by the mixin trait {@link codechicken.multipart.trait.TPartialOcclusionTile}.
  */
-@MultiPartMarker (TPartialOcclusionTile.class)
 public interface PartialOcclusionPart extends MultiPart {
 
     /**

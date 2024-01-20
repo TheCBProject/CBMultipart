@@ -1,12 +1,13 @@
 package codechicken.multipart.trait;
 
 import codechicken.multipart.api.part.CapabilityProviderPart;
-import codechicken.multipart.api.annotation.MultiPartTrait;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.capability.ChainedProvider;
 import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +17,6 @@ import java.util.Collection;
 /**
  * Created by covers1624 on 7/1/21.
  */
-@MultiPartTrait (CapabilityProviderPart.class)
 public class TCapabilityTile extends TileMultipart {
 
     //null and all sides.
@@ -26,6 +26,10 @@ public class TCapabilityTile extends TileMultipart {
     });
 
     private ChainedProvider[] providers = new ChainedProvider[7];
+
+    public TCapabilityTile(BlockPos pos, BlockState state) {
+        super(pos, state);
+    }
 
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {

@@ -87,11 +87,8 @@ dependencies {
 //    compileOnly fg.deobf("mezz.jei:jei-${config.mc_version}:${config.jei_version}")
 
     //Packed into built jar.
-    shadow("codechicken:TraitMixinCompiler:${config.mixin_version}") { transitive = false }
-    shadow("codechicken:TraitMixinCompiler-forge:${config.mixin_version}") { transitive = false }
-    shadow("codechicken:TraitMixinCompiler-scala:${config.mixin_version}") { transitive = false }
-    shadow("codechicken:ChickenASM:${config.chicken_asm_version}") { transitive = false }
-    shadow("codechicken:ChickenASM-modlauncher:${config.chicken_asm_version}") { transitive = false }
+    shadow("io.codechicken:TraitMixinCompiler:${config.mixin_version}") { transitive = false }
+    shadow("io.codechicken:ChickenASM:${config.chicken_asm_version}") { transitive = false }
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.0.0'
 }

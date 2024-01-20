@@ -1,19 +1,21 @@
 package codechicken.multipart.util;
 
 import codechicken.asm.ASMHelper;
-import codechicken.asm.CC_ClassWriter;
 import codechicken.asm.ObfMapping;
-import codechicken.mixin.api.*;
-import codechicken.mixin.forge.ForgeMixinBackend;
-import codechicken.mixin.forge.SidedGenerator;
+import codechicken.mixin.SidedFactory;
+import codechicken.mixin.api.MixinCompiler;
+import codechicken.mixin.api.MixinDebugger;
+import codechicken.mixin.api.MixinFactory;
+import codechicken.mixin.api.MixinLanguageSupport;
+import codechicken.mixin.util.ClassInfo;
 import codechicken.mixin.util.JavaTraitGenerator;
 import codechicken.mixin.util.SimpleDebugger;
 import codechicken.mixin.util.Utils;
-import codechicken.multipart.api.annotation.MultiPartTrait;
 import codechicken.multipart.api.part.MultiPart;
+import codechicken.multipart.api.RegisterMultipartTraitsEvent;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.CBMultipartModContent;
-import com.google.common.collect.ImmutableList;
+import codechicken.multipart.trait.TileMultipartClient;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import net.covers1624.quack.collection.FastStream;
@@ -21,14 +23,17 @@ import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.fml.ModLoader;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -37,17 +42,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static codechicken.mixin.util.Utils.asmName;
 import static net.covers1624.quack.util.SneakyUtils.throwUnchecked;
 import static org.objectweb.asm.Opcodes.*;
 
 /**
- * Please use {@link MultiPartTrait} annotations.
- * <p>
- * TODO allow parallel registration of traits. Requires mixin compiler changes. (parallel stream processing of annotations)
  * Created by covers1624 on 4/5/20.
+ *
+ * @see RegisterMultipartTraitsEvent
  */
-public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartGenerator.Factory, MultiPart> {
+public class MultipartGenerator extends SidedFactory<TileMultipart, MultipartGenerator.Factory, MultiPart> {
 
     private static final Logger logger = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
@@ -59,25 +62,21 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
 
     private final Map<String, TraitKey> passthroughTraits = new HashMap<>();
 
-    private final MixinFactory.TraitKey clientTrait = registerTrait(asmName("codechicken.multipart.trait.TileMultipartClient"));
+    private final MixinFactory.TraitKey clientTrait = registerTrait(TileMultipartClient.class);
 
     private MultipartGenerator() {
-        super(MixinCompiler.create(new ForgeMixinBackend(), makeDebugger(), getMixinSupports()), TileMultipart.class, Factory.class, "cmp");
-        Optional<MixinLanguageSupport.JavaMixinLanguageSupport> javaSupport = mixinCompiler.findLanguageSupport("java");
-        javaSupport//
-                .orElseThrow(() -> new RuntimeException("Unable to find JavaMixinLanguageSupport instance..."))//
+        super(MixinCompiler.create(new ForgeMixinBackend(), makeDebugger()), TileMultipart.class, Factory.class, "cmp");
+        Objects.requireNonNull(mixinCompiler.<MixinLanguageSupport.JavaMixinLanguageSupport>getLanguageSupport("java"))
                 .setTraitGeneratorFactory(MultipartJavaTraitGenerator::new);
     }
 
     /**
-     * Overload for {@link #registerPassThroughInterface(String, boolean, boolean)},
+     * Overload for {@link #registerPassThroughInterface(Class, boolean, boolean)},
      * passing true to both boolean parameters.
      *
      * @param iFace The interface.
      */
-    @AsmName
-    @JavaName
-    public void registerPassThroughInterface(String iFace) {
+    public void registerPassThroughInterface(Class<?> iFace) {
         registerPassThroughInterface(iFace, true, true);
     }
 
@@ -97,19 +96,20 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
      * @param client If this interface should be used client side.
      * @param server If this interface should be used server side.
      */
-    @AsmName
-    @JavaName
-    public void registerPassThroughInterface(String iFace, boolean client, boolean server) {
-        iFace = Utils.asmName(iFace);
+    public void registerPassThroughInterface(Class<?> iFace, boolean client, boolean server) {
         MixinFactory.TraitKey key = registerPassthroughTrait(iFace);
-        String tName = key.getTName();
-        registerTrait(iFace, client ? tName : null, server ? tName : null);
+        Class<?> trait = mixinCompiler.getDefinedClass(key.tName());
+        registerTrait(iFace, client ? trait : null, server ? trait : null);
     }
 
-    //Internal, loads all MultiPartTrait annotations.
-    public void loadAnnotations() {
+    // Internal.
+    public void load() {
         LOCK.lock();
-        loadAnnotations(MultiPartTrait.class, MultiPartTrait.TraitList.class);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onModLoadingComplete);
+    }
+
+    private void onModLoadingComplete(FMLLoadCompleteEvent event) {
+        ModLoader.get().postEvent(new RegisterMultipartTraitsEvent(this));
     }
 
     public ImmutableSet<MixinFactory.TraitKey> getTraits(MultiPart part, boolean client) {
@@ -131,7 +131,8 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
         return construct(traits).newInstance(pos, CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState());
     }
 
-    public TraitKey registerPassthroughTrait(@AsmName String iName) {
+    public TraitKey registerPassthroughTrait(Class<?> iClass) {
+        String iName = Utils.asmName(iClass);
         TraitKey key = passthroughTraits.get(iName);
         if (key != null) {
             return key;
@@ -145,6 +146,7 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
         String vName = "impl";
         String iDesc = "L" + iName + ";";
 
+        ClassNode mpCNode = Objects.requireNonNull(mixinCompiler.getClassNode(Utils.asmName(TileMultipart.class)), "Did not get class for TileMultipart?");
         ClassNode iNode = mixinCompiler.getClassNode(iName);
         if (iNode == null) {
             throwUnchecked(new ClassNotFoundException("Unable to generate PassThrough trait for interface: " + iName + ", class not found."));
@@ -154,25 +156,33 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
             throw new IllegalArgumentException("Class: " + iName + ", is not an interface.");
         }
 
-        ClassWriter cw = new CC_ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+        ClassNode cNode = new ClassNode();
 
-        cw.visit(V1_8, ACC_SUPER, tName, null, "codechicken/multipart/block/TileMultipart", new String[] { iName });
+        cNode.visit(V1_8, ACC_SUPER, tName, null, "codechicken/multipart/block/TileMultipart", new String[] { iName });
 
         {
-            FieldVisitor fv = cw.visitField(ACC_PRIVATE, vName, iDesc, null, null);
+            FieldVisitor fv = cNode.visitField(ACC_PRIVATE, vName, iDesc, null, null);
             fv.visitEnd();
         }
         {
-            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
+            MethodNode superCtor = FastStream.of(mpCNode.methods)
+                    .filter(e -> e.name.equals("<init>"))
+                    .only();
+            MethodVisitor mv = cNode.visitMethod(ACC_PUBLIC, "<init>", superCtor.desc, null, null);
             mv.visitCode();
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/block/TileMultipart", "<init>", "()V", false);
+            int idx = 0;
+            mv.visitVarInsn(ALOAD, idx++);
+            for (Type arg : Type.getArgumentTypes(superCtor.desc)) {
+                mv.visitVarInsn(arg.getOpcode(ILOAD), idx);
+                idx += arg.getSize();
+            }
+            mv.visitMethodInsn(INVOKESPECIAL, "codechicken/multipart/block/TileMultipart", "<init>", superCtor.desc, false);
             mv.visitInsn(RETURN);
             mv.visitMaxs(-1, -1);
         }
 
         {
-            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "bindPart", "(Lcodechicken/multipart/api/part/MultiPart;)V", null, null);
+            MethodVisitor mv = cNode.visitMethod(ACC_PUBLIC, "bindPart", "(Lcodechicken/multipart/api/part/MultiPart;)V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 1);
@@ -192,7 +202,7 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
         }
 
         {
-            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "partRemoved", "(Lcodechicken/multipart/api/part/MultiPart;I)V", null, null);
+            MethodVisitor mv = cNode.visitMethod(ACC_PUBLIC, "partRemoved", "(Lcodechicken/multipart/api/part/MultiPart;I)V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 1);
@@ -212,7 +222,7 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
             mv.visitEnd();
         }
         {
-            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "canAddPart", "(Lcodechicken/multipart/api/part/MultiPart;)Z", null, null);
+            MethodVisitor mv = cNode.visitMethod(ACC_PUBLIC, "canAddPart", "(Lcodechicken/multipart/api/part/MultiPart;)Z", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitFieldInsn(GETFIELD, tName, vName, iDesc);
@@ -233,14 +243,13 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
         }
 
         methods(iNode).forEach(m -> {
-            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, m.name, m.desc, m.signature, m.exceptions.toArray(new String[0]));
+            MethodVisitor mv = cNode.visitMethod(ACC_PUBLIC, m.name, m.desc, m.signature, m.exceptions.toArray(new String[0]));
             mv.visitVarInsn(ALOAD, 0);
             mv.visitFieldInsn(GETFIELD, tName, vName, iDesc);
             Utils.finishBridgeCall(mv, m.desc, INVOKEINTERFACE, iName, m.name, m.desc, true);
         });
-        cw.visitEnd();
-        mixinCompiler.defineInternal(tName, cw.toByteArray());
-        key = registerTrait(tName);
+        cNode.visitEnd();
+        key = registerTrait(cNode);
         passthroughTraits.put(iName, key);
         return key;
     }
@@ -325,11 +334,5 @@ public class MultipartGenerator extends SidedGenerator<TileMultipart, MultipartG
             return new MixinDebugger.NullDebugger();
         }
         return new SimpleDebugger(Paths.get("./asm/multipart"), DEBUG_TYPE);
-    }
-
-    @Deprecated //Remove in 1.16.3
-    private static Collection<Class<? extends MixinLanguageSupport>> getMixinSupports() {
-        // TODO load the Scala language support if scala is present.
-        return ImmutableList.of(MixinLanguageSupport.JavaMixinLanguageSupport.class);
     }
 }

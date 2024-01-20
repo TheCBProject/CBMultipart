@@ -1,12 +1,13 @@
 package codechicken.multipart.trait;
 
-import codechicken.multipart.api.annotation.MultiPartTrait;
 import codechicken.multipart.api.part.EdgePart;
 import codechicken.multipart.api.part.FacePart;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.redstone.RedstonePart;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.trait.extern.RedstoneTile;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 import static codechicken.lib.vec.Rotation.rotateSide;
 import static codechicken.multipart.api.RedstoneInteractions.connectionMask;
@@ -16,8 +17,11 @@ import static codechicken.multipart.util.PartMap.edgeBetween;
 /**
  * Created by covers1624 on 31/12/20.
  */
-@MultiPartTrait (RedstonePart.class)
 public class TRedstoneTile extends TileMultipart implements RedstoneTile {
+
+    public TRedstoneTile(BlockPos pos, BlockState state) {
+        super(pos, state);
+    }
 
     @Override
     public int getDirectSignal(int side) {
