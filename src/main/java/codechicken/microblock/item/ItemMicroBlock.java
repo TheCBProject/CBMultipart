@@ -45,20 +45,6 @@ public class ItemMicroBlock extends Item {
         return Component.translatable("item." + factory.getRegistryName().toString().replace(':', '.') + "." + size, material.getLocalizedName());
     }
 
-    //TODO?
-//    @Override
-//    public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
-//        if (!allowedIn(tab)) return;
-//
-//        for (StandardMicroFactory factory : StandardMicroFactory.FACTORIES.values()) {
-//            for (int size : new int[] { 1, 2, 4 }) {
-//                for (MicroMaterial microMaterial : MicroMaterialRegistry.MICRO_MATERIALS) {
-//                    items.add(create(factory.factoryId, size, microMaterial));
-//                }
-//            }
-//        }
-//    }
-
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
         Player player = ctx.getPlayer();
