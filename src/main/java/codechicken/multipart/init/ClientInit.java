@@ -4,6 +4,7 @@ import codechicken.lib.render.block.BlockRenderingRegistry;
 import codechicken.multipart.client.ClientEventHandler;
 import codechicken.multipart.client.MultipartBlockRenderer;
 import codechicken.multipart.client.MultipartTileRenderer;
+import codechicken.multipart.client.Shaders;
 import codechicken.multipart.handler.ControlKeyHandler;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -29,6 +30,7 @@ public class ClientInit {
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.addListener(ClientInit::onClientInit);
         bus.addListener(ClientInit::onRegisterRenderers);
+        Shaders.init();
     }
 
     private static void onClientInit(FMLClientSetupEvent event) {

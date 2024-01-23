@@ -19,6 +19,7 @@ import codechicken.microblock.part.MicroblockPlacement;
 import codechicken.microblock.part.PlacementGrid;
 import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.util.MaskedCuboid;
+import codechicken.multipart.client.Shaders;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -65,7 +66,7 @@ public class MicroblockRender {
     private static final ThreadLocal<PipelineState> PIPELINES = ThreadLocal.withInitial(PipelineState::create);
 
     public static final RenderType HIGHLIGHT_RENDER_TYPE = RenderType.create(MOD_ID + ":highlight", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 255, RenderType.CompositeState.builder()
-            .setShaderState(RenderType.RENDERTYPE_SOLID_SHADER)
+            .setShaderState(new RenderStateShard.ShaderStateShard(Shaders::highlightShader))
             .setTextureState(RenderType.BLOCK_SHEET)
             .setWriteMaskState(RenderType.COLOR_DEPTH_WRITE)
             .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
@@ -259,19 +260,8 @@ public class MicroblockRender {
         }
     }
 
-    private static class MicroblockLevelProxy implements BlockAndTintGetter {
-
-        private final BlockAndTintGetter other;
-        private final BlockPos pos;
-        private final BlockState state;
-
-        private MicroblockLevelProxy(BlockAndTintGetter other, BlockPos pos, BlockState state) {
-            this.other = other;
-            this.pos = pos;
-            this.state = state;
-        }
-
-        // @formatter:off
+    // @formatter:off
+    private record MicroblockLevelProxy(BlockAndTintGetter other, BlockPos pos, BlockState state) implements BlockAndTintGetter {
         @Override public float getShade(Direction face, boolean shade) { return other.getShade(face, shade); }
         @Override public LevelLightEngine getLightEngine() { return other.getLightEngine(); }
         @Override public int getBlockTint(BlockPos pos, ColorResolver resolver) { return other.getBlockTint(pos, resolver); }
@@ -280,6 +270,6 @@ public class MicroblockRender {
         @Override public FluidState getFluidState(BlockPos pos) { return other.getFluidState(pos); }
         @Override public int getHeight() { return other.getHeight(); }
         @Override public int getMinBuildHeight() { return other.getMinBuildHeight(); }
-        // @formatter:on
     }
+    // @formatter:on
 }
