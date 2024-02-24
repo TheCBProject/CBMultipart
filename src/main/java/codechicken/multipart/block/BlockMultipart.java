@@ -153,8 +153,13 @@ public class BlockMultipart extends Block implements EntityBlock {
 
     @Override
     public int getLightEmission(BlockState state, BlockGetter world, BlockPos pos) {
-        TileMultipart tile = getTile(world, pos);
-        if (tile != null) {
+        // See docs on IForgeBlock#getLightEmission for why this is necessary
+        if (pos == BlockPos.ZERO) {
+            return 1;
+        }
+
+        // getExistingBlockEntity allows retrieval from worker threads
+        if (world.getExistingBlockEntity(pos) instanceof TileMultipart tile) {
             return tile.getLightEmission();
         }
         return 0;
