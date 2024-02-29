@@ -45,7 +45,7 @@ public class TorchPart extends McSidedStatePart implements AnimateTickPart {
 
     @Override
     public MultipartType<?> getType() {
-        return ModContent.torchPartType;
+        return ModContent.TORCH_PART.get();
     }
 
     protected Block getStandingBlock() {

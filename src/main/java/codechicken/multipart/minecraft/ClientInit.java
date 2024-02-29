@@ -15,19 +15,19 @@ public class ClientInit {
     }
 
     private static void onClientSetup(FMLClientSetupEvent event) {
-        MultipartClientRegistry.register(ModContent.torchPartType, PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.soulTorchPartType, PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.redstoneTorchPartType, PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.leverPartType, PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.stoneButtonPartType, PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.polishedBlackstoneButtonPartType, PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.oakButtonPartType, PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.spruceButtonPartType, PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.birchButtonPartType, PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.jungleButtonPartType, PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.acaciaButtonPartType, PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.darkOakButtonPartType, PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.crimsonButtonPartType, PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.warpedButtonPartType, PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.TORCH_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.SOUL_TORCH_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.REDSTONE_TORCH_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.LEVER_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.STONE_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.POLISHED_BLACKSTONE_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.OAK_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.SPRUCE_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.BIRCH_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.JUNGLE_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.ACACIA_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.DARK_OAK_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.CRIMSON_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(ModContent.WARPED_BUTTON_PART.get(), PartBakedModelRenderer.simple());
     }
 }

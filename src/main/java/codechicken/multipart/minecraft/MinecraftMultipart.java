@@ -13,7 +13,7 @@ public class MinecraftMultipart {
     public static final String MOD_ID = "cb_multipart_minecraft";
 
     public MinecraftMultipart() {
-        FMLJavaModLoadingContext.get().getModEventBus().register(ModContent.class);
+        ModContent.init(FMLJavaModLoadingContext.get().getModEventBus());
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ClientInit::init);
     }
 }

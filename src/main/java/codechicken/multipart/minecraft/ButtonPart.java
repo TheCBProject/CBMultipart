@@ -170,72 +170,72 @@ public class ButtonPart extends McSidedStatePart implements FaceRedstonePart {
 
     public static class StoneButtonPart extends ButtonPart {
 
-        public StoneButtonPart() { super(ModContent.stoneButtonPartType, (ButtonBlock) Blocks.STONE_BUTTON); }
+        public StoneButtonPart() { super(ModContent.STONE_BUTTON_PART.get(), (ButtonBlock) Blocks.STONE_BUTTON); }
 
-        public StoneButtonPart(BlockState state) { super(ModContent.stoneButtonPartType, (ButtonBlock) Blocks.STONE_BUTTON, state); }
+        public StoneButtonPart(BlockState state) { super(ModContent.STONE_BUTTON_PART.get(), (ButtonBlock) Blocks.STONE_BUTTON, state); }
     }
 
     public static class PolishedBlackstoneButtonPart extends ButtonPart {
 
-        public PolishedBlackstoneButtonPart() { super(ModContent.polishedBlackstoneButtonPartType, (ButtonBlock) Blocks.POLISHED_BLACKSTONE_BUTTON); }
+        public PolishedBlackstoneButtonPart() { super(ModContent.POLISHED_BLACKSTONE_BUTTON_PART.get(), (ButtonBlock) Blocks.POLISHED_BLACKSTONE_BUTTON); }
 
-        public PolishedBlackstoneButtonPart(BlockState state) { super(ModContent.polishedBlackstoneButtonPartType, (ButtonBlock) Blocks.POLISHED_BLACKSTONE_BUTTON, state); }
+        public PolishedBlackstoneButtonPart(BlockState state) { super(ModContent.POLISHED_BLACKSTONE_BUTTON_PART.get(), (ButtonBlock) Blocks.POLISHED_BLACKSTONE_BUTTON, state); }
     }
 
     public static class OakButtonPart extends ButtonPart {
 
-        public OakButtonPart() { super(ModContent.oakButtonPartType, (ButtonBlock) Blocks.OAK_BUTTON); }
+        public OakButtonPart() { super(ModContent.OAK_BUTTON_PART.get(), (ButtonBlock) Blocks.OAK_BUTTON); }
 
-        public OakButtonPart(BlockState state) { super(ModContent.oakButtonPartType, (ButtonBlock) Blocks.OAK_BUTTON, state); }
+        public OakButtonPart(BlockState state) { super(ModContent.OAK_BUTTON_PART.get(), (ButtonBlock) Blocks.OAK_BUTTON, state); }
     }
 
     public static class SpruceButtonPart extends ButtonPart {
 
-        public SpruceButtonPart() { super(ModContent.spruceButtonPartType, (ButtonBlock) Blocks.SPRUCE_BUTTON); }
+        public SpruceButtonPart() { super(ModContent.SPRUCE_BUTTON_PART.get(), (ButtonBlock) Blocks.SPRUCE_BUTTON); }
 
-        public SpruceButtonPart(BlockState state) { super(ModContent.spruceButtonPartType, (ButtonBlock) Blocks.SPRUCE_BUTTON, state); }
+        public SpruceButtonPart(BlockState state) { super(ModContent.SPRUCE_BUTTON_PART.get(), (ButtonBlock) Blocks.SPRUCE_BUTTON, state); }
     }
 
     public static class BirchButtonPart extends ButtonPart {
 
-        public BirchButtonPart() { super(ModContent.birchButtonPartType, (ButtonBlock) Blocks.BIRCH_BUTTON); }
+        public BirchButtonPart() { super(ModContent.BIRCH_BUTTON_PART.get(), (ButtonBlock) Blocks.BIRCH_BUTTON); }
 
-        public BirchButtonPart(BlockState state) { super(ModContent.birchButtonPartType, (ButtonBlock) Blocks.BIRCH_BUTTON, state); }
+        public BirchButtonPart(BlockState state) { super(ModContent.BIRCH_BUTTON_PART.get(), (ButtonBlock) Blocks.BIRCH_BUTTON, state); }
     }
 
     public static class JungleButtonPart extends ButtonPart {
 
-        public JungleButtonPart() { super(ModContent.jungleButtonPartType, (ButtonBlock) Blocks.JUNGLE_BUTTON); }
+        public JungleButtonPart() { super(ModContent.JUNGLE_BUTTON_PART.get(), (ButtonBlock) Blocks.JUNGLE_BUTTON); }
 
-        public JungleButtonPart(BlockState state) { super(ModContent.jungleButtonPartType, (ButtonBlock) Blocks.JUNGLE_BUTTON, state); }
+        public JungleButtonPart(BlockState state) { super(ModContent.JUNGLE_BUTTON_PART.get(), (ButtonBlock) Blocks.JUNGLE_BUTTON, state); }
     }
 
     public static class AcaciaButtonPart extends ButtonPart {
 
-        public AcaciaButtonPart() { super(ModContent.acaciaButtonPartType, (ButtonBlock) Blocks.ACACIA_BUTTON); }
+        public AcaciaButtonPart() { super(ModContent.ACACIA_BUTTON_PART.get(), (ButtonBlock) Blocks.ACACIA_BUTTON); }
 
-        public AcaciaButtonPart(BlockState state) { super(ModContent.acaciaButtonPartType, (ButtonBlock) Blocks.ACACIA_BUTTON, state); }
+        public AcaciaButtonPart(BlockState state) { super(ModContent.ACACIA_BUTTON_PART.get(), (ButtonBlock) Blocks.ACACIA_BUTTON, state); }
     }
 
     public static class DarkOakButtonPart extends ButtonPart {
 
-        public DarkOakButtonPart() { super(ModContent.darkOakButtonPartType, (ButtonBlock) Blocks.DARK_OAK_BUTTON); }
+        public DarkOakButtonPart() { super(ModContent.DARK_OAK_BUTTON_PART.get(), (ButtonBlock) Blocks.DARK_OAK_BUTTON); }
 
-        public DarkOakButtonPart(BlockState state) { super(ModContent.darkOakButtonPartType, (ButtonBlock) Blocks.DARK_OAK_BUTTON, state); }
+        public DarkOakButtonPart(BlockState state) { super(ModContent.DARK_OAK_BUTTON_PART.get(), (ButtonBlock) Blocks.DARK_OAK_BUTTON, state); }
     }
 
     public static class CrimsonButtonPart extends ButtonPart {
 
-        public CrimsonButtonPart() { super(ModContent.crimsonButtonPartType, (ButtonBlock) Blocks.CRIMSON_BUTTON); }
+        public CrimsonButtonPart() { super(ModContent.CRIMSON_BUTTON_PART.get(), (ButtonBlock) Blocks.CRIMSON_BUTTON); }
 
-        public CrimsonButtonPart(BlockState state) { super(ModContent.crimsonButtonPartType, (ButtonBlock) Blocks.CRIMSON_BUTTON, state); }
+        public CrimsonButtonPart(BlockState state) { super(ModContent.CRIMSON_BUTTON_PART.get(), (ButtonBlock) Blocks.CRIMSON_BUTTON, state); }
     }
 
     public static class WarpedButtonPart extends ButtonPart {
 
-        public WarpedButtonPart() { super(ModContent.warpedButtonPartType, (ButtonBlock) Blocks.WARPED_BUTTON); }
+        public WarpedButtonPart() { super(ModContent.WARPED_BUTTON_PART.get(), (ButtonBlock) Blocks.WARPED_BUTTON); }
 
-        public WarpedButtonPart(BlockState state) { super(ModContent.warpedButtonPartType, (ButtonBlock) Blocks.WARPED_BUTTON, state); }
+        public WarpedButtonPart(BlockState state) { super(ModContent.WARPED_BUTTON_PART.get(), (ButtonBlock) Blocks.WARPED_BUTTON, state); }
     }
 
 }

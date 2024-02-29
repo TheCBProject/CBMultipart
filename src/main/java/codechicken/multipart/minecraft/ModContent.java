@@ -5,7 +5,6 @@ import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.PartConverter;
 import codechicken.multipart.api.SimpleMultipartType;
 import codechicken.multipart.api.part.MultiPart;
-import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.util.MultipartPlaceContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Item;
@@ -14,11 +13,9 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.registries.ObjectHolder;
-import net.minecraftforge.registries.RegisterEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -30,94 +27,74 @@ import java.util.function.Supplier;
  */
 public class ModContent {
 
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:torch")
-    public static MultipartType<TorchPart> torchPartType;
+    private static final DeferredRegister<MultipartType<?>> MULTIPART_TYPES = DeferredRegister.create(MultipartType.MULTIPART_TYPES, "minecraft");
+    private static final DeferredRegister<PartConverter> PART_CONVERTERS = DeferredRegister.create(PartConverter.PART_CONVERTERS, "minecraft");
 
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:soul_torch")
-    public static MultipartType<SoulTorchPart> soulTorchPartType;
+    public static final RegistryObject<MultipartType<TorchPart>> TORCH_PART = MULTIPART_TYPES.register("torch", () -> new SimpleMultipartType<>(e -> new TorchPart()));
+    public static final RegistryObject<MultipartType<SoulTorchPart>> SOUL_TORCH_PART = MULTIPART_TYPES.register("soul_torch", () -> new SimpleMultipartType<>(e -> new SoulTorchPart()));
+    public static final RegistryObject<MultipartType<RedstoneTorchPart>> REDSTONE_TORCH_PART = MULTIPART_TYPES.register("redstone_torch", () -> new SimpleMultipartType<>(e -> new RedstoneTorchPart()));
+    public static final RegistryObject<MultipartType<LeverPart>> LEVER_PART = MULTIPART_TYPES.register("lever", () -> new SimpleMultipartType<>(e -> new LeverPart()));
 
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:redstone_torch")
-    public static MultipartType<RedstoneTorchPart> redstoneTorchPartType;
+    public static final RegistryObject<MultipartType<ButtonPart.StoneButtonPart>> STONE_BUTTON_PART = MULTIPART_TYPES.register("stone_button", () -> new SimpleMultipartType<>(e -> new ButtonPart.StoneButtonPart()));
+    public static final RegistryObject<MultipartType<ButtonPart.PolishedBlackstoneButtonPart>> POLISHED_BLACKSTONE_BUTTON_PART = MULTIPART_TYPES.register("polished_blackstone_button", () -> new SimpleMultipartType<>(e -> new ButtonPart.PolishedBlackstoneButtonPart()));
 
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:lever")
-    public static MultipartType<LeverPart> leverPartType;
+    public static final RegistryObject<MultipartType<ButtonPart.OakButtonPart>> OAK_BUTTON_PART = MULTIPART_TYPES.register("oak_button", () -> new SimpleMultipartType<>(e -> new ButtonPart.OakButtonPart()));
+    public static final RegistryObject<MultipartType<ButtonPart.SpruceButtonPart>> SPRUCE_BUTTON_PART = MULTIPART_TYPES.register("spruce_button", () -> new SimpleMultipartType<>(e -> new ButtonPart.SpruceButtonPart()));
+    public static final RegistryObject<MultipartType<ButtonPart.BirchButtonPart>> BIRCH_BUTTON_PART = MULTIPART_TYPES.register("birch_button", () -> new SimpleMultipartType<>(e -> new ButtonPart.BirchButtonPart()));
+    public static final RegistryObject<MultipartType<ButtonPart.JungleButtonPart>> JUNGLE_BUTTON_PART = MULTIPART_TYPES.register("jungle_button", () -> new SimpleMultipartType<>(e -> new ButtonPart.JungleButtonPart()));
+    public static final RegistryObject<MultipartType<ButtonPart.AcaciaButtonPart>> ACACIA_BUTTON_PART = MULTIPART_TYPES.register("acacia_button", () -> new SimpleMultipartType<>(e -> new ButtonPart.AcaciaButtonPart()));
+    public static final RegistryObject<MultipartType<ButtonPart.DarkOakButtonPart>> DARK_OAK_BUTTON_PART = MULTIPART_TYPES.register("dark_oak_button", () -> new SimpleMultipartType<>(e -> new ButtonPart.DarkOakButtonPart()));
+    public static final RegistryObject<MultipartType<ButtonPart.CrimsonButtonPart>> CRIMSON_BUTTON_PART = MULTIPART_TYPES.register("crimson_button", () -> new SimpleMultipartType<>(e -> new ButtonPart.CrimsonButtonPart()));
+    public static final RegistryObject<MultipartType<ButtonPart.WarpedButtonPart>> WARPED_BUTTON_PART = MULTIPART_TYPES.register("warped_button", () -> new SimpleMultipartType<>(e -> new ButtonPart.WarpedButtonPart()));
 
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:stone_button")
-    public static MultipartType<ButtonPart.StoneButtonPart> stoneButtonPartType;
+    private static final RegistryObject<PartConverter> TORCH_CONVERTER = PART_CONVERTERS.register("torch", () ->
+            new Converter<>(TorchPart::new, TorchPart::new, Items.TORCH, Blocks.TORCH, Blocks.WALL_TORCH)
+    );
+    private static final RegistryObject<PartConverter> SOUL_TORCH_CONVERTER = PART_CONVERTERS.register("soul_torch", () ->
+            new Converter<>(SoulTorchPart::new, SoulTorchPart::new, Items.SOUL_TORCH, Blocks.SOUL_TORCH, Blocks.SOUL_WALL_TORCH)
+    );
+    private static final RegistryObject<PartConverter> REDSTONE_TORCH_CONVERTER = PART_CONVERTERS.register("redstone_torch", () ->
+            new Converter<>(RedstoneTorchPart::new, RedstoneTorchPart::new, Items.REDSTONE_TORCH, Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WALL_TORCH)
+    );
+    private static final RegistryObject<PartConverter> LEVER_CONVERTER = PART_CONVERTERS.register("lever", () ->
+            new Converter<>(LeverPart::new, LeverPart::new, Items.LEVER, Blocks.LEVER)
+    );
 
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:polished_blackstone_button")
-    public static MultipartType<ButtonPart.PolishedBlackstoneButtonPart> polishedBlackstoneButtonPartType;
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:oak_button")
-    public static MultipartType<ButtonPart.OakButtonPart> oakButtonPartType;
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:spruce_button")
-    public static MultipartType<ButtonPart.SpruceButtonPart> spruceButtonPartType;
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:birch_button")
-    public static MultipartType<ButtonPart.BirchButtonPart> birchButtonPartType;
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:jungle_button")
-    public static MultipartType<ButtonPart.JungleButtonPart> jungleButtonPartType;
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:acacia_button")
-    public static MultipartType<ButtonPart.AcaciaButtonPart> acaciaButtonPartType;
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:dark_oak_button")
-    public static MultipartType<ButtonPart.DarkOakButtonPart> darkOakButtonPartType;
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:crimson_button")
-    public static MultipartType<ButtonPart.CrimsonButtonPart> crimsonButtonPartType;
-    @ObjectHolder (registryName = "cb_multipart:multipart_types", value = "minecraft:warped_button")
-    public static MultipartType<ButtonPart.WarpedButtonPart> warpedButtonPartType;
+    private static final RegistryObject<PartConverter> STONE_BUTTON_CONVERTER = PART_CONVERTERS.register("stone_button", () ->
+            new Converter<>(ButtonPart.StoneButtonPart::new, ButtonPart.StoneButtonPart::new, Items.STONE_BUTTON, Blocks.STONE_BUTTON)
+    );
+    private static final RegistryObject<PartConverter> POLISHED_BLACKSTONE_BUTTON_CONVERTER = PART_CONVERTERS.register("polished_blackstone_button", () ->
+            new Converter<>(ButtonPart.PolishedBlackstoneButtonPart::new, ButtonPart.PolishedBlackstoneButtonPart::new, Items.POLISHED_BLACKSTONE_BUTTON, Blocks.POLISHED_BLACKSTONE_BUTTON)
+    );
 
-    @SubscribeEvent
-    public static void onRegisterMultiParts(RegisterEvent event) {
-        event.register(MultiPartRegistries.MULTIPART_TYPES.getRegistryKey(), r -> {
-            ModContainer container = ModLoadingContext.get().getActiveContainer();
-            ModLoadingContext.get().setActiveContainer(null);
+    private static final RegistryObject<PartConverter> OAK_BUTTON_CONVERTER = PART_CONVERTERS.register("oak_button", () ->
+            new Converter<>(ButtonPart.OakButtonPart::new, ButtonPart.OakButtonPart::new, Items.OAK_BUTTON, Blocks.OAK_BUTTON)
+    );
+    private static final RegistryObject<PartConverter> SPRUCE_BUTTON_CONVERTER = PART_CONVERTERS.register("spruce_button", () ->
+            new Converter<>(ButtonPart.SpruceButtonPart::new, ButtonPart.SpruceButtonPart::new, Items.SPRUCE_BUTTON, Blocks.SPRUCE_BUTTON)
+    );
+    private static final RegistryObject<PartConverter> BIRCH_BUTTON_CONVERTER = PART_CONVERTERS.register("birch_button", () ->
+            new Converter<>(ButtonPart.BirchButtonPart::new, ButtonPart.BirchButtonPart::new, Items.BIRCH_BUTTON, Blocks.BIRCH_BUTTON)
+    );
+    private static final RegistryObject<PartConverter> JUNGLE_BUTTON_CONVERTER = PART_CONVERTERS.register("jungle_button", () ->
+            new Converter<>(ButtonPart.JungleButtonPart::new, ButtonPart.JungleButtonPart::new, Items.JUNGLE_BUTTON, Blocks.JUNGLE_BUTTON)
+    );
+    private static final RegistryObject<PartConverter> ACACIA_BUTTON_CONVERTER = PART_CONVERTERS.register("acacia_button", () ->
+            new Converter<>(ButtonPart.AcaciaButtonPart::new, ButtonPart.AcaciaButtonPart::new, Items.ACACIA_BUTTON, Blocks.ACACIA_BUTTON)
+    );
+    private static final RegistryObject<PartConverter> DARK_OAK_BUTTON_CONVERTER = PART_CONVERTERS.register("dark_oak_button", () ->
+            new Converter<>(ButtonPart.DarkOakButtonPart::new, ButtonPart.DarkOakButtonPart::new, Items.DARK_OAK_BUTTON, Blocks.DARK_OAK_BUTTON)
+    );
+    private static final RegistryObject<PartConverter> CRIMSON_BUTTON_CONVERTER = PART_CONVERTERS.register("crimson_button", () ->
+            new Converter<>(ButtonPart.CrimsonButtonPart::new, ButtonPart.CrimsonButtonPart::new, Items.CRIMSON_BUTTON, Blocks.CRIMSON_BUTTON)
+    );
+    private static final RegistryObject<PartConverter> WARPED_BUTTON_CONVERTER = PART_CONVERTERS.register("warped_button", () ->
+            new Converter<>(ButtonPart.WarpedButtonPart::new, ButtonPart.WarpedButtonPart::new, Items.WARPED_BUTTON, Blocks.WARPED_BUTTON)
+    );
 
-            r.register("torch", new SimpleMultipartType<>(e -> new TorchPart()));
-            r.register("soul_torch", new SimpleMultipartType<>(e -> new SoulTorchPart()));
-            r.register("redstone_torch", new SimpleMultipartType<>(e -> new RedstoneTorchPart()));
-            r.register("lever", new SimpleMultipartType<>(e -> new LeverPart()));
-
-            r.register("stone_button", new SimpleMultipartType<>(e -> new ButtonPart.StoneButtonPart()));
-
-            r.register("polished_blackstone_button", new SimpleMultipartType<>(e -> new ButtonPart.PolishedBlackstoneButtonPart()));
-            r.register("oak_button", new SimpleMultipartType<>(e -> new ButtonPart.OakButtonPart()));
-            r.register("spruce_button", new SimpleMultipartType<>(e -> new ButtonPart.SpruceButtonPart()));
-            r.register("birch_button", new SimpleMultipartType<>(e -> new ButtonPart.BirchButtonPart()));
-            r.register("jungle_button", new SimpleMultipartType<>(e -> new ButtonPart.JungleButtonPart()));
-            r.register("acacia_button", new SimpleMultipartType<>(e -> new ButtonPart.AcaciaButtonPart()));
-            r.register("dark_oak_button", new SimpleMultipartType<>(e -> new ButtonPart.DarkOakButtonPart()));
-            r.register("crimson_button", new SimpleMultipartType<>(e -> new ButtonPart.CrimsonButtonPart()));
-            r.register("warped_button", new SimpleMultipartType<>(e -> new ButtonPart.WarpedButtonPart()));
-
-            ModLoadingContext.get().setActiveContainer(container);
-        });
-    }
-
-    @SubscribeEvent
-    public static void onRegisterMultiPartConverters(RegisterEvent event) {
-
-        event.register(MultiPartRegistries.PART_CONVERTERS.getRegistryKey(), r -> {
-            ModContainer container = ModLoadingContext.get().getActiveContainer();
-            ModLoadingContext.get().setActiveContainer(null);
-
-            r.register("torch", new Converter<>(TorchPart::new, TorchPart::new, Items.TORCH, Blocks.TORCH, Blocks.WALL_TORCH));
-            r.register("soul_torch", new Converter<>(SoulTorchPart::new, SoulTorchPart::new, Items.SOUL_TORCH, Blocks.SOUL_TORCH, Blocks.SOUL_WALL_TORCH));
-            r.register("redstone_torch", new Converter<>(RedstoneTorchPart::new, RedstoneTorchPart::new, Items.REDSTONE_TORCH, Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WALL_TORCH));
-            r.register("lever", new Converter<>(LeverPart::new, LeverPart::new, Items.LEVER, Blocks.LEVER));
-
-            r.register("stone_button", new Converter<>(ButtonPart.StoneButtonPart::new, ButtonPart.StoneButtonPart::new, Items.STONE_BUTTON, Blocks.STONE_BUTTON));
-
-            r.register("polished_blackstone_button", new Converter<>(ButtonPart.PolishedBlackstoneButtonPart::new, ButtonPart.PolishedBlackstoneButtonPart::new, Items.POLISHED_BLACKSTONE_BUTTON, Blocks.POLISHED_BLACKSTONE_BUTTON));
-            r.register("oak_button", new Converter<>(ButtonPart.OakButtonPart::new, ButtonPart.OakButtonPart::new, Items.OAK_BUTTON, Blocks.OAK_BUTTON));
-            r.register("spruce_button", new Converter<>(ButtonPart.SpruceButtonPart::new, ButtonPart.SpruceButtonPart::new, Items.SPRUCE_BUTTON, Blocks.SPRUCE_BUTTON));
-            r.register("birch_button", new Converter<>(ButtonPart.BirchButtonPart::new, ButtonPart.BirchButtonPart::new, Items.BIRCH_BUTTON, Blocks.BIRCH_BUTTON));
-            r.register("jungle_button", new Converter<>(ButtonPart.JungleButtonPart::new, ButtonPart.JungleButtonPart::new, Items.JUNGLE_BUTTON, Blocks.JUNGLE_BUTTON));
-            r.register("acacia_button", new Converter<>(ButtonPart.AcaciaButtonPart::new, ButtonPart.AcaciaButtonPart::new, Items.ACACIA_BUTTON, Blocks.ACACIA_BUTTON));
-            r.register("dark_oak_button", new Converter<>(ButtonPart.DarkOakButtonPart::new, ButtonPart.DarkOakButtonPart::new, Items.DARK_OAK_BUTTON, Blocks.DARK_OAK_BUTTON));
-            r.register("crimson_button", new Converter<>(ButtonPart.CrimsonButtonPart::new, ButtonPart.CrimsonButtonPart::new, Items.CRIMSON_BUTTON, Blocks.CRIMSON_BUTTON));
-            r.register("warped_button", new Converter<>(ButtonPart.WarpedButtonPart::new, ButtonPart.WarpedButtonPart::new, Items.WARPED_BUTTON, Blocks.WARPED_BUTTON));
-
-            ModLoadingContext.get().setActiveContainer(container);
-        });
-
+    public static void init(IEventBus modBus) {
+        MULTIPART_TYPES.register(modBus);
+        PART_CONVERTERS.register(modBus);
     }
 
     private static class Converter<T extends McStatePart> extends PartConverter {
