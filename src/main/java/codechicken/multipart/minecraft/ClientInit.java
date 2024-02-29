@@ -15,19 +15,19 @@ public class ClientInit {
     }
 
     private static void onClientSetup(FMLClientSetupEvent event) {
-        MultipartClientRegistry.register(ModContent.TORCH_PART.get(), PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.SOUL_TORCH_PART.get(), PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.REDSTONE_TORCH_PART.get(), PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.LEVER_PART.get(), PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.STONE_BUTTON_PART.get(), PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.POLISHED_BLACKSTONE_BUTTON_PART.get(), PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.OAK_BUTTON_PART.get(), PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.SPRUCE_BUTTON_PART.get(), PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.BIRCH_BUTTON_PART.get(), PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.JUNGLE_BUTTON_PART.get(), PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.ACACIA_BUTTON_PART.get(), PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.DARK_OAK_BUTTON_PART.get(), PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.CRIMSON_BUTTON_PART.get(), PartBakedModelRenderer.simple());
-        MultipartClientRegistry.register(ModContent.WARPED_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.TORCH_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.SOUL_TORCH_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.REDSTONE_TORCH_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.LEVER_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.STONE_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.POLISHED_BLACKSTONE_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.OAK_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.SPRUCE_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.BIRCH_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.JUNGLE_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.ACACIA_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.DARK_OAK_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.CRIMSON_BUTTON_PART.get(), PartBakedModelRenderer.simple());
+        MultipartClientRegistry.register(MinecraftMultipartModContent.WARPED_BUTTON_PART.get(), PartBakedModelRenderer.simple());
     }
 }

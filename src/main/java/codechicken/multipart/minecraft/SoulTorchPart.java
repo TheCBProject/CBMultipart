@@ -26,6 +26,6 @@ public class SoulTorchPart extends TorchPart {
 
     @Override
     public MultipartType<?> getType() {
-        return ModContent.SOUL_TORCH_PART.get();
+        return MinecraftMultipartModContent.SOUL_TORCH_PART.get();
     }
 }

@@ -31,7 +31,7 @@ public class LeverPart extends McSidedStatePart implements FaceRedstonePart {
 
     @Override
     public MultipartType<?> getType() {
-        return ModContent.LEVER_PART.get();
+        return MinecraftMultipartModContent.LEVER_PART.get();
     }
 
     @Override

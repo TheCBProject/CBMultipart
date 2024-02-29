@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 /**
  * Created by covers1624 on 1/9/20.
  */
-public class ModContent {
+public class MinecraftMultipartModContent {
 
     private static final DeferredRegister<MultipartType<?>> MULTIPART_TYPES = DeferredRegister.create(MultipartType.MULTIPART_TYPES, "minecraft");
     private static final DeferredRegister<PartConverter> PART_CONVERTERS = DeferredRegister.create(PartConverter.PART_CONVERTERS, "minecraft");

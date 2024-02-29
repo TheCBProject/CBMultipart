@@ -28,7 +28,7 @@ public class RedstoneTorchPart extends TorchPart implements FaceRedstonePart, Ra
 
     @Override
     public MultipartType<?> getType() {
-        return ModContent.REDSTONE_TORCH_PART.get();
+        return MinecraftMultipartModContent.REDSTONE_TORCH_PART.get();
     }
 
     @Override
