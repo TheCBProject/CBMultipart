@@ -30,7 +30,7 @@ public class ButtonPart extends McSidedStatePart implements FaceRedstonePart {
     }
 
     public ButtonPart(MultipartType<?> type, ButtonBlock block, BlockState state) {
-        super(state);
+        super(state.setValue(ButtonBlock.POWERED, false));// Reset button to un-powered when converted
         this.type = type;
         this.block = block;
     }
