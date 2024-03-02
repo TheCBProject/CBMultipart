@@ -102,7 +102,15 @@ def publishingMetadataTask = tasks.register("publishingMetadata") {
                         'classifier'  : 'universal',
                         'modLoader'   : 'neoforge',
                         'curseforgeId': '258426',
-                        'modrinthId'  : 'LmvnWWSV'
+                        'modrinthId'  : 'LmvnWWSV',
+                        'dependencies': [
+                                [
+                                        'modId'       : 'codechickenlib',
+                                        'type'        : 'required',
+                                        'modrinthId'  : '242818',
+                                        'curseforgeId': '2gq0ALnz'
+                                ]
+                        ]
                 ]
         ]))
     }
