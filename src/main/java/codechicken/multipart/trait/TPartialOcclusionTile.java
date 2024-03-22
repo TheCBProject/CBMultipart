@@ -20,45 +20,38 @@ import java.util.List;
  */
 public class TPartialOcclusionTile extends TileMultipart {
 
-    //Static cache.
+    // Cached partial occlusion test results for performance
+    // This cache exists almost entirely for the microblock highlight renderer, due to how expensive combining VoxelShapes is.
+    // Normal occlusion operations happen infrequently enough that this is not a performance concern during normal gameplay.
+    // TODO, Figure out how to cleanly nuke this and do caching inside MicroblockRender.
     @Nullable
-    private static TPartialOcclusionTile lastOcclusionTestedTile;
+    private Iterable<MultiPart> lastTestParts = null;
     @Nullable
-    private static VoxelShape lastOcclusionTestedShape;
-    private static boolean lastOcclusionTestedResult;
+    private VoxelShape lastTestShape = null;
+    private boolean lastTestResult = false;
 
     public TPartialOcclusionTile(BlockPos pos, BlockState state) {
         super(pos, state);
     }
 
     @Override
-    public void bindPart(MultiPart newPart) {
-        super.bindPart(newPart);
-
-        if (newPart instanceof PartialOcclusionPart && lastOcclusionTestedTile == this) {
-            lastOcclusionTestedTile = null;
-        }
-    }
-
-    @Override
-    public void partRemoved(MultiPart remPart, int p) {
-        super.partRemoved(remPart, p);
-
-        if (remPart instanceof PartialOcclusionPart && lastOcclusionTestedTile == this) {
-            lastOcclusionTestedTile = null;
-        }
+    public void markShapeChange() {
+        super.markShapeChange();
+        // Invalidate cached results on part add, remove, or shape change
+        lastTestParts = null;
+        lastTestShape = null;
     }
 
     @Override
     public boolean occlusionTest(Iterable<MultiPart> parts, MultiPart npart) {
         if (npart instanceof PartialOcclusionPart newPart) {
             VoxelShape newShape = newPart.getPartialOcclusionShape();
-            if (lastOcclusionTestedTile != this || lastOcclusionTestedShape != newShape) {
-                lastOcclusionTestedTile = this;
-                lastOcclusionTestedShape = newShape;
-                lastOcclusionTestedResult = partialOcclusionTest(parts, newPart);
+            if (lastTestParts != parts || lastTestShape != newShape) {
+                lastTestParts = parts;
+                lastTestShape = newShape;
+                lastTestResult = partialOcclusionTest(parts, newPart);
             }
-            if (!lastOcclusionTestedResult) {
+            if (!lastTestResult) {
                 return false;
             }
         }

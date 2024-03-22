@@ -140,8 +140,11 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.BIRCH_PLANKS));
             registerMaterial(r, new BlockMicroMaterial(Blocks.JUNGLE_PLANKS));
             registerMaterial(r, new BlockMicroMaterial(Blocks.ACACIA_PLANKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHERRY_PLANKS));
             registerMaterial(r, new BlockMicroMaterial(Blocks.DARK_OAK_PLANKS));
             registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_PLANKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BAMBOO_PLANKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BAMBOO_MOSAIC));
             registerMaterial(r, new BlockMicroMaterial(Blocks.SAND)); //TODO Gravity?
             registerMaterial(r, new BlockMicroMaterial(Blocks.RED_SAND)); //TODO Gravity?
             registerMaterial(r, new BlockMicroMaterial(Blocks.GRAVEL));
@@ -157,6 +160,7 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.BIRCH_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.JUNGLE_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.ACACIA_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHERRY_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.DARK_OAK_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_ROOTS));
@@ -165,14 +169,17 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_BIRCH_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_JUNGLE_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_ACACIA_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_CHERRY_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_DARK_OAK_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_OAK_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_MANGROVE_LOG));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_BAMBOO_BLOCK));
             registerMaterial(r, new BlockMicroMaterial(Blocks.OAK_WOOD));
             registerMaterial(r, new BlockMicroMaterial(Blocks.SPRUCE_WOOD));
             registerMaterial(r, new BlockMicroMaterial(Blocks.BIRCH_WOOD));
             registerMaterial(r, new BlockMicroMaterial(Blocks.JUNGLE_WOOD));
             registerMaterial(r, new BlockMicroMaterial(Blocks.ACACIA_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHERRY_WOOD));
             registerMaterial(r, new BlockMicroMaterial(Blocks.DARK_OAK_WOOD));
             registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_WOOD));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_OAK_WOOD));
@@ -180,6 +187,7 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_BIRCH_WOOD));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_JUNGLE_WOOD));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_ACACIA_WOOD));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_CHERRY_WOOD));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_DARK_OAK_WOOD));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_MANGROVE_WOOD));
             registerMaterial(r, new BlockMicroMaterial(Blocks.OAK_LEAVES));
@@ -187,6 +195,7 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.BIRCH_LEAVES));
             registerMaterial(r, new BlockMicroMaterial(Blocks.JUNGLE_LEAVES));
             registerMaterial(r, new BlockMicroMaterial(Blocks.ACACIA_LEAVES));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHERRY_LEAVES));
             registerMaterial(r, new BlockMicroMaterial(Blocks.DARK_OAK_LEAVES));
             registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_LEAVES));
             registerMaterial(r, new BlockMicroMaterial(Blocks.AZALEA_LEAVES));
@@ -221,6 +230,7 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.BRICKS));
             registerMaterial(r, new BlockMicroMaterial(Blocks.TNT)); //TODO, make explode?
             registerMaterial(r, new BlockMicroMaterial(Blocks.BOOKSHELF));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_BOOKSHELF));
             registerMaterial(r, new BlockMicroMaterial(Blocks.MOSSY_COBBLESTONE));
             registerMaterial(r, new BlockMicroMaterial(Blocks.OBSIDIAN));
             registerMaterial(r, new BlockMicroMaterial(Blocks.DIAMOND_ORE));
@@ -379,8 +389,16 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.FIRE_CORAL_BLOCK)); //TODO Dies out of water
             registerMaterial(r, new BlockMicroMaterial(Blocks.HORN_CORAL_BLOCK)); //TODO Dies out of water
             registerMaterial(r, new BlockMicroMaterial(Blocks.BLUE_ICE)); //TODO speed
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WARPED_STEM));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_WARPED_STEM));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WARPED_HYPHAE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_WARPED_HYPHAE));
             registerMaterial(r, new BlockMicroMaterial(Blocks.WARPED_NYLIUM));
             registerMaterial(r, new BlockMicroMaterial(Blocks.WARPED_WART_BLOCK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CRIMSON_STEM));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_CRIMSON_STEM));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CRIMSON_HYPHAE));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_CRIMSON_HYPHAE));
             registerMaterial(r, new BlockMicroMaterial(Blocks.CRIMSON_NYLIUM));
             registerMaterial(r, new BlockMicroMaterial(Blocks.CRIMSON_PLANKS));
             registerMaterial(r, new BlockMicroMaterial(Blocks.WARPED_PLANKS));

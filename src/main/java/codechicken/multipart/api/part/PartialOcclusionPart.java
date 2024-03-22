@@ -1,5 +1,6 @@
 package codechicken.multipart.api.part;
 
+import codechicken.multipart.block.TileMultipart;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
@@ -18,6 +19,8 @@ public interface PartialOcclusionPart extends MultiPart {
      * <p>
      * It is expected that this method return some form of cached instance that does NOT change
      * each call, unless some internal state has changed.
+     * <p>
+     * If this shape changes after initial placement, call {@link TileMultipart#markShapeChange()}.
      *
      * @return the VoxelShape for partial occlusion tests.
      */

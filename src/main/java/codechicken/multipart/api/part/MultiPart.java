@@ -20,9 +20,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -174,26 +177,56 @@ public interface MultiPart {
         return true;
     }
 
+    /**
+     * Maps to {@link Block#getShape(BlockState, BlockGetter, BlockPos, CollisionContext)}.
+     * <p>
+     * If this shape changes after initial placement, call {@link TileMultipart#markShapeChange()}.
+     */
     default VoxelShape getShape(CollisionContext context) {
         return Shapes.empty();
     }
 
+    /**
+     * Maps to {@link Block#getCollisionShape(BlockState, BlockGetter, BlockPos, CollisionContext)}.
+     * <p>
+     * If this shape changes after initial placement, call {@link TileMultipart#markShapeChange()}.
+     */
     default VoxelShape getCollisionShape(CollisionContext context) {
         return getShape(context);
     }
 
+    /**
+     * Maps to {@link Block#getOcclusionShape(BlockState, BlockGetter, BlockPos)}.
+     * <p>
+     * If this shape changes after initial placement, call {@link TileMultipart#markShapeChange()}.
+     */
     default VoxelShape getRenderOcclusionShape() {
         return getShape(CollisionContext.empty());
     }
 
+    /**
+     * Maps to {@link Block#getInteractionShape(BlockState, BlockGetter, BlockPos)}.
+     * <p>
+     * If this shape changes after initial placement, call {@link TileMultipart#markShapeChange()}.
+     */
     default VoxelShape getInteractionShape() {
         return getShape(CollisionContext.empty());
     }
 
+    /**
+     * Maps to {@link Block#getBlockSupportShape(BlockState, BlockGetter, BlockPos)}.
+     * <p>
+     * If this shape changes after initial placement, call {@link TileMultipart#markShapeChange()}.
+     */
     default VoxelShape getBlockSupportShape() {
         return getShape(CollisionContext.empty());
     }
 
+    /**
+     * Maps to {@link Block#getVisualShape(BlockState, BlockGetter, BlockPos, CollisionContext)}.
+     * <p>
+     * If this shape changes after initial placement, call {@link TileMultipart#markShapeChange()}.
+     */
     default VoxelShape getVisualShape(CollisionContext context) {
         return getShape(context);
     }
