@@ -81,17 +81,12 @@ public class DataGenerators {
             generated(IRON_SAW.get());
             generated(DIAMOND_SAW.get());
         }
-
-        @Override
-        public String getName() {
-            return "CBMicroblock Item Models";
-        }
     }
 
     private static class Recipes extends RecipeProvider {
 
         public Recipes(PackOutput output) {
-            super(output);
+            super(output, MOD_ID);
         }
 
         @Override
@@ -123,11 +118,6 @@ public class DataGenerators {
                     .key('M', Tags.Items.GEMS_DIAMOND)
                     .patternLine("SRR")
                     .patternLine("SMR");
-        }
-
-        @Override
-        public String getName() {
-            return "CBMicroblock Recipes";
         }
     }
 }
