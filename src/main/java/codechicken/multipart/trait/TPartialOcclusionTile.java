@@ -25,10 +25,10 @@ public class TPartialOcclusionTile extends TileMultipart {
     // Normal occlusion operations happen infrequently enough that this is not a performance concern during normal gameplay.
     // TODO, Figure out how to cleanly nuke this and do caching inside MicroblockRender.
     @Nullable
-    private Iterable<MultiPart> lastTestParts = null;
+    private static Iterable<MultiPart> lastTestParts = null;
     @Nullable
-    private VoxelShape lastTestShape = null;
-    private boolean lastTestResult = false;
+    private static VoxelShape lastTestShape = null;
+    private static boolean lastTestResult = false;
 
     public TPartialOcclusionTile(BlockPos pos, BlockState state) {
         super(pos, state);
@@ -46,7 +46,7 @@ public class TPartialOcclusionTile extends TileMultipart {
     public boolean occlusionTest(Iterable<MultiPart> parts, MultiPart npart) {
         if (npart instanceof PartialOcclusionPart newPart) {
             VoxelShape newShape = newPart.getPartialOcclusionShape();
-            if (lastTestParts != parts || lastTestShape != newShape) {
+            if (!level.isClientSide() || lastTestParts != parts || lastTestShape != newShape) {
                 lastTestParts = parts;
                 lastTestShape = newShape;
                 lastTestResult = partialOcclusionTest(parts, newPart);
