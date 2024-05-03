@@ -46,7 +46,7 @@ public class TPartialOcclusionTile extends TileMultipart {
     public boolean occlusionTest(Iterable<MultiPart> parts, MultiPart npart) {
         if (npart instanceof PartialOcclusionPart newPart) {
             VoxelShape newShape = newPart.getPartialOcclusionShape();
-            if (!level.isClientSide() || lastTestParts != parts || lastTestShape != newShape) {
+            if (!getLevel().isClientSide() || lastTestParts != parts || lastTestShape != newShape) {
                 lastTestParts = parts;
                 lastTestShape = newShape;
                 lastTestResult = partialOcclusionTest(parts, newPart);
