@@ -17,10 +17,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.EventHooks;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 /**
  * Created by covers1624 on 1/9/20.
@@ -31,7 +31,7 @@ public class PlacementConversionHandler {
 
     public static void init() {
         LOCK.lock();
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOW, PlacementConversionHandler::onRightClickBlock);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOW, PlacementConversionHandler::onRightClickBlock);
     }
 
     private static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
@@ -83,7 +83,7 @@ public class PlacementConversionHandler {
                 ItemStack held = ctx.getItemInHand();
                 held.shrink(1);
                 if (held.isEmpty()) {
-                    ForgeEventFactory.onPlayerDestroyItem(player, held, hand);
+                    EventHooks.onPlayerDestroyItem(player, held, hand);
                 }
             }
         } else {

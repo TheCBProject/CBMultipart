@@ -1,17 +1,21 @@
 package codechicken.multipart.network;
 
-import codechicken.lib.packet.PacketCustomChannelBuilder;
+import codechicken.lib.packet.PacketCustomChannel;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.event.EventNetworkChannel;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * Created by covers1624 on 4/30/20.
  */
 public class MultiPartNetwork {
 
-    public static final ResourceLocation NET_CHANNEL = new ResourceLocation("cmp:n");
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
+    public static final ResourceLocation NET_CHANNEL = new ResourceLocation("cmp:n");
+    public static final PacketCustomChannel channel = new PacketCustomChannel(NET_CHANNEL)
+//            .versioned() // TODO
+            .client(() -> MultiPartCPH::new)
+            .server(() -> MultiPartSPH::new);
 
     //Client handled.
     public static final int C_TILE_DESC = 1;
@@ -24,14 +28,9 @@ public class MultiPartNetwork {
     //Server handled.
     public static final int S_CONTROL_KEY_MODIFIER = 1;
 
-    public static EventNetworkChannel netChannel;
-
-    public static void init() {
+    public static void init(IEventBus modBus) {
         LOCK.lock();
-        netChannel = PacketCustomChannelBuilder.named(NET_CHANNEL)
-                .assignServerHandler(() -> MultiPartSPH::new)
-                .assignClientHandler(() -> MultiPartCPH::new)
-                .build();
+        channel.init(modBus);
     }
 
 }

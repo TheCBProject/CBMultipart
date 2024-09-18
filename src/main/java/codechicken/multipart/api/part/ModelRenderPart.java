@@ -2,7 +2,7 @@ package codechicken.multipart.api.part;
 
 import codechicken.multipart.api.part.render.PartBakedModelRenderer;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelData;
 
 /**
  * Companion to {@link PartBakedModelRenderer}

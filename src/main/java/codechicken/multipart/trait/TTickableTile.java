@@ -54,7 +54,6 @@ public class TTickableTile extends TileMultipart implements TickableTile {
 
     @Override
     public void tick() {
-        getCapCache().tick();
         for (int i = 0, tickingPartsSize = tickingParts.size(); i < tickingPartsSize; i++) {
             TickablePart part = tickingParts.get(i);
             if (((MultiPart) part).tile() != null) {

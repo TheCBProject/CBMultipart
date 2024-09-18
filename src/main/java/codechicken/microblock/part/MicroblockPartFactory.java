@@ -27,7 +27,7 @@ public abstract class MicroblockPartFactory extends MultipartType<MicroblockPart
     @NotNull
     @Override
     public MicroblockPart createPartClient(MCDataInput packet) {
-        return create(true, packet.readRegistryIdDirect(MicroMaterialRegistry.MICRO_MATERIALS));
+        return create(true, packet.readRegistryIdDirect(MicroMaterialRegistry.microMaterials()));
     }
 
     public abstract float getResistanceFactor();

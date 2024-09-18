@@ -4,8 +4,8 @@ import codechicken.lib.render.shader.CCShaderInstance;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.RegisterShadersEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -21,9 +21,9 @@ public class Shaders {
 
     private static @Nullable CCShaderInstance highlightShader;
 
-    public static void init() {
+    public static void init(IEventBus modBus) {
         LOCK.lock();
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(Shaders::onRegisterShaders);
+        modBus.addListener(Shaders::onRegisterShaders);
     }
 
     private static void onRegisterShaders(RegisterShadersEvent event) {

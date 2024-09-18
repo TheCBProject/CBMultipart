@@ -3,11 +3,11 @@ package codechicken.multipart.init;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.client.model.generators.BlockStateProvider;
-import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
+import net.neoforged.neoforge.client.model.generators.ModelFile;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 import static codechicken.multipart.CBMultipart.MOD_ID;
 
@@ -18,9 +18,9 @@ public class DataGenerators {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
 
-    public static void init() {
+    public static void init(IEventBus modBus) {
         LOCK.lock();
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(DataGenerators::gatherDataGenerators);
+        modBus.addListener(DataGenerators::gatherDataGenerators);
     }
 
     public static void gatherDataGenerators(GatherDataEvent event) {

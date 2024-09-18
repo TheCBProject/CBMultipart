@@ -2,16 +2,16 @@ package codechicken.multipart.minecraft;
 
 import codechicken.multipart.api.MultipartClientRegistry;
 import codechicken.multipart.api.part.render.PartBakedModelRenderer;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 /**
  * Created by covers1624 on 8/11/21.
  */
 public class ClientInit {
 
-    public static void init() {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientInit::onClientSetup);
+    public static void init(IEventBus modBus) {
+        modBus.addListener(ClientInit::onClientSetup);
     }
 
     private static void onClientSetup(FMLClientSetupEvent event) {

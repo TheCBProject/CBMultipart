@@ -78,7 +78,7 @@ public class ButtonPart extends McSidedStatePart implements FaceRedstonePart {
     }
 
     public boolean canArrowsPress() {
-        return block.arrowsCanPress;
+        return block.type.canButtonBeActivatedByArrows();
     }
 
     @Override

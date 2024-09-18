@@ -19,7 +19,7 @@ import static codechicken.multipart.network.MultiPartNetwork.*;
 public class MultiPartCPH implements ICustomPacketHandler.IClientPacketHandler {
 
     @Override
-    public void handlePacket(PacketCustom packet, Minecraft mc, ClientPacketListener handler) {
+    public void handlePacket(PacketCustom packet, Minecraft mc) {
         switch (packet.getType()) {
             case C_TILE_DESC -> handleTileDescPacket(packet, mc);
             case C_ADD_PART -> handleAddPart(packet, mc);
@@ -30,11 +30,8 @@ public class MultiPartCPH implements ICustomPacketHandler.IClientPacketHandler {
     }
 
     public static void handleTileDescPacket(MCDataInput packet, Minecraft mc) {
-        int num = packet.readVarInt();
-        for (int i = 0; i < num; i++) {
-            BlockPos pos = packet.readPos();
-            TileMultipart.handleDescPacket(mc.level, pos, packet);
-        }
+        BlockPos pos = packet.readPos();
+        TileMultipart.handleDescPacket(mc.level, pos, packet);
     }
 
     public static void handleAddPart(MCDataInput packet, Minecraft mc) {

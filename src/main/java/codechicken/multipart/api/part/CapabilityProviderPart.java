@@ -1,13 +1,12 @@
 package codechicken.multipart.api.part;
 
-import net.minecraft.core.Direction;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by covers1624 on 7/1/21.
  */
-public interface CapabilityProviderPart extends MultiPart, ICapabilityProvider {
+public interface CapabilityProviderPart extends MultiPart {
 
-    boolean hasCapabilities(@Nullable Direction dir);
+    <T, C> @Nullable T getCapability(BlockCapability<T, C> capability, C context);
 }

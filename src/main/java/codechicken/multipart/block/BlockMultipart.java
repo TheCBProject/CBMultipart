@@ -40,9 +40,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
+import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -152,6 +150,11 @@ public class BlockMultipart extends Block implements EntityBlock {
     }
 
     @Override
+    public boolean hasDynamicLightEmission(BlockState state) {
+        return true;
+    }
+
+    @Override
     public int getLightEmission(BlockState state, BlockGetter world, BlockPos pos) {
         // See docs on IForgeBlock#getLightEmission for why this is necessary
         if (pos == BlockPos.ZERO) {
@@ -159,9 +162,10 @@ public class BlockMultipart extends Block implements EntityBlock {
         }
 
         // getExistingBlockEntity allows retrieval from worker threads
-        if (world.getExistingBlockEntity(pos) instanceof TileMultipart tile) {
-            return tile.getLightEmission();
-        }
+        // TODO Auxiliary Light Manager stuffs
+//        if (world.getBlockEntity(pos) instanceof TileMultipart tile) {
+//            return tile.getLightEmission();
+//        }
         return 0;
     }
 
@@ -206,7 +210,7 @@ public class BlockMultipart extends Block implements EntityBlock {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
         TileMultipart tile = getTile(level, pos);
         PartRayTraceResult hit = retracePart(level, pos, player);
         if (tile != null && hit != null) {
@@ -310,7 +314,6 @@ public class BlockMultipart extends Block implements EntityBlock {
     }
 
     @Override
-    @OnlyIn (Dist.CLIENT)
     public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource rand) {
         TileMultipart tile = getTile(world, pos);
         if (tile != null) {

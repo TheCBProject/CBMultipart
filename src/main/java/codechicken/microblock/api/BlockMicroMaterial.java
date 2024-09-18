@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -28,8 +29,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.common.TierSortingRegistry;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.TierSortingRegistry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -179,7 +179,8 @@ public class BlockMicroMaterial extends MicroMaterial {
      */
     public static ResourceLocation makeMaterialKey(BlockState state) {
         Block block = state.getBlock();
-        StringBuilder path = new StringBuilder(ForgeRegistries.BLOCKS.getKey(block).getPath());
+        ResourceLocation blockKey = BuiltInRegistries.BLOCK.getKey(block);
+        StringBuilder path = new StringBuilder(blockKey.getPath());
         if (!state.getProperties().isEmpty()) {
             path.append("//");
 
@@ -191,6 +192,6 @@ public class BlockMicroMaterial extends MicroMaterial {
                 path.append(property.getName()).append('.').append(property.getName(unsafeCast(entry.getValue())));
             }
         }
-        return new ResourceLocation(ForgeRegistries.BLOCKS.getKey(block).getNamespace(), path.toString());
+        return new ResourceLocation(blockKey.getNamespace(), path.toString());
     }
 }

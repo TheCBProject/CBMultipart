@@ -16,6 +16,9 @@ import codechicken.microblock.util.MicroMaterialRegistry;
 import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.MultipartType;
 import net.covers1624.quack.util.CrashLock;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -29,11 +32,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.*;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -49,26 +53,26 @@ public class CBMicroblockModContent {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
-    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, CBMicroblock.MOD_ID);
+    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, CBMicroblock.MOD_ID);
     private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CBMicroblock.MOD_ID);
     private static final DeferredRegister<MultipartType<?>> MULTIPART_TYPES = DeferredRegister.create(new ResourceLocation(CBMultipart.MOD_ID, "multipart_types"), CBMicroblock.MOD_ID);
-    private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, CBMicroblock.MOD_ID);
+    private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, CBMicroblock.MOD_ID);
 
-    public static final RegistryObject<ItemMicroBlock> MICRO_BLOCK_ITEM = ITEMS.register("microblock", () -> new ItemMicroBlock(new Item.Properties()));
+    public static final DeferredHolder<Item, ItemMicroBlock> MICRO_BLOCK_ITEM = ITEMS.register("microblock", () -> new ItemMicroBlock(new Item.Properties()));
 
-    public static final RegistryObject<Item> STONE_ROD_ITEM = ITEMS.register("stone_rod", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> STONE_ROD_ITEM = ITEMS.register("stone_rod", () -> new Item(new Item.Properties()));
 
-    public static final RegistryObject<SawItem> STONE_SAW = ITEMS.register("stone_saw", () -> new SawItem(Tiers.STONE, new Item.Properties().setNoRepair()));
-    public static final RegistryObject<SawItem> IRON_SAW = ITEMS.register("iron_saw", () -> new SawItem(Tiers.IRON, new Item.Properties().setNoRepair()));
-    public static final RegistryObject<SawItem> DIAMOND_SAW = ITEMS.register("diamond_saw", () -> new SawItem(Tiers.DIAMOND, new Item.Properties().setNoRepair()));
+    public static final DeferredHolder<Item, SawItem> STONE_SAW = ITEMS.register("stone_saw", () -> new SawItem(Tiers.STONE, new Item.Properties().setNoRepair()));
+    public static final DeferredHolder<Item, SawItem> IRON_SAW = ITEMS.register("iron_saw", () -> new SawItem(Tiers.IRON, new Item.Properties().setNoRepair()));
+    public static final DeferredHolder<Item, SawItem> DIAMOND_SAW = ITEMS.register("diamond_saw", () -> new SawItem(Tiers.DIAMOND, new Item.Properties().setNoRepair()));
 
-    public static final RegistryObject<CreativeModeTab> MICRO_TAB = TABS.register("microblocks", () -> CreativeModeTab.builder()
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MICRO_TAB = TABS.register("microblocks", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.cb_microblock"))
             .icon(() -> ItemMicroBlock.create(1, 2, MicroMaterialRegistry.getMaterial(BlockMicroMaterial.makeMaterialKey(Blocks.GRASS_BLOCK.defaultBlockState()))))
             .displayItems((p, o) -> {
                 for (StandardMicroFactory factory : StandardMicroFactory.FACTORIES.values()) {
                     for (int size : new int[] { 1, 2, 4 }) {
-                        for (MicroMaterial material : MicroMaterialRegistry.MICRO_MATERIALS) {
+                        for (MicroMaterial material : MicroMaterialRegistry.microMaterials()) {
                             o.accept(ItemMicroBlock.create(factory.factoryId, size, material));
                         }
                     }
@@ -78,33 +82,32 @@ public class CBMicroblockModContent {
             .build()
     );
 
-    public static final RegistryObject<FaceMicroFactory> FACE_MICROBLOCK_PART = MULTIPART_TYPES.register("face", FaceMicroFactory::new);
-    public static final RegistryObject<HollowMicroFactory> HOLLOW_MICROBLOCK_PART = MULTIPART_TYPES.register("hollow", HollowMicroFactory::new);
-    public static final RegistryObject<CornerMicroFactory> CORNER_MICROBLOCK_PART = MULTIPART_TYPES.register("corner", CornerMicroFactory::new);
-    public static final RegistryObject<EdgeMicroFactory> EDGE_MICROBLOCK_PART = MULTIPART_TYPES.register("edge", EdgeMicroFactory::new);
-    public static final RegistryObject<PostMicroblockFactory> POST_MICROBLOCK_PART = MULTIPART_TYPES.register("post", PostMicroblockFactory::new);
+    public static final DeferredHolder<MultipartType<?>, FaceMicroFactory> FACE_MICROBLOCK_PART = MULTIPART_TYPES.register("face", FaceMicroFactory::new);
+    public static final DeferredHolder<MultipartType<?>, HollowMicroFactory> HOLLOW_MICROBLOCK_PART = MULTIPART_TYPES.register("hollow", HollowMicroFactory::new);
+    public static final DeferredHolder<MultipartType<?>, CornerMicroFactory> CORNER_MICROBLOCK_PART = MULTIPART_TYPES.register("corner", CornerMicroFactory::new);
+    public static final DeferredHolder<MultipartType<?>, EdgeMicroFactory> EDGE_MICROBLOCK_PART = MULTIPART_TYPES.register("edge", EdgeMicroFactory::new);
+    public static final DeferredHolder<MultipartType<?>, PostMicroblockFactory> POST_MICROBLOCK_PART = MULTIPART_TYPES.register("post", PostMicroblockFactory::new);
 
-    public static final RegistryObject<SimpleCraftingRecipeSerializer<?>> MICRO_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("microblock", () -> new SimpleCraftingRecipeSerializer<>(MicroRecipe::new));
+    public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<?>> MICRO_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("microblock", () -> new SimpleCraftingRecipeSerializer<>(e -> new MicroRecipe()));
 
     @Nullable
     public static Tier MAX_SAW_TIER;
 
-    public static void init() {
+    public static void init(IEventBus modBus) {
         LOCK.lock();
 
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-        ITEMS.register(bus);
-        TABS.register(bus);
-        MULTIPART_TYPES.register(bus);
-        RECIPE_SERIALIZERS.register(bus);
-        bus.addListener(CBMicroblockModContent::onRegisterMicroMaterials);
-        bus.addListener(CBMicroblockModContent::onCommonSetup);
-        bus.addListener(CBMicroblockModContent::onProcessIMC);
+        ITEMS.register(modBus);
+        TABS.register(modBus);
+        MULTIPART_TYPES.register(modBus);
+        RECIPE_SERIALIZERS.register(modBus);
+        modBus.addListener(CBMicroblockModContent::onRegisterMicroMaterials);
+        modBus.addListener(CBMicroblockModContent::onCommonSetup);
+        modBus.addListener(CBMicroblockModContent::onProcessIMC);
     }
 
     private static void onCommonSetup(FMLCommonSetupEvent event) {
         Tier tier = null;
-        for (Item item : ForgeRegistries.ITEMS.getValues()) {
+        for (Item item : BuiltInRegistries.ITEM) {
             Tier found = SawItem.getSawTier(item);
             if (found != null) {
                 if (tier == null || SawItem.isTierGTEQ(found, tier)) {
@@ -122,7 +125,7 @@ public class CBMicroblockModContent {
 
     private static void onRegisterMicroMaterials(RegisterEvent event) {
         // Note: Intentionally kept in same order as Blocks class
-        event.register(MicroMaterialRegistry.MICRO_MATERIALS.getRegistryKey(), r -> {
+        event.register(MicroMaterial.MULTIPART_TYPES, r -> {
             registerMaterial(r, new BlockMicroMaterial(Blocks.STONE));
             registerMaterial(r, new BlockMicroMaterial(Blocks.GRANITE));
             registerMaterial(r, new BlockMicroMaterial(Blocks.POLISHED_GRANITE));
@@ -466,7 +469,7 @@ public class CBMicroblockModContent {
     }
 
     private static void processIMC(InterModProcessEvent event) {
-        ForgeRegistry<MicroMaterial> registry = (ForgeRegistry<MicroMaterial>) MicroMaterialRegistry.MICRO_MATERIALS;
+        MappedRegistry<MicroMaterial> registry = (MappedRegistry<MicroMaterial>) MicroMaterialRegistry.microMaterials();
         registry.unfreeze();
         event.getIMCStream().forEach(e -> {
             if (!e.method().equals("micro_material")) return;
@@ -493,8 +496,7 @@ public class CBMicroblockModContent {
                 LOGGER.warn("Mod '{}' tried to register a duplicate MicroMaterial. '{}'. Ignoring.", sender, key);
                 return;
             }
-            registry.register(key, material);
-
+            Registry.register(registry, key, material);
         });
         registry.freeze();
     }

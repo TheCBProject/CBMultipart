@@ -2,6 +2,8 @@ package codechicken.microblock.init;
 
 import codechicken.lib.datagen.ItemModelProvider;
 import codechicken.lib.datagen.recipe.RecipeProvider;
+import codechicken.microblock.client.MicroblockItemRenderer;
+import codechicken.microblock.recipe.MicroRecipe;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
@@ -11,10 +13,10 @@ import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
@@ -31,10 +33,10 @@ public class DataGenerators {
 
     private static final CrashLock LOCK = new CrashLock("Already Initialized");
 
-    public static void init() {
+    public static void init(IEventBus modBus) {
         LOCK.lock();
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(DataGenerators::registerDataGens);
+        modBus.addListener(DataGenerators::registerDataGens);
     }
 
     private static void registerDataGens(GatherDataEvent event) {
@@ -73,7 +75,7 @@ public class DataGenerators {
 
         @Override
         protected void registerModels() {
-            generated(MICRO_BLOCK_ITEM.get()).noTexture();
+            clazz(MICRO_BLOCK_ITEM.get(), MicroblockItemRenderer.class);
 
             generated(STONE_ROD_ITEM.get());
 
@@ -91,7 +93,7 @@ public class DataGenerators {
 
         @Override
         protected void registerRecipes() {
-            special(MICRO_RECIPE_SERIALIZER.get(),  new ResourceLocation(MOD_ID, "microblock"));
+            special(new ResourceLocation(MOD_ID, "microblock"), MicroRecipe::new);
 
             shapedRecipe(STONE_ROD_ITEM.get())
                     .key('S', Tags.Items.COBBLESTONE)

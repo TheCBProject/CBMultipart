@@ -1,3 +1,4 @@
 {
-  "type": "cb_microblock:microblock"
+  "type": "cb_microblock:microblock",
+  "category": "misc"
 }

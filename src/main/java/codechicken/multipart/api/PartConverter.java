@@ -4,6 +4,8 @@ import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.util.MultipartPlaceContext;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -20,9 +22,9 @@ import java.util.Collections;
 public abstract class PartConverter {
 
     /**
-     * The Forge registry name used by PartConverter.
+     * The registry name used by PartConverter.
      */
-    public static final ResourceLocation PART_CONVERTERS = new ResourceLocation(CBMultipart.MOD_ID, "part_converters");
+    public static final ResourceKey<Registry<PartConverter>> PART_CONVERTERS = ResourceKey.createRegistryKey(new ResourceLocation(CBMultipart.MOD_ID, "part_converters"));
 
     private static final ConversionResult<Collection<MultiPart>> EMPTY_LIST = new ConversionResult<>(Collections.emptyList(), false);
     private static final ConversionResult<MultiPart> EMPTY = new ConversionResult<>(null, false);

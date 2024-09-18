@@ -5,8 +5,8 @@ import codechicken.lib.vec.Cuboid6;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.List;

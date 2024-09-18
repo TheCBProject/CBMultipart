@@ -13,8 +13,8 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraftforge.client.event.RenderHighlightEvent;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
@@ -24,7 +24,7 @@ import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 public class ClientEventHandler {
 
     public static void init() {
-        MinecraftForge.EVENT_BUS.addListener(ClientEventHandler::onDrawBlockHighlight);
+        NeoForge.EVENT_BUS.addListener(ClientEventHandler::onDrawBlockHighlight);
     }
 
     private static void onDrawBlockHighlight(RenderHighlightEvent.Block event) {

@@ -9,21 +9,22 @@ import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.util.MultipartPlaceContext;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.NewRegistryEvent;
-import net.minecraftforge.registries.RegistryBuilder;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.NewRegistryEvent;
+import net.neoforged.neoforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Created by covers1624 on 3/16/20.
@@ -33,25 +34,30 @@ public class MultiPartRegistries {
     private static final Logger logger = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
 
-    public static IForgeRegistry<MultipartType<?>> MULTIPART_TYPES;
-    public static IForgeRegistry<PartConverter> PART_CONVERTERS;
+    private static @Nullable Registry<MultipartType<?>> MULTIPART_TYPES;
+    private static @Nullable Registry<PartConverter> PART_CONVERTERS;
 
-    public static void init() {
+    public static void init(IEventBus modBus) {
         LOCK.lock();
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(MultiPartRegistries::createRegistries);
+        modBus.addListener(MultiPartRegistries::createRegistries);
     }
 
     private static void createRegistries(NewRegistryEvent event) {
-        event.create(new RegistryBuilder<MultipartType<?>>()
-                .setName(MultipartType.MULTIPART_TYPES)
-                .disableSaving(), e -> MULTIPART_TYPES = e);
-        event.create(new RegistryBuilder<PartConverter>()
-                        .setName(PartConverter.PART_CONVERTERS)
-                        .disableOverrides()
-                        .disableSaving()
-                        .disableSync(),
-                e -> PART_CONVERTERS = e
+        MULTIPART_TYPES = event.create(new RegistryBuilder<>(MultipartType.MULTIPART_TYPES)
+                .sync(true)
         );
+        PART_CONVERTERS = event.create(new RegistryBuilder<>(PartConverter.PART_CONVERTERS)
+                .sync(false)
+        );
+
+    }
+
+    public static Registry<MultipartType<?>> multipartTypes() {
+        return requireNonNull(MULTIPART_TYPES, "MultipartType registry not created yet.");
+    }
+
+    public static Registry<PartConverter> partConverters() {
+        return requireNonNull(PART_CONVERTERS, "PartConverter registry not created yet.");
     }
 
     /**
@@ -66,8 +72,8 @@ public class MultiPartRegistries {
      * @param part The {@link MultiPart} to write to said stream.
      */
     public static void writePart(MCDataOutput data, MultiPart part) {
-        MultipartType<?> type = Objects.requireNonNull(part.getType());
-        ResourceLocation name = Objects.requireNonNull(type.getRegistryName());
+        MultipartType<?> type = requireNonNull(part.getType());
+        ResourceLocation name = requireNonNull(type.getRegistryName());
         if (!MULTIPART_TYPES.containsKey(name)) {
             throw new RuntimeException("MultiPartType with name '" + name + "' is not registered.");
         }
@@ -106,8 +112,8 @@ public class MultiPartRegistries {
      * @return The same NBT tag provided.
      */
     public static CompoundTag savePart(CompoundTag nbt, MultiPart part) {
-        MultipartType<?> type = Objects.requireNonNull(part.getType());
-        ResourceLocation name = Objects.requireNonNull(type.getRegistryName());
+        MultipartType<?> type = requireNonNull(part.getType());
+        ResourceLocation name = requireNonNull(type.getRegistryName());
         nbt.putString("id", name.toString());
         part.save(nbt);
         return nbt;
@@ -126,7 +132,7 @@ public class MultiPartRegistries {
     @Nullable
     public static MultiPart loadPart(CompoundTag nbt) {
         ResourceLocation name = new ResourceLocation(nbt.getString("id"));
-        MultipartType<?> type = MULTIPART_TYPES.getValue(name);
+        MultipartType<?> type = MULTIPART_TYPES.get(name);
         if (type == null) {
             //TODO 'dummy' parts to save these.
             logger.error("Missing mapping for MultiPartType with ID: {}", name);
@@ -140,7 +146,7 @@ public class MultiPartRegistries {
     }
 
     public static Collection<MultiPart> convertBlock(LevelAccessor level, BlockPos pos, BlockState state) {
-        for (PartConverter conv : PART_CONVERTERS.getValues()) {
+        for (PartConverter conv : PART_CONVERTERS) {
             ConversionResult<Collection<MultiPart>> result = conv.convert(level, pos, state);
             if (result.success()) {
                 assert result.result() != null;
@@ -152,7 +158,7 @@ public class MultiPartRegistries {
 
     @Nullable
     public static MultiPart convertItem(MultipartPlaceContext context) {
-        for (PartConverter conv : PART_CONVERTERS.getValues()) {
+        for (PartConverter conv : PART_CONVERTERS) {
             ConversionResult<MultiPart> result = conv.convert(context);
             if (result.success()) {
                 assert result.result() != null;

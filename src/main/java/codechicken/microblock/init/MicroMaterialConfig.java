@@ -5,13 +5,13 @@ import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.util.MicroMaterialRegistry;
 import net.covers1624.quack.io.IOUtils;
 import net.covers1624.quack.util.SneakyUtils;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,7 +50,7 @@ public class MicroMaterialConfig {
             }
             return;
         }
-        ForgeRegistry<MicroMaterial> registry = (ForgeRegistry<MicroMaterial>) MicroMaterialRegistry.MICRO_MATERIALS;
+        MappedRegistry<MicroMaterial> registry = (MappedRegistry<MicroMaterial>) MicroMaterialRegistry.microMaterials();
         registry.unfreeze();
         try (BufferedReader reader = Files.newBufferedReader(file)) {
             int i = 0;
@@ -64,7 +64,7 @@ public class MicroMaterialConfig {
         registry.freeze();
     }
 
-    private static void parseLine(String line, int lineNumber, IForgeRegistry<MicroMaterial> registry) {
+    private static void parseLine(String line, int lineNumber, Registry<MicroMaterial> registry) {
         int hashIndex = line.indexOf("#");
         if (hashIndex != -1) {
             line = line.substring(0, hashIndex).trim();
@@ -73,7 +73,7 @@ public class MicroMaterialConfig {
 
         int openBracketIdx = line.indexOf("[");
         ResourceLocation resourceLocation = new ResourceLocation(openBracketIdx == -1 ? line : line.substring(0, openBracketIdx));
-        Block block = ForgeRegistries.BLOCKS.getValue(resourceLocation);
+        Block block = BuiltInRegistries.BLOCK.getOptional(resourceLocation).orElse(null);
         if (block == null) {
             LOGGER.error("Error reading microblock config line {}, Missing block: '{}'", lineNumber, resourceLocation);
             return;
@@ -120,6 +120,6 @@ public class MicroMaterialConfig {
             LOGGER.warn("Skipping microblock config line {}. Micro material for BlockState {} already registered.", lineNumber, state);
             return;
         }
-        registry.register(key, new BlockMicroMaterial(state));
+        Registry.register(registry, key, new BlockMicroMaterial(state));
     }
 }

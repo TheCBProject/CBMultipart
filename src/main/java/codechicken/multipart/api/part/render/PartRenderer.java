@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.client.event.RenderHighlightEvent;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 
 import javax.annotation.Nullable;
 

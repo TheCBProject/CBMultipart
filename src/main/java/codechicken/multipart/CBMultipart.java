@@ -1,6 +1,5 @@
 package codechicken.multipart;
 
-import codechicken.lib.world.TileChunkLoadHook;
 import codechicken.multipart.api.RegisterMultipartTraitsEvent;
 import codechicken.multipart.api.part.*;
 import codechicken.multipart.api.part.redstone.RedstonePart;
@@ -16,10 +15,9 @@ import codechicken.multipart.util.MultipartLoadHandler;
 import codechicken.multipart.util.TickScheduler;
 import net.minecraft.world.Container;
 import net.minecraft.world.WorldlyContainer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 import static codechicken.multipart.CBMultipart.MOD_ID;
 
@@ -31,21 +29,22 @@ public class CBMultipart {
 
     public static final String MOD_ID = "cb_multipart";
 
-    public CBMultipart() {
-        CBMultipartModContent.init();
-        MultiPartRegistries.init();
-        DataGenerators.init();
+    public CBMultipart(IEventBus modBus) {
+        CBMultipartModContent.init(modBus);
+        MultiPartRegistries.init(modBus);
+        DataGenerators.init(modBus);
 
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> ClientInit::init);
+        if (FMLEnvironment.dist.isClient()) {
+            ClientInit.init(modBus);
+        }
 
-        MultipartGenerator.INSTANCE.load();
+        MultipartGenerator.INSTANCE.load(modBus);
         MultipartLoadHandler.init();
-        MultiPartNetwork.init();
+        MultiPartNetwork.init(modBus);
         PlacementConversionHandler.init();
         TickScheduler.init();
-        TileChunkLoadHook.init();
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onRegisterMultipartTraits);
+        modBus.addListener(this::onRegisterMultipartTraits);
     }
 
     private void onRegisterMultipartTraits(RegisterMultipartTraitsEvent event) {

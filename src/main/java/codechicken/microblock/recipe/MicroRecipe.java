@@ -28,8 +28,8 @@ public class MicroRecipe extends CustomRecipe {
 
     private static final int[] splitMap = { 3, 3, -1, 2 };
 
-    public MicroRecipe(ResourceLocation id, CraftingBookCategory category) {
-        super(id, category);
+    public MicroRecipe() {
+        super(CraftingBookCategory.MISC);
     }
 
     @Override
@@ -273,7 +273,7 @@ public class MicroRecipe extends CustomRecipe {
     @Nullable
     public static MicroMaterial findMaterial(ItemStack stack) {
         if (stack.isEmpty()) return null;
-        for (MicroMaterial material : MicroMaterialRegistry.MICRO_MATERIALS.getValues()) {
+        for (MicroMaterial material : MicroMaterialRegistry.microMaterials()) {
             ItemStack mStack = material.getItem();
             if (ItemStack.isSameItemSameTags(mStack, stack)) {
                 return material;

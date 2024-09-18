@@ -1,12 +1,12 @@
 modLoader="javafml"
-loaderVersion="[${lang_version},)"
+loaderVersion="[2,)"
 issueTrackerURL="https://github.com/TheCBProject/ForgeMultipart"
 license="GNU Lesser General Public License v2.1"
 
 #CBMultipart
 [[mods]]
-	modId="cb_multipart"
-	displayName="CBMultipart"
+    modId="cb_multipart"
+    displayName="CBMultipart"
     version="${file.jarVersion}"
 
     updateJSONURL="https://version-check.covers1624.net/check/?mod=CBMultipart&mc=${mc_version}"
@@ -15,55 +15,55 @@ license="GNU Lesser General Public License v2.1"
     description="Open source library for facilitation of multiple functional parts in the one block space."
 
 [[dependencies.cb_multipart]]
-	modId="forge"
-	mandatory=true
-	versionRange="[${forge_version},)"
-	ordering="NONE"
-	side="BOTH"
+    modId="neoforge"
+    type="required"
+    versionRange="[${forge_version},)"
+    ordering="NONE"
+    side="BOTH"
 [[dependencies.cb_multipart]]
     modId="minecraft"
-    mandatory=true
-    versionRange="[1.20.1]"
+    type="required"
+    versionRange="[1.20.4]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.cb_multipart]]
     modId="codechickenlib"
-    mandatory=true
+    type="required"
     versionRange="${ccl_version_range}"
     ordering="AFTER"
     side="BOTH"
 
 #CBMicroblocks
 [[mods]]
-	modId="cb_microblock"
-	displayName="CBMicroblock"
-	version="${file.jarVersion}"
+    modId="cb_microblock"
+    displayName="CBMicroblock"
+    version="${file.jarVersion}"
 
     displayURL="https://github.com/TheCBProject/CBMultipart"
     authors="ChickenBones, covers1624"
     description="Microblocks for CBMultipart."
 
 [[dependencies.cb_microblock]]
-	modId="forge"
-	mandatory=true
+    modId="neoforge"
+    type="required"
 versionRange="[${forge_version},)"
-	ordering="NONE"
-	side="BOTH"
+    ordering="NONE"
+    side="BOTH"
 [[dependencies.cb_microblock]]
     modId="minecraft"
-    mandatory=true
-versionRange="[1.20.1]"
+    type="required"
+versionRange="[1.20.4]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.cb_microblock]]
     modId="codechickenlib"
-    mandatory=true
+    type="required"
     versionRange="${ccl_version_range}"
     ordering="AFTER"
     side="BOTH"
 [[dependencies.cb_microblock]]
     modId="cb_multipart"
-    mandatory=true
+    type="required"
     versionRange="[${file.jarVersion}]"
     ordering="AFTER"
     side="BOTH"
@@ -79,26 +79,26 @@ versionRange="[1.20.1]"
     description="Provides multipart versions of some vanilla blocks like torches and buttons."
 
 [[dependencies.cb_multipart_minecraft]]
-    modId="forge"
-    mandatory=true
+    modId="neoforge"
+    type="required"
     versionRange="[${forge_version},)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.cb_multipart_minecraft]]
     modId="minecraft"
-    mandatory=true
-    versionRange="[1.20.1]"
+    type="required"
+    versionRange="[1.20.4]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.cb_multipart_minecraft]]
     modId="codechickenlib"
-    mandatory=true
+    type="required"
     versionRange="${ccl_version_range}"
     ordering="AFTER"
     side="BOTH"
 [[dependencies.cb_multipart_minecraft]]
     modId="cb_multipart"
-    mandatory=true
+    type="required"
     versionRange="[${file.jarVersion}]"
     ordering="AFTER"
     side="BOTH"

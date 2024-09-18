@@ -4,7 +4,7 @@ import codechicken.asm.ClassHierarchyManager;
 import codechicken.mixin.api.MixinBackend;
 import cpw.mods.modlauncher.TransformingClassLoader;
 import net.covers1624.quack.reflect.PrivateLookups;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;

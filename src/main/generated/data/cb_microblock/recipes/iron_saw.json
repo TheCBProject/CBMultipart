@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "misc",
   "key": {
     "M": {
       "tag": "forge:ingots/iron"
@@ -16,7 +17,6 @@
     "SMR"
   ],
   "result": {
-    "item": "cb_microblock:iron_saw",
-    "nbt": "{Damage:0}"
+    "item": "cb_microblock:iron_saw"
   }
 }

@@ -5,8 +5,7 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
-    id 'net.neoforged.gradle' version '[6.0.18,6.2)'
-    id 'org.spongepowered.mixin' version '0.7.+'
+    id 'net.neoforged.gradle.userdev' version '7.0.97'
 }
 
 java {
@@ -17,43 +16,41 @@ java {
     withJavadocJar()
 }
 
-group = "io.codechicken"
-archivesBaseName = "CBMultipart"
+group = 'io.codechicken'
+base {
+    archivesName = 'CBMultipart'
+}
 
 sourceSets.main.resources.srcDirs += "src/main/generated"
 
 mod_version = "${mod_version}." + (System.getenv("BUILD_NUMBER") ?: "1")
 version = "${mc_version}-${mod_version}"
-println "Starting build of ${archivesBaseName}, Version: ${mod_version}"
+println "Starting build of ${base.archivesName.get()}, Version: ${mod_version}"
 println "Using Forge: ${forge_version}, for Minecraft: ${mc_version}"
 
 minecraft {
-    mappings channel: 'official', version: mc_version
-    accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
-    runs {
-        client {
-            workingDirectory file('run')
-            mods { cb_multipart { source sourceSets.main } }
-            mods { cb_microblock { source sourceSets.main } }
-        }
-        server {
-            workingDirectory file('run')
-            mods { cb_multipart { source sourceSets.main } }
-            mods { cb_microblock { source sourceSets.main } }
-        }
-        data {
-            workingDirectory file('run')
-            args '--mod', 'cb_multipart', '--mod', 'cb_microblock', '--all', '--flat', '--output', file("src/main/generated"), '--existing', file("src/main/resources")
-            mods { cb_multipart { source sourceSets.main } }
-            mods { cb_microblock { source sourceSets.main } }
-        }
+    accessTransformers.file file("src/main/resources/META-INF/accesstransformer.cfg")
+}
+
+runs {
+    configureEach {
+        modSource project.sourceSets.main
+    }
+    client {
+        workingDirectory file('run')
+    }
+    server {
+        workingDirectory file('run')
+    }
+    data {
+        workingDirectory file('run')
+        programArguments.addAll '--mod', 'cb_multipart', '--mod', 'cb_microblock', '--all', '--flat', '--output', file("src/main/generated").absolutePath, '--existing', file("src/main/resources").absolutePath
     }
 }
 
 configurations {
     shadow
     implementation.extendsFrom shadow
-    annotationProcessor.extendsFrom minecraft
 }
 
 repositories {
@@ -62,18 +59,14 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.neoforged:forge:${mc_version}-${forge_version}"
+    implementation "net.neoforged:neoforge:${forge_version}"
 
     //Mod deps
-    implementation fg.deobf("io.codechicken:CodeChickenLib:${mc_version}-${ccl_version}:universal")
+    implementation "io.codechicken:CodeChickenLib:${mc_version}-${ccl_version}"
 
     //Packed into built jar.
     shadow("io.codechicken:TraitMixinCompiler:${mixin_version}") { transitive = false }
     shadow("io.codechicken:ChickenASM:${chicken_asm_version}") { transitive = false }
-}
-
-mixin {
-    add(sourceSets.main, "mixins.cbmultipart.refmap.json")
 }
 
 processResources {
@@ -90,7 +83,7 @@ processResources {
     }
 }
 
-def publishingMetadata = project.layout.buildDirectory.file("libs/$archivesBaseName-$version-publishing.json")
+def publishingMetadata = project.layout.buildDirectory.file("libs/${base.archivesName.get()}-$version-publishing.json")
 def publishingMetadataTask = tasks.register("publishingMetadata") {
     outputs.file(publishingMetadata)
     doFirst {
@@ -99,8 +92,8 @@ def publishingMetadataTask = tasks.register("publishingMetadata") {
                         'displayName' : "CB Multipart ${version}",
                         'mcVersion'   : "${mc_version}",
                         'version'     : "${mod_version}",
-                        'classifier'  : 'universal',
-                        'modLoader'   : ['neoforge', 'forge'],
+                        'classifier'  : null,
+                        'modLoader'   : 'neoforge',
                         'curseforgeId': '258426',
                         'modrinthId'  : 'LmvnWWSV',
                         'dependencies': [
@@ -116,22 +109,15 @@ def publishingMetadataTask = tasks.register("publishingMetadata") {
     }
 }
 
-reobf {
-    shadowJar {}
-    jar {//Disable reobfJar
-        enabled = false
-    }
-}
-
 jar.enabled = false//Disable normal jar, is replaced by ShadowJar.
 shadowJar {
-    finalizedBy 'reobfShadowJar'
-    archiveClassifier = 'universal'
+    finalizedBy 'signShadowJar'
+    archiveClassifier = ''
     manifest {
-        attributes 'Specification-Title': archivesBaseName
+        attributes 'Specification-Title': base.archivesName.get()
         attributes 'Specification-Vendor': 'covers1624'
         attributes 'Specification-Version': "1"
-        attributes 'Implementation-Title': archivesBaseName
+        attributes 'Implementation-Title': base.archivesName.get()
         attributes 'Implementation-Vendor': 'covers1624'
         attributes 'Implementation-Version': version
         attributes 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
@@ -146,7 +132,6 @@ build.dependsOn shadowJar
 
 tasks.register("signShadowJar") {
     dependsOn("shadowJar")
-    dependsOn("reobfShadowJar")
 
     doFirst {
         def args = [:]
@@ -192,7 +177,7 @@ publishing {
     publications {
         Multipart(MavenPublication) {
             groupId project.group
-            artifactId project.archivesBaseName
+            artifactId project.base.archivesName.get()
             version project.version
             artifact shadowJar
             artifact sourcesJar
@@ -203,23 +188,23 @@ publishing {
             }
 
             pom {
-                name = archivesBaseName
-                description = archivesBaseName
-                url = "https://github.com/TheCBProject/${archivesBaseName}"
+                name = base.archivesName.get()
+                description = base.archivesName.get()
+                url = "https://github.com/TheCBProject/${base.archivesName.get()}"
                 scm {
-                    url = "https://github.com/TheCBProject/${archivesBaseName}"
-                    connection = "scm:git:git://github.com/TheCBProject/${archivesBaseName}.git"
-                    connection = "scm:git:git@github.com:TheCBProject/${archivesBaseName}.git"
+                    url = "https://github.com/TheCBProject/${base.archivesName.get()}"
+                    connection = "scm:git:git://github.com/TheCBProject/${base.archivesName.get()}.git"
+                    connection = "scm:git:git@github.com:TheCBProject/${base.archivesName.get()}.git"
                 }
 
                 issueManagement {
                     system = 'github'
-                    url = "https://github.com/TheCBProject/${archivesBaseName}/issues"
+                    url = "https://github.com/TheCBProject/${base.archivesName.get()}/issues"
                 }
                 licenses {
                     license {
                         name = "GNU Lesser Public License (GPL), Version 2.1"
-                        url = "https://raw.githubusercontent.com/TheCBProject/${archivesBaseName}/master/LICENSE.txt"
+                        url = "https://raw.githubusercontent.com/TheCBProject/${base.archivesName.get()}/master/LICENSE.txt"
                         distribution = 'repo'
                     }
                 }

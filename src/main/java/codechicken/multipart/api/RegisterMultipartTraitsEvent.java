@@ -3,9 +3,9 @@ package codechicken.multipart.api;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.util.MultipartGenerator;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.fml.event.IModBusEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.fml.event.IModBusEvent;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 
 /**
  * Fired on the mod bus for mods to register their traits and passthrough interfaces

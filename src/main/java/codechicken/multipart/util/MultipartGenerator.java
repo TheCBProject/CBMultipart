@@ -7,7 +7,6 @@ import codechicken.mixin.api.MixinCompiler;
 import codechicken.mixin.api.MixinDebugger;
 import codechicken.mixin.api.MixinFactory;
 import codechicken.mixin.api.MixinLanguageSupport;
-import codechicken.mixin.util.ClassInfo;
 import codechicken.mixin.util.JavaTraitGenerator;
 import codechicken.mixin.util.SimpleDebugger;
 import codechicken.mixin.util.Utils;
@@ -23,9 +22,9 @@ import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoader;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -103,9 +102,9 @@ public class MultipartGenerator extends SidedFactory<TileMultipart, MultipartGen
     }
 
     // Internal.
-    public void load() {
+    public void load(IEventBus modBus) {
         LOCK.lock();
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onModLoadingComplete);
+        modBus.addListener(this::onModLoadingComplete);
     }
 
     private void onModLoadingComplete(FMLLoadCompleteEvent event) {

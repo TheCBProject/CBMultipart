@@ -4,7 +4,6 @@ import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.RandomTickPart;
 import codechicken.multipart.block.TileMultipart;
 import net.covers1624.quack.collection.FastStream;
-import net.covers1624.quack.collection.StreamableIterable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -14,54 +13,132 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
+import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+
+import static codechicken.multipart.CBMultipart.MOD_ID;
 
 /**
  * Internal Impl for TickScheduler.
  * Created by covers1624 on 12/5/20.
  */
-class WorldTickScheduler {
-
-    private static final Capability<WorldTickScheduler> WORLD_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() { });
-    private static final Capability<WorldTickScheduler.ChunkScheduler> CHUNK_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() { });
-
-    static final ChunkStorage CHUNK_STORAGE = new ChunkStorage();
+class WorldTickScheduler extends SavedData {
 
     public static WorldTickScheduler getInstance(ServerLevel level) {
-        return level.getCapability(WORLD_CAPABILITY, null).orElseThrow(() -> new RuntimeException("Should never happen..."));
+        return level.getDataStorage().computeIfAbsent(
+                new Factory<>(
+                        () -> new WorldTickScheduler(level),
+                        t -> new WorldTickScheduler(level, t)
+                ),
+                MOD_ID + "_scheduled_ticks"
+        );
     }
 
     public static ChunkScheduler getInstance(LevelChunk chunk) {
-        return chunk.getCapability(CHUNK_CAPABILITY).orElseThrow(() -> new RuntimeException("Should never happen..."));
+        return getInstance((ServerLevel) chunk.getLevel())
+                .getChunkScheduler(chunk);
     }
 
     private final ServerLevel world;
 
-    private final Map<ChunkPos, ChunkScheduler> tickingChunks = new HashMap<>();
+    private final Map<ChunkPos, ChunkScheduler> chunks = new HashMap<>();
+    private final List<ChunkScheduler> ticking = new LinkedList<>();
+
+    private final List<ChunkScheduler> tickingPending = new LinkedList<>();
+    private boolean isTicking;
 
     WorldTickScheduler(ServerLevel world) {
         this.world = world;
     }
 
-    public void onChunkUnload(ChunkPos pos) {
-        tickingChunks.remove(pos);
+    WorldTickScheduler(ServerLevel world, CompoundTag tag) {
+        this.world = world;
+        load(tag);
+    }
+
+    private void load(CompoundTag tag) {
+        ListTag chunksList = tag.getList("Chunks", Tag.TAG_COMPOUND);
+        for (int i = 0; i < chunksList.size(); i++) {
+            CompoundTag chunkTag = chunksList.getCompound(i);
+            ChunkPos pos = new ChunkPos(chunkTag.getInt("ChunkX"), chunkTag.getInt("ChunkZ"));
+            ChunkScheduler chunkScheduler = new ChunkScheduler(this, pos);
+            chunkScheduler.load(chunkTag);
+            chunks.put(pos, chunkScheduler);
+        }
+    }
+
+    @Override
+    public CompoundTag save(CompoundTag tag) {
+        ListTag chunksList = new ListTag();
+        for (ChunkScheduler chunk : chunks.values()) {
+            CompoundTag chunkTag = chunk.save(new CompoundTag());
+            if (chunkTag == null) continue;
+
+            chunkTag.putInt("ChunkX", chunk.pos.x);
+            chunkTag.putInt("ChunkZ", chunk.pos.z);
+            chunksList.add(chunkTag);
+        }
+        tag.put("Chunks", chunksList);
+
+        return tag;
+    }
+
+    @Override
+    public boolean isDirty() {
+        return true;
+    }
+
+    public ChunkScheduler getChunkScheduler(LevelChunk chunk) {
+        return chunks.computeIfAbsent(chunk.getPos(), pos -> {
+            ChunkScheduler scheduler = new ChunkScheduler(this, pos);
+            if (chunk.loaded) {
+                scheduler.onChunkLoad(chunk);
+            }
+            return scheduler;
+        });
+    }
+
+    public void onChunkUnload(LevelChunk chunk) {
+        ChunkPos pos = chunk.getPos();
+        ticking.removeIf(e -> {
+            if (!e.pos.equals(pos)) return false;
+
+            e.onChunkUnload();
+            return true;
+        });
+    }
+
+    public void onChunkLoad(LevelChunk chunk) {
+        ChunkPos pos = chunk.getPos();
+        ChunkScheduler scheduler = chunks.get(pos);
+        if (scheduler != null) {
+            scheduler.onChunkLoad(chunk);
+        }
     }
 
     public void tick() {
-        if (!tickingChunks.isEmpty()) {
-            tickingChunks.values().removeIf(ChunkScheduler::tick);
+        isTicking = true;
+        ticking.removeIf(ChunkScheduler::tick);
+        isTicking = false;
+        ticking.addAll(tickingPending);
+        tickingPending.clear();
+    }
+
+    public void startTicking(ChunkScheduler chunkScheduler) {
+        if (isTicking) {
+            tickingPending.add(chunkScheduler);
+        } else {
+            ticking.add(chunkScheduler);
         }
     }
 
     static class ChunkScheduler {
 
         private final WorldTickScheduler worldScheduler;
-        private final LevelChunk chunk;
+        private final ChunkPos pos;
+        private @Nullable LevelChunk chunk;
 
         //Stores the ticks that were loaded from disk, only _loaded_ once ChunkEvent.Load is called.
         private final List<SavedTickEntry> savedTicks = new ArrayList<>();
@@ -76,9 +153,31 @@ class WorldTickScheduler {
         private final List<PartTickEntry> pendingScheduled = new LinkedList<>();
         private final List<PartTickEntry> pendingRandom = new LinkedList<>();
 
-        ChunkScheduler(WorldTickScheduler worldScheduler, LevelChunk chunk) {
+        ChunkScheduler(WorldTickScheduler worldScheduler, ChunkPos pos) {
             this.worldScheduler = worldScheduler;
-            this.chunk = chunk;
+            this.pos = pos;
+        }
+
+        private void load(CompoundTag tag) {
+            FastStream.of(tag.getList("ticks", 10))
+                    .map(e -> ((CompoundTag) e))
+                    .map(SavedTickEntry::new)
+                    .forEach(savedTicks::add);
+        }
+
+        private @Nullable CompoundTag save(CompoundTag tag) {
+            if (scheduledTicks.isEmpty() && savedTicks.isEmpty()) return null;
+
+            ListTag tickList = new ListTag();
+            FastStream.of(scheduledTicks)
+                    .map(PartTickEntry::write)
+                    .filter(Objects::nonNull)
+                    .forEach(tickList::add);
+            // Just incase weird things happen.
+            savedTicks.forEach(e -> tickList.add(e.write()));
+            tag.put("ticks", tickList);
+
+            return tag;
         }
 
         public void addScheduledTick(MultiPart part, int time) {
@@ -106,15 +205,22 @@ class WorldTickScheduler {
         }
 
         private void onAdd() {
-            if (!scheduledTicks.isEmpty() || !randomTicks.isEmpty()) {
-                worldScheduler.tickingChunks.put(chunk.getPos(), this);
-            }
+            if (scheduledTicks.isEmpty() && randomTicks.isEmpty()) return;
+
+            worldScheduler.startTicking(this);
+        }
+
+        private void onChunkUnload() {
+            chunk = null;
         }
 
         //TODO, I can see future problems clearing this, if TileNBTContainer loads the part X ticks later.
         //Perhaps this should also wait X ticks after chunk load for those cases.
         //But TileNBTContainer _should_ only exist for parts placed runtime by things not aware of the API.
-        public void onChunkLoad() {
+        private void onChunkLoad(LevelChunk chunk) {
+            if (this.chunk != null) throw new RuntimeException("Chunk already loaded?");
+
+            this.chunk = chunk;
             for (SavedTickEntry savedTick : savedTicks) {
                 //Use map to avoid loading locks.
                 BlockEntity tileEntity = chunk.getBlockEntities().get(savedTick.pos);
@@ -126,7 +232,9 @@ class WorldTickScheduler {
             onAdd();
         }
 
-        public boolean tick() {
+        private boolean tick() {
+            if (chunk == null) return true;
+
             ticking = true;
             doTicks(scheduledTicks);
             doTicks(randomTicks);
@@ -139,54 +247,26 @@ class WorldTickScheduler {
         }
 
         private void doTicks(List<PartTickEntry> list) {
-            Iterator<PartTickEntry> itr = list.iterator();
             long time = worldScheduler.world.getGameTime();
-            while (itr.hasNext()) {
-                PartTickEntry entry = itr.next();
-                if (entry.time <= time) {
-                    if (entry.part.hasTile()) {
-                        if (entry.random) {
-                            if (entry.part instanceof RandomTickPart) {
-                                ((RandomTickPart) entry.part).randomTick();
-                            }
-                            addRandomTick(entry.part, time + nextRandomTick());
-                        } else {
-                            entry.part.scheduledTick();
+            list.removeIf(entry -> {
+                if (entry.time > time) return false;
+
+                if (entry.part.hasTile()) {
+                    if (entry.random) {
+                        if (entry.part instanceof RandomTickPart) {
+                            ((RandomTickPart) entry.part).randomTick();
                         }
+                        addRandomTick(entry.part, time + nextRandomTick());
+                    } else {
+                        entry.part.scheduledTick();
                     }
-                    itr.remove();
                 }
-            }
+                return true;
+            });
         }
 
         private int nextRandomTick() {
             return worldScheduler.world.getRandom().nextInt(800) + 800;
-        }
-    }
-
-    static class ChunkStorage {
-
-        public Tag writeNBT(ChunkScheduler instance) {
-            CompoundTag tag = new CompoundTag();
-
-            ListTag scheduledTicks = new ListTag();
-            FastStream.of(instance.scheduledTicks)
-                    .map(PartTickEntry::write)
-                    .filter(Objects::nonNull)
-                    .forEach(scheduledTicks::add);
-            // Just incase weird things happen.
-            instance.savedTicks.forEach(e -> scheduledTicks.add(e.write()));
-            tag.put("ticks", scheduledTicks);
-
-            return tag;
-        }
-
-        public void readNBT(ChunkScheduler instance, Tag nbt) {
-            CompoundTag tag = (CompoundTag) nbt;
-            FastStream.of(tag.getList("ticks", 10))
-                    .map(e -> ((CompoundTag) e))
-                    .map(SavedTickEntry::new)
-                    .forEach(instance.savedTicks::add);
         }
     }
 

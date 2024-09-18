@@ -1,28 +1,17 @@
 package codechicken.multipart.util;
 
-import codechicken.lib.capability.SimpleCapProvider;
 import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.RandomTickPart;
 import net.covers1624.quack.util.CrashLock;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.*;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.ChunkEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.event.level.ChunkEvent;
 
 /**
  * Used to Schedule ticks for {@link MultiPart} instances.
@@ -38,79 +27,27 @@ public class TickScheduler {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
 
-    private static final Capability<WorldTickScheduler> WORLD_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() { });
-    private static final Capability<WorldTickScheduler.ChunkScheduler> CHUNK_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() { });
-
-    private static final ResourceLocation WORLD_KEY = new ResourceLocation(CBMultipart.MOD_ID, "world_scheduled_ticks");
-    private static final ResourceLocation CHUNK_KEY = new ResourceLocation(CBMultipart.MOD_ID, "chunk_scheduled_ticks");
-
     public static void init() {
         LOCK.lock();
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(TickScheduler::registerCapabilities);
-        MinecraftForge.EVENT_BUS.addGenericListener(Level.class, TickScheduler::attachLevelCapabilities);
-        MinecraftForge.EVENT_BUS.addGenericListener(LevelChunk.class, TickScheduler::attachChunkCapabilities);
-        MinecraftForge.EVENT_BUS.addListener(TickScheduler::onChunkLoad);
-        MinecraftForge.EVENT_BUS.addListener(TickScheduler::onChunkUnload);
-        MinecraftForge.EVENT_BUS.addListener(TickScheduler::onWorldTick);
-    }
-
-    private static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.register(WorldTickScheduler.class);
-        event.register(WorldTickScheduler.ChunkScheduler.class);
-    }
-
-    private static void attachLevelCapabilities(AttachCapabilitiesEvent<Level> event) {
-        if (!(event.getObject() instanceof ServerLevel world)) {
-            return;
-        }
-        WorldTickScheduler scheduler = new WorldTickScheduler(world);
-        event.addCapability(WORLD_KEY, new SimpleCapProvider<>(WORLD_CAPABILITY, scheduler));
-    }
-
-    private static void attachChunkCapabilities(AttachCapabilitiesEvent<LevelChunk> event) {
-        if (!(event.getObject().getLevel() instanceof ServerLevel level)) {
-            return;
-        }
-        WorldTickScheduler worldScheduler = WorldTickScheduler.getInstance(level);
-        WorldTickScheduler.ChunkScheduler scheduler = new WorldTickScheduler.ChunkScheduler(worldScheduler, event.getObject());
-        LazyOptional<WorldTickScheduler.ChunkScheduler> opt = LazyOptional.of(() -> scheduler);
-        event.addCapability(CHUNK_KEY, new ICapabilitySerializable<>() {
-
-            @Override
-            public Tag serializeNBT() {
-                return WorldTickScheduler.CHUNK_STORAGE.writeNBT(scheduler);
-            }
-
-            @Override
-            public void deserializeNBT(Tag nbt) {
-                WorldTickScheduler.CHUNK_STORAGE.readNBT(scheduler, nbt);
-            }
-
-            @NotNull
-            @Override
-            public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-                if (cap == CHUNK_CAPABILITY) {
-                    return unsafeCast(opt);
-                }
-                return LazyOptional.empty();
-            }
-        });
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, TickScheduler::onChunkLoad);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, TickScheduler::onChunkUnload);
+        NeoForge.EVENT_BUS.addListener(TickScheduler::onWorldTick);
     }
 
     private static void onChunkLoad(ChunkEvent.Load event) {
-        if (!(event.getLevel() instanceof ServerLevel) || !(event.getChunk() instanceof LevelChunk chunk)) {
+        if (!(event.getLevel() instanceof ServerLevel level) || !(event.getChunk() instanceof LevelChunk chunk)) {
             return;
         }
-        WorldTickScheduler.ChunkScheduler chunkScheduler = WorldTickScheduler.getInstance(chunk);
-        chunkScheduler.onChunkLoad();
+        WorldTickScheduler scheduler = WorldTickScheduler.getInstance(level);
+        scheduler.onChunkLoad(chunk);
     }
 
     private static void onChunkUnload(ChunkEvent.Unload event) {
-        if (!(event.getLevel() instanceof ServerLevel level)) {
+        if (!(event.getLevel() instanceof ServerLevel level) || !(event.getChunk() instanceof LevelChunk chunk)) {
             return;
         }
-        WorldTickScheduler worldScheduler = WorldTickScheduler.getInstance(level);
-        worldScheduler.onChunkUnload(event.getChunk().getPos());
+        WorldTickScheduler scheduler = WorldTickScheduler.getInstance(level);
+        scheduler.onChunkUnload(chunk);
     }
 
     private static void onWorldTick(TickEvent.LevelTickEvent event) {

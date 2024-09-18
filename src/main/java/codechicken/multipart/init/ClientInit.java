@@ -9,10 +9,9 @@ import codechicken.multipart.handler.ControlKeyHandler;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
 /**
  * Created by covers1624 on 26/6/22.
@@ -21,16 +20,15 @@ public class ClientInit {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
 
-    public static void init() {
+    public static void init(IEventBus modBus) {
         LOCK.lock();
 
-        ControlKeyHandler.init();
+        ControlKeyHandler.init(modBus);
         ClientEventHandler.init();
 
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-        bus.addListener(ClientInit::onClientInit);
-        bus.addListener(ClientInit::onRegisterRenderers);
-        Shaders.init();
+        modBus.addListener(ClientInit::onClientInit);
+        modBus.addListener(ClientInit::onRegisterRenderers);
+        Shaders.init(modBus);
     }
 
     private static void onClientInit(FMLClientSetupEvent event) {

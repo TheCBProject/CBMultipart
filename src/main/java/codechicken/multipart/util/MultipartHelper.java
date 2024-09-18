@@ -1,6 +1,7 @@
 package codechicken.multipart.util;
 
 import codechicken.lib.packet.PacketCustom;
+import codechicken.lib.packet.PacketSender;
 import codechicken.mixin.api.MixinFactory;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
@@ -10,6 +11,7 @@ import codechicken.multipart.network.MultiPartSPH;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -103,7 +105,7 @@ public class MultipartHelper {
                 }
                 world.setBlock(pos, CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState(), 0);
                 silentAddTile(world, pos, newTile);
-                PacketCustom.sendToChunk(new ClientboundBlockUpdatePacket(world, pos), world, pos);
+                PacketSender.sendToChunk(new ClientboundBlockUpdatePacket(world, pos), (ServerLevel) world, pos);
                 for (MultiPart cPart : newTile.getPartList()) {
                     cPart.onConverted();
                     MultiPartSPH.sendAddPart(newTile, cPart);

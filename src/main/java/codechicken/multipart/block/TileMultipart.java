@@ -5,7 +5,6 @@ import codechicken.lib.data.MCDataByteBuf;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.math.MathHelper;
-import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
 import codechicken.lib.world.IChunkLoadTile;
 import codechicken.multipart.api.part.BaseMultipart;
@@ -13,6 +12,7 @@ import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.network.MultiPartSPH;
+import codechicken.multipart.trait.TCapabilityTile;
 import codechicken.multipart.util.*;
 import com.google.common.base.Preconditions;
 import net.covers1624.quack.collection.ColUtils;
@@ -21,6 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -36,12 +37,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -52,6 +52,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static java.util.Objects.requireNonNull;
 import static net.minecraft.world.level.block.Block.*;
 
 /**
@@ -188,12 +189,17 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
      */
     public void onRemoved() { }
 
-    public void operate(Consumer<MultiPart> cons) {
-        for (MultiPart part : partList) {
-            if (part.hasTile()) {
-                cons.accept(part);
-            }
-        }
+    /**
+     * Called via our global capability registration.
+     * <p>
+     * Implemented by {@link TCapabilityTile}
+     *
+     * @param capability The capability.
+     * @param context    The capability context.
+     * @return The capability instance.
+     */
+    public <T, C> @Nullable T getCapability(BlockCapability<T, C> capability, C context) {
+        return null;
     }
     //endregion
 
@@ -351,12 +357,6 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         }
     }
 
-    //Empty method here fixes trait inheritance issue.
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        return super.getCapability(cap, side);
-    }
-
     //endregion
 
     //region *** Internal callbacks ***
@@ -394,13 +394,6 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
                 .orElse(0);
     }
 
-    public int getLightEmission() {
-        return partList.stream()
-                .mapToInt(MultiPart::getLightEmission)
-                .max()
-                .orElse(0);
-    }
-
     public float getDestroyProgress(Player player, PartRayTraceResult hit) {
         return hit.part.getStrength(player, hit);
     }
@@ -416,7 +409,9 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     }
 
     public void onMoved() {
-        capabilityCache.setWorldPos(level, worldPosition);
+        if (level instanceof ServerLevel serverLevel) {
+            capabilityCache.setLevelPos(serverLevel, worldPosition);
+        }
         operate(MultiPart::onMoved);
     }
 
@@ -431,7 +426,9 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     @Override
     public void setLevel(Level level) {
         super.setLevel(level);
-        capabilityCache.setWorldPos(level, getBlockPos());
+        if (level instanceof ServerLevel serverLevel) {
+            capabilityCache.setLevelPos(serverLevel, worldPosition);
+        }
     }
 
     public void entityInside(Entity entity) {
@@ -443,7 +440,6 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     }
 
     public void onNeighborBlockChanged(BlockPos pos) {
-        capabilityCache.onNeighborChanged(pos);
         operate(e -> e.onNeighborBlockChanged(pos));
     }
 
@@ -452,13 +448,6 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     public int getDirectSignal(int side) { return 0; }
 
     public int getSignal(int side) { return 0; }
-
-    @Override
-    public AABB getRenderBoundingBox() {
-        Cuboid6 c = Cuboid6.full.copy();
-        operate(e -> c.enclose(e.getRenderBounds()));
-        return c.add(worldPosition).aabb();
-    }
 
     public void animateTick(RandomSource random) { }
 
@@ -523,6 +512,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
      */
     public void notifyPartChange(@Nullable MultiPart part) {
         internalPartChange(part);
+        updateLight();
 
         BlockState state = CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState();
         level.sendBlockUpdated(worldPosition, state, state, 3);
@@ -565,6 +555,24 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
      */
     public void markRender() { }
 
+    private int getLightEmission() {
+        int light = 0;
+        for (MultiPart multiPart : partList) {
+            int lightEmission = multiPart.getLightEmission();
+            if (lightEmission > light) {
+                light = lightEmission;
+            }
+        }
+        return light;
+    }
+
+    public void updateLight() {
+        AuxiliaryLightManager lightManager = requireNonNull(getLevel()).getAuxLightManager(getBlockPos());
+        if (lightManager != null) {
+            lightManager.setLightAt(getBlockPos(), getLightEmission());
+        }
+    }
+
     public void recalcLight(boolean sky, boolean block) {
         LevelLightEngine lm = level.getLightEngine();
         if (sky && lm.skyEngine != null) {
@@ -599,6 +607,14 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     public void dropItems(Iterable<ItemStack> items) {
         Vector3 pos = Vector3.fromTileCenter(this);
         items.forEach(e -> dropItem(e, level, pos));
+    }
+
+    public void operate(Consumer<MultiPart> cons) {
+        for (MultiPart part : partList) {
+            if (part.hasTile()) {
+                cons.accept(part);
+            }
+        }
     }
 
     public CapabilityCache getCapCache() {

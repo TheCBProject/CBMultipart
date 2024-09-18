@@ -18,8 +18,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Explosion;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -63,7 +63,7 @@ public abstract class MicroblockPart extends BaseMultipart {
 
     @Override
     public void writeDesc(MCDataOutput packet) {
-        packet.writeRegistryIdDirect(MicroMaterialRegistry.MICRO_MATERIALS, material);
+        packet.writeRegistryIdDirect(MicroMaterialRegistry.microMaterials(), material);
         packet.writeByte(shape);
     }
 

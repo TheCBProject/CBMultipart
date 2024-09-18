@@ -1,8 +1,13 @@
 package codechicken.microblock.api;
 
+import codechicken.microblock.CBMicroblock;
 import codechicken.microblock.util.MicroMaterialRegistry;
+import codechicken.multipart.CBMultipart;
+import codechicken.multipart.api.MultipartType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -10,9 +15,8 @@ import net.minecraft.world.item.Tier;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -22,6 +26,11 @@ import java.util.function.Consumer;
  * Created by covers1624 on 26/6/22.
  */
 public abstract class MicroMaterial {
+
+    /**
+     * The registry name used by MicroMaterial.
+     */
+    public static final ResourceKey<Registry<MicroMaterial>> MULTIPART_TYPES = ResourceKey.createRegistryKey(new ResourceLocation(CBMicroblock.MOD_ID, "micro_material"));
 
     @Nullable
     Object renderProperties;
@@ -34,7 +43,7 @@ public abstract class MicroMaterial {
      * @return Key this material is registered under
      */
     public ResourceLocation getRegistryName() {
-        return Objects.requireNonNull(MicroMaterialRegistry.MICRO_MATERIALS.getKey(this));
+        return Objects.requireNonNull(MicroMaterialRegistry.microMaterials().getKey(this));
     }
 
     /**
@@ -107,7 +116,7 @@ public abstract class MicroMaterial {
     }
 
     private void initClient() {
-        if (FMLEnvironment.dist == Dist.CLIENT && !FMLLoader.getLaunchHandler().isData()) {
+        if (FMLEnvironment.dist.isClient() && !FMLLoader.getLaunchHandler().isData()) {
             initializeClient(props -> renderProperties = props);
         }
     }

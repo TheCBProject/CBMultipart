@@ -4,7 +4,9 @@ import codechicken.lib.data.MCDataInput;
 import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.init.MultiPartRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,9 +18,9 @@ import java.util.Objects;
 public abstract class MultipartType<T extends MultiPart> {
 
     /**
-     * The Forge registry name used by MultipartType.
+     * The registry name used by MultipartType.
      */
-    public static final ResourceLocation MULTIPART_TYPES = new ResourceLocation(CBMultipart.MOD_ID, "multipart_types");
+    public static final ResourceKey<Registry<MultipartType<?>>> MULTIPART_TYPES = ResourceKey.createRegistryKey(new ResourceLocation(CBMultipart.MOD_ID, "multipart_types"));
 
     // Internal.
     @Nullable
@@ -51,6 +53,6 @@ public abstract class MultipartType<T extends MultiPart> {
     public abstract T createPartClient(MCDataInput packet);
 
     public ResourceLocation getRegistryName() {
-        return Objects.requireNonNull(MultiPartRegistries.MULTIPART_TYPES.getKey(this));
+        return Objects.requireNonNull(MultiPartRegistries.multipartTypes().getKey(this));
     }
 }
