@@ -1,6 +1,7 @@
 package codechicken.multipart.network;
 
 import codechicken.lib.packet.PacketCustomChannel;
+import codechicken.multipart.CBMultipart;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
@@ -11,9 +12,9 @@ import net.neoforged.bus.api.IEventBus;
 public class MultiPartNetwork {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
-    public static final ResourceLocation NET_CHANNEL = new ResourceLocation("cmp:n");
+    public static final ResourceLocation NET_CHANNEL = new ResourceLocation(CBMultipart.MOD_ID, "network");
     public static final PacketCustomChannel channel = new PacketCustomChannel(NET_CHANNEL)
-//            .versioned() // TODO
+            .versioned(CBMultipart.container().getModInfo().getVersion().toString())
             .client(() -> MultiPartCPH::new)
             .server(() -> MultiPartSPH::new);
 
