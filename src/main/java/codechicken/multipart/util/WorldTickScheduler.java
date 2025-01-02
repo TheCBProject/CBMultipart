@@ -5,6 +5,7 @@ import codechicken.multipart.api.part.RandomTickPart;
 import codechicken.multipart.block.TileMultipart;
 import net.covers1624.quack.collection.FastStream;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -30,7 +31,7 @@ class WorldTickScheduler extends SavedData {
         return level.getDataStorage().computeIfAbsent(
                 new Factory<>(
                         () -> new WorldTickScheduler(level),
-                        t -> new WorldTickScheduler(level, t)
+                        (t, r) -> new WorldTickScheduler(level, t)
                 ),
                 MOD_ID + "_scheduled_ticks"
         );
@@ -70,7 +71,7 @@ class WorldTickScheduler extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         ListTag chunksList = new ListTag();
         for (ChunkScheduler chunk : chunks.values()) {
             CompoundTag chunkTag = chunk.save(new CompoundTag());
@@ -301,18 +302,29 @@ class WorldTickScheduler extends SavedData {
         public final long time;
 
         public SavedTickEntry(CompoundTag tag) {
-            pos = NbtUtils.readBlockPos(tag.getCompound("pos"));
+            pos = readBlockPos(tag.getCompound("pos"));
             idx = tag.getInt("idx");
             time = tag.getLong("time");
         }
 
         public CompoundTag write() {
             CompoundTag tag = new CompoundTag();
-            tag.put("pos", NbtUtils.writeBlockPos(pos));
+            tag.put("pos", writeBlockPos(pos));
             tag.putInt("idx", idx);
             tag.putLong("time", time);
             return tag;
         }
 
+        private static BlockPos readBlockPos(CompoundTag tag) {
+            return new BlockPos(tag.getInt("X"), tag.getInt("Y"), tag.getInt("Z"));
+        }
+
+        private static CompoundTag writeBlockPos(BlockPos tag) {
+            CompoundTag compoundtag = new CompoundTag();
+            compoundtag.putInt("X", tag.getX());
+            compoundtag.putInt("Y", tag.getY());
+            compoundtag.putInt("Z", tag.getZ());
+            return compoundtag;
+        }
     }
 }

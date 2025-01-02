@@ -23,7 +23,7 @@ license="GNU Lesser General Public License v2.1"
 [[dependencies.cb_multipart]]
     modId="minecraft"
     type="required"
-    versionRange="[1.20.4]"
+    versionRange="[1.21.1]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.cb_multipart]]
@@ -52,7 +52,7 @@ versionRange="[${forge_version},)"
 [[dependencies.cb_microblock]]
     modId="minecraft"
     type="required"
-versionRange="[1.20.4]"
+versionRange="[1.21.1]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.cb_microblock]]
@@ -87,7 +87,7 @@ versionRange="[1.20.4]"
 [[dependencies.cb_multipart_minecraft]]
     modId="minecraft"
     type="required"
-    versionRange="[1.20.4]"
+    versionRange="[1.21.1]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.cb_multipart_minecraft]]

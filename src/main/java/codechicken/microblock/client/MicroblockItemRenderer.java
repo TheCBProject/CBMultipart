@@ -8,6 +8,7 @@ import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.api.MicroMaterialClient;
 import codechicken.microblock.item.ItemMicroBlock;
+import codechicken.microblock.item.MicroMaterialComponent;
 import codechicken.microblock.part.MicroblockPart;
 import codechicken.microblock.part.StandardMicroFactory;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -24,17 +25,15 @@ public class MicroblockItemRenderer implements IItemRenderer {
 
     @Override
     public void renderItem(ItemStack stack, ItemDisplayContext transformType, PoseStack mStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
-        MicroMaterial material = ItemMicroBlock.getMaterialFromStack(stack);
-        StandardMicroFactory factory = ItemMicroBlock.getFactory(stack);
-        int size = ItemMicroBlock.getSize(stack);
+        MicroMaterialComponent component = MicroMaterialComponent.getComponent(stack);
 
-        if (material == null || factory == null) return;
+        if (component == null || component.factory() == null) return;
 
-        MicroMaterialClient clientMaterial = MicroMaterialClient.get(material);
+        MicroMaterialClient clientMaterial = MicroMaterialClient.get(component.material());
         if (clientMaterial == null) return;
 
-        MicroblockPart part = factory.create(true, material);
-        part.setShape(size, factory.getItemSlot());
+        MicroblockPart part = component.factory().create(true, component.material());
+        part.setShape(component.size(), component.factory().getItemSlot());
 
         mStack.pushPose();
         Vector3 offset = Vector3.CENTER.copy().subtract(part.getBounds().center());

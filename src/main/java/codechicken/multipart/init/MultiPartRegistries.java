@@ -9,6 +9,7 @@ import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.util.MultipartPlaceContext;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -105,17 +106,17 @@ public class MultiPartRegistries {
      * The part must have a valid {@link MultiPart#getType()}.
      * <p>
      * First writes {@link MultipartType#getRegistryName()} to the 'id'
-     * tag, then calls {@link MultiPart#save(CompoundTag)}.
+     * tag, then calls {@link MultiPart#save(CompoundTag, HolderLookup.Provider)}.
      *
      * @param nbt  The NBT tag to write to.
      * @param part The {@link MultiPart} to write.
      * @return The same NBT tag provided.
      */
-    public static CompoundTag savePart(CompoundTag nbt, MultiPart part) {
+    public static CompoundTag savePart(CompoundTag nbt, MultiPart part, HolderLookup.Provider registries) {
         MultipartType<?> type = requireNonNull(part.getType());
         ResourceLocation name = requireNonNull(type.getRegistryName());
         nbt.putString("id", name.toString());
-        part.save(nbt);
+        part.save(nbt, registries);
         return nbt;
     }
 
@@ -124,14 +125,14 @@ public class MultiPartRegistries {
      * First looks up the {@link MultipartType} from the 'id' tag,
      * Missing {@link MultipartType}s are currently ignored and destroyed,
      * then calls {@link MultipartType#createPartServer(CompoundTag)}
-     * if the result is non null, then calls {@link MultiPart#load(CompoundTag)}.
+     * if the result is non null, then calls {@link MultiPart#load(CompoundTag, HolderLookup.Provider)}.
      *
      * @param nbt The NBT tag to read from.
      * @return The new {@link MultiPart} instance, or null.
      */
     @Nullable
-    public static MultiPart loadPart(CompoundTag nbt) {
-        ResourceLocation name = new ResourceLocation(nbt.getString("id"));
+    public static MultiPart loadPart(CompoundTag nbt, HolderLookup.Provider registries) {
+        ResourceLocation name = ResourceLocation.parse(nbt.getString("id"));
         MultipartType<?> type = MULTIPART_TYPES.get(name);
         if (type == null) {
             //TODO 'dummy' parts to save these.
@@ -140,7 +141,7 @@ public class MultiPartRegistries {
         }
         MultiPart part = type.createPartServer(nbt);
         if (part != null) {
-            part.load(nbt);
+            part.load(nbt, registries);
         }
         return part;
     }

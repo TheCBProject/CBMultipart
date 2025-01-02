@@ -31,7 +31,7 @@ public class ClientEventHandler {
         Camera camera = event.getCamera();
         PoseStack mStack = event.getPoseStack();
         MultiBufferSource buffers = event.getMultiBufferSource();
-        float partialTicks = event.getPartialTick();
+        float partialTicks = event.getDeltaTracker().getGameTimeDeltaPartialTick(true);
         BlockHitResult target = event.getTarget();
         if (!(target instanceof PartRayTraceResult hit)) return;
 

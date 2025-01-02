@@ -29,7 +29,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.neoforged.neoforge.common.TierSortingRegistry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -78,20 +77,9 @@ public class BlockMicroMaterial extends MicroMaterial {
         return new ItemStack(state.getBlock(), 1);
     }
 
-    @Nullable
-    @Override
-    public Tier getCutterTier() {
-        for (Tier tier : TierSortingRegistry.getSortedTiers()) {
-            if (TierSortingRegistry.isCorrectTierForDrops(tier, state)) {
-                return tier;
-            }
-        }
-        return null;
-    }
-
     @Override
     public SoundType getSound() {
-        return state.getBlock().getSoundType(state);
+        return state.getSoundType();
     }
 
     @Override
@@ -192,6 +180,6 @@ public class BlockMicroMaterial extends MicroMaterial {
                 path.append(property.getName()).append('.').append(property.getName(unsafeCast(entry.getValue())));
             }
         }
-        return new ResourceLocation(blockKey.getNamespace(), path.toString());
+        return ResourceLocation.fromNamespaceAndPath(blockKey.getNamespace(), path.toString());
     }
 }

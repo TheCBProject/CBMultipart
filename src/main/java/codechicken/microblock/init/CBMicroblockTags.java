@@ -18,11 +18,11 @@ public class CBMicroblockTags {
         public static final TagKey<Item> TOOL_SAW = mod("tools/saw");
 
         private static TagKey<Item> forge(String path) {
-            return ItemTags.create(new ResourceLocation("forge", path));
+            return ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", path));
         }
 
         private static TagKey<Item> mod(String path) {
-            return ItemTags.create(new ResourceLocation(CBMicroblock.MOD_ID, path));
+            return ItemTags.create(ResourceLocation.fromNamespaceAndPath(CBMicroblock.MOD_ID, path));
         }
     }
 }

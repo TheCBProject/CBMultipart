@@ -108,7 +108,7 @@ public class MultipartGenerator extends SidedFactory<TileMultipart, MultipartGen
     }
 
     private void onModLoadingComplete(FMLLoadCompleteEvent event) {
-        ModLoader.get().postEvent(new RegisterMultipartTraitsEvent(this));
+        ModLoader.postEvent(new RegisterMultipartTraitsEvent(this));
     }
 
     public ImmutableSet<MixinFactory.TraitKey> getTraits(MultiPart part, boolean client) {

@@ -13,6 +13,7 @@ import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.part.BaseMultipart;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -83,13 +84,13 @@ public abstract class MicroblockPart extends BaseMultipart {
     }
 
     @Override
-    public void save(CompoundTag tag) {
+    public void save(CompoundTag tag, HolderLookup.Provider registries) {
         tag.putByte("shape", shape);
         tag.putString("material", material.getRegistryName().toString());
     }
 
     @Override
-    public void load(CompoundTag tag) {
+    public void load(CompoundTag tag, HolderLookup.Provider registries) {
         shape = tag.getByte("shape");
         // TODO redundant because of `createServer`
         material = MicroMaterialRegistry.getMaterial(tag.getString("material"));

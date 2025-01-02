@@ -3,6 +3,7 @@ package codechicken.multipart.internal.mixin;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.CBMultipartModContent;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -22,10 +23,10 @@ public class TileEntityMixin {
             at = @At ("HEAD"),
             cancellable = true
     )
-    private static void onLoadStatic(BlockPos pos, BlockState state, CompoundTag tag, CallbackInfoReturnable<BlockEntity> cir) {
+    private static void onLoadStatic(BlockPos pos, BlockState state, CompoundTag tag, HolderLookup.Provider registries, CallbackInfoReturnable<BlockEntity> cir) {
         String s = tag.getString("id");
         if (CBMultipartModContent.MULTIPART_TILE_TYPE.getId().toString().equals(s)) {
-            cir.setReturnValue(TileMultipart.fromNBT(tag, pos));
+            cir.setReturnValue(TileMultipart.fromNBT(tag, pos, registries));
         }
     }
 }

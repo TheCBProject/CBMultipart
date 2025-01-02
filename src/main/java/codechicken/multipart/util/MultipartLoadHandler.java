@@ -8,6 +8,7 @@ import codechicken.multipart.network.MultiPartSPH;
 import io.netty.buffer.Unpooled;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -75,7 +76,7 @@ public class MultipartLoadHandler {
 
         //Handle initial desc sync
         @Override
-        public void handleUpdateTag(CompoundTag tag) {
+        public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
             if (!tag.contains("data")) {
                 logger.warn("Received update tag without 'data' field. Ignoring..");
                 return;
@@ -84,14 +85,14 @@ public class MultipartLoadHandler {
         }
 
         @Override
-        public void load(CompoundTag compound) {
-            super.load(compound);
+        public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries) {
+            super.loadAdditional(compound, registries);
             tag = compound.copy();
         }
 
         @Override
-        public void saveAdditional(CompoundTag compound) {
-            super.saveAdditional(compound);
+        public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries) {
+            super.saveAdditional(compound, registries);
             if (tag != null) {
                 compound.merge(tag);
             }
@@ -105,7 +106,7 @@ public class MultipartLoadHandler {
 
             if (!failed && !loaded) {
                 if (tag != null) {
-                    TileMultipart newTile = TileMultipart.fromNBT(tag, getBlockPos());
+                    TileMultipart newTile = TileMultipart.fromNBT(tag, getBlockPos(), getLevel().registryAccess());
                     if (newTile != null) {
                         newTile.clearRemoved();
                         level.setBlockEntity(newTile);

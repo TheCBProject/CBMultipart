@@ -1,6 +1,5 @@
 package codechicken.multipart.network;
 
-import codechicken.lib.data.MCByteStream;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.packet.ICustomPacketHandler;
 import codechicken.lib.packet.PacketCustom;
@@ -8,10 +7,8 @@ import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.util.ControlKeyModifier;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.ChunkPos;
 
 import java.util.function.Consumer;
 
@@ -31,7 +28,7 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
 
     //region Send C_TILE_DESC
     public static void sendDescUpdate(TileMultipart tile) {
-        PacketCustom packet = new PacketCustom(NET_CHANNEL, C_TILE_DESC);
+        PacketCustom packet = new PacketCustom(NET_CHANNEL, C_TILE_DESC, tile.getLevel().registryAccess());
         packet.writePos(tile.getBlockPos());
         tile.writeDesc(packet);
         packet.sendToChunk(tile);
@@ -41,45 +38,30 @@ public class MultiPartSPH implements ICustomPacketHandler.IServerPacketHandler {
     //region Send C_ADD_PART
     public static void sendAddPart(TileMultipart tile, MultiPart part) {
         ServerLevel world = (ServerLevel) tile.getLevel();
-        MCByteStream stream = new MCByteStream();
-        MultiPartRegistries.writePart(stream, part);
-        world.getChunkSource().chunkMap.getPlayers(new ChunkPos(tile.getBlockPos()), false)
-                .forEach(player -> {
-                    PacketCustom packet = new PacketCustom(NET_CHANNEL, C_ADD_PART);
-                    packet.writePos(tile.getBlockPos());
-                    packet.append(stream.getBytes());
-                    packet.sendToPlayer(player);
-                });
+        PacketCustom packet = new PacketCustom(NET_CHANNEL, C_ADD_PART, world.registryAccess());
+        packet.writePos(tile.getBlockPos());
+        MultiPartRegistries.writePart(packet, part);
+        packet.sendToChunk(tile);
     }
     //endregion
 
     //region Send C_REM_PART
     public static void sendRemPart(TileMultipart tile, int partIdx) {
-        ServerLevel world = (ServerLevel) tile.getLevel();
-        world.getChunkSource().chunkMap.getPlayers(new ChunkPos(tile.getBlockPos()), false)
-                .forEach(player -> {
-                    PacketCustom packet = new PacketCustom(NET_CHANNEL, C_REM_PART);
-                    packet.writeByte(partIdx);
-                    packet.writePos(tile.getBlockPos());
-                    packet.sendToPlayer(player);
-                });
+        PacketCustom packet = new PacketCustom(NET_CHANNEL, C_REM_PART, tile.getLevel().registryAccess());
+        packet.writeByte(partIdx);
+        packet.writePos(tile.getBlockPos());
+        packet.sendToChunk(tile);
     }
     //endregion
 
     //region Send C_PART_UPDATE
     public static void dispatchPartUpdate(MultiPart part, Consumer<MCDataOutput> func) {
         ServerLevel world = (ServerLevel) part.level();
-        MCByteStream stream = new MCByteStream();
-        func.accept(stream);
-        BlockPos pos = part.pos();
-        world.getChunkSource().chunkMap.getPlayers(new ChunkPos(pos), false)
-                .forEach(player -> {
-                    PacketCustom packet = new PacketCustom(NET_CHANNEL, C_PART_UPDATE);
-                    packet.writeByte(part.tile().getPartList().indexOf(part));
-                    packet.writePos(part.pos());
-                    packet.append(stream.getBytes());
-                    packet.sendToPlayer(player);
-                });
+        PacketCustom packet = new PacketCustom(NET_CHANNEL, C_PART_UPDATE, world.registryAccess());
+        packet.writeByte(part.tile().getPartList().indexOf(part));
+        packet.writePos(part.pos());
+        func.accept(packet);
+        packet.sendToChunk(part.tile());
     }
     //endregion
 }

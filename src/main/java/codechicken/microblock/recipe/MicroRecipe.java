@@ -1,22 +1,19 @@
 package codechicken.microblock.recipe;
 
 import codechicken.lib.util.ItemUtils;
-import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.init.CBMicroblockModContent;
+import codechicken.microblock.init.CBMicroblockTags;
 import codechicken.microblock.item.ItemMicroBlock;
-import codechicken.microblock.item.SawItem;
+import codechicken.microblock.item.MicroMaterialComponent;
 import codechicken.microblock.util.MicroMaterialRegistry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.Nullable;
 
 import static codechicken.microblock.init.CBMicroblockModContent.MICRO_BLOCK_ITEM;
@@ -38,13 +35,8 @@ public class MicroRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack getResultItem(RegistryAccess pRegistryAccess) {
-        return ItemMicroBlock.create(1, 1, BlockMicroMaterial.makeMaterialKey(Blocks.STONE.defaultBlockState()));
-    }
-
-    @Override
-    public boolean matches(CraftingContainer cont, Level level) {
-        return !getAssemblyResult(cont).isEmpty();
+    public boolean matches(CraftingInput input, Level level) {
+        return !getAssemblyResult(input).isEmpty();
     }
 
     @Override
@@ -53,72 +45,82 @@ public class MicroRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer cont, RegistryAccess reg) {
-        return getAssemblyResult(cont);
+    public ItemStack assemble(CraftingInput inv, HolderLookup.Provider registries) {
+        return getAssemblyResult(inv);
     }
 
-    private ItemStack getAssemblyResult(CraftingContainer cont) {
-        var res = getHollowResult(cont);
+    private ItemStack getAssemblyResult(CraftingInput inv) {
+        var res = getHollowResult(inv);
         if (!res.isEmpty()) return res;
 
-        res = getGluingResult(cont);
+        res = getGluingResult(inv);
         if (!res.isEmpty()) return res;
 
-        res = getThinningResult(cont);
+        res = getThinningResult(inv);
         if (!res.isEmpty()) return res;
 
-        res = getSplittingResult(cont);
+        res = getSplittingResult(inv);
         if (!res.isEmpty()) return res;
 
-        return getHollowFillResult(cont);
+        return getHollowFillResult(inv);
     }
 
-    private static ItemStack getHollowResult(CraftingContainer cont) {
-        if (!getStack(cont, 1, 1).isEmpty()) return ItemStack.EMPTY;
+    private static ItemStack getHollowResult(CraftingInput inv) {
+        if (inv.width() != 3 || inv.height() != 3) return ItemStack.EMPTY;
 
-        ItemStack first = getStack(cont, 0, 0);
-        int factory = microFactory(first);
-        int size = microSize(first);
-        MicroMaterial material = microMaterial(first);
-        if (material == null) return ItemStack.EMPTY;
-        if (!first.is(MICRO_BLOCK_ITEM.get()) || factory != 0) return ItemStack.EMPTY;
+        if (!inv.getItem(1, 1).isEmpty()) return ItemStack.EMPTY;
 
-        for (int i = 0; i <= 8; i++) {
-            if (i == 4) continue;
-            ItemStack item = cont.getItem(i);
-            if (!item.is(MICRO_BLOCK_ITEM.get()) ||
-                    microMaterial(item) != material || microFactory(item) != factory || microSize(item) != size) {
-                return ItemStack.EMPTY;
+        ItemStack first = inv.getItem(0, 0);
+        if (!first.is(MICRO_BLOCK_ITEM.get())) return ItemStack.EMPTY;
+
+        MicroMaterialComponent materialComponent = MicroMaterialComponent.getComponent(first);
+        if (materialComponent == null) return ItemStack.EMPTY;
+
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 3; y++) {
+                if (x == 0 && y == 0 || x == 1 && y == 1) continue;
+
+                ItemStack stack = inv.getItem(x, y);
+                if (!stack.is(MICRO_BLOCK_ITEM.get())) return ItemStack.EMPTY;
+
+                MicroMaterialComponent comp = MicroMaterialComponent.getComponent(stack);
+                if (comp == null) return ItemStack.EMPTY;
+
+                if (!comp.equals(materialComponent)) return ItemStack.EMPTY;
             }
         }
-        return create(8, 1, size, material);
+
+        return create(8, 1, materialComponent.size(), materialComponent.material());
     }
 
-    private static ItemStack getGluingResult(CraftingContainer cont) {
+    private static ItemStack getGluingResult(CraftingInput inv) {
         int size = 0;
         int count = 0;
         int smallest = 0;
         int mcrFactory = 0;
         MicroMaterial material = null;
-        for (int i = 0; i < 9; i++) {
-            ItemStack item = cont.getItem(i);
-            if (!item.isEmpty()) {
-                if (!item.is(MICRO_BLOCK_ITEM.get())) return ItemStack.EMPTY;
+        for (ItemStack stack : inv.items()) {
+            if (!stack.isEmpty()) {
+                if (!stack.is(MICRO_BLOCK_ITEM.get())) return ItemStack.EMPTY;
+
+                MicroMaterialComponent component = MicroMaterialComponent.getComponent(stack);
+                if (component == null) return ItemStack.EMPTY;
+
                 if (count == 0) {
-                    size = microSize(item);
-                    mcrFactory = microFactory(item);
-                    material = microMaterial(item);
+                    size = component.size();
+                    mcrFactory = component.factoryId();
+                    material = component.material();
                     count = 1;
                     smallest = size;
-                } else if (microFactory(item) != mcrFactory || microMaterial(item) != material) {
-                    return ItemStack.EMPTY;
-                } else if (mcrFactory >= 2 && microSize(item) != smallest) {
-                    return ItemStack.EMPTY;
-                } else {
-                    smallest = Math.min(smallest, microSize(item));
-                    count += 1;
-                    size += microSize(item);
+                    continue;
                 }
+
+                if (component.factoryId() != mcrFactory || component.material() != material) return ItemStack.EMPTY;
+                if (mcrFactory >= 2 && component.size() != smallest) return ItemStack.EMPTY;
+
+                smallest = Math.min(smallest, component.size());
+                count += 1;
+                size += component.size();
             }
         }
 
@@ -149,84 +151,71 @@ public class MicroRecipe extends CustomRecipe {
         };
     }
 
-    private static ItemStack getThinningResult(CraftingContainer cont) {
-        SawResult saw = getSaw(cont);
+    private static ItemStack getThinningResult(CraftingInput inv) {
+        if (inv.items().size() != 2 || inv.width() != 2) return ItemStack.EMPTY;
+
+        SawResult saw = findSaw(inv);
         if (saw == null) return ItemStack.EMPTY;
 
-        ItemStack item = getStack(cont, saw.col, saw.row + 1);
+        ItemStack item = inv.getItem(saw.x == 0 ? 1 : 0, saw.y);
         if (item.isEmpty()) return ItemStack.EMPTY;
 
-        int size = microSize(item);
-        MicroMaterial material = microMaterial(item);
-        int mcrClass = microFactory(item);
-        if (size == 1 || material == null || !canCut(saw.sawTier, material)) {
-            return ItemStack.EMPTY;
+        int factory;
+        int size;
+        MicroMaterial material;
+
+        MicroMaterialComponent comp = MicroMaterialComponent.getComponent(item);
+        if (comp != null) {
+            factory = comp.factoryId();
+            size = comp.size();
+            material = comp.material();
+        } else {
+            factory = 0;
+            size = 8;
+            material = findMaterial(item);
         }
 
-        for (int r = 0; r < 3; r++) {
-            for (int c = 0; c < 3; c++) {
-                if ((c != saw.col || r != saw.row && r != saw.row + 1) && !getStack(cont, c, r).isEmpty()) {
-                    return ItemStack.EMPTY;
-                }
-            }
-        }
+        if (size == 1 || material == null) return ItemStack.EMPTY;
 
-        return create(2, mcrClass, size / 2, material);
+        return create(2, factory, size / 2, material);
     }
 
-    private static ItemStack getSplittingResult(CraftingContainer cont) {
-        SawResult saw = getSaw(cont);
+    private static ItemStack getSplittingResult(CraftingInput inv) {
+        if (inv.items().size() != 2 || inv.height() != 2) return ItemStack.EMPTY;
+
+        SawResult saw = findSaw(inv);
         if (saw == null) return ItemStack.EMPTY;
 
-        ItemStack item = getStack(cont, saw.col + 1, saw.row);
-        if (!item.is(MICRO_BLOCK_ITEM.get())) return ItemStack.EMPTY;
+        ItemStack item = inv.getItem(saw.x, saw.y == 0 ? 1 : 0);
+        if (!item.is(MICRO_BLOCK_ITEM)) return ItemStack.EMPTY;
 
-        int mcrClass = microFactory(item);
-        MicroMaterial material = microMaterial(item);
-        if (material == null || !canCut(saw.sawTier, material)) return ItemStack.EMPTY;
+        MicroMaterialComponent comp = MicroMaterialComponent.getComponent(item);
+        if (comp == null) return ItemStack.EMPTY;
 
-        int split = splitMap[mcrClass];
+        int split = splitMap[comp.factoryId()];
         if (split == -1) return ItemStack.EMPTY;
 
-        for (int r = 0; r < 3; r++) {
-            for (int c = 0; c < 3; c++) {
-                if ((r != saw.row || c != saw.col && c != saw.col + 1) && !getStack(cont, c, r).isEmpty()) {
-                    return ItemStack.EMPTY;
-                }
-            }
-        }
-        return create(2, split, microSize(item), material);
+        return create(2, split, comp.size(), comp.material());
     }
 
-    private static ItemStack getHollowFillResult(CraftingContainer cont) {
-        ItemStack cover = ItemStack.EMPTY;
-        for (int i = 0; i < 9; i++) {
-            ItemStack item = cont.getItem(i);
-            if (!item.isEmpty()) {
-                if (item.getItem() != MICRO_BLOCK_ITEM.get() || !cover.isEmpty() || microFactory(item) != 1) {
-                    return ItemStack.EMPTY;
-                }
-                cover = item;
-            }
-        }
-        if (cover.isEmpty()) {
-            return ItemStack.EMPTY;
-        }
+    private static ItemStack getHollowFillResult(CraftingInput inv) {
+        if (inv.items().size() != 1) return ItemStack.EMPTY;
 
-        MicroMaterial material = microMaterial(cover);
-        if (material == null) return ItemStack.EMPTY;
+        ItemStack only = inv.items().getFirst();
+        if (!only.is(CBMicroblockModContent.MICRO_BLOCK_ITEM)) return ItemStack.EMPTY;
 
-        return create(1, 0, microSize(cover), material);
+        MicroMaterialComponent component = MicroMaterialComponent.getComponent(only);
+        if (component == null || component.factoryId() != 1) return ItemStack.EMPTY;
+
+        return create(1, 0, component.size(), component.material());
     }
 
-    @Nullable
-    private static SawResult getSaw(CraftingContainer cont) {
-        for (int r = 0; r < 3; r++) {
-            for (int c = 0; c < 3; c++) {
-                ItemStack item = getStack(cont, r, c);
-                Tier tier = SawItem.getSawTier(item.getItem());
-                if (tier != null) {
-                    return new SawResult(item, tier, r, c);
+    private static @Nullable SawResult findSaw(CraftingInput inv) {
+        for (int x = 0; x < inv.width(); x++) {
+            for (int y = 0; y < inv.height(); y++) {
+                ItemStack item = inv.getItem(x, y);
+                if (item.is(CBMicroblockTags.Items.TOOL_SAW)) {
+                    return new SawResult(item, x, y);
                 }
             }
         }
@@ -240,47 +229,17 @@ public class MicroRecipe extends CustomRecipe {
         return ItemMicroBlock.createStack(amount, factoryId, size, material);
     }
 
-    private static boolean canCut(Tier sawTier, MicroMaterial material) {
-        // If the material has a tier, saw must be GTEQ, or max tier saw.
-        // If the material has no tier, must be max tier saw.
-        Tier required = material.getCutterTier();
-        return required != null && SawItem.isTierGTEQ(sawTier, required) || sawTier == CBMicroblockModContent.MAX_SAW_TIER;
-    }
-
-    private static ItemStack getStack(CraftingContainer cont, int row, int col) {
-        return cont.getItem(row + col * cont.getWidth());
-    }
-
-    private static int microFactory(ItemStack stack) {
-        if (!stack.is(MICRO_BLOCK_ITEM.get())) return 0;
-
-        return ItemMicroBlock.getFactoryID(stack);
-    }
-
-    private static int microSize(ItemStack stack) {
-        if (!stack.is(MICRO_BLOCK_ITEM.get())) return 8;
-
-        return ItemMicroBlock.getSize(stack);
-    }
-
-    @Nullable
-    public static MicroMaterial microMaterial(ItemStack stack) {
-        if (!stack.is(MICRO_BLOCK_ITEM.get())) return findMaterial(stack);
-
-        return ItemMicroBlock.getMaterialFromStack(stack);
-    }
-
     @Nullable
     public static MicroMaterial findMaterial(ItemStack stack) {
         if (stack.isEmpty()) return null;
         for (MicroMaterial material : MicroMaterialRegistry.microMaterials()) {
             ItemStack mStack = material.getItem();
-            if (ItemStack.isSameItemSameTags(mStack, stack)) {
+            if (ItemStack.isSameItemSameComponents(mStack, stack)) {
                 return material;
             }
         }
         return null;
     }
 
-    private record SawResult(ItemStack stack, Tier sawTier, int row, int col) { }
+    private record SawResult(ItemStack stack, int x, int y) { }
 }

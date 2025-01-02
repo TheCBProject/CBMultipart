@@ -72,7 +72,7 @@ public class MicroMaterialConfig {
         if (line.isEmpty()) return;
 
         int openBracketIdx = line.indexOf("[");
-        ResourceLocation resourceLocation = new ResourceLocation(openBracketIdx == -1 ? line : line.substring(0, openBracketIdx));
+        ResourceLocation resourceLocation = ResourceLocation.parse(openBracketIdx == -1 ? line : line.substring(0, openBracketIdx));
         Block block = BuiltInRegistries.BLOCK.getOptional(resourceLocation).orElse(null);
         if (block == null) {
             LOGGER.error("Error reading microblock config line {}, Missing block: '{}'", lineNumber, resourceLocation);

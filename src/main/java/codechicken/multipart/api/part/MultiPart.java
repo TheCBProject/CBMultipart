@@ -13,9 +13,11 @@ import codechicken.multipart.util.PartRayTraceResult;
 import codechicken.multipart.util.TickScheduler;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -137,7 +139,7 @@ public interface MultiPart {
      *
      * @param tag The tag to write to.
      */
-    default void save(CompoundTag tag) { }
+    default void save(CompoundTag tag, HolderLookup.Provider registries) { }
 
     /**
      * Load this part from a {@link CompoundTag}.
@@ -146,7 +148,7 @@ public interface MultiPart {
      *
      * @param tag The tag to read from.
      */
-    default void load(CompoundTag tag) { }
+    default void load(CompoundTag tag, HolderLookup.Provider registries) { }
 
     /**
      * Send a packet to this part's client-side counterpart.
@@ -396,18 +398,31 @@ public interface MultiPart {
     }
 
     /**
-     * Called on block right-click.
+     * Called on block right-click with an item.
+     * <p>
+     * This should not modify the part client-side.
+     *
+     * @param stack  The {@link ItemStack} held by the player.
+     * @param player The player that right-clicked the part.
+     * @param hit    The {@link PartRayTraceResult} hit result.
+     * @param hand   The {@link InteractionHand} the player is using.
+     * @return The {@link ItemInteractionResult}.
+     */
+    default ItemInteractionResult useItemOn(ItemStack stack, Player player, PartRayTraceResult hit, InteractionHand hand) {
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    /**
+     * Called on block right-click without an item.
      * <p>
      * This should not modify the part client-side.
      *
      * @param player The player that right-clicked the part.
      * @param hit    The {@link PartRayTraceResult} hit result.
-     * @param stack  The {@link ItemStack} held by the player.
-     * @param hand   The {@link InteractionHand} the player is using.
      * @return The {@link InteractionResult}.
      */
-    default InteractionResult activate(Player player, PartRayTraceResult hit, ItemStack stack, InteractionHand hand) {
-        return InteractionResult.FAIL;
+    default InteractionResult useWithoutItem(Player player, PartRayTraceResult hit) {
+        return InteractionResult.PASS;
     }
 
     /**

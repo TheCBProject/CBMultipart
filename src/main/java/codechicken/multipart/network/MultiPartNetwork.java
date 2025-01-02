@@ -12,7 +12,7 @@ import net.neoforged.bus.api.IEventBus;
 public class MultiPartNetwork {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
-    public static final ResourceLocation NET_CHANNEL = new ResourceLocation(CBMultipart.MOD_ID, "network");
+    public static final ResourceLocation NET_CHANNEL = ResourceLocation.fromNamespaceAndPath(CBMultipart.MOD_ID, "network");
     public static final PacketCustomChannel channel = new PacketCustomChannel(NET_CHANNEL)
             .versioned(CBMultipart.container().getModInfo().getVersion().toString())
             .client(() -> MultiPartCPH::new)

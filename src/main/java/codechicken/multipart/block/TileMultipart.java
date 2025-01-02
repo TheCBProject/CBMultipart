@@ -19,12 +19,14 @@ import net.covers1624.quack.collection.ColUtils;
 import net.covers1624.quack.collection.FastStream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -206,23 +208,29 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     //region *** Tile Save/Load ***
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         ListTag parts = new ListTag();
         for (MultiPart part : partList) {
-            parts.add(MultiPartRegistries.savePart(new CompoundTag(), part));
+            parts.add(MultiPartRegistries.savePart(new CompoundTag(), part, registries));
         }
         tag.put("parts", parts);
     }
 
     @Override
-    public final CompoundTag getUpdateTag() {
-        CompoundTag tag = super.getUpdateTag();
-        MCDataByteBuf desc = new MCDataByteBuf();
+    public final CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        MCDataByteBuf desc = new MCDataByteBuf(getLevel().registryAccess());
         writeDesc(desc);
         desc.writeToNBT(tag, "data");
         return tag;
     }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider) {
+        handleDescPacket(getLevel(), getBlockPos(), MCDataByteBuf.readFromNBT(tag, "data", getLevel().registryAccess()));
+    }
+
     //endregion
 
     //region *** Networking ***
@@ -415,8 +423,12 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         operate(MultiPart::onMoved);
     }
 
-    public InteractionResult use(Player player, PartRayTraceResult hit, InteractionHand hand) {
-        return hit.part.activate(player, hit, player.getItemInHand(hand), hand);
+    public ItemInteractionResult useItemOn(ItemStack stack, Player player, PartRayTraceResult hit, InteractionHand hand) {
+        return hit.part.useItemOn(stack, player, hit, hand);
+    }
+
+    public InteractionResult useWithoutItem(Player player, PartRayTraceResult hit) {
+        return hit.part.useWithoutItem(player, hit);
     }
 
     public void attack(Player player, PartRayTraceResult hit) {
@@ -688,12 +700,12 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
      * Creates this tile from an NBT tag
      */
     @Nullable
-    public static TileMultipart fromNBT(CompoundTag tag, BlockPos pos) {
+    public static TileMultipart fromNBT(CompoundTag tag, BlockPos pos, HolderLookup.Provider registries) {
         ListTag partList = tag.getList("parts", 10);
         List<MultiPart> parts = new ArrayList<>();
 
         for (int i = 0; i < partList.size(); i++) {
-            MultiPart part = MultiPartRegistries.loadPart(partList.getCompound(i));
+            MultiPart part = MultiPartRegistries.loadPart(partList.getCompound(i), registries);
             if (part != null) {
                 parts.add(part);
             }
@@ -701,7 +713,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         if (parts.isEmpty()) return null;
 
         TileMultipart tile = MultipartGenerator.INSTANCE.generateCompositeTile(null, pos, parts, false);
-        tile.load(tag);
+        tile.loadWithComponents(tag, registries);
         tile.loadParts(parts);
         return tile;
     }

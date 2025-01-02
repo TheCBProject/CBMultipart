@@ -1,6 +1,6 @@
-// 1.20.4	2024-09-17T21:05:19.645029781	cb_microblock Recipes.
-5e4637c05a4208c50ca56c90f4f88e6e508e6864 data/cb_microblock/recipes/diamond_saw.json
-9a20aeccbe3e9655d66d4d9f1f4ad0327407f9e1 data/cb_microblock/recipes/iron_saw.json
-81a245dcb7e18d2e7b81d16ff2137888b7c53670 data/cb_microblock/recipes/microblock.json
-cd299d442ed98a6eef695dba21a7b24ae2d12578 data/cb_microblock/recipes/stone_rod.json
-7a28ac5a568ef7a94671f77dba5f256b95ca7dbe data/cb_microblock/recipes/stone_saw.json
+// 1.21.1	2025-01-02T14:36:54.619724648	cb_microblock Recipes.
+a0d3dad44d8955510428ca551307115c101d2f75 data/cb_microblock/recipe/diamond_saw.json
+6c4ccfa2ec0563522f1fbe85549f3e4ec9e88ef0 data/cb_microblock/recipe/iron_saw.json
+81a245dcb7e18d2e7b81d16ff2137888b7c53670 data/cb_microblock/recipe/microblock.json
+78fedca06ab63a74fdaafaba6778e6db22849cf9 data/cb_microblock/recipe/stone_rod.json
+f241270a30261b914c2092dab2b9cccf86ed405b data/cb_microblock/recipe/stone_saw.json

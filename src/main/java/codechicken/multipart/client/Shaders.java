@@ -28,7 +28,7 @@ public class Shaders {
 
     private static void onRegisterShaders(RegisterShadersEvent event) {
         event.registerShader(
-                CCShaderInstance.create(event.getResourceProvider(), new ResourceLocation(MOD_ID, "highlight"), DefaultVertexFormat.BLOCK),
+                CCShaderInstance.create(event.getResourceProvider(), ResourceLocation.fromNamespaceAndPath(MOD_ID, "highlight"), DefaultVertexFormat.BLOCK),
                 e -> highlightShader = (CCShaderInstance) e
         );
     }

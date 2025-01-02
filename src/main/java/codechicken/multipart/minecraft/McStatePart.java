@@ -9,6 +9,7 @@ import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -53,12 +54,12 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
     }
 
     @Override
-    public void save(CompoundTag tag) {
+    public void save(CompoundTag tag, HolderLookup.Provider registries) {
         tag.put("state", NbtUtils.writeBlockState(state));
     }
 
     @Override
-    public void load(CompoundTag tag) {
+    public void load(CompoundTag tag, HolderLookup.Provider registries) {
         //TODO is this right?
         state = NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), tag.getCompound("state"));
     }

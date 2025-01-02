@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -221,13 +222,23 @@ public class BlockMultipart extends Block implements EntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit_) {
-        TileMultipart tile = getTile(world, pos);
-        PartRayTraceResult hit = retracePart(world, pos, player);
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit_) {
+        TileMultipart tile = getTile(level, pos);
+        PartRayTraceResult hit = retracePart(level, pos, player);
         if (tile != null && hit != null) {
-            return tile.use(player, hit, hand);
+            return tile.useItemOn(stack, player, hit, hand);
         }
-        return InteractionResult.FAIL;
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState stack, Level level, BlockPos pos, Player player, BlockHitResult hit_) {
+        TileMultipart tile = getTile(level, pos);
+        PartRayTraceResult hit = retracePart(level, pos, player);
+        if (tile != null && hit != null) {
+            return tile.useWithoutItem(player, hit);
+        }
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -323,7 +334,7 @@ public class BlockMultipart extends Block implements EntityBlock {
 
     @Override
     public boolean addLandingEffects(BlockState state1, ServerLevel level, BlockPos pos, BlockState state2, LivingEntity entity, int numberOfParticles) {
-        PacketCustom packet = new PacketCustom(MultiPartNetwork.NET_CHANNEL, MultiPartNetwork.C_LANDING_EFFECTS);
+        PacketCustom packet = new PacketCustom(MultiPartNetwork.NET_CHANNEL, MultiPartNetwork.C_LANDING_EFFECTS, level.registryAccess());
         packet.writePos(pos);
         packet.writeVector(Vector3.fromEntity(entity));
         packet.writeVarInt(numberOfParticles);

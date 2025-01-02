@@ -18,10 +18,9 @@ public class MicroMaterialRegistry {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized");
 
-    private static @Nullable Registry<MicroMaterial> MICRO_MATERIALS;
-
+    @Deprecated
     public static Registry<MicroMaterial> microMaterials() {
-        return requireNonNull(MICRO_MATERIALS, "MicroMaterial registry has not been created.");
+        return MicroMaterial.REGISTRY;
     }
 
     public static void init(IEventBus modBus) {
@@ -31,14 +30,12 @@ public class MicroMaterialRegistry {
     }
 
     private static void createRegistries(NewRegistryEvent event) {
-        MICRO_MATERIALS = event.create(new RegistryBuilder<MicroMaterial>(MicroMaterial.MULTIPART_TYPES)
-                .sync(true)
-        );
+        event.register(MicroMaterial.REGISTRY);
     }
 
     @Nullable
     public static MicroMaterial getMaterial(String name) {
-        return getMaterial(new ResourceLocation(name));
+        return getMaterial(ResourceLocation.parse(name));
     }
 
     @Nullable

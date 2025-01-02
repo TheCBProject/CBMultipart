@@ -24,7 +24,7 @@ public abstract class PartConverter {
     /**
      * The registry name used by PartConverter.
      */
-    public static final ResourceKey<Registry<PartConverter>> PART_CONVERTERS = ResourceKey.createRegistryKey(new ResourceLocation(CBMultipart.MOD_ID, "part_converters"));
+    public static final ResourceKey<Registry<PartConverter>> PART_CONVERTERS = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CBMultipart.MOD_ID, "part_converters"));
 
     private static final ConversionResult<Collection<MultiPart>> EMPTY_LIST = new ConversionResult<>(Collections.emptyList(), false);
     private static final ConversionResult<MultiPart> EMPTY = new ConversionResult<>(null, false);

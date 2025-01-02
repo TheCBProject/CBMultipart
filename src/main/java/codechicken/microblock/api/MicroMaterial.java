@@ -2,21 +2,24 @@ package codechicken.microblock.api;
 
 import codechicken.microblock.CBMicroblock;
 import codechicken.microblock.util.MicroMaterialRegistry;
-import codechicken.multipart.CBMultipart;
-import codechicken.multipart.api.MultipartType;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.SoundType;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.data.loading.DatagenModLoader;
+import net.neoforged.neoforge.registries.RegistryBuilder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -30,7 +33,15 @@ public abstract class MicroMaterial {
     /**
      * The registry name used by MicroMaterial.
      */
-    public static final ResourceKey<Registry<MicroMaterial>> MULTIPART_TYPES = ResourceKey.createRegistryKey(new ResourceLocation(CBMicroblock.MOD_ID, "micro_material"));
+    public static final ResourceKey<Registry<MicroMaterial>> MULTIPART_TYPES = ResourceKey.createRegistryKey(
+            ResourceLocation.fromNamespaceAndPath(CBMicroblock.MOD_ID, "micro_material")
+    );
+    public static final Registry<MicroMaterial> REGISTRY = new RegistryBuilder<>(MULTIPART_TYPES)
+            .sync(true)
+            .create();
+
+    public static final Codec<MicroMaterial> CODEC = REGISTRY.byNameCodec();
+    public static final StreamCodec<RegistryFriendlyByteBuf, MicroMaterial> STREAM_CODEC = ByteBufCodecs.registry(MULTIPART_TYPES);
 
     @Nullable
     Object renderProperties;
@@ -82,14 +93,6 @@ public abstract class MicroMaterial {
     public abstract ItemStack getItem();
 
     /**
-     * Gets the Tier that is required to cut this material.
-     *
-     * @return The required tier for cutting. Null specifies max available.
-     */
-    @Nullable
-    public abstract Tier getCutterTier();
-
-    /**
      * Get the breaking/waking sound.
      *
      * @return The {@link SoundType}.
@@ -116,7 +119,7 @@ public abstract class MicroMaterial {
     }
 
     private void initClient() {
-        if (FMLEnvironment.dist.isClient() && !FMLLoader.getLaunchHandler().isData()) {
+        if (FMLEnvironment.dist.isClient() && !DatagenModLoader.isRunningDataGen()) {
             initializeClient(props -> renderProperties = props);
         }
     }

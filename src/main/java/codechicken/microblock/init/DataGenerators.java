@@ -46,7 +46,7 @@ public class DataGenerators {
 
         gen.addProvider(event.includeClient(), new ItemModels(output, files));
         gen.addProvider(event.includeServer(), new ItemTagGen(output, event.getLookupProvider(), CompletableFuture.supplyAsync(TagsProvider.TagLookup::empty), files));
-        gen.addProvider(event.includeServer(), new Recipes(output));
+        gen.addProvider(event.includeServer(), new Recipes(event.getLookupProvider(), output));
     }
 
     private static class ItemTagGen extends ItemTagsProvider {
@@ -87,16 +87,16 @@ public class DataGenerators {
 
     private static class Recipes extends RecipeProvider {
 
-        public Recipes(PackOutput output) {
-            super(output, MOD_ID);
+        public Recipes(CompletableFuture<HolderLookup.Provider> registries, PackOutput output) {
+            super(registries, output, MOD_ID);
         }
 
         @Override
         protected void registerRecipes() {
-            special(new ResourceLocation(MOD_ID, "microblock"), MicroRecipe::new);
+            special(ResourceLocation.fromNamespaceAndPath(MOD_ID, "microblock"), MicroRecipe::new);
 
             shapedRecipe(STONE_ROD_ITEM.get())
-                    .key('S', Tags.Items.COBBLESTONE)
+                    .key('S', Tags.Items.COBBLESTONES)
                     .patternLine("S")
                     .patternLine("S");
 

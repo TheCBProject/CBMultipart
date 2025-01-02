@@ -1,17 +1,15 @@
 package codechicken.multipart.util;
 
-import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.RandomTickPart;
 import net.covers1624.quack.util.CrashLock;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 /**
  * Used to Schedule ticks for {@link MultiPart} instances.
@@ -50,10 +48,9 @@ public class TickScheduler {
         scheduler.onChunkUnload(chunk);
     }
 
-    private static void onWorldTick(TickEvent.LevelTickEvent event) {
-        if (!(event.level instanceof ServerLevel level) || event.phase != TickEvent.Phase.END) {
-            return;
-        }
+    private static void onWorldTick(LevelTickEvent.Post event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) return;
+
         WorldTickScheduler worldScheduler = WorldTickScheduler.getInstance(level);
         worldScheduler.tick();
     }

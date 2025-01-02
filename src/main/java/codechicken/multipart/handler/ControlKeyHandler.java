@@ -7,9 +7,9 @@ import net.covers1624.quack.util.CrashLock;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.TickEvent;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -33,13 +33,14 @@ public class ControlKeyHandler {
         event.register(KEY);
     }
 
-    private static void tick(TickEvent.ClientTickEvent event) {
+    private static void tick(ClientTickEvent.Post event) {
         boolean pressed = KEY.isDown();
         if (pressed != lastPressed) {
             lastPressed = pressed;
-            if (Minecraft.getInstance().getConnection() != null) {
-                ControlKeyModifier.setIsControlDown(Minecraft.getInstance().player, pressed);
-                PacketCustom packet = new PacketCustom(MultiPartNetwork.NET_CHANNEL, MultiPartNetwork.S_CONTROL_KEY_MODIFIER);
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.getConnection() != null) {
+                ControlKeyModifier.setIsControlDown(mc.player, pressed);
+                PacketCustom packet = new PacketCustom(MultiPartNetwork.NET_CHANNEL, MultiPartNetwork.S_CONTROL_KEY_MODIFIER, mc.player.registryAccess());
                 packet.writeBoolean(pressed);
                 packet.sendToServer();
             }

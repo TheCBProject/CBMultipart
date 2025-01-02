@@ -3,13 +3,13 @@
   "category": "misc",
   "key": {
     "M": {
-      "item": "minecraft:flint"
+      "tag": "c:gems/diamond"
     },
     "R": {
       "tag": "forge:rods/stone"
     },
     "S": {
-      "tag": "forge:rods/wooden"
+      "tag": "c:rods/wooden"
     }
   },
   "pattern": [
@@ -17,6 +17,7 @@
     "SMR"
   ],
   "result": {
-    "item": "cb_microblock:stone_saw"
+    "count": 1,
+    "id": "cb_microblock:diamond_saw"
   }
 }

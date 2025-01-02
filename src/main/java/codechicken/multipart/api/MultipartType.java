@@ -20,7 +20,7 @@ public abstract class MultipartType<T extends MultiPart> {
     /**
      * The registry name used by MultipartType.
      */
-    public static final ResourceKey<Registry<MultipartType<?>>> MULTIPART_TYPES = ResourceKey.createRegistryKey(new ResourceLocation(CBMultipart.MOD_ID, "multipart_types"));
+    public static final ResourceKey<Registry<MultipartType<?>>> MULTIPART_TYPES = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CBMultipart.MOD_ID, "multipart_types"));
 
     // Internal.
     @Nullable

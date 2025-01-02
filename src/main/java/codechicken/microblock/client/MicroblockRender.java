@@ -14,6 +14,7 @@ import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.item.ItemMicroBlock;
+import codechicken.microblock.item.MicroMaterialComponent;
 import codechicken.microblock.part.ExecutablePlacement;
 import codechicken.microblock.part.MicroblockPlacement;
 import codechicken.microblock.part.PlacementGrid;
@@ -101,7 +102,7 @@ public class MicroblockRender {
             PoseStack pStack = event.getPoseStack();
             pStack.pushPose();
             pStack.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
-            if (renderHighlight(player, InteractionHand.MAIN_HAND, stack, event.getTarget(), pStack, event.getMultiBufferSource(), event.getPartialTick())) {
+            if (renderHighlight(player, InteractionHand.MAIN_HAND, stack, event.getTarget(), pStack, event.getMultiBufferSource(), event.getDeltaTracker().getGameTimeDeltaPartialTick(true))) {
                 event.setCanceled(true);
             }
 
@@ -110,13 +111,10 @@ public class MicroblockRender {
     }
 
     private static boolean renderHighlight(Player player, InteractionHand hand, ItemStack stack, BlockHitResult hit, PoseStack pStack, MultiBufferSource buffers, float partialTicks) {
-        MicroMaterial material = ItemMicroBlock.getMaterialFromStack(stack);
-        StandardMicroFactory factory = ItemMicroBlock.getFactory(stack);
-        int size = ItemMicroBlock.getSize(stack);
+        MicroMaterialComponent component = MicroMaterialComponent.getComponent(stack);
+        if (component == null || component.factory() == null) return false;
 
-        if (material == null || factory == null) return false;
-
-        renderHighlight(player, hand, hit, factory, size, material, pStack, buffers, partialTicks);
+        renderHighlight(player, hand, hit, component.factory(), component.size(), component.material(), pStack, buffers, partialTicks);
         return true;
     }
 
@@ -156,8 +154,8 @@ public class MicroblockRender {
         Vector3 vn = v1.copy().subtract(v2);
         double d = vn.mag();
         vn.divide(d);
-        builder.vertex(v1.x, v1.y, v1.z).color(r, g, b, a).normal((float) vn.x, (float) vn.y, (float) vn.z).endVertex();
-        builder.vertex(v2.x, v2.y, v2.z).color(r, g, b, a).normal((float) vn.x, (float) vn.y, (float) vn.z).endVertex();
+        builder.addVertex((float) v1.x, (float) v1.y, (float) v1.z).setColor(r, g, b, a).setNormal((float) vn.x, (float) vn.y, (float) vn.z);
+        builder.addVertex((float) v2.x, (float) v2.y, (float) v2.z).setColor(r, g, b, a).setNormal((float) vn.x, (float) vn.y, (float) vn.z);
     }
 
     private static void transformFace(Vector3 hit, int side, Matrix4 mat) {

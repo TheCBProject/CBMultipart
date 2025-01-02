@@ -72,7 +72,7 @@ public class LeverPart extends McSidedStatePart implements FaceRedstonePart {
     }
 
     @Override
-    public InteractionResult activate(Player player, PartRayTraceResult hit, ItemStack item, InteractionHand hand) {
+    public InteractionResult useWithoutItem(Player player, PartRayTraceResult hit) {
         if (level().isClientSide) {
             return InteractionResult.SUCCESS;
         }
