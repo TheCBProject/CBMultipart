@@ -8,6 +8,7 @@ import codechicken.microblock.client.MicroblockRender;
 import codechicken.microblock.part.MicroblockPart;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.multipart.util.PartRayTraceResult;
+import net.covers1624.quack.collection.FastStream;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleEngine;
@@ -31,6 +32,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -172,7 +175,11 @@ public class BlockMicroMaterial extends MicroMaterial {
         if (!state.getProperties().isEmpty()) {
             path.append("//");
 
-            for (Map.Entry<Property<?>, Comparable<?>> entry : state.getValues().entrySet()) {
+            // Stable sort all keys based off their name, otherwise they may differ on the server/client.
+            Map<Property<?>, Comparable<?>> entries = FastStream.of(state.getValues().entrySet())
+                    .sorted(Comparator.comparing(e -> e.getKey().getName()))
+                    .toMap(Map.Entry::getKey, Map.Entry::getValue);
+            for (Map.Entry<Property<?>, Comparable<?>> entry : entries.entrySet()) {
                 Property<?> property = entry.getKey();
                 if (path.charAt(path.length() - 2) != '/') {
                     path.append('/');
