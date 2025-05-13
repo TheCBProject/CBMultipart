@@ -77,11 +77,11 @@ public class DataGenerators {
         protected void registerModels() {
             clazz(MICRO_BLOCK_ITEM.get(), MicroblockItemRenderer.class);
 
-            generated(STONE_ROD_ITEM.get());
+            handheld(STONE_ROD_ITEM.get());
 
-            generated(STONE_SAW.get());
-            generated(IRON_SAW.get());
-            generated(DIAMOND_SAW.get());
+            handheld(STONE_SAW.get());
+            handheld(IRON_SAW.get());
+            handheld(DIAMOND_SAW.get());
         }
     }
 
