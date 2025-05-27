@@ -1,11 +1,10 @@
 import groovy.json.JsonOutput
 
 plugins {
-    id 'java'
+    id 'java-library'
     id 'maven-publish'
     id 'signing'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
-    id 'net.neoforged.gradle.userdev' version '7.0.165'
+    id 'net.neoforged.moddev' version '2.0.77'
 }
 
 java {
@@ -28,23 +27,24 @@ version = "${mc_version}-${mod_version}"
 println "Starting build of ${base.archivesName.get()}, Version: ${mod_version}"
 println "Using Forge: ${forge_version}, for Minecraft: ${mc_version}"
 
-minecraft {
-    accessTransformers.file file("src/main/resources/META-INF/accesstransformer.cfg")
-}
+neoForge {
+    version = forge_version
 
-runs {
-    configureEach {
-        modSource project.sourceSets.main
+    accessTransformers {
+        publish file("src/main/resources/META-INF/accesstransformer.cfg")
     }
-    client {
-        workingDirectory file('run')
-    }
-    server {
-        workingDirectory file('run')
-    }
-    data {
-        workingDirectory file('run')
-        arguments.addAll '--mod', 'cb_multipart', '--mod', 'cb_microblock', '--all', '--flat', '--output', file("src/main/generated").absolutePath, '--existing', file("src/main/resources").absolutePath
+
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+        }
+        data {
+            data()
+            programArguments.addAll '--mod', 'cb_multipart', '--mod', 'cb_microblock', '--all', '--flat', '--output', file("src/main/generated").absolutePath, '--existing', file("src/main/resources").absolutePath
+        }
     }
 }
 
@@ -56,17 +56,26 @@ configurations {
 repositories {
     mavenLocal()
     maven { url = "https://maven.covers1624.net/" }
+    // TODO CCL exports a JEI dep, somehow.
+    maven { url "https://maven.blamejared.com/" }
 }
 
 dependencies {
-    implementation "net.neoforged:neoforge:${forge_version}"
+    api "io.codechicken:CodeChickenLib:${mc_version}-${ccl_version}"
+    accessTransformers "io.codechicken:CodeChickenLib:${mc_version}-${ccl_version}"
 
-    //Mod deps
-    implementation "io.codechicken:CodeChickenLib:${mc_version}-${ccl_version}"
-
-    //Packed into built jar.
-    shadow("io.codechicken:TraitMixinCompiler:${mixin_version}") { transitive = false }
-    shadow("io.codechicken:ChickenASM:${chicken_asm_version}") { transitive = false }
+    jarJar(api("io.codechicken:TraitMixinCompiler") { transitive = false }) {
+        version {
+            strictly '[3.0.0,3.1.0)'
+            prefer '3.0.0.21'
+        }
+    }
+    jarJar(api("io.codechicken:ChickenASM") { transitive = false }) {
+        version {
+            strictly '[4.0.0,4.1.0)'
+            prefer '4.0.0.18'
+        }
+    }
 }
 
 processResources {
@@ -109,10 +118,8 @@ def publishingMetadataTask = tasks.register("publishingMetadata") {
     }
 }
 
-jar.enabled = false//Disable normal jar, is replaced by ShadowJar.
-shadowJar {
-    finalizedBy 'signShadowJar'
-    archiveClassifier = ''
+jar {
+    finalizedBy 'signJar'
     manifest {
         attributes 'Specification-Title': base.archivesName.get()
         attributes 'Specification-Vendor': 'covers1624'
@@ -124,18 +131,15 @@ shadowJar {
         attributes 'MixinConfigs': 'mixins.cbmultipart.json'
     }
 
-    configurations = [project.configurations.shadow]
-    mergeServiceFiles()
     exclude 'module-info.class'
 }
-build.dependsOn shadowJar
 
-tasks.register("signShadowJar") {
-    dependsOn("shadowJar")
+tasks.register("signJar") {
+    dependsOn("jar")
 
     doFirst {
         def args = [:]
-        args['jar'] = shadowJar.archiveFile.get().asFile
+        args['jar'] = jar.archiveFile.get().asFile
         if (System.getenv("KEY_STORE")) {
             args['keyStore'] = System.getenv("KEY_STORE")
             file(System.getenv("KEY_STORE_PROPS")).withReader {
@@ -179,9 +183,9 @@ publishing {
             groupId project.group
             artifactId project.base.archivesName.get()
             version project.version
-            artifact shadowJar
-            artifact sourcesJar
-            artifact javadocJar
+
+            from components['java']
+
             artifact(publishingMetadata) {
                 builtBy publishingMetadataTask
                 classifier 'publishing'
