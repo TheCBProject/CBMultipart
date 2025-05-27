@@ -34,9 +34,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
@@ -183,16 +181,18 @@ public class BlockMicroMaterial extends MicroMaterial {
         if (!state.getProperties().isEmpty()) {
             path.append("//");
 
+            record ValuePair(Property<?> key, Comparable<?> value) { }
             // Stable sort all keys based off their name, otherwise they may differ on the server/client.
-            Map<Property<?>, Comparable<?>> entries = FastStream.of(state.getValues().entrySet())
+            var entries = FastStream.of(state.getValues().entrySet())
                     .sorted(Comparator.comparing(e -> e.getKey().getName()))
-                    .toMap(Map.Entry::getKey, Map.Entry::getValue);
-            for (Map.Entry<Property<?>, Comparable<?>> entry : entries.entrySet()) {
-                Property<?> property = entry.getKey();
+                    .map(e -> new ValuePair(e.getKey(), e.getValue()))
+                    .toList();
+            for (var entry : entries) {
+                Property<?> property = entry.key;
                 if (path.charAt(path.length() - 2) != '/') {
                     path.append('/');
                 }
-                path.append(property.getName()).append('.').append(property.getName(unsafeCast(entry.getValue())));
+                path.append(property.getName()).append('.').append(property.getName(unsafeCast(entry.value)));
             }
         }
         return ResourceLocation.fromNamespaceAndPath(blockKey.getNamespace(), path.toString());
