@@ -1,8 +1,6 @@
 package codechicken.multipart.init;
 
-import codechicken.lib.render.block.BlockRenderingRegistry;
 import codechicken.multipart.client.ClientEventHandler;
-import codechicken.multipart.client.MultipartBlockRenderer;
 import codechicken.multipart.client.MultipartTileRenderer;
 import codechicken.multipart.client.Shaders;
 import codechicken.multipart.handler.ControlKeyHandler;
@@ -33,7 +31,6 @@ public class ClientInit {
 
     private static void onClientInit(FMLClientSetupEvent event) {
         ItemBlockRenderTypes.setRenderLayer(CBMultipartModContent.MULTIPART_BLOCK.get(), e -> true);
-        BlockRenderingRegistry.registerRenderer(CBMultipartModContent.MULTIPART_BLOCK.get(), new MultipartBlockRenderer());
     }
 
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {

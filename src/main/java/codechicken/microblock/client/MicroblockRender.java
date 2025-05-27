@@ -1,6 +1,8 @@
 package codechicken.microblock.client;
 
 import codechicken.lib.model.CachedFormat;
+import codechicken.lib.model.IVertexConsumer;
+import codechicken.lib.model.Quad;
 import codechicken.lib.model.pipeline.BakedPipeline;
 import codechicken.lib.model.pipeline.transformers.QuadClamper;
 import codechicken.lib.model.pipeline.transformers.QuadFaceStripper;
@@ -13,14 +15,13 @@ import codechicken.lib.vec.*;
 import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.init.CBMicroblockModContent;
-import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.item.MicroMaterialComponent;
-import codechicken.microblock.part.ExecutablePlacement;
-import codechicken.microblock.part.MicroblockPlacement;
-import codechicken.microblock.part.PlacementGrid;
-import codechicken.microblock.part.StandardMicroFactory;
+import codechicken.microblock.part.*;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.multipart.client.Shaders;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -37,6 +38,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -49,14 +51,21 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.OptionalDouble;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static codechicken.microblock.CBMicroblock.MOD_ID;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Created by covers1624 on 20/10/22.
@@ -65,6 +74,10 @@ public class MicroblockRender {
 
     private static final CrashLock LOCK = new CrashLock("Already Initialized");
     private static final ThreadLocal<PipelineState> PIPELINES = ThreadLocal.withInitial(PipelineState::create);
+
+    private static final Cache<QuadCacheKey, List<BakedQuad>> QUAD_CACHE = CacheBuilder.newBuilder()
+            .expireAfterAccess(30, TimeUnit.MINUTES)
+            .build();
 
     public static final RenderType HIGHLIGHT_RENDER_TYPE = RenderType.create(MOD_ID + ":highlight", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 255, RenderType.CompositeState.builder()
             .setShaderState(new RenderStateShard.ShaderStateShard(Shaders::highlightShader))
@@ -84,10 +97,16 @@ public class MicroblockRender {
             .createCompositeState(false)
     );
 
-    public static void init() {
+    public static void init(IEventBus modBus) {
         LOCK.lock();
 
+        modBus.addListener(MicroblockRender::onRegisterReloadListeners);
+
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, MicroblockRender::onDrawHighlight);
+    }
+
+    private static void onRegisterReloadListeners(RegisterClientReloadListenersEvent event) {
+        event.registerReloadListener((ResourceManagerReloadListener) e -> QUAD_CACHE.invalidateAll());
     }
 
     private static void onDrawHighlight(RenderHighlightEvent.Block event) {
@@ -129,7 +148,6 @@ public class MicroblockRender {
         if (placement == null) return;
 
         BlockPos pos = placement.pos;
-
         Matrix4 mat = new Matrix4(pStack);
         mat.translate(pos);
         mat.apply(new Scale(1.002, 1.002, 1.002).at(Vector3.CENTER));
@@ -166,78 +184,169 @@ public class MicroblockRender {
         mat.translate(0, rHit.y - 0.002, 0);
     }
 
+    @Deprecated // TODO highlight renderer still uses this.
     public static void renderCuboids(CCRenderState ccrs, BlockState state, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids) {
-        PipelineState pipeState = PIPELINES.get();
         BakedVertexSource vertexSource = BakedVertexSource.instance();
+        transformModel(ccrs.lightMatrix.access, ccrs.lightMatrix.pos, state, layer, cuboids, new MicroblockQuadPipeline() {
+
+            @Override
+            public void prepareQuad(CachedFormat format) {
+                vertexSource.reset(format);
+            }
+
+            @Override
+            public IVertexConsumer getConsumer() {
+                return vertexSource;
+            }
+
+            @Override
+            public void onQuadPiped() {
+            }
+
+            @Override
+            public void onTransformFinished() {
+                if (vertexSource.getVertexCount() <= 0) return;
+
+                ccrs.setModel(vertexSource);
+                if (layer != null) {
+                    ccrs.render(ccrs.lightMatrix);
+                } else {
+                    ccrs.render();
+                }
+            }
+        });
+    }
+
+    // TODO tighten the api here to require an ImmutableSet.
+    public static List<BakedQuad> getQuads(MicroblockPart part, BlockState state, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids) {
+        // Build a key to be hashed and stored.
+        QuadCacheKey key = new QuadCacheKey(state, layer, ImmutableSet.copyOf(cuboids));
+        // Try get already cached quads.
+        List<BakedQuad> quads = QUAD_CACHE.getIfPresent(key);
+        if (quads != null) return quads;
+
+        // Sync on the state so we still get some sort of parallelism
+        // There is no good key to use here..
+        synchronized (state) {
+            // Double synchronized, because thats how we do it.
+            quads = QUAD_CACHE.getIfPresent(key);
+            if (quads != null) return quads;
+
+            // Build the new quads.
+            List<BakedQuad> newQuads = new ArrayList<>();
+            Quad collector = new Quad();
+            boolean didStuff = transformModel(part.hasTile() ? part.level() : null, part.hasTile() ? part.pos() : null, state, layer, cuboids, new MicroblockQuadPipeline() {
+                @Override
+                public void prepareQuad(CachedFormat format) {
+                    collector.reset(format);
+                }
+
+                @Override
+                public IVertexConsumer getConsumer() {
+                    return collector;
+                }
+
+                @Override
+                public void onQuadPiped() {
+                    if (collector.full) {
+                        newQuads.add(collector.bake());
+                    }
+                }
+
+                @Override
+                public void onTransformFinished() {
+                }
+            });
+
+            // The entire point of manually handling the cache instead of using the loader mechanism
+            // is to allow this case here. If we miss the render layer check when transforming, we
+            // do nothing, and cache nothing. There is no reason to fill our cache with rather expensive keys
+            // with utter garbage.
+            if (!didStuff) return List.of();
+
+            // Use a singleton for empty in the cache.
+            quads = !newQuads.isEmpty() ? newQuads : List.of();
+            QUAD_CACHE.put(key, quads);
+            return quads;
+        }
+    }
+
+    private static boolean transformModel(@Nullable BlockAndTintGetter level, @Nullable BlockPos pos, BlockState state, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids, MicroblockQuadPipeline pipeline) {
+        PipelineState pipeState = PIPELINES.get();
         RandomSource randy = RandomSource.create();
 
         BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
         BlockColors blockColors = Minecraft.getInstance().getBlockColors();
         BakedModel model = dispatcher.getBlockModel(state);
 
-        BlockPos pos = null;
         long seed = 42L;
-        BlockAndTintGetter level = null;
         ModelData modelData = ModelData.EMPTY;
         if (layer != null) {
-            pos = ccrs.lightMatrix.pos;
-            seed = state.getSeed(pos);
-            level = new MicroblockLevelProxy(ccrs.lightMatrix.access, pos, state);
+            seed = state.getSeed(requireNonNull(pos));
+            level = new MicroblockLevelProxy(requireNonNull(level), pos, state);
             modelData = model.getModelData(level, pos, state, modelData);
 
-            if (!model.getRenderTypes(state, randy, modelData).contains(layer)) return;
+            if (!model.getRenderTypes(state, randy, modelData).contains(layer)) return false;
         }
 
         for (Direction face : Direction.BY_3D_DATA) {
             randy.setSeed(seed);
             for (BakedQuad quad : model.getQuads(state, face, randy, modelData, layer)) {
-                renderQuad(ccrs, vertexSource, pipeState, blockColors, layer, quad, state, level, pos, cuboids);
+                pipeline.transformQuad(pipeState, blockColors, layer, quad, state, level, pos, cuboids);
             }
         }
         randy.setSeed(seed);
         for (BakedQuad quad : model.getQuads(state, null, randy, modelData, layer)) {
-            renderQuad(ccrs, vertexSource, pipeState, blockColors, layer, quad, state, level, pos, cuboids);
-        }
-    }
-
-    private static void renderQuad(CCRenderState ccrs, BakedVertexSource vs, PipelineState pipeState, BlockColors blockColors, @Nullable RenderType layer, BakedQuad quad, BlockState state, @Nullable BlockAndTintGetter level, @Nullable BlockPos pos, Iterable<MaskedCuboid> cuboids) {
-        BakedPipeline pipeline = pipeState.pipeline;
-        QuadClamper clamper = pipeState.clamper;
-        QuadFaceStripper faceStripper = pipeState.faceStripper;
-        QuadTinter tinter = pipeState.tinter;
-
-        CachedFormat format = formatFor(quad);
-        vs.reset(format);
-
-        if (quad.isTinted()) {
-            tinter.setTint(blockColors.getColor(state, level, pos, quad.getTintIndex()));
-        }
-        for (MaskedCuboid cuboid : cuboids) {
-            pipeline.reset(format);
-            faceStripper.setBounds(cuboid.box());
-            faceStripper.setMask(cuboid.sideMask());
-            clamper.setClampBounds(cuboid.box());
-
-            pipeline.setElementState("tinter", quad.isTinted());
-
-            pipeline.prepare(vs);
-            pipeline.put(quad);
+            pipeline.transformQuad(pipeState, blockColors, layer, quad, state, level, pos, cuboids);
         }
 
-        if (vs.getVertexCount() <= 0) return;
-
-        ccrs.setModel(vs);
-        if (layer != null) {
-            ccrs.render(ccrs.lightMatrix);
-        } else {
-            ccrs.render();
-        }
+        return true;
     }
 
     // Exists as a mixin target for mods which change the vertex formats.
     private static CachedFormat formatFor(BakedQuad quad) {
         return CachedFormat.BLOCK;
     }
+
+    private static abstract class MicroblockQuadPipeline {
+
+        public abstract void prepareQuad(CachedFormat format);
+
+        public abstract IVertexConsumer getConsumer();
+
+        public abstract void onQuadPiped();
+
+        public abstract void onTransformFinished();
+
+        public void transformQuad(PipelineState pipeState, BlockColors blockColors, @Nullable RenderType layer, BakedQuad quad, BlockState state, @Nullable BlockAndTintGetter level, @Nullable BlockPos pos, Iterable<MaskedCuboid> cuboids) {
+            BakedPipeline pipeline = pipeState.pipeline;
+            QuadClamper clamper = pipeState.clamper;
+            QuadFaceStripper faceStripper = pipeState.faceStripper;
+            QuadTinter tinter = pipeState.tinter;
+
+            CachedFormat format = formatFor(quad);
+            prepareQuad(format);
+
+            if (quad.isTinted()) {
+                tinter.setTint(blockColors.getColor(state, level, pos, quad.getTintIndex()));
+            }
+            for (MaskedCuboid cuboid : cuboids) {
+                pipeline.reset(format);
+                faceStripper.setBounds(cuboid.box());
+                faceStripper.setMask(cuboid.sideMask());
+                clamper.setClampBounds(cuboid.box());
+
+                pipeline.setElementState("tinter", quad.isTinted());
+
+                pipeline.prepare(getConsumer());
+                pipeline.put(quad);
+                onQuadPiped();
+            }
+            onTransformFinished();
+        }
+    }
+
+    private record QuadCacheKey(BlockState state, @Nullable RenderType layer, Set<MaskedCuboid> cuboids) { }
 
     private record PipelineState(BakedPipeline pipeline, QuadClamper clamper, QuadFaceStripper faceStripper, QuadTinter tinter) {
 

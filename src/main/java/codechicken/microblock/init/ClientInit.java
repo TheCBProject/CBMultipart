@@ -21,7 +21,7 @@ public class ClientInit {
 
         modBus.addListener(ClientInit::clientSetup);
 
-        MicroblockRender.init();
+        MicroblockRender.init(modBus);
     }
 
     private static void clientSetup(FMLClientSetupEvent event) {

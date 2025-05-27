@@ -6,8 +6,8 @@ import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Transformation;
 import codechicken.lib.vec.Vector3;
-import codechicken.microblock.api.SlottedHollowConnect;
 import codechicken.microblock.api.MicroMaterial;
+import codechicken.microblock.api.SlottedHollowConnect;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.part.StandardMicroblockPart;
@@ -16,6 +16,7 @@ import codechicken.microblock.util.MaskedCuboid;
 import codechicken.multipart.api.part.FacePart;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.NormalOcclusionPart;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -24,8 +25,6 @@ import net.covers1624.quack.collection.FastStream;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-
-import java.util.List;
 
 /**
  * Created by covers1624 on 20/10/22.
@@ -198,7 +197,7 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements Face
         renderMask = renderMask & 0xFF | getHoleSize() << 8;
     }
 
-    private List<MaskedCuboid> buildBoxes(Cuboid6 c, int sideMask, boolean face) {
+    private ImmutableSet<MaskedCuboid> buildBoxes(Cuboid6 c, int sideMask, boolean face) {
         int size = renderMask >> 8;
         double d1 = 0.5 - size / 32D;
         double d2 = 0.5 + size / 32D;
@@ -216,15 +215,15 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements Face
                     iMask = 0x3C;
                 }
 
-                return List.of(
-                        new MaskedCuboid(new Cuboid6(d1, y1, d2, d2, y2, z2), 0x3B | iMask), //-z internal
-                        new MaskedCuboid(new Cuboid6(d1, y1, z1, d2, y2, d1), 0x37 | iMask), //+z internal
+                return ImmutableSet.of(
+                        MaskedCuboid.of(new Cuboid6(d1, y1, d2, d2, y2, z2), 0x3B | iMask), //-z internal
+                        MaskedCuboid.of(new Cuboid6(d1, y1, z1, d2, y2, d1), 0x37 | iMask), //+z internal
 
-                        new MaskedCuboid(new Cuboid6(d2, y1, d1, x2, y2, d2), sideMask & 0x23 | 0xC | iMask), //-x internal -y+y+x external
-                        new MaskedCuboid(new Cuboid6(x1, y1, d1, d1, y2, d2), sideMask & 0x13 | 0xC | iMask), //+x internal -y+y-x external
+                        MaskedCuboid.of(new Cuboid6(d2, y1, d1, x2, y2, d2), sideMask & 0x23 | 0xC | iMask), //-x internal -y+y+x external
+                        MaskedCuboid.of(new Cuboid6(x1, y1, d1, d1, y2, d2), sideMask & 0x13 | 0xC | iMask), //+x internal -y+y-x external
 
-                        new MaskedCuboid(new Cuboid6(x1, y1, d2, x2, y2, z2), sideMask & 0x3B | 4 | iMask), //-y+y+z-x+x external
-                        new MaskedCuboid(new Cuboid6(x1, y1, z1, x2, y2, d1), sideMask & 0x37 | 8 | iMask) //-y+y-z-x+x external
+                        MaskedCuboid.of(new Cuboid6(x1, y1, d2, x2, y2, z2), sideMask & 0x3B | 4 | iMask), //-y+y+z-x+x external
+                        MaskedCuboid.of(new Cuboid6(x1, y1, z1, x2, y2, d1), sideMask & 0x37 | 8 | iMask) //-y+y-z-x+x external
                 );
             }
             case 2, 3 -> {
@@ -232,15 +231,15 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements Face
                     iMask = 0x33;
                 }
 
-                return List.of(
-                        new MaskedCuboid(new Cuboid6(d2, d1, z1, x2, d2, z2), 0x2F | iMask), //-x internal
-                        new MaskedCuboid(new Cuboid6(x1, d1, z1, d1, d2, z2), 0x1F | iMask), //+x internal
+                return ImmutableSet.of(
+                        MaskedCuboid.of(new Cuboid6(d2, d1, z1, x2, d2, z2), 0x2F | iMask), //-x internal
+                        MaskedCuboid.of(new Cuboid6(x1, d1, z1, d1, d2, z2), 0x1F | iMask), //+x internal
 
-                        new MaskedCuboid(new Cuboid6(d1, d2, z1, d2, y2, z2), sideMask & 0xE | 0x30 | iMask), //-y internal -z+z+y external
-                        new MaskedCuboid(new Cuboid6(d1, y1, z1, d2, d1, z2), sideMask & 0xD | 0x30 | iMask), //+y internal -z+z-y external
+                        MaskedCuboid.of(new Cuboid6(d1, d2, z1, d2, y2, z2), sideMask & 0xE | 0x30 | iMask), //-y internal -z+z+y external
+                        MaskedCuboid.of(new Cuboid6(d1, y1, z1, d2, d1, z2), sideMask & 0xD | 0x30 | iMask), //+y internal -z+z-y external
 
-                        new MaskedCuboid(new Cuboid6(d2, y1, z1, x2, y2, z2), sideMask & 0x2F | 0x10 | iMask), //-z+z+x-y+y external
-                        new MaskedCuboid(new Cuboid6(x1, y1, z1, d1, y2, z2), sideMask & 0x1F | 0x20 | iMask) //-z+z-x-y+y external
+                        MaskedCuboid.of(new Cuboid6(d2, y1, z1, x2, y2, z2), sideMask & 0x2F | 0x10 | iMask), //-z+z+x-y+y external
+                        MaskedCuboid.of(new Cuboid6(x1, y1, z1, d1, y2, z2), sideMask & 0x1F | 0x20 | iMask) //-z+z-x-y+y external
                 );
             }
             case 4, 5 -> {
@@ -248,15 +247,15 @@ public class HollowMicroblockPart extends StandardMicroblockPart implements Face
                     iMask = 0xF;
                 }
 
-                return List.of(
-                        new MaskedCuboid(new Cuboid6(x1, d2, d1, x2, y2, d2), 0x3E | iMask), //-y internal
-                        new MaskedCuboid(new Cuboid6(x1, y1, d1, x2, d1, d2), 0x3D | iMask), //+y internal
+                return ImmutableSet.of(
+                        MaskedCuboid.of(new Cuboid6(x1, d2, d1, x2, y2, d2), 0x3E | iMask), //-y internal
+                        MaskedCuboid.of(new Cuboid6(x1, y1, d1, x2, d1, d2), 0x3D | iMask), //+y internal
 
-                        new MaskedCuboid(new Cuboid6(x1, d1, d2, x2, d2, z2), sideMask & 0x38 | 3 | iMask), //-z internal -x+x+z external
-                        new MaskedCuboid(new Cuboid6(x1, d1, z1, x2, d2, d1), sideMask & 0x34 | 3 | iMask), //+z internal -x+x-z external
+                        MaskedCuboid.of(new Cuboid6(x1, d1, d2, x2, d2, z2), sideMask & 0x38 | 3 | iMask), //-z internal -x+x+z external
+                        MaskedCuboid.of(new Cuboid6(x1, d1, z1, x2, d2, d1), sideMask & 0x34 | 3 | iMask), //+z internal -x+x-z external
 
-                        new MaskedCuboid(new Cuboid6(x1, d2, z1, x2, y2, z2), sideMask & 0x3E | 1 | iMask), //-x+x+y-z+z external
-                        new MaskedCuboid(new Cuboid6(x1, y1, z1, x2, d1, z2), sideMask & 0x3D | 2 | iMask) //-x+x-y-z+z external
+                        MaskedCuboid.of(new Cuboid6(x1, d2, z1, x2, y2, z2), sideMask & 0x3E | 1 | iMask), //-x+x+y-z+z external
+                        MaskedCuboid.of(new Cuboid6(x1, y1, z1, x2, d1, z2), sideMask & 0x3D | 2 | iMask) //-x+x-y-z+z external
                 );
             }
             default -> throw new IllegalStateException("Unexpected value: " + getSlot());

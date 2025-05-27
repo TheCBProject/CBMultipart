@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "cb_multipart:block/dummy"
+      "model": "cb_multipart:block/multipart"
     }
   }
 }

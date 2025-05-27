@@ -27,6 +27,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -34,6 +35,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
@@ -533,5 +535,19 @@ public interface MultiPart {
      */
     default Cuboid6 getRenderBounds() {
         return Cuboid6.full;
+    }
+
+    /**
+     * Companion to {@link BlockEntity#getModelData()}, except for this part.
+     * <p>
+     * Called to obtain any model data for this part.
+     * <p>
+     * Call {@link #tile()}.{@link TileMultipart#markRender()} to ask for your
+     * model data to be re-queried.
+     *
+     * @return The model data.
+     */
+    default ModelData getModelData() {
+        return ModelData.EMPTY;
     }
 }

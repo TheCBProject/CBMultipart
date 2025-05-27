@@ -7,6 +7,7 @@ import codechicken.microblock.util.MaskedCuboid;
 import codechicken.microblock.util.MicroOcclusionHelper;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.PartialOcclusionPart;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -114,9 +115,9 @@ public abstract class StandardMicroblockPart extends MicroblockPart implements I
 
     @Override
     public Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory) {
-        if (isInventory) return List.of(new MaskedCuboid(getBounds(), 0));
+        if (isInventory) return ImmutableSet.of(MaskedCuboid.of(getBounds(), 0));
 
-        return List.of(new MaskedCuboid(renderBounds, renderMask));
+        return ImmutableSet.of(MaskedCuboid.of(renderBounds, renderMask));
     }
 
     @Override

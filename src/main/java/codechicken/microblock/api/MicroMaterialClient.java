@@ -9,10 +9,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemDisplayContext;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * Created by covers1624 on 23/10/22.
@@ -26,6 +29,9 @@ public abstract class MicroMaterialClient {
 
     public abstract RenderType getItemRenderLayer();
 
+    public abstract List<BakedQuad> getQuads(MicroblockPart part, @Nullable Direction side, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids);
+
+    @Deprecated
     public abstract void renderCuboids(CCRenderState ccrs, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids);
 
     public void renderDynamic(MicroblockPart part, @Nullable ItemDisplayContext transformType, PoseStack pStack, MultiBufferSource buffers, int packedLight, int packedOverlay, float partialTicks) { }

@@ -29,6 +29,7 @@ import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 /**
  * Created by covers1624 on 31/8/20.
  */
+@Deprecated (forRemoval = true)
 public class MultipartBlockRenderer implements ICCBlockRenderer {
 
     @Override

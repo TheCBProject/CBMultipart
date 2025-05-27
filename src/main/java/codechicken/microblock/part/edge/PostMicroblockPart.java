@@ -7,20 +7,19 @@ import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Transformation;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.part.MicroblockPartFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.part.MicroblockPart;
+import codechicken.microblock.part.MicroblockPartFactory;
 import codechicken.microblock.part.face.FaceMicroblockPart;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.microblock.util.MicroOcclusionHelper;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.NormalOcclusionPart;
 import codechicken.multipart.api.part.PartialOcclusionPart;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 /**
  * Created by covers1624 on 21/10/22.
@@ -74,14 +73,14 @@ public class PostMicroblockPart extends MicroblockPart implements PartialOcclusi
 
     @Override
     public Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory) {
-        if (isInventory) return List.of(new MaskedCuboid(getBounds(), 0));
+        if (isInventory) return ImmutableSet.of(MaskedCuboid.of(getBounds(), 0));
 
-        MaskedCuboid a = new MaskedCuboid(renderBounds1, 0);
-        if (renderBounds2 == null) return List.of(a);
+        MaskedCuboid a = MaskedCuboid.of(renderBounds1, 0);
+        if (renderBounds2 == null) return ImmutableSet.of(a);
 
-        return List.of(
+        return ImmutableSet.of(
                 a,
-                new MaskedCuboid(renderBounds2, 0)
+                MaskedCuboid.of(renderBounds2, 0)
         );
     }
 

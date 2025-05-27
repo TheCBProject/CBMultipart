@@ -6,15 +6,14 @@ import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Transformation;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
-import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.init.CBMicroblockModContent;
+import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.part.StandardMicroblockPart;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.multipart.api.part.FacePart;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-
-import java.util.List;
 
 /**
  * Created by covers1624 on 20/10/22.
@@ -52,13 +51,13 @@ public class FaceMicroblockPart extends StandardMicroblockPart implements FacePa
 
     @Override
     public Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory) {
-        if (isInventory) return List.of(new MaskedCuboid(getBounds(), 0));
+        if (isInventory) return ImmutableSet.of(MaskedCuboid.of(getBounds(), 0));
 
-        if (isTransparent()) return List.of(new MaskedCuboid(renderBounds, renderMask));
+        if (isTransparent()) return ImmutableSet.of(MaskedCuboid.of(renderBounds, renderMask));
 
-        return List.of(
-                new MaskedCuboid(renderBounds, renderMask | 1 << getSlot()), // All faces except our slot use these bounds.
-                new MaskedCuboid(getBounds(), ~(1 << getSlot()))             // Our slot renders at our full bounds.
+        return ImmutableSet.of(
+                MaskedCuboid.of(renderBounds, renderMask | 1 << getSlot()), // All faces except our slot use these bounds.
+                MaskedCuboid.of(getBounds(), ~(1 << getSlot()))             // Our slot renders at our full bounds.
         );
     }
 

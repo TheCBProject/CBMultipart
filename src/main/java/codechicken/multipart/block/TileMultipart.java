@@ -465,6 +465,11 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
 
     public boolean isClientTile() { return false; }
 
+    /**
+     * @return The current tile. For traits.
+     */
+    public TileMultipart tile() { return this; }
+
     public void addLandingEffects(Vector3 entity, int numberOfParticles) {
         PartRayTraceResult hit = hitFeet(entity);
         if (hit == null) return;

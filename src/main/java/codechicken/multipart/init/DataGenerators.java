@@ -1,5 +1,7 @@
 package codechicken.multipart.init;
 
+import codechicken.lib.datagen.ClassModelLoaderBuilder;
+import codechicken.multipart.client.MultipartTileBakedModel;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -40,7 +42,10 @@ public class DataGenerators {
         @Override
         protected void registerStatesAndModels() {
             ModelFile model = models()
-                    .withExistingParent("dummy", "block");
+                    .withExistingParent("multipart", "block")
+                    .customLoader(ClassModelLoaderBuilder::new)
+                    .clazz(MultipartTileBakedModel.class)
+                    .end();
             simpleBlock(CBMultipartModContent.MULTIPART_BLOCK.get(), model);
         }
     }
