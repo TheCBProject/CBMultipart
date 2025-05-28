@@ -48,11 +48,6 @@ neoForge {
     }
 }
 
-configurations {
-    shadow
-    implementation.extendsFrom shadow
-}
-
 repositories {
     mavenLocal()
     maven { url = "https://maven.covers1624.net/" }
