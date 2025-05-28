@@ -30,7 +30,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
@@ -177,24 +176,14 @@ public class BlockMicroMaterial extends MicroMaterial {
     public static ResourceLocation makeMaterialKey(BlockState state) {
         Block block = state.getBlock();
         ResourceLocation blockKey = BuiltInRegistries.BLOCK.getKey(block);
-        StringBuilder path = new StringBuilder(blockKey.getPath());
+        String path = blockKey.getPath();
         if (!state.getProperties().isEmpty()) {
-            path.append("//");
-
-            record ValuePair(Property<?> key, Comparable<?> value) { }
             // Stable sort all keys based off their name, otherwise they may differ on the server/client.
-            var entries = FastStream.of(state.getValues().entrySet())
+            path += "//" + FastStream.of(state.getValues().entrySet())
                     .sorted(Comparator.comparing(e -> e.getKey().getName()))
-                    .map(e -> new ValuePair(e.getKey(), e.getValue()))
-                    .toList();
-            for (var entry : entries) {
-                Property<?> property = entry.key;
-                if (path.charAt(path.length() - 2) != '/') {
-                    path.append('/');
-                }
-                path.append(property.getName()).append('.').append(property.getName(unsafeCast(entry.value)));
-            }
+                    .map(e -> e.getKey().getName() + "." + e.getKey().getName(unsafeCast(e.getValue())))
+                    .join("/");
         }
-        return ResourceLocation.fromNamespaceAndPath(blockKey.getNamespace(), path.toString());
+        return ResourceLocation.fromNamespaceAndPath(blockKey.getNamespace(), path);
     }
 }
