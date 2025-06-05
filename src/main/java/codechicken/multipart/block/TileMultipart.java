@@ -5,6 +5,7 @@ import codechicken.lib.data.MCDataByteBuf;
 import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.math.MathHelper;
+import codechicken.lib.raytracer.VoxelShapeCache;
 import codechicken.lib.vec.Vector3;
 import codechicken.lib.world.IChunkLoadTile;
 import codechicken.multipart.api.part.BaseMultipart;
@@ -13,8 +14,11 @@ import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.init.MultiPartRegistries;
 import codechicken.multipart.network.MultiPartSPH;
 import codechicken.multipart.trait.TCapabilityTile;
-import codechicken.multipart.util.*;
+import codechicken.multipart.util.MultipartGenerator;
+import codechicken.multipart.util.MultipartHelper;
+import codechicken.multipart.util.PartRayTraceResult;
 import com.google.common.base.Preconditions;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.covers1624.quack.collection.ColUtils;
 import net.covers1624.quack.collection.FastStream;
 import net.minecraft.core.BlockPos;
@@ -40,6 +44,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.capabilities.BlockCapability;
@@ -49,8 +54,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -64,30 +71,6 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
 
     private List<MultiPart> partList = new CopyOnWriteArrayList<>();
     private final CapabilityCache capabilityCache = new CapabilityCache();
-
-    private final MergedVoxelShapeHolder<MultiPart> outlineShapeHolder = new MergedVoxelShapeHolder<>(
-            e -> new MultipartVoxelShape(e, this)
-    );
-
-    private final MergedVoxelShapeHolder<MultiPart> collisionShapeHolder = new MergedVoxelShapeHolder<>(
-            e -> new MultipartVoxelShape(e, this)
-    );
-
-    private final MergedVoxelShapeHolder<MultiPart> occlusionShapeHolder = new MergedVoxelShapeHolder<>(
-            e -> new MultipartVoxelShape(e, this)
-    );
-
-    private final MergedVoxelShapeHolder<MultiPart> interactionShapeHolder = new MergedVoxelShapeHolder<>(
-            e -> new MultipartVoxelShape(e, this)
-    );
-
-    private final MergedVoxelShapeHolder<MultiPart> supportShapeHolder = new MergedVoxelShapeHolder<>(
-            e -> new MultipartVoxelShape(e, this)
-    );
-
-    private final MergedVoxelShapeHolder<MultiPart> visualShapeHolder = new MergedVoxelShapeHolder<>(
-            e -> new MultipartVoxelShape(e, this)
-    );
 
     public TileMultipart(BlockPos pos, BlockState state) {
         super(CBMultipartModContent.MULTIPART_TILE_TYPE.get(), pos, state);
@@ -368,17 +351,58 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     //endregion
 
     //region *** Internal callbacks ***
-    public VoxelShape getShape(CollisionContext context) { return outlineShapeHolder.update(partList, part -> part.getShape(context)); }
+    public VoxelShape getShape(CollisionContext context) { return mergedShape(part -> part.getShape(context)); }
 
-    public VoxelShape getCollisionShape(CollisionContext context) { return collisionShapeHolder.update(partList, part -> part.getCollisionShape(context)); }
+    public VoxelShape getCollisionShape(CollisionContext context) { return mergedShape(part -> part.getCollisionShape(context)); }
 
-    public VoxelShape getRenderOcclusionShape() { return occlusionShapeHolder.update(partList, MultiPart::getRenderOcclusionShape); }
+    public VoxelShape getRenderOcclusionShape() { return mergedShape(MultiPart::getRenderOcclusionShape); }
 
-    public VoxelShape getInteractionShape() { return interactionShapeHolder.update(partList, MultiPart::getInteractionShape); }
+    public VoxelShape getInteractionShape() { return mergedShape(MultiPart::getInteractionShape); }
 
-    public VoxelShape getBlockSupportShape() { return supportShapeHolder.update(partList, MultiPart::getBlockSupportShape); }
+    public VoxelShape getBlockSupportShape() { return mergedShape(MultiPart::getBlockSupportShape); }
 
-    public VoxelShape getVisualShape(CollisionContext context) { return visualShapeHolder.update(partList, part -> part.getVisualShape(context)); }
+    public VoxelShape getVisualShape(CollisionContext context) { return mergedShape(part -> part.getVisualShape(context)); }
+
+    private VoxelShape mergedShape(Function<MultiPart, VoxelShape> func) {
+        var shapeToPart = FastStream.of(getPartList())
+                .toImmutableMap(func, Function.identity());
+
+        var merged = VoxelShapeCache.merge(shapeToPart.keySet());
+        return new VoxelShape(merged.shape) {
+            @Override
+            public DoubleList getCoords(Direction.Axis axis) {
+                return merged.getCoords(axis);
+            }
+
+            @Override
+            public @Nullable BlockHitResult clip(Vec3 start, Vec3 end, BlockPos pos) {
+                return FastStream.of(shapeToPart.entrySet())
+                        .map(e -> clipPart(e.getKey(), e.getValue(), start, end, pos))
+                        .filter(Objects::nonNull)
+                        .minByDoubleOrDefault(e -> e.distance);
+            }
+
+            private static @Nullable PartRayTraceResult clipPart(VoxelShape shape, MultiPart part, Vec3 start, Vec3 end, BlockPos pos) {
+                BlockHitResult hit = shape.clip(start, end, pos);
+                if (hit == null) return null;
+
+                VoxelShape interactionShape = part.getInteractionShape();
+                if (!interactionShape.equals(shape)) {
+                    // Always prioritize a hit on the interaction shape of a part.
+                    // In BlockGetter.clip, it uses the chosen ClipContext.Block mode, then
+                    // will follow up with clipWithInteractionOverride, which doesn't actually fully override
+                    // it just sets the face. So we always follow up every clip, regardless of where it's from, with
+                    // a clip on the interaction shape, so we can return the BlockHitResult from the interaction shape.
+                    BlockHitResult hit2 = interactionShape.clip(start, end, pos);
+                    if (hit2 != null) {
+                        hit = hit2;
+                    }
+                }
+
+                return new PartRayTraceResult(shape, part, hit, start);
+            }
+        };
+    }
 
     public void harvestPart(PartRayTraceResult hit, Player player) {
         hit.part.harvest(player, hit);
@@ -600,11 +624,9 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         }
     }
 
+    // This isn't required anymore.
+    @Deprecated (forRemoval = true)
     public void markShapeChange() {
-        outlineShapeHolder.clear();
-        collisionShapeHolder.clear();
-        occlusionShapeHolder.clear();
-        interactionShapeHolder.clear();
     }
 
     /**

@@ -184,7 +184,8 @@ public interface MultiPart {
     /**
      * Maps to {@link Block#getShape(BlockState, BlockGetter, BlockPos, CollisionContext)}.
      * <p>
-     * If this shape changes after initial placement, call {@link TileMultipart#markShapeChange()}.
+     * The returned shape here will be used in keys of maps and such. Please ensure that it is
+     * cached within the part, to avoid memory churn.
      */
     default VoxelShape getShape(CollisionContext context) {
         return Shapes.empty();
@@ -193,7 +194,8 @@ public interface MultiPart {
     /**
      * Maps to {@link Block#getCollisionShape(BlockState, BlockGetter, BlockPos, CollisionContext)}.
      * <p>
-     * If this shape changes after initial placement, call {@link TileMultipart#markShapeChange()}.
+     * The returned shape here will be used in keys of maps and such. Please ensure that it is
+     * cached within the part, to avoid memory churn.
      */
     default VoxelShape getCollisionShape(CollisionContext context) {
         return getShape(context);
@@ -202,7 +204,8 @@ public interface MultiPart {
     /**
      * Maps to {@link Block#getOcclusionShape(BlockState, BlockGetter, BlockPos)}.
      * <p>
-     * If this shape changes after initial placement, call {@link TileMultipart#markShapeChange()}.
+     * The returned shape here will be used in keys of maps and such. Please ensure that it is
+     * cached within the part, to avoid memory churn.
      */
     default VoxelShape getRenderOcclusionShape() {
         return getShape(CollisionContext.empty());
@@ -211,7 +214,8 @@ public interface MultiPart {
     /**
      * Maps to {@link Block#getInteractionShape(BlockState, BlockGetter, BlockPos)}.
      * <p>
-     * If this shape changes after initial placement, call {@link TileMultipart#markShapeChange()}.
+     * The returned shape here will be used in keys of maps and such. Please ensure that it is
+     * cached within the part, to avoid memory churn.
      */
     default VoxelShape getInteractionShape() {
         return getShape(CollisionContext.empty());
@@ -220,7 +224,8 @@ public interface MultiPart {
     /**
      * Maps to {@link Block#getBlockSupportShape(BlockState, BlockGetter, BlockPos)}.
      * <p>
-     * If this shape changes after initial placement, call {@link TileMultipart#markShapeChange()}.
+     * The returned shape here will be used in keys of maps and such. Please ensure that it is
+     * cached within the part, to avoid memory churn.
      */
     default VoxelShape getBlockSupportShape() {
         return getShape(CollisionContext.empty());
@@ -229,7 +234,8 @@ public interface MultiPart {
     /**
      * Maps to {@link Block#getVisualShape(BlockState, BlockGetter, BlockPos, CollisionContext)}.
      * <p>
-     * If this shape changes after initial placement, call {@link TileMultipart#markShapeChange()}.
+     * The returned shape here will be used in keys of maps and such. Please ensure that it is
+     * cached within the part, to avoid memory churn.
      */
     default VoxelShape getVisualShape(CollisionContext context) {
         return getShape(context);

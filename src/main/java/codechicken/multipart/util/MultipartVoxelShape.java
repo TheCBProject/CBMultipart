@@ -13,7 +13,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * Created by covers1624 on 3/9/20.
+ *
+ * @deprecated Now unused, Functionality inlined into TileMultipart
  */
+@Deprecated (forRemoval = true)
 public class MultipartVoxelShape extends VoxelShape {
 
     private final VoxelShape shape;
@@ -45,7 +48,7 @@ public class MultipartVoxelShape extends VoxelShape {
             if (hit instanceof SubHitBlockHitResult sHit) {
                 result = new PartRayTraceResult(part, sHit);
             } else {
-                result = new PartRayTraceResult(part, hit, start);
+                result = new PartRayTraceResult(shape, part, hit, start);
             }
             if (closest == null || result.compareTo(closest) < 0) {
                 closest = result;

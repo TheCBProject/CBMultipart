@@ -35,14 +35,6 @@ public class TPartialOcclusionTile extends TileMultipart {
     }
 
     @Override
-    public void markShapeChange() {
-        super.markShapeChange();
-        // Invalidate cached results on part add, remove, or shape change
-        lastTestParts = null;
-        lastTestShape = null;
-    }
-
-    @Override
     public boolean occlusionTest(Iterable<MultiPart> parts, MultiPart npart) {
         if (npart instanceof PartialOcclusionPart newPart) {
             VoxelShape newShape = newPart.getPartialOcclusionShape();

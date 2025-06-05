@@ -45,7 +45,12 @@ public class ClientEventHandler {
         if (renderer == null || !renderer.drawHighlight(unsafeCast(part), hit, camera, mStack, buffers, partialTicks)) {
             Matrix4 mat = new Matrix4(mStack);
             mat.translate(hit.getBlockPos());
-            RenderUtils.bufferShapeHitBox(mat, buffers, camera, part.getShape(CollisionContext.empty()));
+            var shape = hit.hitShape;
+            if (shape == null) {
+                // TODO 1.21.4+ remove this fallback when hitShape is not nullable.
+                shape = part.getShape(CollisionContext.empty());
+            }
+            RenderUtils.bufferShapeHitBox(mat, buffers, camera, shape);
         }
         event.setCanceled(true);
     }

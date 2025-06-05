@@ -1,6 +1,5 @@
 package codechicken.multipart.util;
 
-import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.packet.PacketSender;
 import codechicken.mixin.api.MixinFactory;
 import codechicken.multipart.api.part.MultiPart;
@@ -117,8 +116,10 @@ public class MultipartHelper {
             //If the new part has traits the tile doesnt already have.
             if (!tileTraits.containsAll(traits)) {
                 //concat traits and generate new tile.
-                ImmutableSet<MixinFactory.TraitKey> newTraits = ImmutableSet.<MixinFactory.TraitKey>builder()//
-                        .addAll(tileTraits).addAll(traits).build();
+                ImmutableSet<MixinFactory.TraitKey> newTraits = ImmutableSet.<MixinFactory.TraitKey>builder()
+                        .addAll(tileTraits)
+                        .addAll(traits)
+                        .build();
                 newTile = MultipartGenerator.INSTANCE.construct(newTraits).newInstance(pos, CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState());
                 newTile.setValid(false);
                 silentAddTile(world, pos, newTile);

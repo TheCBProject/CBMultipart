@@ -51,7 +51,6 @@ public interface PartBakedModelRenderer<T extends ModelRenderPart> extends PartR
     @Override
     @SuppressWarnings ("ConstantConditions")
     default void renderStatic(T part, @Nullable RenderType layer, CCRenderState ccrs) {
-
         BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
         BlockState state = part.getCurrentState();
         RandomSource randy = RandomSource.create();
