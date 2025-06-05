@@ -391,8 +391,8 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
                 .collect(Collectors.toList());
     }
 
-    public ItemStack getCloneStack(PartRayTraceResult hit) {
-        return hit.part.getCloneStack(hit);
+    public ItemStack getCloneStack(PartRayTraceResult hit, Player player) {
+        return hit.part.getCloneStack(hit, player);
     }
 
     public float getExplosionResistance(Explosion explosion) {

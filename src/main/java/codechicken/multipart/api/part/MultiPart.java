@@ -264,6 +264,14 @@ public interface MultiPart {
      * @param hit The {@link PartRayTraceResult} hit result.
      * @return The {@link ItemStack} pick result.
      */
+    default ItemStack getCloneStack(PartRayTraceResult hit, Player player) {
+        return getCloneStack(hit);
+    }
+
+    /**
+     * @deprecated Use player sensitive version.
+     */
+    @Deprecated
     default ItemStack getCloneStack(PartRayTraceResult hit) {
         return ItemStack.EMPTY;
     }
