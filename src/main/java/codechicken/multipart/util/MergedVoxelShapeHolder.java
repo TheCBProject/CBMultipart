@@ -11,7 +11,10 @@ import java.util.function.Function;
 
 /**
  * Created by covers1624 on 3/10/20.
+ *
+ * @deprecated Now unused, Functionality inlined into TileMultipart
  */
+@Deprecated (forRemoval = true)
 public class MergedVoxelShapeHolder<T> {
 
     private final Set<VoxelShape> shapeParts = new HashSet<>();
