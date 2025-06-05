@@ -215,7 +215,7 @@ public class BlockMultipart extends Block implements EntityBlock {
         TileMultipart tile = getTile(level, pos);
         PartRayTraceResult hit = retracePart(level, pos, player);
         if (tile != null && hit != null) {
-            return tile.getCloneStack(hit);
+            return tile.getCloneStack(hit, player);
         }
         return ItemStack.EMPTY;
 
