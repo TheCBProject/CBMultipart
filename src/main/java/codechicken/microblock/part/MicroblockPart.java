@@ -19,6 +19,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
@@ -106,7 +107,7 @@ public abstract class MicroblockPart extends BaseMultipart {
     public abstract int getItemFactoryId();
 
     @Override
-    public Iterable<ItemStack> getDrops() {
+    public Iterable<ItemStack> getDrops(LootParams.Builder builder) {
         int size = getSize();
         List<ItemStack> items = new LinkedList<>();
         for (int s : new int[] { 4, 2, 1 }) {
@@ -120,14 +121,14 @@ public abstract class MicroblockPart extends BaseMultipart {
     }
 
     @Override
-    public ItemStack getCloneStack(PartRayTraceResult hit) {
+    public ItemStack getCloneStack(PartRayTraceResult hit, Player player) {
         int size = getSize();
         for (int s : new int[] { 4, 2, 1 }) {
             if (size % s == 0 && size / s >= 1) {
                 return ItemMicroBlock.create(getItemFactoryId(), size, material);
             }
         }
-        return super.getCloneStack(hit);
+        return ItemStack.EMPTY;
     }
 
     public abstract Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory);

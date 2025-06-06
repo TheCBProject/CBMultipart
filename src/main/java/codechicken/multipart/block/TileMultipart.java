@@ -43,6 +43,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -58,8 +60,6 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static java.util.Objects.requireNonNull;
 import static net.minecraft.world.level.block.Block.*;
@@ -404,15 +404,14 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         };
     }
 
-    public void harvestPart(PartRayTraceResult hit, Player player) {
-        hit.part.harvest(player, hit);
+    public void harvestPart(PartRayTraceResult hit, Player player, ItemStack harvestTool) {
+        hit.part.harvest(player, hit, harvestTool);
     }
 
-    public List<ItemStack> getDrops() {
-        return partList.stream()
-                .map(MultiPart::getDrops)
-                .flatMap(e -> StreamSupport.stream(e.spliterator(), false))
-                .collect(Collectors.toList());
+    public List<ItemStack> getDrops(LootParams.Builder builder) {
+        return FastStream.of(partList)
+                .flatMap(e -> e.getDrops(MultiPart.lootBuilderForPart(builder, e)))
+                .toList();
     }
 
     public ItemStack getCloneStack(PartRayTraceResult hit, Player player) {
@@ -743,6 +742,14 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         tile.loadWithComponents(tag, registries);
         tile.loadParts(parts);
         return tile;
+    }
+
+    public static LootParams.Builder lootBuilderForTile(TileMultipart tile) {
+        return new LootParams.Builder((ServerLevel) tile.getLevel())
+                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(tile.getBlockPos()))
+                .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
+                .withOptionalParameter(LootContextParams.BLOCK_STATE, tile.getBlockState())
+                .withOptionalParameter(LootContextParams.BLOCK_ENTITY, tile);
     }
 
     public static void dropItem(ItemStack stack, Level level, Vector3 pos) {
