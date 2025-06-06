@@ -13,6 +13,7 @@ import codechicken.multipart.trait.*;
 import codechicken.multipart.util.MultipartGenerator;
 import codechicken.multipart.util.MultipartLoadHandler;
 import codechicken.multipart.util.TickScheduler;
+import codechicken.multipart.wrapped.level.WrapperLevelFactory;
 import net.minecraft.world.Container;
 import net.minecraft.world.WorldlyContainer;
 import net.neoforged.bus.api.IEventBus;
@@ -51,6 +52,8 @@ public class CBMultipart {
         TickScheduler.init();
 
         modBus.addListener(this::onRegisterMultipartTraits);
+
+        WrapperLevelFactory.init();
     }
 
     public static ModContainer container() {

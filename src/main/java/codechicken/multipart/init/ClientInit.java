@@ -1,9 +1,11 @@
 package codechicken.multipart.init;
 
+import codechicken.multipart.api.MultipartClientRegistry;
 import codechicken.multipart.client.ClientEventHandler;
 import codechicken.multipart.client.MultipartTileRenderer;
 import codechicken.multipart.client.Shaders;
 import codechicken.multipart.handler.ControlKeyHandler;
+import codechicken.multipart.wrapped.client.WrapperPartRenderer;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
@@ -31,6 +33,8 @@ public class ClientInit {
 
     private static void onClientInit(FMLClientSetupEvent event) {
         ItemBlockRenderTypes.setRenderLayer(CBMultipartModContent.MULTIPART_BLOCK.get(), e -> true);
+
+        MultipartClientRegistry.register(CBMultipartModContent.WRAPPED_PART.get(), new WrapperPartRenderer());
     }
 
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
