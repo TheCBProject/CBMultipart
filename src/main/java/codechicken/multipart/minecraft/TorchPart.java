@@ -82,7 +82,6 @@ public class TorchPart extends McSidedStatePart implements AnimateTickPart {
     @Nullable
     @Override
     public MultiPart setStateOnPlacement(BlockPlaceContext context) {
-
         Level world = context.getLevel();
         BlockPos pos = context.getClickedPos();
         Direction face = context.getClickedFace();
