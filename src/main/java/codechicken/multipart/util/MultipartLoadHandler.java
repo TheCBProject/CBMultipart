@@ -10,6 +10,7 @@ import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -43,7 +44,8 @@ public class MultipartLoadHandler {
             for (BlockEntity be : List.copyOf(chunk.getBlockEntities().values())) {
                 if (be instanceof TileNBTContainer tile && tile.updateTag != null) {
                     byte[] data = tile.updateTag.getByteArray("data");
-                    TileMultipart.handleDescPacket(tile.getLevel(), tile.getBlockPos(), new MCDataByteBuf(Unpooled.wrappedBuffer(data)));
+                    Level level = tile.getLevel();
+                    TileMultipart.handleDescPacket(level, tile.getBlockPos(), new MCDataByteBuf(Unpooled.wrappedBuffer(data), level.registryAccess()));
                 }
             }
         }
