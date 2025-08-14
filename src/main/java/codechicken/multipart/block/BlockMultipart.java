@@ -53,6 +53,9 @@ import java.util.function.Consumer;
  */
 public class BlockMultipart extends Block implements EntityBlock {
 
+    //TODO, Temporary workaround whilst onDestroyedByPlayer doesn't have hand context.
+    private static final ThreadLocal<ItemStack> MAIN_HAND_ON_DESTROY = ThreadLocal.withInitial(() -> ItemStack.EMPTY);
+
     public BlockMultipart() {
         super(Block.Properties.of()
                 .mapColor(MapColor.STONE)
@@ -181,6 +184,12 @@ public class BlockMultipart extends Block implements EntityBlock {
     }
 
     @Override
+    public boolean canHarvestBlock(BlockState state, BlockGetter level, BlockPos pos, Player player) {
+        MAIN_HAND_ON_DESTROY.set(player.getMainHandItem().copy());
+        return super.canHarvestBlock(state, level, pos, player);
+    }
+
+    @Override
     public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
         TileMultipart tile = getTile(level, pos);
         PartRayTraceResult hit = retracePart(level, pos, player);
@@ -196,15 +205,19 @@ public class BlockMultipart extends Block implements EntityBlock {
             return true;
         }
 
-        tile.harvestPart(hit, player);
+        // TODO PR to NeoForge to add this a context to onDestroyedByPlayer.
+        ItemStack hand = MAIN_HAND_ON_DESTROY.get();
+        MAIN_HAND_ON_DESTROY.set(ItemStack.EMPTY);
+
+        tile.harvestPart(hit, player, hand);
         return level.getBlockEntity(pos) == null;
     }
 
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
-        TileMultipart tile = getTile(builder.getParameter(LootContextParams.BLOCK_ENTITY));//TODO
+        TileMultipart tile = getTile(builder.getParameter(LootContextParams.BLOCK_ENTITY));
         if (tile != null) {
-            return tile.getDrops();
+            return tile.getDrops(builder);
         }
 
         return Collections.emptyList();
@@ -356,7 +369,7 @@ public class BlockMultipart extends Block implements EntityBlock {
     public static void dropAndDestroy(Level world, BlockPos pos) {
         TileMultipart tile = getTile(world, pos);
         if (tile != null && !world.isClientSide) {
-            tile.dropItems(tile.getDrops());
+            tile.dropItems(tile.getDrops(TileMultipart.lootBuilderForTile(tile)));
         }
 
         world.removeBlock(pos, false);

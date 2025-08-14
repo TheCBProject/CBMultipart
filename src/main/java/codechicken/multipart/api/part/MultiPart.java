@@ -5,6 +5,7 @@ import codechicken.lib.data.MCDataInput;
 import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
+import codechicken.multipart.api.MultipartLootContextParams;
 import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.PartConverter;
 import codechicken.multipart.block.TileMultipart;
@@ -15,6 +16,7 @@ import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
@@ -30,6 +32,9 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -245,12 +250,13 @@ public interface MultiPart {
      * Harvest this part, removing it from the container {@link TileMultipart}
      * and dropping any items if necessary.
      *
-     * @param player The {@link Player} harvesting the part.
-     * @param hit    The {@link PartRayTraceResult} hit result.
+     * @param player      The {@link Player} harvesting the part.
+     * @param hit         The {@link PartRayTraceResult} hit result.
+     * @param harvestTool The tool the player used to remove this part.
      */
-    default void harvest(Player player, PartRayTraceResult hit) {
+    default void harvest(Player player, PartRayTraceResult hit, ItemStack harvestTool) {
         if (!player.getAbilities().instabuild) {
-            tile().dropItems(getDrops());
+            tile().dropItems(getDrops(lootBuilderForPart(this, player, harvestTool)));
         }
         tile().remPart(this);
     }
@@ -260,14 +266,15 @@ public interface MultiPart {
      *
      * @return The {@link ItemStack}s.
      */
-    default Iterable<ItemStack> getDrops() {
+    default Iterable<ItemStack> getDrops(LootParams.Builder builder) {
         return List.of();
     }
 
     /**
      * Return the {@link ItemStack} for pick-block(usually middle click) function.
      *
-     * @param hit The {@link PartRayTraceResult} hit result.
+     * @param hit    The {@link PartRayTraceResult} hit result.
+     * @param player The player getting the clone stack.
      * @return The {@link ItemStack} pick result.
      */
     default ItemStack getCloneStack(PartRayTraceResult hit, Player player) {
@@ -563,5 +570,51 @@ public interface MultiPart {
      */
     default ModelData getModelData() {
         return ModelData.EMPTY;
+    }
+
+    /**
+     * Build a new {@link LootParams.Builder} for harvesting this part.
+     *
+     * @param part      The part being harvested.
+     * @param destroyer The destroyer.
+     * @param tool      The tool the destroyer is using.
+     * @return The builder.
+     */
+    static LootParams.Builder lootBuilderForPart(MultiPart part, @Nullable Entity destroyer, ItemStack tool) {
+        return new LootParams.Builder(((ServerLevel) part.level()))
+                .withParameter(MultipartLootContextParams.MULTI_PART, part)
+                .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(part.pos()))
+                .withParameter(LootContextParams.TOOL, tool)
+                .withOptionalParameter(LootContextParams.THIS_ENTITY, destroyer);
+    }
+
+    /**
+     * Clone and adapt the given {@link LootParams.Builder} from a Block context to a MultiPart context.
+     *
+     * @param forBlock The builder we are adapting.
+     * @param part     The part we are doing this for.
+     * @return The new builder.
+     */
+    static LootParams.Builder lootBuilderForPart(LootParams.Builder forBlock, MultiPart part) {
+        return lootBuilderForPart(forBlock.getLevel(), forBlock, part);
+    }
+
+    /**
+     * Clone and adapt the given {@link LootParams.Builder} from a Block context to a MultiPart context.
+     *
+     * @param level    The level.
+     * @param forBlock The builder we are adapting.
+     * @param part     The part we are doing this for.
+     * @return The new builder.
+     */
+    static LootParams.Builder lootBuilderForPart(ServerLevel level, LootParams.Builder forBlock, MultiPart part) {
+        LootParams.Builder builder = new LootParams.Builder(level);
+        builder.params.putAll(forBlock.params);
+        builder.dynamicDrops.putAll(forBlock.dynamicDrops);
+        // Parts don't get these as context.
+        builder.params.remove(LootContextParams.BLOCK_STATE);
+        builder.params.remove(LootContextParams.BLOCK_ENTITY);
+        builder.withParameter(MultipartLootContextParams.MULTI_PART, part);
+        return builder;
     }
 }
