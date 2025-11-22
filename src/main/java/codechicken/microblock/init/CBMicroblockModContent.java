@@ -5,6 +5,7 @@ import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.item.MicroMaterialComponent;
+import codechicken.microblock.item.SawComponent;
 import codechicken.microblock.item.SawItem;
 import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.part.corner.CornerMicroFactory;
@@ -70,6 +71,13 @@ public class CBMicroblockModContent {
             DataComponentType.<MicroMaterialComponent>builder()
                     .persistent(MicroMaterialComponent.CODEC)
                     .networkSynchronized(MicroMaterialComponent.STREAM_CODEC)
+                    .build()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<SawComponent>> SAW_COMPONENT = DATA_COMPONENTS.register("saw", () ->
+            DataComponentType.<SawComponent>builder()
+                    .persistent(SawComponent.CODEC)
+                    .networkSynchronized(SawComponent.STREAM_CODEC)
                     .build()
     );
 

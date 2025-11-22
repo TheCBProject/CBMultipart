@@ -15,6 +15,7 @@ public class CBMicroblockTags {
 
         public static final TagKey<Item> STONE_ROD = forge("rods/stone");
 
+        @Deprecated(forRemoval = true) // Use SawComponent
         public static final TagKey<Item> TOOL_SAW = mod("tools/saw");
 
         private static TagKey<Item> forge(String path) {

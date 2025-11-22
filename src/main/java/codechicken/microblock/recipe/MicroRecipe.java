@@ -6,6 +6,7 @@ import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.init.CBMicroblockTags;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.item.MicroMaterialComponent;
+import codechicken.microblock.item.SawComponent;
 import codechicken.microblock.util.MicroMaterialRegistry;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
@@ -177,6 +178,8 @@ public class MicroRecipe extends CustomRecipe {
 
         if (size == 1 || material == null) return ItemStack.EMPTY;
 
+        if (!material.isCuttableBySaw(saw.stack())) return ItemStack.EMPTY;
+
         return create(2, factory, size / 2, material);
     }
 
@@ -194,6 +197,8 @@ public class MicroRecipe extends CustomRecipe {
 
         int split = splitMap[comp.factoryId()];
         if (split == -1) return ItemStack.EMPTY;
+
+        if (!comp.material().isCuttableBySaw(saw.stack())) return ItemStack.EMPTY;
 
         return create(2, split, comp.size(), comp.material());
     }
@@ -214,7 +219,7 @@ public class MicroRecipe extends CustomRecipe {
         for (int x = 0; x < inv.width(); x++) {
             for (int y = 0; y < inv.height(); y++) {
                 ItemStack item = inv.getItem(x, y);
-                if (item.is(CBMicroblockTags.Items.TOOL_SAW)) {
+                if (item.is(CBMicroblockTags.Items.TOOL_SAW) || SawComponent.getComponent(item) != null) {
                     return new SawResult(item, x, y);
                 }
             }

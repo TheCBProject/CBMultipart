@@ -4,7 +4,6 @@ import codechicken.microblock.CBMicroblock;
 import codechicken.microblock.util.MicroMaterialRegistry;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -109,6 +108,16 @@ public abstract class MicroMaterial {
      * @return The resistance.
      */
     public abstract float getExplosionResistance(BlockGetter level, BlockPos pos, Explosion explosion);
+
+    /**
+     * Checks if a given saw can cut this material.
+     *
+     * @param saw The saw
+     * @return True if this material can be cut by saw
+     */
+    public boolean isCuttableBySaw(ItemStack saw) {
+        return true;
+    }
 
     /**
      * Initialize any client-side properties for this MicroMaterial.
