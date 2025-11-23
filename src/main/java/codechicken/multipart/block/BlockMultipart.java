@@ -42,6 +42,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
+import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -157,16 +158,11 @@ public class BlockMultipart extends Block implements EntityBlock {
 
     @Override
     public int getLightEmission(BlockState state, BlockGetter world, BlockPos pos) {
-        // See docs on IForgeBlock#getLightEmission for why this is necessary
-        if (pos == BlockPos.ZERO) {
-            return 1;
+        // Retrieve light from AuxiliaryLightManager (see TileMultipart#updateLight)
+        AuxiliaryLightManager lightManager = world.getAuxLightManager(pos);
+        if (lightManager != null) {
+            return lightManager.getLightAt(pos);
         }
-
-        // getExistingBlockEntity allows retrieval from worker threads
-        // TODO Auxiliary Light Manager stuffs
-//        if (world.getBlockEntity(pos) instanceof TileMultipart tile) {
-//            return tile.getLightEmission();
-//        }
         return 0;
     }
 
