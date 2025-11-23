@@ -18,9 +18,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.block.SoundType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -154,6 +157,11 @@ public abstract class MicroblockPart extends BaseMultipart {
     @Override
     public float getExplosionResistance(Explosion explosion) {
         return getMaterial().getExplosionResistance(level(), pos(), explosion) * getMicroFactory().getResistanceFactor();
+    }
+
+    @Override
+    public @Nullable SoundType getSound(@Nullable UseOnContext useOnContext) {
+        return material.getSound();
     }
 
     @Override

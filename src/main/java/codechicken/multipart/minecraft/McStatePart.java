@@ -142,8 +142,8 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
     }
 
     @Override
-    public SoundType getPlacementSound(UseOnContext context) {
-        return state.getSoundType(level(), pos(), context.getPlayer());
+    public SoundType getSound(@Nullable UseOnContext useOnContext) {
+        return state.getSoundType(level(), pos(), useOnContext != null ? useOnContext.getPlayer() : null);
     }
 
     @Override

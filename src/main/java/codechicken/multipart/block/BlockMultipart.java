@@ -14,6 +14,7 @@ import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -79,6 +81,12 @@ public class BlockMultipart extends Block implements EntityBlock {
             @Override
             public boolean addDestroyEffects(BlockState state, Level Level, BlockPos pos, ParticleEngine manager) {
                 // Just return true, we handle this ourselves in onDestroyedByPlayer
+                return true;
+            }
+
+            @Override
+            public boolean playBreakSound(BlockState state, Level level, BlockPos pos) {
+                // Handled in onDestroyedByPlayer
                 return true;
             }
         });
@@ -180,7 +188,16 @@ public class BlockMultipart extends Block implements EntityBlock {
     public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
         TileMultipart tile = getTile(level, pos);
         PartRayTraceResult hit = retracePart(level, pos, player);
-        level.levelEvent(player, 2001, pos, Block.getId(state));
+
+        // Get and play the part's break sound
+        SoundType soundtype = hit == null ? null : hit.part.getSound(null);
+        if (soundtype == null) {
+            // Fall back to BlockMultipart's sound
+            soundtype = state.getSoundType(level, pos, null);
+        }
+        // Play sound the same way as LevelRenderer#levelEvent, ID 2001
+        // Note: If this already runs on all relevant clients, we can use playLocalSound
+        level.playSound(player, pos, soundtype.getBreakSound(), SoundSource.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
 
         if (hit == null || tile == null) {
             dropAndDestroy(level, pos);
