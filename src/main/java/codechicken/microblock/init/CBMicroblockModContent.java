@@ -31,6 +31,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CopperBulbBlock;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
@@ -180,6 +181,7 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_ROOTS));
             registerMaterial(r, new BlockMicroMaterial(Blocks.MUDDY_MANGROVE_ROOTS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BAMBOO_BLOCK));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_SPRUCE_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_BIRCH_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_JUNGLE_LOG));
@@ -434,8 +436,14 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.QUARTZ_BRICKS));
             registerMaterial(r, new BlockMicroMaterial(Blocks.AMETHYST_BLOCK));
             registerMaterial(r, new BlockMicroMaterial(Blocks.TUFF));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.POLISHED_TUFF));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_TUFF));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.TUFF_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_TUFF_BRICKS));
             registerMaterial(r, new BlockMicroMaterial(Blocks.CALCITE));
             registerMaterial(r, new BlockMicroMaterial(Blocks.TINTED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SCULK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SCULK_CATALYST));
             registerMaterial(r, new BlockMicroMaterial(Blocks.OXIDIZED_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.WEATHERED_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.EXPOSED_COPPER));
@@ -446,6 +454,10 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.WEATHERED_CUT_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.EXPOSED_CUT_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.CUT_COPPER)); //TODO Oxidization (normal -> exposed -> weathered -> oxidized)
+            registerMaterial(r, new BlockMicroMaterial(Blocks.OXIDIZED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WEATHERED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.EXPOSED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_COPPER)); //TODO Oxidization (normal -> exposed -> weathered -> oxidized)
             registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_COPPER_BLOCK));
             registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_WEATHERED_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_EXPOSED_COPPER));
@@ -454,6 +466,18 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_WEATHERED_CUT_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_EXPOSED_CUT_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_CUT_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_OXIDIZED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_WEATHERED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_EXPOSED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true))); //TODO Do these even make sense?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.EXPOSED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WEATHERED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.OXIDIZED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_EXPOSED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_WEATHERED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_OXIDIZED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
             registerMaterial(r, new BlockMicroMaterial(Blocks.DRIPSTONE_BLOCK));
             registerMaterial(r, new BlockMicroMaterial(Blocks.ROOTED_DIRT));
             registerMaterial(r, new BlockMicroMaterial(Blocks.MUD));
