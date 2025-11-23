@@ -13,13 +13,13 @@ public class CBMicroblockTags {
 
     public static class Items {
 
-        public static final TagKey<Item> STONE_ROD = forge("rods/stone");
+        public static final TagKey<Item> STONE_ROD = common("rods/stone");
 
         @Deprecated(forRemoval = true) // Use SawComponent
         public static final TagKey<Item> TOOL_SAW = mod("tools/saw");
 
-        private static TagKey<Item> forge(String path) {
-            return ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", path));
+        private static TagKey<Item> common(String path) {
+            return ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", path));
         }
 
         private static TagKey<Item> mod(String path) {

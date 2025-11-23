@@ -60,7 +60,9 @@ public class DataGenerators {
             tag(TOOL_SAW)
                     .add(STONE_SAW.get())
                     .add(IRON_SAW.get())
-                    .add(DIAMOND_SAW.get());
+                    .add(GOLD_SAW.get())
+                    .add(DIAMOND_SAW.get())
+                    .add(NETHERITE_SAW.get());
 
             tag(STONE_ROD)
                     .add(STONE_ROD_ITEM.get());
@@ -81,7 +83,9 @@ public class DataGenerators {
 
             generated(STONE_SAW.get());
             generated(IRON_SAW.get());
+            generated(GOLD_SAW.get());
             generated(DIAMOND_SAW.get());
+            generated(NETHERITE_SAW.get());
         }
     }
 
@@ -114,10 +118,24 @@ public class DataGenerators {
                     .patternLine("SRR")
                     .patternLine("SMR");
 
+            shapedRecipe(GOLD_SAW.get())
+                    .key('S', Tags.Items.RODS_WOODEN)
+                    .key('R', STONE_ROD)
+                    .key('M', Tags.Items.INGOTS_GOLD)
+                    .patternLine("SRR")
+                    .patternLine("SMR");
+
             shapedRecipe(DIAMOND_SAW.get())
                     .key('S', Tags.Items.RODS_WOODEN)
                     .key('R', STONE_ROD)
                     .key('M', Tags.Items.GEMS_DIAMOND)
+                    .patternLine("SRR")
+                    .patternLine("SMR");
+
+            shapedRecipe(NETHERITE_SAW.get())
+                    .key('S', Tags.Items.RODS_WOODEN)
+                    .key('R', STONE_ROD)
+                    .key('M', Tags.Items.INGOTS_NETHERITE)
                     .patternLine("SRR")
                     .patternLine("SMR");
         }

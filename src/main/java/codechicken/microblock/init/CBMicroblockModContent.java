@@ -65,7 +65,9 @@ public class CBMicroblockModContent {
 
     public static final DeferredHolder<Item, SawItem> STONE_SAW = ITEMS.register("stone_saw", () -> new SawItem(Tiers.STONE, new Item.Properties().setNoRepair()));
     public static final DeferredHolder<Item, SawItem> IRON_SAW = ITEMS.register("iron_saw", () -> new SawItem(Tiers.IRON, new Item.Properties().setNoRepair()));
+    public static final DeferredHolder<Item, SawItem> GOLD_SAW = ITEMS.register("gold_saw", () -> new SawItem(Tiers.GOLD, new Item.Properties().setNoRepair()));
     public static final DeferredHolder<Item, SawItem> DIAMOND_SAW = ITEMS.register("diamond_saw", () -> new SawItem(Tiers.DIAMOND, new Item.Properties().setNoRepair()));
+    public static final DeferredHolder<Item, SawItem> NETHERITE_SAW = ITEMS.register("netherite_saw", () -> new SawItem(Tiers.NETHERITE, new Item.Properties().setNoRepair()));
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<MicroMaterialComponent>> MICRO_MATERIAL_COMPONENT = DATA_COMPONENTS.register("micro_material", () ->
             DataComponentType.<MicroMaterialComponent>builder()
@@ -122,7 +124,9 @@ public class CBMicroblockModContent {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(STONE_SAW.get());
             event.accept(IRON_SAW.get());
+            event.accept(GOLD_SAW.get());
             event.accept(DIAMOND_SAW.get());
+            event.accept(NETHERITE_SAW.get());
         }
     }
 

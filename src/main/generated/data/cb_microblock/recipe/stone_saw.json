@@ -6,7 +6,7 @@
       "item": "minecraft:flint"
     },
     "R": {
-      "tag": "forge:rods/stone"
+      "tag": "c:rods/stone"
     },
     "S": {
       "tag": "c:rods/wooden"
