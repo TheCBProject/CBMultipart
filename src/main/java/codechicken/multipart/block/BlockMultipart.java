@@ -11,6 +11,8 @@ import codechicken.multipart.util.MultipartLoadHandler;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -49,6 +51,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -61,6 +64,7 @@ public class BlockMultipart extends Block implements EntityBlock {
                 .mapColor(MapColor.STONE)
                 .dynamicShape()
                 .noOcclusion()
+                .sound(SoundType.EMPTY)
         );
     }
 
@@ -178,6 +182,24 @@ public class BlockMultipart extends Block implements EntityBlock {
     public float getDestroyProgress(BlockState state, Player player, BlockGetter world, BlockPos pos) {
         TileMultipart tile = getTile(world, pos);
         PartRayTraceResult hit = retracePart(world, pos, player);
+
+        // Play sound if breaking
+        SoundType soundType = hit == null ? null : hit.part.getSound(null);
+        float destroyTicks = Objects.requireNonNull(Minecraft.getInstance().gameMode).destroyTicks;
+        if (soundType != null && destroyTicks % 4.0F == 0.0F) {
+            // Same invocation as MultiplayerGameMode#continueDestroyBlock
+            Minecraft.getInstance().getSoundManager().play(
+                    new SimpleSoundInstance(
+                            soundType.getHitSound(),
+                            SoundSource.BLOCKS,
+                            (soundType.getVolume() + 1.0F) / 8.0F,
+                            soundType.getPitch() * 0.5F,
+                            SoundInstance.createUnseededRandom(),
+                            pos
+                    )
+            );
+        }
+
         if (tile != null && hit != null) {
             return tile.getDestroyProgress(player, hit);
         }
