@@ -1,5 +1,6 @@
 package codechicken.multipart.block;
 
+import codechicken.lib.math.MathHelper;
 import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.raytracer.RayTracer;
 import codechicken.lib.vec.Vector3;
@@ -11,8 +12,6 @@ import codechicken.multipart.util.MultipartLoadHandler;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -179,27 +178,53 @@ public class BlockMultipart extends Block implements EntityBlock {
     }
 
     @Override
+    public SoundType getSoundType(BlockState state, LevelReader level, BlockPos pos, @Nullable Entity entity) {
+        // Literally nothing can be done without an entity
+        if (entity == null) return super.getSoundType(state, level, pos, entity);
+
+        TileMultipart tile = getTile(level, pos);
+        if (tile == null) return super.getSoundType(state, level, pos, entity);
+
+        PartRayTraceResult feetHit = hitFeet(tile, Vector3.fromEntity(entity));
+        PartRayTraceResult lookHit = entity instanceof Player player ? retracePart(level, pos, player) : null;
+
+        SoundType feetSound = feetHit == null ? null : feetHit.part.getSound(null);
+        SoundType lookSound = lookHit == null ? null : lookHit.part.getSound(null);
+
+        // If neither sound is available, fall back to default
+        if (lookSound == null && feetSound == null) {
+            return super.getSoundType(state, level, pos, entity);
+        }
+
+        // If only one sound is available, use it
+        if (lookSound == null) {
+            return feetSound;
+        } else if (feetSound == null) {
+            return lookSound;
+        }
+
+        // Select look sound pitch/volume if breaking, else use feet sound
+        boolean isBreaking = level.isClientSide() && Objects.requireNonNull(Minecraft.getInstance().gameMode).isDestroying();
+        float pitch = isBreaking ? lookSound.getPitch() : feetSound.getPitch();
+        float volume = isBreaking ? lookSound.getVolume() : feetSound.getVolume();
+
+        // Combine sounds, prioritizing lookSound for hit/break/place sounds.
+        // Imperfect solution: may accidentally select lookSound pitch/volume if player is breaking, but another sound query is made to this block
+        return new SoundType(
+                volume,
+                pitch,
+                lookSound.getBreakSound(), // Directly queried during part removal
+                lookSound.getStepSound(),
+                feetSound.getHitSound(), // Only accessed client-side when gameMode.isDestroying()
+                lookSound.getPlaceSound(), // Directly queried during part placement
+                feetSound.getFallSound()
+        );
+    }
+
+    @Override
     public float getDestroyProgress(BlockState state, Player player, BlockGetter world, BlockPos pos) {
         TileMultipart tile = getTile(world, pos);
         PartRayTraceResult hit = retracePart(world, pos, player);
-
-        // Play sound if breaking
-        SoundType soundType = hit == null ? null : hit.part.getSound(null);
-        float destroyTicks = Objects.requireNonNull(Minecraft.getInstance().gameMode).destroyTicks;
-        if (soundType != null && destroyTicks % 4.0F == 0.0F) {
-            // Same invocation as MultiplayerGameMode#continueDestroyBlock
-            Minecraft.getInstance().getSoundManager().play(
-                    new SimpleSoundInstance(
-                            soundType.getHitSound(),
-                            SoundSource.BLOCKS,
-                            (soundType.getVolume() + 1.0F) / 8.0F,
-                            soundType.getPitch() * 0.5F,
-                            SoundInstance.createUnseededRandom(),
-                            pos
-                    )
-            );
-        }
-
         if (tile != null && hit != null) {
             return tile.getDestroyProgress(player, hit);
         }
@@ -427,5 +452,20 @@ public class BlockMultipart extends Block implements EntityBlock {
     @Nullable
     public static PartRayTraceResult retracePart(BlockGetter world, BlockPos pos, Player player) {
         return RayTracer.retraceBlock(world, player, pos) instanceof PartRayTraceResult hit ? hit : null;
+    }
+
+    @Nullable
+    public static PartRayTraceResult hitFeet(TileMultipart tile, Vector3 entityPos) {
+        BlockHitResult hit = tile.getCollisionShape(CollisionContext.empty()).clip(
+                entityPos.copy().add(0, 0.01, 0).vec3(),
+                entityPos.copy().add(0, -0.01, 0).vec3(),
+                tile.getBlockPos()
+        );
+        if (!(hit instanceof PartRayTraceResult pHit)) return null;
+
+        double dist = entityPos.copy().subtract(hit.getLocation()).mag();
+        if (!MathHelper.between(-0.01, dist, 0.01)) return null;
+
+        return pHit;
     }
 }
