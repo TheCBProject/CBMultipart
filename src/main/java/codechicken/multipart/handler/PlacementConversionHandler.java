@@ -75,7 +75,7 @@ public class PlacementConversionHandler {
 
         if (!world.isClientSide) {
             TileMultipart.addPart(world, pos, part);
-            SoundType sound = part.getPlacementSound(ctx);
+            SoundType sound = part.getSound(ctx);
             if (sound != null) {
                 world.playSound(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, sound.getPlaceSound(), SoundSource.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
             }

@@ -3,7 +3,7 @@
   "category": "misc",
   "key": {
     "M": {
-      "tag": "c:gems/diamond"
+      "tag": "c:ingots/gold"
     },
     "R": {
       "tag": "c:rods/stone"
@@ -18,6 +18,6 @@
   ],
   "result": {
     "count": 1,
-    "id": "cb_microblock:diamond_saw"
+    "id": "cb_microblock:gold_saw"
   }
 }

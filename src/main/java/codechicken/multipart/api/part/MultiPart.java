@@ -323,10 +323,27 @@ public interface MultiPart {
      *
      * @param context The placement context.
      * @return The sound, or {@code null} for no sound.
+     *
+     * @deprecated Use {@link #getSound(UseOnContext)} instead.
      */
     @Nullable
+    @Deprecated
     default SoundType getPlacementSound(UseOnContext context) {
-        return null;
+        return SoundType.STONE;
+    }
+
+    /**
+     * Used to get the sound for this part.
+     *
+     * @param useOnContext The placement context if part is being placed
+     * @return The sound, or {@code null} for no sound.
+     */
+    @Nullable
+    default SoundType getSound(@Nullable UseOnContext useOnContext) {
+        if (useOnContext != null) {
+            return getPlacementSound(useOnContext);
+        }
+        return SoundType.STONE;
     }
 
     /**

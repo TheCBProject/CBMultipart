@@ -1,6 +1,8 @@
-// 1.21.1	2024-10-29T17:19:34.128263858	cb_microblock Item models.
+// 1.21.1	2025-11-23T11:19:20.391128	cb_microblock Item models.
 889a6094a52ed0abee52e315fe6a4710dcd12851 assets/cb_microblock/models/item/diamond_saw.json
+ecbf529f4320dcd3cb7acf2a2311be0b5cb0bfab assets/cb_microblock/models/item/gold_saw.json
 3c81fc1f5313b123c5e31c1241ea90231dc0180f assets/cb_microblock/models/item/iron_saw.json
 55430d3d211ed564fe0a798ba8747dd5b798fce1 assets/cb_microblock/models/item/microblock.json
+6ae392856ee6b66539d171de52e96a598841b79f assets/cb_microblock/models/item/netherite_saw.json
 b75b209c3a3053ae0b5119d5e3cf98fc76dda312 assets/cb_microblock/models/item/stone_rod.json
 5f86061e96d33329e77a6e907a7193fabf3017eb assets/cb_microblock/models/item/stone_saw.json

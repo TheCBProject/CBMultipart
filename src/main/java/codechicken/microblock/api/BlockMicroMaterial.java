@@ -5,6 +5,9 @@ import codechicken.lib.render.particle.CustomBreakingParticle;
 import codechicken.lib.render.particle.CustomParticleHandler;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.client.MicroblockRender;
+import codechicken.microblock.init.CBMicroblockModContent;
+import codechicken.microblock.init.CBMicroblockTags;
+import codechicken.microblock.item.SawComponent;
 import codechicken.microblock.part.MicroblockPart;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.multipart.util.PartRayTraceResult;
@@ -86,6 +89,25 @@ public class BlockMicroMaterial extends MicroMaterial {
     @Override
     public float getExplosionResistance(BlockGetter level, BlockPos pos, Explosion explosion) {
         return state.getExplosionResistance(level, pos, explosion);
+    }
+
+    @Override
+    public boolean isCuttableBySaw(ItemStack saw) {
+        if (sawCutsEverything(saw)) {
+            return true;
+        }
+
+        var component = SawComponent.getComponent(saw);
+        if (component == null) {
+            // Fallback to tag check
+            return saw.is(CBMicroblockTags.Items.TOOL_SAW);
+        }
+
+        return component.canCut(state);
+    }
+
+    private boolean sawCutsEverything(ItemStack saw) {
+        return CBMicroblockModContent.netheriteSawCutsEverything && saw.is(CBMicroblockModContent.NETHERITE_SAW);
     }
 
     @Override

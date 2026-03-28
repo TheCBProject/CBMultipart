@@ -1,10 +1,13 @@
 package codechicken.microblock.init;
 
+import codechicken.lib.config.ConfigCategory;
+import codechicken.lib.config.ConfigSyncManager;
 import codechicken.microblock.CBMicroblock;
 import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.item.MicroMaterialComponent;
+import codechicken.microblock.item.SawComponent;
 import codechicken.microblock.item.SawItem;
 import codechicken.microblock.part.StandardMicroFactory;
 import codechicken.microblock.part.corner.CornerMicroFactory;
@@ -30,6 +33,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CopperBulbBlock;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
@@ -64,12 +68,21 @@ public class CBMicroblockModContent {
 
     public static final DeferredHolder<Item, SawItem> STONE_SAW = ITEMS.register("stone_saw", () -> new SawItem(Tiers.STONE, new Item.Properties().setNoRepair()));
     public static final DeferredHolder<Item, SawItem> IRON_SAW = ITEMS.register("iron_saw", () -> new SawItem(Tiers.IRON, new Item.Properties().setNoRepair()));
+    public static final DeferredHolder<Item, SawItem> GOLD_SAW = ITEMS.register("gold_saw", () -> new SawItem(Tiers.GOLD, new Item.Properties().setNoRepair()));
     public static final DeferredHolder<Item, SawItem> DIAMOND_SAW = ITEMS.register("diamond_saw", () -> new SawItem(Tiers.DIAMOND, new Item.Properties().setNoRepair()));
+    public static final DeferredHolder<Item, SawItem> NETHERITE_SAW = ITEMS.register("netherite_saw", () -> new SawItem(Tiers.NETHERITE, new Item.Properties().setNoRepair()));
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<MicroMaterialComponent>> MICRO_MATERIAL_COMPONENT = DATA_COMPONENTS.register("micro_material", () ->
             DataComponentType.<MicroMaterialComponent>builder()
                     .persistent(MicroMaterialComponent.CODEC)
                     .networkSynchronized(MicroMaterialComponent.STREAM_CODEC)
+                    .build()
+    );
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<SawComponent>> SAW_COMPONENT = DATA_COMPONENTS.register("saw", () ->
+            DataComponentType.<SawComponent>builder()
+                    .persistent(SawComponent.CODEC)
+                    .networkSynchronized(SawComponent.STREAM_CODEC)
                     .build()
     );
 
@@ -97,8 +110,12 @@ public class CBMicroblockModContent {
 
     public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<?>> MICRO_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("microblock", () -> new SimpleCraftingRecipeSerializer<>(e -> new MicroRecipe()));
 
+    public static boolean netheriteSawCutsEverything;
+
     public static void init(IEventBus modBus) {
         LOCK.lock();
+
+        loadConfig();
 
         ITEMS.register(modBus);
         DATA_COMPONENTS.register(modBus);
@@ -110,11 +127,31 @@ public class CBMicroblockModContent {
         modBus.addListener(CBMicroblockModContent::onProcessIMC);
     }
 
+    private static void loadConfig() {
+        ConfigCategory general = CBMicroblock.config.getCategory("general");
+
+        general.getValue("netheriteSawCutsEverything")
+                .setComment(
+                        "If true, Netherite saws will cut any material without a tier check.",
+                        "Useful if another mod adds materials above Netherite."
+                )
+                .setDefaultBoolean(true)
+                .syncTagToClient()
+                .onSync((tag, reason) -> netheriteSawCutsEverything = tag.getBoolean());
+
+        general.save();
+        general.forceSync();
+
+        ConfigSyncManager.registerSync(ResourceLocation.fromNamespaceAndPath(CBMicroblock.MOD_ID, "general"), general);
+    }
+
     private static void onCreativeTabBuild(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(STONE_SAW.get());
             event.accept(IRON_SAW.get());
+            event.accept(GOLD_SAW.get());
             event.accept(DIAMOND_SAW.get());
+            event.accept(NETHERITE_SAW.get());
         }
     }
 
@@ -168,6 +205,7 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.MANGROVE_ROOTS));
             registerMaterial(r, new BlockMicroMaterial(Blocks.MUDDY_MANGROVE_ROOTS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.BAMBOO_BLOCK));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_SPRUCE_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_BIRCH_LOG));
             registerMaterial(r, new BlockMicroMaterial(Blocks.STRIPPED_JUNGLE_LOG));
@@ -422,8 +460,14 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.QUARTZ_BRICKS));
             registerMaterial(r, new BlockMicroMaterial(Blocks.AMETHYST_BLOCK));
             registerMaterial(r, new BlockMicroMaterial(Blocks.TUFF));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.POLISHED_TUFF));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_TUFF));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.TUFF_BRICKS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_TUFF_BRICKS));
             registerMaterial(r, new BlockMicroMaterial(Blocks.CALCITE));
             registerMaterial(r, new BlockMicroMaterial(Blocks.TINTED_GLASS));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SCULK));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.SCULK_CATALYST));
             registerMaterial(r, new BlockMicroMaterial(Blocks.OXIDIZED_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.WEATHERED_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.EXPOSED_COPPER));
@@ -434,6 +478,10 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.WEATHERED_CUT_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.EXPOSED_CUT_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.CUT_COPPER)); //TODO Oxidization (normal -> exposed -> weathered -> oxidized)
+            registerMaterial(r, new BlockMicroMaterial(Blocks.OXIDIZED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WEATHERED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.EXPOSED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.CHISELED_COPPER)); //TODO Oxidization (normal -> exposed -> weathered -> oxidized)
             registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_COPPER_BLOCK));
             registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_WEATHERED_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_EXPOSED_COPPER));
@@ -442,6 +490,18 @@ public class CBMicroblockModContent {
             registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_WEATHERED_CUT_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_EXPOSED_CUT_COPPER));
             registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_CUT_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_OXIDIZED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_WEATHERED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_EXPOSED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_CHISELED_COPPER));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true))); //TODO Do these even make sense?
+            registerMaterial(r, new BlockMicroMaterial(Blocks.EXPOSED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WEATHERED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.OXIDIZED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_EXPOSED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_WEATHERED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
+            registerMaterial(r, new BlockMicroMaterial(Blocks.WAXED_OXIDIZED_COPPER_BULB.defaultBlockState().setValue(CopperBulbBlock.LIT, true)));
             registerMaterial(r, new BlockMicroMaterial(Blocks.DRIPSTONE_BLOCK));
             registerMaterial(r, new BlockMicroMaterial(Blocks.ROOTED_DIRT));
             registerMaterial(r, new BlockMicroMaterial(Blocks.MUD));

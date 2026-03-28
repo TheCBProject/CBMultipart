@@ -44,7 +44,7 @@ public abstract class ItemMultipart extends Item {
 
         if (!world.isClientSide) {
             TileMultipart.addPart(world, pos, part);
-            SoundType sound = part.getPlacementSound(context);
+            SoundType sound = part.getSound(context);
             if (sound != null) {
                 world.playSound(null, pos, sound.getPlaceSound(),
                         SoundSource.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);

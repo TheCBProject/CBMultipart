@@ -2,6 +2,8 @@
   "values": [
     "cb_microblock:stone_saw",
     "cb_microblock:iron_saw",
-    "cb_microblock:diamond_saw"
+    "cb_microblock:gold_saw",
+    "cb_microblock:diamond_saw",
+    "cb_microblock:netherite_saw"
   ]
 }
