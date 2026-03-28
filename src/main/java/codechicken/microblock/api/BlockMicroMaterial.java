@@ -5,6 +5,7 @@ import codechicken.lib.render.particle.CustomBreakingParticle;
 import codechicken.lib.render.particle.CustomParticleHandler;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.client.MicroblockRender;
+import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.init.CBMicroblockTags;
 import codechicken.microblock.item.SawComponent;
 import codechicken.microblock.part.MicroblockPart;
@@ -92,7 +93,7 @@ public class BlockMicroMaterial extends MicroMaterial {
 
     @Override
     public boolean isCuttableBySaw(ItemStack saw) {
-        if (isStrongestSaw(saw)) {
+        if (sawCutsEverything(saw)) {
             return true;
         }
 
@@ -105,8 +106,8 @@ public class BlockMicroMaterial extends MicroMaterial {
         return component.canCut(state);
     }
 
-    private boolean isStrongestSaw(ItemStack saw) {
-        return false; //TODO
+    private boolean sawCutsEverything(ItemStack saw) {
+        return CBMicroblockModContent.netheriteSawCutsEverything && saw.is(CBMicroblockModContent.NETHERITE_SAW);
     }
 
     @Override

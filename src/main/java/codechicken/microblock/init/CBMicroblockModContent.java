@@ -1,5 +1,7 @@
 package codechicken.microblock.init;
 
+import codechicken.lib.config.ConfigCategory;
+import codechicken.lib.config.ConfigSyncManager;
 import codechicken.microblock.CBMicroblock;
 import codechicken.microblock.api.BlockMicroMaterial;
 import codechicken.microblock.api.MicroMaterial;
@@ -108,8 +110,12 @@ public class CBMicroblockModContent {
 
     public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<?>> MICRO_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("microblock", () -> new SimpleCraftingRecipeSerializer<>(e -> new MicroRecipe()));
 
+    public static boolean netheriteSawCutsEverything;
+
     public static void init(IEventBus modBus) {
         LOCK.lock();
+
+        loadConfig();
 
         ITEMS.register(modBus);
         DATA_COMPONENTS.register(modBus);
@@ -119,6 +125,24 @@ public class CBMicroblockModContent {
         modBus.addListener(CBMicroblockModContent::onCreativeTabBuild);
         modBus.addListener(CBMicroblockModContent::onRegisterMicroMaterials);
         modBus.addListener(CBMicroblockModContent::onProcessIMC);
+    }
+
+    private static void loadConfig() {
+        ConfigCategory general = CBMicroblock.config.getCategory("general");
+
+        general.getValue("netheriteSawCutsEverything")
+                .setComment(
+                        "If true, Netherite saws will cut any material without a tier check.",
+                        "Useful if another mod adds materials above Netherite."
+                )
+                .setDefaultBoolean(true)
+                .syncTagToClient()
+                .onSync((tag, reason) -> netheriteSawCutsEverything = tag.getBoolean());
+
+        general.save();
+        general.forceSync();
+
+        ConfigSyncManager.registerSync(ResourceLocation.fromNamespaceAndPath(CBMicroblock.MOD_ID, "general"), general);
     }
 
     private static void onCreativeTabBuild(BuildCreativeModeTabContentsEvent event) {
