@@ -615,6 +615,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     }
 
     public void recalcLight(boolean sky, boolean block) {
+        updateLight();
         LevelLightEngine lm = level.getLightEngine();
         if (sky && lm.skyEngine != null) {
             lm.skyEngine.checkBlock(worldPosition);
