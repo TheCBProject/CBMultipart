@@ -19,16 +19,14 @@ import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
@@ -97,9 +95,21 @@ public class CBMicroblockModContent {
         TABS.register(bus);
         MULTIPART_TYPES.register(bus);
         RECIPE_SERIALIZERS.register(bus);
-        bus.addListener(CBMicroblockModContent::onRegisterMicroMaterials);
+        bus.addListener(CBMicroblockModContent::onCreativeTabBuild);
         bus.addListener(CBMicroblockModContent::onCommonSetup);
+        bus.addListener(CBMicroblockModContent::onRegisterMicroMaterials);
         bus.addListener(CBMicroblockModContent::onProcessIMC);
+    }
+
+    private static void onCreativeTabBuild(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+            event.accept(STONE_SAW.get());
+            event.accept(IRON_SAW.get());
+            event.accept(DIAMOND_SAW.get());
+        }
+        if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
+            event.accept(STONE_ROD_ITEM.get());
+        }
     }
 
     private static void onCommonSetup(FMLCommonSetupEvent event) {
