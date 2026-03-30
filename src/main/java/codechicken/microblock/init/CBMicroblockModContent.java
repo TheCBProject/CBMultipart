@@ -153,6 +153,9 @@ public class CBMicroblockModContent {
             event.accept(DIAMOND_SAW.get());
             event.accept(NETHERITE_SAW.get());
         }
+        if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
+            event.accept(STONE_ROD_ITEM.get());
+        }
     }
 
     private static void onProcessIMC(InterModProcessEvent event) {
