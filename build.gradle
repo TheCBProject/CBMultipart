@@ -71,6 +71,10 @@ dependencies {
             prefer '4.0.0.18'
         }
     }
+
+    // Workaround for WorkspaceTool not being able to provide these for neodev.
+    compileOnly('io.github.llamalad7:mixinextras-neoforge:0.5.3')
+    runtimeOnly('io.github.llamalad7:mixinextras-neoforge:0.5.3')
 }
 
 processResources {
