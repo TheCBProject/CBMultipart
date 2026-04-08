@@ -72,16 +72,22 @@ public class RedstoneInteractions {
     }
 
     /**
-     * Get the connection mask of the block on side of (pos).
+     * Get the connection mask of the block on side of (pos). See {@link #getConnectionMask(LevelReader, BlockPos, int, boolean)}
      *
-     * @param power , whether the connection mask is for signal transfer or visual connection. (some blocks accept power without visual connection)
+     * @param world The world
+     * @param pos   The position of the original block
+     * @param side  The side the target block is in that will be queried
+     * @param power If true, returns a power transmission mask rather than visual connection mask
      */
     public static int otherConnectionMask(LevelReader world, BlockPos pos, int side, boolean power) {
         return getConnectionMask(world, pos.relative(Direction.from3DDataValue(side)), side ^ 1, power);
     }
 
     /**
-     * Get the connection mask of part on side
+     * Get the connection mask of part on a given block side.
+     *
+     * @param p The part to query
+     * @param side The side to query, relative to the part's parent block
      */
     public static int connectionMask(MultiPart p, int side) {
         if (p instanceof RedstonePart && ((RedstonePart) p).canConnectRedstone(side)) {
@@ -102,7 +108,16 @@ public class RedstoneInteractions {
     }
 
     /**
-     * @param power If true, don't test canConnectRedstone on blocks, just get a power transmission mask rather than a visual connection
+     * Retrieves connection mask for block at give pos. If the block/entity implements the more capable RedstoneConnector/RedstoneConnectorBlock
+     * interfaces, it provides the mask directly. Otherwise, it is calculated from known vanilla blocks. For unknown blocks, the default canConnectRedstone
+     * logic applies.
+     * <p>
+     * If power is true, the power transmission mask is returned instead. Some blocks can accept/emit signal even without a visible connection.
+     *
+     * @param world The level
+     * @param pos   The position of the block to query
+     * @param side  The side of the block to query
+     * @param power If true, returns a power transmission mask rather than visual connection mask
      */
     public static int getConnectionMask(LevelReader world, BlockPos pos, int side, boolean power) {
         if (world.getBlockEntity(pos) instanceof RedstoneConnector cond) {
@@ -118,7 +133,16 @@ public class RedstoneInteractions {
     }
 
     /**
-     * Returns the connection mask for a vanilla block
+     * Calculates the connection mask for a vanilla block. This will take care of calculating partial masks for non-full blocks,
+     * which default block methods cannot handle.
+     * <p>
+     * If power is true, the power transmission mask is returned instead. Some blocks can accept/emit signal even without a visible connection.
+     *
+     * @param world The level
+     * @param pos   The position of the vanilla block
+     * @param state The state of the vanilla block
+     * @param side  The side of the vanilla block to query
+     * @param power If true, returns a power transmission mask rather than visual connection mask
      */
     public static int vanillaConnectionMask(LevelReader world, BlockPos pos, BlockState state, int side, boolean power) {
         Block block = state.getBlock();
@@ -190,8 +214,18 @@ public class RedstoneInteractions {
             return 1 << Rotation.rotationTo(side & 6, fside);
         }
 
-        // For all other blocks, rely on canConnectRedstone logic
-        if (power || block.canConnectRedstone(state, world, pos, Direction.from3DDataValue(side))) {
+        // Observer
+        if (block == Blocks.OBSERVER) {
+            int fside = state.getValue(ObserverBlock.FACING).ordinal();
+            if (side == (fside ^ 1)) {
+                return 0x1F; // Full backface
+            }
+            return 0; // Only backside connects/emits
+        }
+
+        // For all other blocks, rely on canConnectRedstone logic. Side is respective to the wire
+        // attempting the connection, not the target side. Therefore, it is flipped
+        if (power || block.canConnectRedstone(state, world, pos, Direction.from3DDataValue(side).getOpposite())) {
             return 0x1F;
         }
         return 0;
