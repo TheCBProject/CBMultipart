@@ -13,6 +13,7 @@ import codechicken.multipart.util.PartRayTraceResult;
 import codechicken.multipart.util.TickScheduler;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,6 +25,8 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -394,6 +397,11 @@ public interface MultiPart {
     default void onMoved() {
         onWorldJoin();
     }
+
+    /**
+     * Called when this part has been transformed, for example, after a schematic placement.
+     */
+    default void onTransform(Direction.Axis rotationAxis, Rotation rotation, Mirror mirror) { }
 
     /**
      * Called on block right-click.

@@ -4,6 +4,9 @@ import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.SlottedPart;
 import codechicken.multipart.block.TileMultipart;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Arrays;
@@ -52,8 +55,8 @@ public class TSlottedTile extends TileMultipart {
 
     @Override
     public boolean canAddPart(MultiPart part) {
-        if (part instanceof SlottedPart) {
-            int mask = ((SlottedPart) part).getSlotMask();
+        if (part instanceof SlottedPart slottedPart) {
+            int mask = slottedPart.getSlotMask();
             for (int i = 0; i < v_partMap.length; i++) {
                 if ((mask & 1 << i) != 0 && getSlottedPart(i) != null) {
                     return false;
@@ -64,16 +67,32 @@ public class TSlottedTile extends TileMultipart {
         return super.canAddPart(part);
     }
 
+    private void addToPartMap(SlottedPart part) {
+        int mask = part.getSlotMask();
+        for (int i = 0; i < v_partMap.length; i++) {
+            if ((mask & 1 << i) > 0) {
+                v_partMap[i] = part;
+            }
+        }
+    }
+
     @Override
     public void bindPart(MultiPart part) {
         super.bindPart(part);
-        if (part instanceof SlottedPart) {
-            int mask = ((SlottedPart) part).getSlotMask();
-            for (int i = 0; i < v_partMap.length; i++) {
-                if ((mask & 1 << i) > 0) {
-                    v_partMap[i] = part;
-                }
-            }
+        if (part instanceof SlottedPart slottedPart) {
+            addToPartMap(slottedPart);
         }
+    }
+
+    @Override
+    public void onTransform(Direction.Axis rotationAxis, Rotation rotation, Mirror mirror) {
+        super.onTransform(rotationAxis, rotation, mirror);
+
+        Arrays.fill(v_partMap, null);
+        operate(part -> {
+            if (part instanceof SlottedPart slottedPart) {
+                addToPartMap(slottedPart);
+            }
+        });
     }
 }
