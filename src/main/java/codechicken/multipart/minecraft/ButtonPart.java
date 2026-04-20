@@ -12,9 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.ButtonBlock;
-import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -166,6 +164,11 @@ public class ButtonPart extends McSidedStatePart implements FaceRedstonePart {
     @Override
     public int getFace() {
         return getSide().ordinal();
+    }
+    
+    @Override
+    public void onTransform(Direction.Axis rotationAxis, Rotation rotation, Mirror mirror) {
+        state = transformFaceAttachedHorizontalDirectionBlock(state, rotationAxis, rotation, mirror);
     }
 
     public static class StoneButtonPart extends ButtonPart {

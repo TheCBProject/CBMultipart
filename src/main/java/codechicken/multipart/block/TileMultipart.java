@@ -32,6 +32,8 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -418,6 +420,10 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     public void onMoved() {
         capabilityCache.setWorldPos(level, worldPosition);
         operate(MultiPart::onMoved);
+    }
+
+    public void onTransform(Direction.Axis rotationAxis, Rotation rotation, Mirror mirror) {
+        operate(e -> e.onTransform(rotationAxis, rotation, mirror));
     }
 
     public InteractionResult use(Player player, PartRayTraceResult hit, InteractionHand hand) {

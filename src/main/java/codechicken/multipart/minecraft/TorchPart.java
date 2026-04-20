@@ -13,10 +13,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.WallTorchBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -104,5 +101,18 @@ public class TorchPart extends McSidedStatePart implements AnimateTickPart {
     @Override
     public void animateTick(RandomSource random) {
         state.getBlock().animateTick(state, level(), pos(), random);
+    }
+
+    @Override
+    public void onTransform(Direction.Axis rotationAxis, net.minecraft.world.level.block.Rotation rotation, Mirror mirror) {
+        if (state.getBlock() == getStandingBlock()) return;
+
+        var shouldRotate = rotationAxis == Direction.Axis.Y ||
+            (rotation == net.minecraft.world.level.block.Rotation.CLOCKWISE_180 &&
+                state.getValue(HorizontalDirectionalBlock.FACING).getAxis() == rotationAxis);
+        if (!shouldRotate) return;
+
+        //noinspection deprecation
+        state = state.rotate(rotation);
     }
 }
