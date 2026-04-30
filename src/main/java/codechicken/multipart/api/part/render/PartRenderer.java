@@ -62,6 +62,7 @@ public interface PartRenderer<T extends MultiPart> {
         CCRenderState ccrs = CCRenderState.instance();
         ccrs.hackyReallyDontComputeLighting = true;
         ccrs.reset();
+        ccrs.brightness = 0;
         BakedQuadVertexBuilder builder = new BakedQuadVertexBuilder();
         ccrs.bind(builder, DefaultVertexFormat.BLOCK);
         ccrs.lightMatrix.locate(part.level(), part.pos());
