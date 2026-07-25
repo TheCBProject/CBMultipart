@@ -5,24 +5,28 @@ import codechicken.lib.data.MCDataOutput;
 import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.PartConverter;
 import codechicken.multipart.api.PartConverter.ConversionResult;
+import codechicken.multipart.api.RegisterPartConvertersEvent;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.util.MultipartPlaceContext;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoader;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
-import net.neoforged.neoforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
@@ -35,31 +39,21 @@ public class MultiPartRegistries {
     private static final Logger logger = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
 
-    public static final Registry<MultipartType<?>> MULTIPART_TYPES = new RegistryBuilder<>(MultipartType.MULTIPART_TYPES)
-            .sync(true)
-            .create();
-    private static final Registry<PartConverter> PART_CONVERTERS = new RegistryBuilder<>(PartConverter.PART_CONVERTERS)
-            .sync(false)
-            .create();
+    private static final List<PartConverter> PART_CONVERTERS = new ArrayList<>();
 
     public static void init(IEventBus modBus) {
         LOCK.lock();
         modBus.addListener(MultiPartRegistries::createRegistries);
+
+        modBus.addListener(EventPriority.LOWEST, MultiPartRegistries::onLateCommonSetup);
     }
 
     private static void createRegistries(NewRegistryEvent event) {
-        event.register(MULTIPART_TYPES);
-        event.register(PART_CONVERTERS);
+        event.register(MultipartType.REGISTRY);
     }
 
-    @Deprecated (forRemoval = true) // Use the fields directly.
-    public static Registry<MultipartType<?>> multipartTypes() {
-        return requireNonNull(MULTIPART_TYPES, "MultipartType registry not created yet.");
-    }
-
-    @Deprecated (forRemoval = true) // Use the fields directly.
-    public static Registry<PartConverter> partConverters() {
-        return requireNonNull(PART_CONVERTERS, "PartConverter registry not created yet.");
+    private static void onLateCommonSetup(FMLCommonSetupEvent event) {
+        ModLoader.postEvent(new RegisterPartConvertersEvent(Collections.synchronizedList(PART_CONVERTERS)));
     }
 
     /**
@@ -76,10 +70,10 @@ public class MultiPartRegistries {
     public static void writePart(MCDataOutput data, MultiPart part) {
         MultipartType<?> type = requireNonNull(part.getType());
         Identifier name = requireNonNull(type.getRegistryName());
-        if (!MULTIPART_TYPES.containsKey(name)) {
+        if (!MultipartType.REGISTRY.containsKey(name)) {
             throw new RuntimeException("MultiPartType with name '" + name + "' is not registered.");
         }
-        data.writeRegistryIdDirect(MULTIPART_TYPES, type);
+        data.writeRegistryIdDirect(MultipartType.REGISTRY, type);
         part.writeDesc(data);
     }
 
@@ -96,7 +90,7 @@ public class MultiPartRegistries {
      * @return The TMultiPart.
      */
     public static MultiPart readPart(MCDataInput data) {
-        MultipartType<?> type = data.readRegistryIdDirect(MULTIPART_TYPES);
+        MultipartType<?> type = data.readRegistryIdDirect(MultipartType.REGISTRY);
         MultiPart part = type.createPartClient(data);
         part.readDesc(data);
         return part;
@@ -113,7 +107,7 @@ public class MultiPartRegistries {
      * @param part   The {@link MultiPart} to write.
      */
     public static void savePart(ValueOutput output, MultiPart part) {
-        output.store("id", MultipartType.TYPE_CODEC(), part.getType());
+        output.store("id", MultipartType.TYPE_CODEC, part.getType());
         part.save(output);
     }
 
@@ -129,7 +123,7 @@ public class MultiPartRegistries {
      */
     @Nullable
     public static MultiPart loadPart(ValueInput input) {
-        var type = input.read("id", MultipartType.TYPE_CODEC());
+        var type = input.read("id", MultipartType.TYPE_CODEC);
         if (type.isEmpty()) {
             //TODO 'dummy' parts to save these.
             logger.error("Missing mapping for MultiPartType with ID: {}", input.getStringOr("id", "null"));
@@ -143,7 +137,7 @@ public class MultiPartRegistries {
     }
 
     public static Collection<MultiPart> convertBlock(LevelAccessor level, BlockPos pos, BlockState state) {
-        for (PartConverter conv : partConverters()) {
+        for (PartConverter conv : PART_CONVERTERS) {
             ConversionResult<Collection<MultiPart>> result = conv.convert(level, pos, state);
             if (result.success()) {
                 assert result.result() != null;
@@ -164,5 +158,4 @@ public class MultiPartRegistries {
         }
         return null;
     }
-
 }

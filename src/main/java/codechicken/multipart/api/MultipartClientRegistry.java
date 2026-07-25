@@ -48,7 +48,7 @@ public class MultipartClientRegistry {
     }
 
     public static void loadStaticPartRenderers() {
-        for (MultipartType<?> type : MultiPartRegistries.MULTIPART_TYPES) {
+        for (MultipartType<?> type : MultipartType.REGISTRY) {
             type.staticRenderer = null;
 
             if (type.staticRendererFactory instanceof StaticPartRenderer.Factory<?> factory) {
@@ -58,7 +58,7 @@ public class MultipartClientRegistry {
     }
 
     private static void loadDynamicPartRenderers() {
-        for (MultipartType<?> type : MultiPartRegistries.MULTIPART_TYPES) {
+        for (MultipartType<?> type : MultipartType.REGISTRY) {
             type.dynamicRenderer = null;
 
             if (type.dynamicRendererFactory instanceof DynamicPartRenderer.Factory<?, ?> factory) {

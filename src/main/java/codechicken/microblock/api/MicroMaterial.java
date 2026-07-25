@@ -32,15 +32,15 @@ public abstract class MicroMaterial {
     /**
      * The registry name used by MicroMaterial.
      */
-    public static final ResourceKey<Registry<MicroMaterial>> MULTIPART_TYPES = ResourceKey.createRegistryKey(
+    public static final ResourceKey<Registry<MicroMaterial>> MICRO_MATERIAL_TYPES = ResourceKey.createRegistryKey(
             Identifier.fromNamespaceAndPath(CBMicroblock.MOD_ID, "micro_material")
     );
-    public static final Registry<MicroMaterial> REGISTRY = new RegistryBuilder<>(MULTIPART_TYPES)
+    public static final Registry<MicroMaterial> REGISTRY = new RegistryBuilder<>(MICRO_MATERIAL_TYPES)
             .sync(true)
             .create();
 
     public static final Codec<MicroMaterial> CODEC = REGISTRY.byNameCodec();
-    public static final StreamCodec<RegistryFriendlyByteBuf, MicroMaterial> STREAM_CODEC = ByteBufCodecs.registry(MULTIPART_TYPES);
+    public static final StreamCodec<RegistryFriendlyByteBuf, MicroMaterial> STREAM_CODEC = ByteBufCodecs.registry(MICRO_MATERIAL_TYPES);
 
     @Nullable
     Object renderProperties;

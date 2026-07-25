@@ -3,12 +3,15 @@ package codechicken.multipart.api;
 import codechicken.lib.data.MCDataInput;
 import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.part.MultiPart;
-import codechicken.multipart.init.MultiPartRegistries;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.storage.ValueInput;
+import net.neoforged.neoforge.registries.RegistryBuilder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -22,12 +25,11 @@ public abstract class MultipartType<T extends MultiPart> {
      * The registry name used by MultipartType.
      */
     public static final ResourceKey<Registry<MultipartType<?>>> MULTIPART_TYPES = ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(CBMultipart.MOD_ID, "multipart_types"));
-    // TODO this is cyclic
-//    public static final Codec<MultipartType<?>> TYPE_CODEC = MultiPartRegistries.MULTIPART_TYPES.byNameCodec();
-
-    public static Codec<MultipartType<?>> TYPE_CODEC() {
-        return MultiPartRegistries.MULTIPART_TYPES.byNameCodec();
-    }
+    public static final Registry<MultipartType<?>> REGISTRY = new RegistryBuilder<>(MULTIPART_TYPES)
+            .sync(true)
+            .create();
+    public static final Codec<MultipartType<?>> TYPE_CODEC = REGISTRY.byNameCodec();
+    public static final StreamCodec<RegistryFriendlyByteBuf, MultipartType<?>> STREAM_CODEC = ByteBufCodecs.registry(MULTIPART_TYPES);
 
     public MultipartType() {
     }
@@ -56,7 +58,7 @@ public abstract class MultipartType<T extends MultiPart> {
     public abstract T createPartClient(MCDataInput packet);
 
     public Identifier getRegistryName() {
-        return Objects.requireNonNull(MultiPartRegistries.multipartTypes().getKey(this));
+        return Objects.requireNonNull(REGISTRY.getKey(this));
     }
 
     // Internal arms-length client-only fields.

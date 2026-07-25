@@ -60,7 +60,7 @@ public class CBMicroblockModContent {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CBMicroblock.MOD_ID);
     private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, CBMicroblock.MOD_ID);
     private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CBMicroblock.MOD_ID);
-    private static final DeferredRegister<MultipartType<?>> MULTIPART_TYPES = DeferredRegister.create(MultipartType.MULTIPART_TYPES, CBMicroblock.MOD_ID);
+    private static final DeferredRegister<MultipartType<?>> MULTIPART_TYPES = DeferredRegister.create(MultipartType.REGISTRY, CBMicroblock.MOD_ID);
     private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, CBMicroblock.MOD_ID);
 
     public static final DeferredItem<ItemMicroBlock> MICRO_BLOCK_ITEM = ITEMS.registerItem("microblock", ItemMicroBlock::new);
@@ -166,7 +166,7 @@ public class CBMicroblockModContent {
 
     private static void onRegisterMicroMaterials(RegisterEvent event) {
         // Note: Intentionally kept in same order as Blocks class
-        event.register(MicroMaterial.MULTIPART_TYPES, r -> {
+        event.register(MicroMaterial.MICRO_MATERIAL_TYPES, r -> {
             registerMaterial(r, new BlockMicroMaterial(Blocks.STONE));
             registerMaterial(r, new BlockMicroMaterial(Blocks.GRANITE));
             registerMaterial(r, new BlockMicroMaterial(Blocks.POLISHED_GRANITE));
