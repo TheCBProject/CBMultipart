@@ -29,10 +29,6 @@ public abstract class MultipartType<T extends MultiPart> {
         return MultiPartRegistries.MULTIPART_TYPES.byNameCodec();
     }
 
-    // Internal.
-    @Nullable
-    Object renderer;
-
     public MultipartType() {
     }
 
@@ -62,4 +58,18 @@ public abstract class MultipartType<T extends MultiPart> {
     public Identifier getRegistryName() {
         return Objects.requireNonNull(MultiPartRegistries.multipartTypes().getKey(this));
     }
+
+    // Internal arms-length client-only fields.
+    @Nullable
+    Object dynamicRenderer;
+    @Nullable
+    Object dynamicRendererFactory;
+
+    @Nullable
+    Object staticRenderer;
+    @Nullable
+    Object staticRendererFactory;
+
+    @Nullable
+    Object outlineRenderer;
 }

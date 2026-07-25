@@ -39,7 +39,7 @@ public class MultipartTileBakedModel implements DynamicBlockStateModel {
         if (tileData == null) return;
 
         for (var partAndData : tileData.parts()) {
-            var renderer = MultipartClientRegistry.getRenderer(partAndData.type());
+            var renderer = MultipartClientRegistry.getStaticPartRenderer(partAndData.type());
             if (renderer != null) {
                 renderer.collectParts(partAndData.data(), level, pos, random, parts);
             }

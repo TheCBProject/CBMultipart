@@ -6,7 +6,9 @@ import net.neoforged.neoforge.model.data.ModelData;
 import net.neoforged.neoforge.model.data.ModelProperty;
 
 /**
- * Companion to {@link BlockStatePartBakedModelRenderer}
+ * A part which is ultimately backed by a {@link BlockState}.
+ *
+ * @see BlockStatePartBakedModelRenderer
  */
 public interface BlockStateModelPart extends MultiPart {
 
@@ -20,6 +22,7 @@ public interface BlockStateModelPart extends MultiPart {
     }
 
     record BlockStateModelPartData(BlockState state) {
+
         public static final ModelProperty<BlockStateModelPartData> TYPE = new ModelProperty<>();
     }
 }

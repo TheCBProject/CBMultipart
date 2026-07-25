@@ -2,9 +2,7 @@ package codechicken.microblock.client;
 
 import codechicken.microblock.api.MicroMaterialClient;
 import codechicken.microblock.part.MicroblockPart;
-import codechicken.multipart.api.part.render.PartRenderer;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.MultiBufferSource;
+import codechicken.multipart.api.part.render.StaticPartRenderer;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
@@ -16,9 +14,7 @@ import java.util.List;
 /**
  * Created by covers1624 on 20/10/22.
  */
-public class MicroblockPartRenderer implements PartRenderer<MicroblockPart, Void> {
-
-    public static final MicroblockPartRenderer INSTANCE = new MicroblockPartRenderer();
+public class MicroblockPartRenderer implements StaticPartRenderer<MicroblockPart> {
 
     @Override
     public void collectParts(ModelData modelData, BlockAndTintGetter level, BlockPos pos, RandomSource rand, List<BlockModelPart> parts) {
@@ -31,6 +27,7 @@ public class MicroblockPartRenderer implements PartRenderer<MicroblockPart, Void
         clientMaterial.collectParts(level, pos, microblockData.renderCuboids(), parts);
     }
 
+    // TODO this needs a whole rethink.
 //    @Override
 //    public void renderDynamic(MicroblockPart part, PoseStack pStack, MultiBufferSource buffers, int packedLight, int packedOverlay, float partialTicks) {
 //        MicroMaterialClient clientMaterial = MicroMaterialClient.get(part.material);

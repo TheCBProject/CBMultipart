@@ -4,6 +4,7 @@ import codechicken.microblock.client.MicroblockPartRenderer;
 import codechicken.microblock.client.MicroblockItemRenderer;
 import codechicken.microblock.client.MicroblockRender;
 import codechicken.multipart.api.MultipartClientRegistry;
+import codechicken.multipart.api.RegisterMultipartRenderersEvent;
 import net.covers1624.quack.util.CrashLock;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -19,18 +20,18 @@ public class ClientInit {
     public static void init(IEventBus modBus) {
         LOCK.lock();
 
-        modBus.addListener(ClientInit::clientSetup);
+        modBus.addListener(ClientInit::onRegisterMultipartRenderers);
         modBus.addListener(ClientInit::onRegisterSpecialModelRenderers);
 
         MicroblockRender.init(modBus);
     }
 
-    private static void clientSetup(FMLClientSetupEvent event) {
-        MultipartClientRegistry.register(CBMicroblockModContent.FACE_MICROBLOCK_PART.get(), MicroblockPartRenderer.INSTANCE);
-        MultipartClientRegistry.register(CBMicroblockModContent.HOLLOW_MICROBLOCK_PART.get(), MicroblockPartRenderer.INSTANCE);
-        MultipartClientRegistry.register(CBMicroblockModContent.CORNER_MICROBLOCK_PART.get(), MicroblockPartRenderer.INSTANCE);
-        MultipartClientRegistry.register(CBMicroblockModContent.EDGE_MICROBLOCK_PART.get(), MicroblockPartRenderer.INSTANCE);
-        MultipartClientRegistry.register(CBMicroblockModContent.POST_MICROBLOCK_PART.get(), MicroblockPartRenderer.INSTANCE);
+    private static void onRegisterMultipartRenderers(RegisterMultipartRenderersEvent event) {
+        event.registerStaticPartRenderer(CBMicroblockModContent.FACE_MICROBLOCK_PART.get(), MicroblockPartRenderer::new);
+        event.registerStaticPartRenderer(CBMicroblockModContent.HOLLOW_MICROBLOCK_PART.get(), MicroblockPartRenderer::new);
+        event.registerStaticPartRenderer(CBMicroblockModContent.CORNER_MICROBLOCK_PART.get(), MicroblockPartRenderer::new);
+        event.registerStaticPartRenderer(CBMicroblockModContent.EDGE_MICROBLOCK_PART.get(), MicroblockPartRenderer::new);
+        event.registerStaticPartRenderer(CBMicroblockModContent.POST_MICROBLOCK_PART.get(), MicroblockPartRenderer::new);
     }
 
     private static void onRegisterSpecialModelRenderers(RegisterSpecialModelRendererEvent event) {

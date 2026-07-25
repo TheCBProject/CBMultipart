@@ -3,8 +3,8 @@ package codechicken.multipart.client;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.multipart.api.MultipartClientRegistry;
 import codechicken.multipart.api.part.MultiPart;
-import codechicken.multipart.api.part.render.PartRenderer;
-import codechicken.multipart.api.part.render.PartRenderer.BEState;
+import codechicken.multipart.api.part.render.DynamicPartRenderer;
+import codechicken.multipart.api.part.render.DynamicPartRenderer.BEState;
 import codechicken.multipart.block.TileMultipart;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -44,7 +44,7 @@ public class MultipartTileRenderer implements BlockEntityRenderer<BlockEntity, M
         var beState = new BEState(state.blockPos, state.lightCoords, state.breakProgress);
         List<PartState<?>> partStates = new ArrayList<>();
         for (MultiPart part : tile.getPartList()) {
-            var renderer = MultipartClientRegistry.getRenderer(part.getType());
+            var renderer = MultipartClientRegistry.getDynamicPartRenderer(part.getType());
             if (renderer == null) continue;
 
             var partState = renderer.createDynamicState();
@@ -67,21 +67,6 @@ public class MultipartTileRenderer implements BlockEntityRenderer<BlockEntity, M
         }
     }
 
-    //    @Override
-//    public void render(BlockEntity t, float partialTicks, PoseStack mStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
-//        if (!(t instanceof TileMultipart tile)) return;
-//        CCRenderState ccrs = CCRenderState.instance();
-//        ccrs.reset();
-//        ccrs.brightness = packedLight;
-//        ccrs.overlay = packedOverlay;
-//        for (MultiPart p : tile.getPartList()) {
-//            PartRenderer<?> renderer = MultipartClientRegistry.getRenderer(p.getType());
-//            if (renderer != null) {
-//                renderer.renderDynamic(unsafeCast(p), mStack, buffers, packedLight, packedOverlay, partialTicks);
-//            }
-//        }
-//    }
-
     @Override
     public AABB getRenderBoundingBox(BlockEntity t) {
         if (!(t instanceof TileMultipart tile)) return new AABB(t.getBlockPos());
@@ -97,7 +82,7 @@ public class MultipartTileRenderer implements BlockEntityRenderer<BlockEntity, M
         public @Nullable List<PartState<?>> partStates;
     }
 
-    public record PartState<S>(PartRenderer<?, S> renderer, S state) {
+    public record PartState<S>(DynamicPartRenderer<?, S> renderer, S state) {
 
         void submit(BEState beState, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraRenderState) {
             renderer.submitDynamic(beState, state, poseStack, collector, cameraRenderState);

@@ -1,7 +1,7 @@
 package codechicken.multipart.client;
 
 import codechicken.multipart.api.MultipartClientRegistry;
-import codechicken.multipart.api.part.render.PartRenderer;
+import codechicken.multipart.api.part.render.OutlinePartRenderer;
 import codechicken.multipart.block.BlockMultipart;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.util.PartRayTraceResult;
@@ -29,10 +29,10 @@ public class ClientEventHandler {
         TileMultipart tile = BlockMultipart.getTile(event.getLevel(), hit.getBlockPos());
         if (tile == null) return;
 
-        PartRenderer<?, ?> renderer = MultipartClientRegistry.getRenderer(hit.part.getType());
+        var renderer = MultipartClientRegistry.getOutlinePartRenderer(hit.part.getType());
         if (renderer != null) {
             boolean[] addedCustomRenderer = { false };
-            boolean rendererHandled = renderer.extractBlockHighlight(
+            boolean rendererHandled = renderer.extractPartOutline(
                     unsafeCast(hit.part),
                     hit,
                     event.getLevelRenderer(),
