@@ -6,7 +6,7 @@ import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.init.MultiPartRegistries;
-import codechicken.multipart.network.MultiPartSPH;
+import codechicken.multipart.network.MultiPartNetwork;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
@@ -107,7 +107,7 @@ public class MultipartHelper {
                 PacketSender.sendToChunk(new ClientboundBlockUpdatePacket(world, pos), (ServerLevel) world, pos);
                 for (MultiPart cPart : newTile.getPartList()) {
                     cPart.onConverted();
-                    MultiPartSPH.sendAddPart(newTile, cPart);
+                    MultiPartNetwork.sendAddPart(newTile, cPart);
                 }
             }
 

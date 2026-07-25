@@ -1,7 +1,5 @@
 package codechicken.microblock.part;
 
-import codechicken.lib.data.MCDataInput;
-import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
@@ -15,6 +13,7 @@ import codechicken.multipart.api.part.BaseMultipart;
 import codechicken.multipart.util.PartRayTraceResult;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -69,13 +68,13 @@ public abstract class MicroblockPart extends BaseMultipart {
     }
 
     @Override
-    public void writeDesc(MCDataOutput packet) {
-        packet.writeRegistryIdDirect(MicroMaterialRegistry.microMaterials(), material);
+    public void writeDesc(RegistryFriendlyByteBuf packet) {
+        packet.cc$writeWithRegistryCodec(MicroMaterial.STREAM_CODEC, material);
         packet.writeByte(shape);
     }
 
     @Override
-    public void readDesc(MCDataInput packet) {
+    public void readDesc(RegistryFriendlyByteBuf packet) {
         shape = packet.readByte();
     }
 
@@ -84,7 +83,7 @@ public abstract class MicroblockPart extends BaseMultipart {
     }
 
     @Override
-    public void readUpdate(MCDataInput packet) {
+    public void readUpdate(RegistryFriendlyByteBuf packet) {
         super.readUpdate(packet);
         tile().notifyPartChange(this);
     }

@@ -1,6 +1,5 @@
 package codechicken.multipart.api;
 
-import codechicken.lib.data.MCDataInput;
 import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.part.MultiPart;
 import com.mojang.serialization.Codec;
@@ -48,14 +47,14 @@ public abstract class MultipartType<T extends MultiPart> {
 
     /**
      * Called to create a {@link MultiPart} instance from
-     * the provided {@link MCDataInput}.
+     * the provided {@link RegistryFriendlyByteBuf}.
      * <p>
      * The supplied packet comes from {@link MultiPart#writeDesc}
      *
      * @param packet The packet.
      * @return The client-side part.
      */
-    public abstract T createPartClient(MCDataInput packet);
+    public abstract T createPartClient(RegistryFriendlyByteBuf packet);
 
     public Identifier getRegistryName() {
         return Objects.requireNonNull(REGISTRY.getKey(this));

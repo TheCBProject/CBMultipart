@@ -1,6 +1,5 @@
 package codechicken.microblock.part.edge;
 
-import codechicken.lib.data.MCDataInput;
 import codechicken.lib.raytracer.VoxelShapeCache;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Rotation;
@@ -17,6 +16,7 @@ import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.NormalOcclusionPart;
 import codechicken.multipart.api.part.PartialOcclusionPart;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -124,7 +124,7 @@ public class PostMicroblockPart extends MicroblockPart implements PartialOcclusi
     }
 
     @Override
-    public void readUpdate(MCDataInput packet) {
+    public void readUpdate(RegistryFriendlyByteBuf packet) {
         super.readUpdate(packet);
         if (level().isClientSide()) {
             recalcBounds();

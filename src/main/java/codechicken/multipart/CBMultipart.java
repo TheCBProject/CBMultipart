@@ -19,10 +19,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
-import org.jetbrains.annotations.Nullable;
 
 import static codechicken.multipart.CBMultipart.MOD_ID;
-import static java.util.Objects.requireNonNull;
 
 /**
  * Created by covers1624 on 30/8/20.
@@ -32,10 +30,7 @@ public class CBMultipart {
 
     public static final String MOD_ID = "cb_multipart";
 
-    private static @Nullable ModContainer container;
-
-    public CBMultipart(ModContainer container, IEventBus modBus) {
-        CBMultipart.container = container;
+    public CBMultipart(IEventBus modBus, ModContainer container) {
         CBMultipartModContent.init(modBus);
         MultiPartRegistries.init(modBus);
         DataGenerators.init(modBus);
@@ -46,15 +41,11 @@ public class CBMultipart {
 
         MultipartGenerator.INSTANCE.load(modBus);
         MultipartLoadHandler.init();
-        MultiPartNetwork.init(modBus);
+        MultiPartNetwork.init(modBus, container);
         PlacementConversionHandler.init();
         TickScheduler.init();
 
         modBus.addListener(this::onRegisterMultipartTraits);
-    }
-
-    public static ModContainer container() {
-        return requireNonNull(container);
     }
 
     private void onRegisterMultipartTraits(RegisterMultipartTraitsEvent event) {

@@ -1,18 +1,17 @@
 package codechicken.multipart.api.part;
 
 import codechicken.lib.capability.CapabilityCache;
-import codechicken.lib.data.MCDataInput;
-import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
 import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.PartConverter;
 import codechicken.multipart.block.TileMultipart;
-import codechicken.multipart.network.MultiPartSPH;
+import codechicken.multipart.network.MultiPartNetwork;
 import codechicken.multipart.util.PartRayTraceResult;
 import codechicken.multipart.util.TickScheduler;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -121,18 +120,18 @@ public interface MultiPart {
      *
      * @param packet The packet to write to.
      */
-    default void writeDesc(MCDataOutput packet) { }
+    default void writeDesc(RegistryFriendlyByteBuf packet) { }
 
     /**
      * Fill out this part with the description information contained in {@code packet}.
      * <p>
-     * Companion method to {@link #writeDesc(MCDataOutput)}.
+     * Companion method to {@link #writeDesc(RegistryFriendlyByteBuf)}.
      * <p>
      * Called client-side when the client loads this part for the first time.
      *
      * @param packet The packet to read from.
      */
-    default void readDesc(MCDataInput packet) { }
+    default void readDesc(RegistryFriendlyByteBuf packet) { }
 
     /**
      * Save this part to a {@link ValueOutput}.
@@ -157,8 +156,8 @@ public interface MultiPart {
      *
      * @param func The callback to write the packet data.
      */
-    default void sendUpdate(Consumer<MCDataOutput> func) {
-        MultiPartSPH.dispatchPartUpdate(this, func);
+    default void sendUpdate(Consumer<RegistryFriendlyByteBuf> func) {
+        MultiPartNetwork.sendPartUpdate(this, func);
     }
 
     /**
@@ -166,7 +165,7 @@ public interface MultiPart {
      *
      * @param packet THe packet to read.
      */
-    default void readUpdate(MCDataInput packet) {
+    default void readUpdate(RegistryFriendlyByteBuf packet) {
         readDesc(packet);
         tile().markRender();
     }

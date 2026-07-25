@@ -1,7 +1,6 @@
 package codechicken.multipart.block;
 
 import codechicken.lib.math.MathHelper;
-import codechicken.lib.packet.PacketCustom;
 import codechicken.lib.raytracer.RayTracer;
 import codechicken.lib.vec.Vector3;
 import codechicken.multipart.api.TickableTile;
@@ -11,7 +10,6 @@ import codechicken.multipart.network.MultiPartNetwork;
 import codechicken.multipart.util.MultipartLoadHandler;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -42,18 +40,15 @@ import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
 import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * Created by covers1624 on 1/1/21.
@@ -370,9 +365,9 @@ public class BlockMultipart extends Block implements EntityBlock {
 
     @Override
     public boolean addLandingEffects(BlockState state1, ServerLevel level, BlockPos pos, BlockState state2, LivingEntity entity, int numberOfParticles) {
-        PacketCustom packet = new PacketCustom(MultiPartNetwork.NET_CHANNEL, MultiPartNetwork.C_LANDING_EFFECTS, level.registryAccess());
-        packet.writePos(pos);
-        packet.writeVector(Vector3.fromEntity(entity));
+        var packet = MultiPartNetwork.LANDING_EFFECTS.toClient(level);
+        packet.writeBlockPos(pos);
+        packet.writeVector3(Vector3.fromEntity(entity));
         packet.writeVarInt(numberOfParticles);
         packet.sendToChunk(level, pos);
         return true;

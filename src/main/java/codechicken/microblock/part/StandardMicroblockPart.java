@@ -1,6 +1,5 @@
 package codechicken.microblock.part;
 
-import codechicken.lib.data.MCDataInput;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.util.MaskedCuboid;
@@ -8,11 +7,10 @@ import codechicken.microblock.util.MicroOcclusionHelper;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.PartialOcclusionPart;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 import static codechicken.microblock.util.MicroOcclusionHelper.shapePriority;
 import static codechicken.multipart.util.PartMap.edgeAxisMask;
@@ -137,7 +135,7 @@ public abstract class StandardMicroblockPart extends MicroblockPart implements I
     }
 
     @Override
-    public void readUpdate(MCDataInput packet) {
+    public void readUpdate(RegistryFriendlyByteBuf packet) {
         super.readUpdate(packet);
         if (level().isClientSide()) {
             recalcBounds();

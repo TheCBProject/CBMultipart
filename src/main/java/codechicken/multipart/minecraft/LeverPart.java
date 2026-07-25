@@ -1,14 +1,13 @@
 package codechicken.multipart.minecraft;
 
-import codechicken.lib.data.MCDataInput;
 import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.redstone.FaceRedstonePart;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.core.Direction;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -122,7 +121,7 @@ public class LeverPart extends McSidedStatePart implements FaceRedstonePart {
     }
 
     @Override
-    public void readUpdate(MCDataInput packet) {
+    public void readUpdate(RegistryFriendlyByteBuf packet) {
         super.readUpdate(packet);
         if (active()) {
             LeverBlock.makeParticle(state, level(), pos(), 1.0F);

@@ -1,16 +1,13 @@
 package codechicken.multipart.util;
 
-import codechicken.lib.data.MCDataByteBuf;
+import codechicken.lib.util.CCCodecs;
 import codechicken.multipart.api.TickableTile;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.CBMultipartModContent;
-import codechicken.multipart.network.MultiPartSPH;
-import com.mojang.serialization.Codec;
-import io.netty.buffer.Unpooled;
+import codechicken.multipart.network.MultiPartNetwork;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,7 +21,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +47,7 @@ public class MultipartLoadHandler {
             for (BlockEntity be : List.copyOf(chunk.getBlockEntities().values())) {
                 if (be instanceof TileNBTContainer tile && tile.clientData != null) {
                     Level level = tile.getLevel();
-                    TileMultipart.handleDescPacket(level, tile.getBlockPos(), new MCDataByteBuf(Unpooled.wrappedBuffer(tile.clientData), level.registryAccess()));
+                    TileMultipart.handleDescPacket(level, tile.getBlockPos(), tile.clientData);
                 }
             }
         }
@@ -71,7 +67,7 @@ public class MultipartLoadHandler {
         //we don't load it multiple times.
         private boolean loaded;
 
-        private @Nullable ByteBuffer clientData;
+        private @Nullable RegistryFriendlyByteBuf clientData;
 
         @Nullable
         public Optional<TileMultipart> tile;
@@ -83,7 +79,7 @@ public class MultipartLoadHandler {
         //Handle initial desc sync
         @Override
         public void handleUpdateTag(ValueInput input) {
-            clientData = input.read("data", Codec.BYTE_BUFFER).orElseThrow();
+            clientData = input.read("data", CCCodecs.embeddedPacket(level.registryAccess())).orElseThrow();
         }
 
         @Override
@@ -114,7 +110,7 @@ public class MultipartLoadHandler {
                         level.setBlockEntity(newTile);
                         newTile.notifyTileChange();
                         newTile.notifyShapeChange();
-                        MultiPartSPH.sendDescUpdate(newTile);
+                        MultiPartNetwork.sendDescUpdate(newTile);
                     } else {
                         level.removeBlock(getBlockPos(), false);
                     }

@@ -1,6 +1,5 @@
 package codechicken.multipart.handler;
 
-import codechicken.lib.packet.PacketCustom;
 import codechicken.multipart.network.MultiPartNetwork;
 import codechicken.multipart.util.ControlKeyModifier;
 import net.covers1624.quack.util.CrashLock;
@@ -40,7 +39,7 @@ public class ControlKeyHandler {
             Minecraft mc = Minecraft.getInstance();
             if (mc.getConnection() != null) {
                 ControlKeyModifier.setIsControlDown(mc.player, pressed);
-                PacketCustom packet = new PacketCustom(MultiPartNetwork.NET_CHANNEL, MultiPartNetwork.S_CONTROL_KEY_MODIFIER, mc.player.registryAccess());
+                var packet = MultiPartNetwork.CONTROL_KEY_MODIFIER.toServer();
                 packet.writeBoolean(pressed);
                 packet.sendToServer();
             }

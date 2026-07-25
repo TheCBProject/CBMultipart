@@ -1,7 +1,6 @@
 package codechicken.multipart.minecraft;
 
-import codechicken.lib.data.MCDataInput;
-import codechicken.lib.data.MCDataOutput;
+import codechicken.lib.packet.CCStreamCodecs;
 import codechicken.lib.vec.Cuboid6;
 import codechicken.multipart.api.NormalOcclusionTest;
 import codechicken.multipart.api.part.*;
@@ -9,8 +8,7 @@ import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -64,14 +62,13 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
     }
 
     @Override
-    public void writeDesc(MCDataOutput packet) {
-        //TODO, Read/Write BlockState?
-        packet.writeCompoundNBT(NbtUtils.writeBlockState(state));
+    public void writeDesc(RegistryFriendlyByteBuf packet) {
+        packet.cc$writeWithCodec(CCStreamCodecs.BLOCK_STATE, state);
     }
 
     @Override
-    public void readDesc(MCDataInput packet) {
-        state = NbtUtils.readBlockState(BuiltInRegistries.BLOCK, packet.readCompoundNBT());
+    public void readDesc(RegistryFriendlyByteBuf packet) {
+        state = packet.cc$readWithCodec(CCStreamCodecs.BLOCK_STATE);
     }
 
     @Override

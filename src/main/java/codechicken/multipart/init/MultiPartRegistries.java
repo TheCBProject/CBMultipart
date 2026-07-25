@@ -1,7 +1,5 @@
 package codechicken.multipart.init;
 
-import codechicken.lib.data.MCDataInput;
-import codechicken.lib.data.MCDataOutput;
 import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.PartConverter;
 import codechicken.multipart.api.PartConverter.ConversionResult;
@@ -10,7 +8,7 @@ import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.util.MultipartPlaceContext;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.Identifier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -57,31 +55,26 @@ public class MultiPartRegistries {
     }
 
     /**
-     * Writes a {@link MultiPart} to the provided {@link MCDataOutput} stream.
+     * Writes a {@link MultiPart} to the provided {@link RegistryFriendlyByteBuf} stream.
      * The part must have a valid {@link MultiPart#getType()}.
      * <p>
      * First looks up the ID for the parts {@link MultipartType} from
-     * {@link MultiPart#getType()}, written to the packet as {@link MCDataOutput#writeVarInt(int)}
-     * followed by {@link MultiPart#writeDesc(MCDataOutput)}.
+     * {@link MultiPart#getType()}, written to the packet as {@link RegistryFriendlyByteBuf#writeVarInt(int)}
+     * followed by {@link MultiPart#writeDesc(RegistryFriendlyByteBuf)}.
      *
      * @param data The stream to write the data to.
      * @param part The {@link MultiPart} to write to said stream.
      */
-    public static void writePart(MCDataOutput data, MultiPart part) {
-        MultipartType<?> type = requireNonNull(part.getType());
-        Identifier name = requireNonNull(type.getRegistryName());
-        if (!MultipartType.REGISTRY.containsKey(name)) {
-            throw new RuntimeException("MultiPartType with name '" + name + "' is not registered.");
-        }
-        data.writeRegistryIdDirect(MultipartType.REGISTRY, type);
+    public static void writePart(RegistryFriendlyByteBuf data, MultiPart part) {
+        data.cc$writeWithRegistryCodec(MultipartType.STREAM_CODEC, requireNonNull(part.getType()));
         part.writeDesc(data);
     }
 
     /**
      * Reads a {@link MultiPart} from a stream.
-     * First reads a {@link MultipartType} id using {@link MCDataInput#readVarInt()}
-     * then calls {@link MultipartType#createPartClient(MCDataInput)}, following that
-     * calls {@link MultiPart#readDesc(MCDataInput)}.
+     * First reads a {@link MultipartType} id using {@link RegistryFriendlyByteBuf#readVarInt()}
+     * then calls {@link MultipartType#createPartClient(RegistryFriendlyByteBuf)}, following that
+     * calls {@link MultiPart#readDesc(RegistryFriendlyByteBuf)}.
      * <p>
      * This method expects the part to be read without errors, errors
      * will cause the entire part space to break.
@@ -89,9 +82,9 @@ public class MultiPartRegistries {
      * @param data The stream to read from.
      * @return The TMultiPart.
      */
-    public static MultiPart readPart(MCDataInput data) {
-        MultipartType<?> type = data.readRegistryIdDirect(MultipartType.REGISTRY);
-        MultiPart part = type.createPartClient(data);
+    public static MultiPart readPart(RegistryFriendlyByteBuf data) {
+        var type = data.cc$readWithRegistryCodec(MultipartType.STREAM_CODEC);
+        var part = type.createPartClient(data);
         part.readDesc(data);
         return part;
     }

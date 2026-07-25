@@ -1,8 +1,7 @@
 package codechicken.multipart.api;
 
-import codechicken.lib.data.MCDataInput;
 import codechicken.multipart.api.part.MultiPart;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.level.storage.ValueInput;
 
 /**
@@ -25,7 +24,7 @@ public class SimpleMultipartType<T extends MultiPart> extends MultipartType<T> {
     }
 
     @Override
-    public T createPartClient(MCDataInput packet) {
+    public T createPartClient(RegistryFriendlyByteBuf packet) {
         return factory.create(true);
     }
 

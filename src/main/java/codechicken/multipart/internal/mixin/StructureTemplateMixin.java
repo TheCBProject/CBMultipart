@@ -2,7 +2,6 @@ package codechicken.multipart.internal.mixin;
 
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.CBMultipartModContent;
-import codechicken.multipart.network.MultiPartSPH;
 import codechicken.multipart.util.MultipartHelper;
 import codechicken.multipart.util.MultipartLoadHandler;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;

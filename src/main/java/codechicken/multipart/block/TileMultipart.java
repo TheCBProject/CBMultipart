@@ -1,24 +1,21 @@
 package codechicken.multipart.block;
 
 import codechicken.lib.capability.CapabilityCache;
-import codechicken.lib.data.MCDataByteBuf;
-import codechicken.lib.data.MCDataInput;
-import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.math.MathHelper;
 import codechicken.lib.raytracer.VoxelShapeCache;
+import codechicken.lib.util.CCCodecs;
 import codechicken.lib.vec.Vector3;
 import codechicken.lib.world.IChunkLoadTile;
 import codechicken.multipart.api.part.BaseMultipart;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.init.MultiPartRegistries;
-import codechicken.multipart.network.MultiPartSPH;
+import codechicken.multipart.network.MultiPartNetwork;
 import codechicken.multipart.trait.TCapabilityTile;
 import codechicken.multipart.util.MultipartGenerator;
 import codechicken.multipart.util.MultipartHelper;
 import codechicken.multipart.util.PartRayTraceResult;
 import com.google.common.base.Preconditions;
-import com.mojang.serialization.Codec;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.covers1624.quack.collection.ColUtils;
@@ -27,7 +24,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -44,6 +43,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
@@ -52,7 +52,10 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.common.world.AuxiliaryLightManager;
+import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,6 +74,8 @@ import static net.minecraft.world.level.block.Block.*;
  * The host tile, capable of containing {@link MultiPart} instances.
  */
 public class TileMultipart extends BlockEntity implements IChunkLoadTile {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TileMultipart.class);
 
     private List<MultiPart> partList = new CopyOnWriteArrayList<>();
     private final CapabilityCache capabilityCache = new CapabilityCache();
@@ -204,17 +209,19 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
 
     @Override
     public final CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        CompoundTag tag = super.getUpdateTag(registries);
-        MCDataByteBuf desc = new MCDataByteBuf(getLevel().registryAccess());
-        writeDesc(desc);
-        desc.writeToNBT(tag, "data");
-        return tag;
+        try (var problemCollector = new ProblemReporter.ScopedCollector(this.problemPath(), LOGGER)) {
+            var output = TagValueOutput.createWithContext(problemCollector, registries);
+            RegistryFriendlyByteBuf desc = new RegistryFriendlyByteBuf(Unpooled.buffer(), getLevel().registryAccess(), ConnectionType.NEOFORGE);
+            writeDesc(desc);
+            output.store("data", CCCodecs.embeddedPacket(getLevel().registryAccess()), desc);
+            return output.buildResult();
+        }
     }
 
     @Override
     public void handleUpdateTag(ValueInput input) {
-        var data = input.read("data", Codec.BYTE_BUFFER).orElseThrow();
-        handleDescPacket(getLevel(), getBlockPos(), new MCDataByteBuf(Unpooled.wrappedBuffer(data)));
+        var data = input.read("data", CCCodecs.embeddedPacket(level.registryAccess())).orElseThrow();
+        handleDescPacket(getLevel(), getBlockPos(), data);
     }
 
     //endregion
@@ -224,7 +231,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     /**
      * Writes the description of this tile, and all parts composing it, to packet
      */
-    public void writeDesc(MCDataOutput packet) {
+    public void writeDesc(RegistryFriendlyByteBuf packet) {
         packet.writeByte(partList.size());
         for (MultiPart part : partList) {
             MultiPartRegistries.writePart(packet, part);
@@ -259,7 +266,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     }
 
     public void addPart_impl(MultiPart part) {
-        if (!level.isClientSide()) MultiPartSPH.sendAddPart(this, part);
+        if (!level.isClientSide()) MultiPartNetwork.sendAddPart(this, part);
 
         addPart_do(part);
         part.onAdded();
@@ -309,7 +316,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         part.preRemove();
         partList.removeIf(e -> e == part);
 
-        if (sendPacket) MultiPartSPH.sendRemPart(this, idx);
+        if (sendPacket) MultiPartNetwork.sendRemPart(this, idx);
 
         partRemoved(part, idx);
         part.onRemoved();
@@ -706,9 +713,9 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     /**
      * Constructs this tile and its parts from a desc packet
      */
-    public static void handleDescPacket(Level world, BlockPos pos, MCDataInput packet) {
+    public static void handleDescPacket(Level world, BlockPos pos, RegistryFriendlyByteBuf packet) {
         List<MultiPart> parts = new ArrayList<>();
-        int nParts = packet.readUByte();
+        int nParts = packet.readUnsignedByte();
         for (int i = 0; i < nParts; i++) {
             parts.add(MultiPartRegistries.readPart(packet));
         }
