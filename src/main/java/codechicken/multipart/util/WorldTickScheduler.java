@@ -3,18 +3,24 @@ package codechicken.multipart.util;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.RandomTickPart;
 import codechicken.multipart.block.TileMultipart;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.covers1624.quack.collection.FastStream;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -27,14 +33,27 @@ import static codechicken.multipart.CBMultipart.MOD_ID;
  */
 class WorldTickScheduler extends SavedData {
 
+    private static final SavedDataType<WorldTickScheduler> TYPE = new SavedDataType<>(
+            MOD_ID + "_scheduled_ticks",
+            WorldTickScheduler::new,
+            ctx -> CompoundTag.CODEC.flatXmap(tag -> {
+                var scheduler = new WorldTickScheduler(ctx);
+                var reporter = new ProblemReporter.Collector();
+                scheduler.load(TagValueInput.create(reporter, ctx.getServer().registryAccess(), tag));
+                if (reporter.isEmpty()) return DataResult.success(scheduler);
+                return DataResult.error(() -> "Failed to deserialize:" + reporter.getReport());
+            }, scheduler -> {
+                var reporter = new ProblemReporter.Collector();
+                var output = TagValueOutput.createWithContext(reporter, ctx.getServer().registryAccess());
+                scheduler.save(output);
+
+                if (reporter.isEmpty()) return DataResult.success(output.buildResult());
+                return DataResult.error(() -> "Failed to serialize: " + reporter.getReport());
+            })
+    );
+
     public static WorldTickScheduler getInstance(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(
-                new Factory<>(
-                        () -> new WorldTickScheduler(level),
-                        (t, r) -> new WorldTickScheduler(level, t)
-                ),
-                MOD_ID + "_scheduled_ticks"
-        );
+        return level.getDataStorage().computeIfAbsent(TYPE);
     }
 
     public static ChunkScheduler getInstance(LevelChunk chunk) {
@@ -54,36 +73,27 @@ class WorldTickScheduler extends SavedData {
         this.world = world;
     }
 
-    WorldTickScheduler(ServerLevel world, CompoundTag tag) {
-        this.world = world;
-        load(tag);
-    }
-
-    private void load(CompoundTag tag) {
-        ListTag chunksList = tag.getList("Chunks", Tag.TAG_COMPOUND);
-        for (int i = 0; i < chunksList.size(); i++) {
-            CompoundTag chunkTag = chunksList.getCompound(i);
-            ChunkPos pos = new ChunkPos(chunkTag.getInt("ChunkX"), chunkTag.getInt("ChunkZ"));
+    private void load(ValueInput input) {
+        var chunksList = input.childrenListOrEmpty("Chunks");
+        for (var chunkTag : chunksList) {
+            var pos = chunkTag.read("Pos", ChunkPos.CODEC).orElseThrow();
             ChunkScheduler chunkScheduler = new ChunkScheduler(this, pos);
             chunkScheduler.load(chunkTag);
             chunks.put(pos, chunkScheduler);
         }
     }
 
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
-        ListTag chunksList = new ListTag();
+    private void save(ValueOutput output) {
+        var chunksList = output.childrenList("Chunks");
         for (ChunkScheduler chunk : chunks.values()) {
-            CompoundTag chunkTag = chunk.save(new CompoundTag());
-            if (chunkTag == null) continue;
-
-            chunkTag.putInt("ChunkX", chunk.pos.x);
-            chunkTag.putInt("ChunkZ", chunk.pos.z);
-            chunksList.add(chunkTag);
+            var chunkTag = chunksList.addChild();
+            chunk.save(chunkTag);
+            if (chunkTag.isEmpty()) {
+                chunksList.discardLast();
+                continue;
+            }
+            chunkTag.store("Pos", ChunkPos.CODEC, chunk.pos);
         }
-        tag.put("Chunks", chunksList);
-
-        return tag;
     }
 
     @Override
@@ -159,26 +169,23 @@ class WorldTickScheduler extends SavedData {
             this.pos = pos;
         }
 
-        private void load(CompoundTag tag) {
-            FastStream.of(tag.getList("ticks", 10))
-                    .map(e -> ((CompoundTag) e))
-                    .map(SavedTickEntry::new)
+        private void load(ValueInput input) {
+            input.listOrEmpty("ticks", SavedTickEntry.CODEC)
                     .forEach(savedTicks::add);
         }
 
-        private @Nullable CompoundTag save(CompoundTag tag) {
-            if (scheduledTicks.isEmpty() && savedTicks.isEmpty()) return null;
+        private void save(ValueOutput output) {
+            if (scheduledTicks.isEmpty() && savedTicks.isEmpty()) return;
 
-            ListTag tickList = new ListTag();
-            FastStream.of(scheduledTicks)
-                    .map(PartTickEntry::write)
-                    .filter(Objects::nonNull)
-                    .forEach(tickList::add);
+            var tickList = output.list("ticks", SavedTickEntry.CODEC);
+            for (var tick : scheduledTicks) {
+                var saved = tick.save();
+                if (saved != null) {
+                    tickList.add(saved);
+                }
+            }
             // Just incase weird things happen.
-            savedTicks.forEach(e -> tickList.add(e.write()));
-            tag.put("ticks", tickList);
-
-            return tag;
+            savedTicks.forEach(tickList::add);
         }
 
         public void addScheduledTick(MultiPart part, int time) {
@@ -271,60 +278,26 @@ class WorldTickScheduler extends SavedData {
         }
     }
 
-    private static class PartTickEntry {
-
-        public final MultiPart part;
-        public final long time;
-        public final boolean random;
-
-        private PartTickEntry(MultiPart part, long time, boolean random) {
-            this.part = part;
-            this.time = time;
-            this.random = random;
-        }
+    private record PartTickEntry(MultiPart part, long time, boolean random) {
 
         @Nullable
-        public CompoundTag write() {
+        public SavedTickEntry save() {
             if (!part.hasTile()) return null;
 
-            CompoundTag tag = new CompoundTag();
-            tag.put("pos", NbtUtils.writeBlockPos(part.pos()));
-            tag.putInt("idx", part.tile().getPartList().indexOf(part));
-            tag.putLong("time", time);
-            return tag;
+            return new SavedTickEntry(
+                    part.pos(),
+                    part.tile().getPartList().indexOf(part),
+                    time
+            );
         }
     }
 
-    private static class SavedTickEntry {
+    private record SavedTickEntry(BlockPos pos, int idx, long time) {
 
-        public final BlockPos pos;
-        public final int idx;
-        public final long time;
-
-        public SavedTickEntry(CompoundTag tag) {
-            pos = readBlockPos(tag.getCompound("pos"));
-            idx = tag.getInt("idx");
-            time = tag.getLong("time");
-        }
-
-        public CompoundTag write() {
-            CompoundTag tag = new CompoundTag();
-            tag.put("pos", writeBlockPos(pos));
-            tag.putInt("idx", idx);
-            tag.putLong("time", time);
-            return tag;
-        }
-
-        private static BlockPos readBlockPos(CompoundTag tag) {
-            return new BlockPos(tag.getInt("X"), tag.getInt("Y"), tag.getInt("Z"));
-        }
-
-        private static CompoundTag writeBlockPos(BlockPos tag) {
-            CompoundTag compoundtag = new CompoundTag();
-            compoundtag.putInt("X", tag.getX());
-            compoundtag.putInt("Y", tag.getY());
-            compoundtag.putInt("Z", tag.getZ());
-            return compoundtag;
-        }
+        private static final Codec<SavedTickEntry> CODEC = RecordCodecBuilder.create(b -> b.group(
+                BlockPos.CODEC.fieldOf("pos").forGetter(SavedTickEntry::pos),
+                Codec.INT.fieldOf("idx").forGetter(SavedTickEntry::idx),
+                Codec.LONG.fieldOf("time").forGetter(SavedTickEntry::time)
+        ).apply(b, SavedTickEntry::new));
     }
 }

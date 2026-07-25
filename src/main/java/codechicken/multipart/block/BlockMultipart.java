@@ -19,8 +19,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -34,9 +34,11 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -58,41 +60,13 @@ import java.util.function.Consumer;
  */
 public class BlockMultipart extends Block implements EntityBlock {
 
-    public BlockMultipart() {
-        super(Block.Properties.of()
+    public BlockMultipart(BlockBehaviour.Properties props) {
+        super(props
                 .mapColor(MapColor.STONE)
                 .dynamicShape()
                 .noOcclusion()
                 .sound(SoundType.EMPTY)
         );
-    }
-
-    @Override
-    public void initializeClient(Consumer<IClientBlockExtensions> consumer) {
-        consumer.accept(new IClientBlockExtensions() {
-            @Override
-            public boolean addHitEffects(BlockState state, Level level, HitResult target, ParticleEngine manager) {
-                if (target instanceof PartRayTraceResult hit) {
-                    TileMultipart tile = getTile(level, hit.getBlockPos());
-                    if (tile != null) {
-                        hit.part.addHitEffects(hit, manager);
-                    }
-                }
-                return true;
-            }
-
-            @Override
-            public boolean addDestroyEffects(BlockState state, Level Level, BlockPos pos, ParticleEngine manager) {
-                // Just return true, we handle this ourselves in onDestroyedByPlayer
-                return true;
-            }
-
-            @Override
-            public boolean playBreakSound(BlockState state, Level level, BlockPos pos) {
-                // Handled in onDestroyedByPlayer
-                return true;
-            }
-        });
     }
 
     @Nullable
@@ -129,11 +103,12 @@ public class BlockMultipart extends Block implements EntityBlock {
         return tile == null ? Shapes.empty() : tile.getCollisionShape(context);
     }
 
-    @Override
-    public VoxelShape getOcclusionShape(BlockState state, BlockGetter world, BlockPos pos) {
-        TileMultipart tile = getTile(world, pos);
-        return tile == null ? Shapes.empty() : tile.getRenderOcclusionShape();
-    }
+    // TODO Occlusion shapes now don't have any world information..
+//    @Override
+//    public VoxelShape getOcclusionShape(BlockState state, BlockGetter world, BlockPos pos) {
+//        TileMultipart tile = getTile(world, pos);
+//        return tile == null ? Shapes.empty() : tile.getRenderOcclusionShape();
+//    }
 
     @Override
     public VoxelShape getInteractionShape(BlockState state, BlockGetter world, BlockPos pos) {
@@ -232,7 +207,7 @@ public class BlockMultipart extends Block implements EntityBlock {
     }
 
     @Override
-    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, ItemStack toolStack, boolean willHarvest, FluidState fluid) {
         TileMultipart tile = getTile(level, pos);
         PartRayTraceResult hit = retracePart(level, pos, player);
 
@@ -251,7 +226,7 @@ public class BlockMultipart extends Block implements EntityBlock {
             return true;
         }
 
-        if (level.isClientSide && tile.isClientTile()) {
+        if (level.isClientSide() && tile.isClientTile()) {
             hit.part.addDestroyEffects(hit, Minecraft.getInstance().particleEngine);
             return true;
         }
@@ -271,7 +246,7 @@ public class BlockMultipart extends Block implements EntityBlock {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData, Player player) {
         TileMultipart tile = getTile(level, pos);
         PartRayTraceResult hit = retracePart(level, pos, player);
         if (tile != null && hit != null) {
@@ -282,13 +257,13 @@ public class BlockMultipart extends Block implements EntityBlock {
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit_) {
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit_) {
         TileMultipart tile = getTile(level, pos);
         PartRayTraceResult hit = retracePart(level, pos, player);
         if (tile != null && hit != null) {
             return tile.useItemOn(stack, player, hit, hand);
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     @Override
@@ -312,10 +287,10 @@ public class BlockMultipart extends Block implements EntityBlock {
     }
 
     @Override
-    public void entityInside(BlockState state, Level world, BlockPos pos, Entity entity) {
+    protected void entityInside(BlockState state, Level world, BlockPos pos, Entity entity, InsideBlockEffectApplier applier, boolean intersects) {
         TileMultipart tile = getTile(world, pos);
         if (tile != null) {
-            tile.entityInside(entity);
+            tile.entityInside(entity, applier, intersects);
         }
     }
 
@@ -328,10 +303,11 @@ public class BlockMultipart extends Block implements EntityBlock {
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
+    protected void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, @Nullable Orientation orientation, boolean isMoving) {
         TileMultipart tile = getTile(world, pos);
         if (tile != null) {
-            tile.onNeighborBlockChanged(fromPos);
+            // TODO, THis needs to be re-evaluated
+            tile.onNeighborBlockChanged(BlockPos.ZERO);
         }
     }
 
@@ -404,7 +380,7 @@ public class BlockMultipart extends Block implements EntityBlock {
 
     @Override
     public boolean addRunningEffects(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (!level.isClientSide) return true;
+        if (!level.isClientSide()) return true;
 
         TileMultipart tile = getTile(level, pos);
         if (tile != null) {
@@ -415,7 +391,7 @@ public class BlockMultipart extends Block implements EntityBlock {
 
     public static void dropAndDestroy(Level world, BlockPos pos) {
         TileMultipart tile = getTile(world, pos);
-        if (tile != null && !world.isClientSide) {
+        if (tile != null && !world.isClientSide()) {
             tile.dropItems(tile.getDrops());
         }
 

@@ -8,7 +8,7 @@ import net.covers1624.quack.util.SneakyUtils;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -51,7 +51,7 @@ public class MicroMaterialConfig {
             return;
         }
         MappedRegistry<MicroMaterial> registry = (MappedRegistry<MicroMaterial>) MicroMaterialRegistry.microMaterials();
-        registry.unfreeze();
+        registry.unfreeze(false);
         try (BufferedReader reader = Files.newBufferedReader(file)) {
             int i = 0;
             String line;
@@ -72,7 +72,7 @@ public class MicroMaterialConfig {
         if (line.isEmpty()) return;
 
         int openBracketIdx = line.indexOf("[");
-        ResourceLocation resourceLocation = ResourceLocation.parse(openBracketIdx == -1 ? line : line.substring(0, openBracketIdx));
+        Identifier resourceLocation = Identifier.parse(openBracketIdx == -1 ? line : line.substring(0, openBracketIdx));
         Block block = BuiltInRegistries.BLOCK.getOptional(resourceLocation).orElse(null);
         if (block == null) {
             LOGGER.error("Error reading microblock config line {}, Missing block: '{}'", lineNumber, resourceLocation);
@@ -114,7 +114,7 @@ public class MicroMaterialConfig {
             }
         }
 
-        ResourceLocation key = BlockMicroMaterial.makeMaterialKey(state);
+        Identifier key = BlockMicroMaterial.makeMaterialKey(state);
 
         if (registry.containsKey(key)) {
             LOGGER.warn("Skipping microblock config line {}. Micro material for BlockState {} already registered.", lineNumber, state);

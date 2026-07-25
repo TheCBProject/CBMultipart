@@ -34,7 +34,7 @@ public class CBMicroblock {
 
         DataGenerators.init(modBus);
 
-        if (FMLEnvironment.dist.isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             ClientInit.init(modBus);
         }
     }

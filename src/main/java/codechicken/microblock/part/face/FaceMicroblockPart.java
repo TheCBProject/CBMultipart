@@ -50,7 +50,7 @@ public class FaceMicroblockPart extends StandardMicroblockPart implements FacePa
     }
 
     @Override
-    public Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory) {
+    public ImmutableSet<MaskedCuboid> getRenderCuboids(boolean isInventory) {
         if (isInventory) return ImmutableSet.of(MaskedCuboid.of(getBounds(), 0));
 
         if (isTransparent()) return ImmutableSet.of(MaskedCuboid.of(renderBounds, renderMask));

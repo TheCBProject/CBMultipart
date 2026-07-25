@@ -56,7 +56,7 @@ public class RedstoneTorchPart extends TorchPart implements FaceRedstonePart, Ra
 
     @Override
     public void onNeighborBlockChanged(BlockPos from) {
-        if (!level().isClientSide) {
+        if (!level().isClientSide()) {
             if (!dropIfCantStay() && isBeingPowered() == active()) {
                 scheduleTick(2);
             }
@@ -69,7 +69,7 @@ public class RedstoneTorchPart extends TorchPart implements FaceRedstonePart, Ra
 
     @Override
     public void scheduledTick() {
-        if (!level().isClientSide && isBeingPowered() == active()) {
+        if (!level().isClientSide() && isBeingPowered() == active()) {
             toggle();
         }
     }

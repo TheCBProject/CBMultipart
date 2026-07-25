@@ -4,6 +4,7 @@ import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.recipe.MicroRecipe;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -13,7 +14,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +25,7 @@ import java.util.List;
  * Component to be added to saw items that can cut microblocks. Provides the logic that
  * determines which blocks can be cut by the saw item this is attached to.
  * <p>
- * For standard Tier-based saws, use {@link #forTier(Tier)}
+ * For standard Tier-based saws, use {@link #forMaterial(ToolMaterial)}
  *
  * @see SawItem
  * @see MicroRecipe
@@ -59,12 +60,12 @@ public record SawComponent(List<Rule> rules, boolean defaultAllowCut) {
      * Creates a SawComponent that cuts any block at the given tier or lower. If a tool of
      * the given tier can harvest a block, then the saw can cut it.
      *
-     * @param tier The tier of the saw.
+     * @param material The tier of the saw.
      * @return The saw component.
      */
-    public static SawComponent forTier(Tier tier) {
+    public static SawComponent forMaterial(ToolMaterial material) {
         return new SawComponent(
-                List.of(SawComponent.Rule.deniesCut(tier.getIncorrectBlocksForDrops())),
+                List.of(SawComponent.Rule.deniesCut(material.incorrectBlocksForDrops())),
                 true);
     }
 
@@ -98,7 +99,8 @@ public record SawComponent(List<Rule> rules, boolean defaultAllowCut) {
         //@formatter:on
 
         private static Rule forTag(TagKey<Block> tag, boolean allowCut) {
-            return new Rule(BuiltInRegistries.BLOCK.getOrCreateTag(tag), allowCut);
+            HolderGetter<Block> holdergetter = BuiltInRegistries.acquireBootstrapRegistrationLookup(BuiltInRegistries.BLOCK);
+            return new Rule(holdergetter.getOrThrow(tag), allowCut);
         }
 
         private static Rule forBlocks(List<Block> blocks, boolean allowCut) {

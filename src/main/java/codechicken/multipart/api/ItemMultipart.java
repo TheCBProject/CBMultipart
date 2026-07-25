@@ -42,7 +42,7 @@ public abstract class ItemMultipart extends Item {
         MultiPart part = newPart(context);
         if (part == null || !TileMultipart.canPlacePart(context, part)) return false;
 
-        if (!world.isClientSide) {
+        if (!world.isClientSide()) {
             TileMultipart.addPart(world, pos, part);
             SoundType sound = part.getSound(context);
             if (sound != null) {

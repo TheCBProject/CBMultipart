@@ -5,11 +5,11 @@ import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.redstone.FaceRedstonePart;
 import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Blocks;
@@ -87,7 +87,7 @@ public class ButtonPart extends McSidedStatePart implements FaceRedstonePart {
             return InteractionResult.CONSUME;
         }
 
-        if (!level().isClientSide) {
+        if (!level().isClientSide()) {
             toggle();
         }
 
@@ -106,8 +106,8 @@ public class ButtonPart extends McSidedStatePart implements FaceRedstonePart {
     }
 
     @Override
-    public void onEntityCollision(Entity entity) {
-        if (!pressed() && !level().isClientSide && entity instanceof Arrow) {
+    public void entityInside(Entity entity, InsideBlockEffectApplier applier, boolean intersects) {
+        if (!pressed() && !level().isClientSide() && entity instanceof Arrow) {
             updateState();
         }
     }

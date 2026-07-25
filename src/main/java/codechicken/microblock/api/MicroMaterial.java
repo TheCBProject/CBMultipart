@@ -9,8 +9,8 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -33,7 +33,7 @@ public abstract class MicroMaterial {
      * The registry name used by MicroMaterial.
      */
     public static final ResourceKey<Registry<MicroMaterial>> MULTIPART_TYPES = ResourceKey.createRegistryKey(
-            ResourceLocation.fromNamespaceAndPath(CBMicroblock.MOD_ID, "micro_material")
+            Identifier.fromNamespaceAndPath(CBMicroblock.MOD_ID, "micro_material")
     );
     public static final Registry<MicroMaterial> REGISTRY = new RegistryBuilder<>(MULTIPART_TYPES)
             .sync(true)
@@ -52,7 +52,7 @@ public abstract class MicroMaterial {
     /**
      * @return Key this material is registered under
      */
-    public ResourceLocation getRegistryName() {
+    public Identifier getRegistryName() {
         return Objects.requireNonNull(MicroMaterialRegistry.microMaterials().getKey(this));
     }
 
@@ -128,7 +128,7 @@ public abstract class MicroMaterial {
     }
 
     private void initClient() {
-        if (FMLEnvironment.dist.isClient() && !DatagenModLoader.isRunningDataGen()) {
+        if (FMLEnvironment.getDist().isClient() && !DatagenModLoader.isRunningDataGen()) {
             initializeClient(props -> renderProperties = props);
         }
     }

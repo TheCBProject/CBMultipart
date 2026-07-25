@@ -5,10 +5,9 @@ import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.util.MultipartPlaceContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +23,7 @@ public abstract class PartConverter {
     /**
      * The registry name used by PartConverter.
      */
-    public static final ResourceKey<Registry<PartConverter>> PART_CONVERTERS = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CBMultipart.MOD_ID, "part_converters"));
+    public static final ResourceKey<Registry<PartConverter>> PART_CONVERTERS = ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(CBMultipart.MOD_ID, "part_converters"));
 
     private static final ConversionResult<Collection<MultiPart>> EMPTY_LIST = new ConversionResult<>(Collections.emptyList(), false);
     private static final ConversionResult<MultiPart> EMPTY = new ConversionResult<>(null, false);

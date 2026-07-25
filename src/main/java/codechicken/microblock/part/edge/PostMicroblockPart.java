@@ -72,7 +72,7 @@ public class PostMicroblockPart extends MicroblockPart implements PartialOcclusi
     }
 
     @Override
-    public Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory) {
+    public ImmutableSet<MaskedCuboid> getRenderCuboids(boolean isInventory) {
         if (isInventory) return ImmutableSet.of(MaskedCuboid.of(getBounds(), 0));
 
         MaskedCuboid a = MaskedCuboid.of(renderBounds1, 0);
@@ -110,7 +110,7 @@ public class PostMicroblockPart extends MicroblockPart implements PartialOcclusi
     @Override
     public void onPartChanged(@Nullable MultiPart part) {
         super.onPartChanged(part);
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             recalcBounds();
         }
     }
@@ -118,7 +118,7 @@ public class PostMicroblockPart extends MicroblockPart implements PartialOcclusi
     @Override
     public void onAdded() {
         super.onAdded();
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             recalcBounds();
         }
     }
@@ -126,7 +126,7 @@ public class PostMicroblockPart extends MicroblockPart implements PartialOcclusi
     @Override
     public void readUpdate(MCDataInput packet) {
         super.readUpdate(packet);
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             recalcBounds();
         }
     }

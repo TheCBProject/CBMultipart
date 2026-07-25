@@ -4,7 +4,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
-    id 'net.neoforged.moddev' version '2.0.77'
+    id 'net.neoforged.moddev' version '2.0.141'
 }
 
 java {
@@ -58,11 +58,12 @@ repositories {
 dependencies {
     api "io.codechicken:CodeChickenLib:${mc_version}-${ccl_version}"
     accessTransformers "io.codechicken:CodeChickenLib:${mc_version}-${ccl_version}"
+    interfaceInjectionData "io.codechicken:CodeChickenLib:${mc_version}-${ccl_version}"
 
     jarJar(api("io.codechicken:TraitMixinCompiler") { transitive = false }) {
         version {
             strictly '[3.0.0,3.1.0)'
-            prefer '3.0.0.21'
+            prefer '3.0.0.22'
         }
     }
     jarJar(api("io.codechicken:ChickenASM") { transitive = false }) {

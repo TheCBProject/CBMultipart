@@ -1,20 +1,15 @@
 package codechicken.multipart.client;
 
-import codechicken.lib.render.RenderUtils;
-import codechicken.lib.vec.Matrix4;
 import codechicken.multipart.api.MultipartClientRegistry;
-import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.render.PartRenderer;
 import codechicken.multipart.block.BlockMultipart;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.util.PartRayTraceResult;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Camera;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.minecraft.client.renderer.state.BlockOutlineRenderState;
+import net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent;
 import net.neoforged.neoforge.common.NeoForge;
+
+import java.util.List;
 
 import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 
@@ -27,31 +22,49 @@ public class ClientEventHandler {
         NeoForge.EVENT_BUS.addListener(ClientEventHandler::onDrawBlockHighlight);
     }
 
-    private static void onDrawBlockHighlight(RenderHighlightEvent.Block event) {
-        Camera camera = event.getCamera();
-        PoseStack mStack = event.getPoseStack();
-        MultiBufferSource buffers = event.getMultiBufferSource();
-        float partialTicks = event.getDeltaTracker().getGameTimeDeltaPartialTick(true);
-        BlockHitResult target = event.getTarget();
-        if (!(target instanceof PartRayTraceResult hit)) return;
+    private static void onDrawBlockHighlight(ExtractBlockOutlineRenderStateEvent event) {
+        if (!(event.getHitResult() instanceof PartRayTraceResult hit)) return;
 
-        TileMultipart tile = BlockMultipart.getTile(camera.getEntity().level(), target.getBlockPos());
+        // Let's just make sure we actually hit the part, unsure why this would never be the case, but /shrug
+        TileMultipart tile = BlockMultipart.getTile(event.getLevel(), hit.getBlockPos());
         if (tile == null) return;
 
-        MultiPart part = hit.part;
-
-        PartRenderer<?> renderer = MultipartClientRegistry.getRenderer(part.getType());
-
-        if (renderer == null || !renderer.drawHighlight(unsafeCast(part), hit, camera, mStack, buffers, partialTicks)) {
-            Matrix4 mat = new Matrix4(mStack);
-            mat.translate(hit.getBlockPos());
-            var shape = hit.hitShape;
-            if (shape == null) {
-                // TODO 1.21.4+ remove this fallback when hitShape is not nullable.
-                shape = part.getShape(CollisionContext.empty());
+        PartRenderer<?, ?> renderer = MultipartClientRegistry.getRenderer(hit.part.getType());
+        if (renderer != null) {
+            boolean[] addedCustomRenderer = { false };
+            boolean rendererHandled = renderer.extractBlockHighlight(
+                    unsafeCast(hit.part),
+                    hit,
+                    event.getLevelRenderer(),
+                    event.getLevelRenderState(),
+                    event.getCamera(),
+                    event.getCollisionContext(),
+                    event.isInTranslucentPass(),
+                    event.isHighContrast(),
+                    (e) -> {
+                        addedCustomRenderer[0] = true;
+                        event.addCustomRenderer(e);
+                    }
+            );
+            if (rendererHandled) {
+                // The part renderer may have set LevelRenderState.blockOutlineRenderState, the same as us
+                // or added to the events `CustomBlockOutlineRenderer` list.
+                // If they did the former, we need to cancel the event to prevent vanilla overwriting it,
+                // if they added a CustomBlockOutlineRenderer, we need to _not_ cancel the event..
+                if (!addedCustomRenderer[0]) {
+                    event.setCanceled(true);
+                }
+                return;
             }
-            RenderUtils.bufferShapeHitBox(mat, buffers, camera, shape);
         }
+
+        event.getLevelRenderState().blockOutlineRenderState = new BlockOutlineRenderState(
+                event.getBlockPos(),
+                event.isInTranslucentPass(),
+                event.isHighContrast(),
+                hit.hitShape,
+                List.of()
+        );
         event.setCanceled(true);
     }
 }

@@ -114,7 +114,7 @@ public abstract class StandardMicroblockPart extends MicroblockPart implements I
     }
 
     @Override
-    public Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory) {
+    public ImmutableSet<MaskedCuboid> getRenderCuboids(boolean isInventory) {
         if (isInventory) return ImmutableSet.of(MaskedCuboid.of(getBounds(), 0));
 
         return ImmutableSet.of(MaskedCuboid.of(renderBounds, renderMask));
@@ -123,7 +123,7 @@ public abstract class StandardMicroblockPart extends MicroblockPart implements I
     @Override
     public void onPartChanged(@Nullable MultiPart part) {
         super.onPartChanged(part);
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             recalcBounds();
         }
     }
@@ -131,7 +131,7 @@ public abstract class StandardMicroblockPart extends MicroblockPart implements I
     @Override
     public void onAdded() {
         super.onAdded();
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             recalcBounds();
         }
     }
@@ -139,7 +139,7 @@ public abstract class StandardMicroblockPart extends MicroblockPart implements I
     @Override
     public void readUpdate(MCDataInput packet) {
         super.readUpdate(packet);
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             recalcBounds();
         }
     }

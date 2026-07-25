@@ -48,7 +48,7 @@ public class ItemMicroBlock extends Item {
             ExecutablePlacement placement = new MicroblockPlacement(player, ctx.getHand(), hit, component.size(), component.material(), !player.getAbilities().instabuild, component.factory().placementProperties()).calculate();
             if (placement == null) return InteractionResult.FAIL;
 
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 placement.place(level, player, stack);
                 if (!player.getAbilities().instabuild) {
                     placement.consume(level, player, stack);

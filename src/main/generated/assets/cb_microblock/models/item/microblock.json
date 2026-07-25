@@ -1,5 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "class": "codechicken.microblock.client.MicroblockItemRenderer",
-  "loader": "codechickenlib:class"
-}

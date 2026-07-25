@@ -3,6 +3,7 @@ package codechicken.multipart.api;
 import codechicken.lib.data.MCDataInput;
 import codechicken.multipart.api.part.MultiPart;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
 
 /**
  * A simple implementation of {@link MultipartType} providing
@@ -19,7 +20,7 @@ public class SimpleMultipartType<T extends MultiPart> extends MultipartType<T> {
     }
 
     @Override
-    public T createPartServer(CompoundTag tag) {
+    public T createPartServer(ValueInput input) {
         return factory.create(false);
     }
 

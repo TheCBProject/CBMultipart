@@ -1,30 +1,28 @@
 package codechicken.microblock.init;
 
-import codechicken.lib.datagen.ItemModelProvider;
 import codechicken.lib.datagen.recipe.RecipeProvider;
 import codechicken.microblock.client.MicroblockItemRenderer;
 import codechicken.microblock.recipe.MicroRecipe;
 import net.covers1624.quack.util.CrashLock;
+import net.minecraft.client.data.models.BlockModelGenerators;
+import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.ModelProvider;
+import net.minecraft.client.data.models.model.ItemModelUtils;
+import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.ItemTagsProvider;
-import net.minecraft.data.tags.TagsProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.common.data.ItemTagsProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
 import static codechicken.microblock.CBMicroblock.MOD_ID;
 import static codechicken.microblock.init.CBMicroblockModContent.*;
 import static codechicken.microblock.init.CBMicroblockTags.Items.STONE_ROD;
-import static codechicken.microblock.init.CBMicroblockTags.Items.TOOL_SAW;
 
 /**
  * Created by covers1624 on 22/10/22.
@@ -39,65 +37,56 @@ public class DataGenerators {
         modBus.addListener(DataGenerators::registerDataGens);
     }
 
-    private static void registerDataGens(GatherDataEvent event) {
-        DataGenerator gen = event.getGenerator();
-        PackOutput output = gen.getPackOutput();
-        ExistingFileHelper files = event.getExistingFileHelper();
-
-        gen.addProvider(event.includeClient(), new ItemModels(output, files));
-        gen.addProvider(event.includeServer(), new ItemTagGen(output, event.getLookupProvider(), CompletableFuture.supplyAsync(TagsProvider.TagLookup::empty), files));
-        gen.addProvider(event.includeServer(), new Recipes(event.getLookupProvider(), output));
+    private static void registerDataGens(GatherDataEvent.Client event) {
+        event.createProvider(Models::new);
+        event.createProvider(ItemTags::new);
+        event.createProvider(Recipes::new);
     }
 
-    private static class ItemTagGen extends ItemTagsProvider {
+    private static class Models extends ModelProvider {
 
-        public ItemTagGen(PackOutput output, CompletableFuture<HolderLookup.Provider> providerLookup, CompletableFuture<TagsProvider.TagLookup<Block>> tagLookup, @Nullable ExistingFileHelper files) {
-            super(output, providerLookup, tagLookup, MOD_ID, files);
+        public Models(PackOutput output) {
+            super(output, MOD_ID);
+        }
+
+        @Override
+        protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
+            itemModels.itemModelOutput.accept(
+                    MICRO_BLOCK_ITEM.get(),
+                    ItemModelUtils.specialModel(Identifier.withDefaultNamespace("block/block"), new MicroblockItemRenderer.Unbaked())
+            );
+
+            itemModels.generateFlatItem(STONE_ROD_ITEM.get(), ModelTemplates.FLAT_ITEM);
+            itemModels.generateFlatItem(STONE_SAW.get(), ModelTemplates.FLAT_ITEM);
+            itemModels.generateFlatItem(IRON_SAW.get(), ModelTemplates.FLAT_ITEM);
+            itemModels.generateFlatItem(GOLD_SAW.get(), ModelTemplates.FLAT_ITEM);
+            itemModels.generateFlatItem(DIAMOND_SAW.get(), ModelTemplates.FLAT_ITEM);
+            itemModels.generateFlatItem(NETHERITE_SAW.get(), ModelTemplates.FLAT_ITEM);
+        }
+    }
+
+    private static class ItemTags extends ItemTagsProvider {
+
+        public ItemTags(PackOutput output, CompletableFuture<HolderLookup.Provider> providerLookup) {
+            super(output, providerLookup, MOD_ID);
         }
 
         @Override
         protected void addTags(HolderLookup.Provider pProvider) {
-            tag(TOOL_SAW)
-                    .add(STONE_SAW.get())
-                    .add(IRON_SAW.get())
-                    .add(GOLD_SAW.get())
-                    .add(DIAMOND_SAW.get())
-                    .add(NETHERITE_SAW.get());
-
             tag(STONE_ROD)
                     .add(STONE_ROD_ITEM.get());
         }
     }
 
-    private static class ItemModels extends ItemModelProvider {
-
-        public ItemModels(PackOutput output, ExistingFileHelper existingFileHelper) {
-            super(output, MOD_ID, existingFileHelper);
-        }
-
-        @Override
-        protected void registerModels() {
-            clazz(MICRO_BLOCK_ITEM.get(), MicroblockItemRenderer.class);
-
-            generated(STONE_ROD_ITEM.get());
-
-            generated(STONE_SAW.get());
-            generated(IRON_SAW.get());
-            generated(GOLD_SAW.get());
-            generated(DIAMOND_SAW.get());
-            generated(NETHERITE_SAW.get());
-        }
-    }
-
     private static class Recipes extends RecipeProvider {
 
-        public Recipes(CompletableFuture<HolderLookup.Provider> registries, PackOutput output) {
-            super(registries, output, MOD_ID);
+        public Recipes(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+            super(output, registries, MOD_ID);
         }
 
         @Override
         protected void registerRecipes() {
-            special(ResourceLocation.fromNamespaceAndPath(MOD_ID, "microblock"), MicroRecipe::new);
+            special(Identifier.fromNamespaceAndPath(MOD_ID, "microblock"), MicroRecipe::new);
 
             shapedRecipe(STONE_ROD_ITEM.get())
                     .key('S', Tags.Items.COBBLESTONES)

@@ -1,85 +1,99 @@
 package codechicken.microblock.client;
 
-import codechicken.lib.model.PerspectiveModelState;
-import codechicken.lib.render.CCRenderState;
-import codechicken.lib.render.item.IItemRenderer;
-import codechicken.lib.util.TransformUtils;
+import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterialClient;
 import codechicken.microblock.item.MicroMaterialComponent;
-import codechicken.microblock.part.MicroblockPart;
+import codechicken.multipart.util.Sides;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.core.Direction;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.client.RenderTypeHelper;
+import org.joml.Vector3fc;
+import org.jspecify.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import static codechicken.microblock.CBMicroblock.MOD_ID;
 
 /**
  * Created by covers1624 on 20/10/22.
  */
-public class MicroblockItemRenderer implements IItemRenderer {
+public class MicroblockItemRenderer implements SpecialModelRenderer<MicroMaterialComponent> {
 
     @Override
-    public void renderItem(ItemStack stack, ItemDisplayContext transformType, PoseStack mStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
-        MicroMaterialComponent component = MicroMaterialComponent.getComponent(stack);
+    @Nullable
+    public MicroMaterialComponent extractArgument(ItemStack stack) {
+        return MicroMaterialComponent.getComponent(stack);
+    }
 
+    @Override
+    public void getExtents(Consumer<Vector3fc> output) {
+        // Just assume this item is a full block.
+        // There isn't really much more we can do here without context.
+        output.accept(Cuboid6.full.min.vector3f());
+        output.accept(Cuboid6.full.max.vector3f());
+    }
+
+    @Override
+    public void submit(@Nullable MicroMaterialComponent component, ItemDisplayContext displayContext, PoseStack poseStack, SubmitNodeCollector collector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) {
         if (component == null || component.factory() == null) return;
 
-        MicroMaterialClient clientMaterial = MicroMaterialClient.get(component.material());
+        var clientMaterial = MicroMaterialClient.get(component.material());
         if (clientMaterial == null) return;
 
-        MicroblockPart part = component.factory().create(true, component.material());
+        var part = component.factory().create(true, component.material());
         part.setShape(component.size(), component.factory().getItemSlot());
 
-        mStack.pushPose();
-        Vector3 offset = Vector3.CENTER.copy().subtract(part.getBounds().center());
-        mStack.translate(offset.x, offset.y, offset.z);
+        poseStack.pushPose();
+        var offset = Vector3.CENTER.copy().subtract(part.getBounds().center());
+        poseStack.translate(offset.x, offset.y, offset.z);
 
-        RenderType layer = clientMaterial.getItemRenderLayer();
         var cuboids = part.getRenderCuboids(true);
-        var itemRenderer = Minecraft.getInstance().getItemRenderer();
-        for (Direction side : Direction.values()) {
-            itemRenderer.renderQuadList(
-                    mStack,
-                    buffers.getBuffer(layer),
-                    clientMaterial.getQuads(part, side, null, cuboids),
-                    stack,
-                    packedLight,
-                    packedOverlay
-            );
+        List<BlockModelPart> list = new ArrayList<>();
+        clientMaterial.collectParts(null, null, cuboids, list);
+        for (var modelPart : list) {
+            // The state used for getRenderType here is not important, all MicroMaterial instances should
+            // wrap BlockModelPart capturing the real block state.
+            // In-world rendering would pass in our own BlockMultipart state anyway.
+            var renderType = modelPart.getRenderType(Blocks.AIR.defaultBlockState());
+            collector.submitCustomGeometry(poseStack, RenderTypeHelper.getEntityRenderType(renderType), (pose, consumer) -> {
+                for (var side : Sides.SIDES_AND_NULL) {
+                    for (BakedQuad quad : modelPart.getQuads(side)) {
+                        consumer.putBulkData(pose, quad, 1.0F, 1.0F, 1.0F, 1.0F, packedLight, packedOverlay);
+                    }
+                }
+            });
         }
-        itemRenderer.renderQuadList(
-                mStack,
-                buffers.getBuffer(layer),
-                clientMaterial.getQuads(part, null, null, cuboids),
-                stack,
-                packedLight,
-                packedOverlay
-        );
 
-        clientMaterial.renderDynamic(part, transformType, mStack, buffers, packedLight, packedOverlay, 0);
-        mStack.popPose();
+        // TODO
+//        clientMaterial.submitDynamic(part, displayContext, poseStack, collector, packedLight, packedOverlay, hasFoil, outlineColor);
+        poseStack.popPose();
     }
 
-    @Override
-    public PerspectiveModelState getModelState() {
-        return TransformUtils.DEFAULT_BLOCK;
-    }
+    public record Unbaked() implements SpecialModelRenderer.Unbaked {
 
-    @Override
-    public boolean useAmbientOcclusion() {
-        return true;
-    }
+        public static final Identifier TYPE = Identifier.fromNamespaceAndPath(MOD_ID, "microblock");
+        public static final MapCodec<Unbaked> CODEC = MapCodec.unit(Unbaked::new);
 
-    @Override
-    public boolean isGui3d() {
-        return true;
-    }
+        @Override
+        public SpecialModelRenderer<?> bake(BakingContext context) {
+            return new MicroblockItemRenderer();
+        }
 
-    @Override
-    public boolean usesBlockLight() {
-        return false;
+        @Override
+        public MapCodec<? extends SpecialModelRenderer.Unbaked> type() {
+            return CODEC;
+        }
     }
 }

@@ -1,7 +1,7 @@
 package codechicken.microblock.init;
 
 import codechicken.microblock.CBMicroblock;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -15,15 +15,12 @@ public class CBMicroblockTags {
 
         public static final TagKey<Item> STONE_ROD = common("rods/stone");
 
-        @Deprecated(forRemoval = true) // Use SawComponent
-        public static final TagKey<Item> TOOL_SAW = mod("tools/saw");
-
         private static TagKey<Item> common(String path) {
-            return ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", path));
+            return ItemTags.create(Identifier.fromNamespaceAndPath("c", path));
         }
 
         private static TagKey<Item> mod(String path) {
-            return ItemTags.create(ResourceLocation.fromNamespaceAndPath(CBMicroblock.MOD_ID, path));
+            return ItemTags.create(Identifier.fromNamespaceAndPath(CBMicroblock.MOD_ID, path));
         }
     }
 }

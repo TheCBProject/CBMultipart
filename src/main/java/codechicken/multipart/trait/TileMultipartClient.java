@@ -3,15 +3,12 @@ package codechicken.multipart.trait;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.client.MultipartModelData;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
-
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.Map;
+import net.neoforged.neoforge.model.data.ModelData;
 
 /**
  * Manual trait implemented on every client side TileMultiPart.
@@ -38,18 +35,19 @@ public class TileMultipartClient extends TileMultipart {
 
     @Override
     public ModelData getModelData() {
-        IdentityHashMap<MultiPart, ModelData> partData = new IdentityHashMap<>();
-        for (MultiPart part : getPartList()) {
-            ModelData data = part.getModelData();
-            if (data != ModelData.EMPTY) {
-                partData.put(part, data);
-            }
+        var parts = getPartList();
+        var partData = ImmutableList.<MultipartModelData.PartModelData>builderWithExpectedSize(parts.size());
+        for (MultiPart part : parts) {
+            partData.add(new MultipartModelData.PartModelData(
+                    part.getType(),
+                    part.getModelData()
+            ));
         }
         return ModelData.of(
                 MultipartModelData.DATA,
                 new MultipartModelData(
                         tile(),
-                        partData
+                        partData.build()
                 )
         );
     }

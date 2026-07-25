@@ -3,13 +3,10 @@ package codechicken.microblock.util;
 import codechicken.microblock.api.MicroMaterial;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
-import net.neoforged.neoforge.registries.RegistryBuilder;
 import org.jetbrains.annotations.Nullable;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Created by covers1624 on 26/6/22.
@@ -35,12 +32,12 @@ public class MicroMaterialRegistry {
 
     @Nullable
     public static MicroMaterial getMaterial(String name) {
-        return getMaterial(ResourceLocation.parse(name));
+        return getMaterial(Identifier.parse(name));
     }
 
     @Nullable
-    public static MicroMaterial getMaterial(ResourceLocation name) {
-        return microMaterials().get(name);
+    public static MicroMaterial getMaterial(Identifier name) {
+        return microMaterials().getValue(name);
     }
 
 }

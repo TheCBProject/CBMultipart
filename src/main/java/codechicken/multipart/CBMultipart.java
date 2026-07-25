@@ -40,7 +40,7 @@ public class CBMultipart {
         MultiPartRegistries.init(modBus);
         DataGenerators.init(modBus);
 
-        if (FMLEnvironment.dist.isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             ClientInit.init(modBus);
         }
 

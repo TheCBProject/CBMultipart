@@ -18,6 +18,8 @@ import codechicken.multipart.util.MultipartGenerator;
 import codechicken.multipart.util.MultipartHelper;
 import codechicken.multipart.util.PartRayTraceResult;
 import com.google.common.base.Preconditions;
+import com.mojang.serialization.Codec;
+import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.covers1624.quack.collection.ColUtils;
 import net.covers1624.quack.collection.FastStream;
@@ -25,13 +27,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -43,6 +44,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -191,13 +194,12 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     //region *** Tile Save/Load ***
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        ListTag parts = new ListTag();
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        var parts = output.childrenList("parts");
         for (MultiPart part : partList) {
-            parts.add(MultiPartRegistries.savePart(new CompoundTag(), part, registries));
+            MultiPartRegistries.savePart(parts.addChild(), part);
         }
-        tag.put("parts", parts);
     }
 
     @Override
@@ -210,8 +212,9 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider) {
-        handleDescPacket(getLevel(), getBlockPos(), MCDataByteBuf.readFromNBT(tag, "data", getLevel().registryAccess()));
+    public void handleUpdateTag(ValueInput input) {
+        var data = input.read("data", Codec.BYTE_BUFFER).orElseThrow();
+        handleDescPacket(getLevel(), getBlockPos(), new MCDataByteBuf(Unpooled.wrappedBuffer(data)));
     }
 
     //endregion
@@ -256,7 +259,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     }
 
     public void addPart_impl(MultiPart part) {
-        if (!level.isClientSide) MultiPartSPH.sendAddPart(this, part);
+        if (!level.isClientSide()) MultiPartSPH.sendAddPart(this, part);
 
         addPart_do(part);
         part.onAdded();
@@ -277,13 +280,13 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
 
     @Nullable
     public TileMultipart remPart(MultiPart part) {
-        Preconditions.checkArgument(!level.isClientSide, "Cannot remove MultiParts from a client tile.");
+        Preconditions.checkArgument(!level.isClientSide(), "Cannot remove MultiParts from a client tile.");
         return remPart_impl(part);
     }
 
     @Nullable
     public TileMultipart remPart_impl(MultiPart part) {
-        remPart_do(part, !level.isClientSide);
+        remPart_do(part, !level.isClientSide());
 
         if (!isRemoved()) {
             TileMultipart tile = partRemoved(this);
@@ -322,7 +325,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         clearParts();
         parts.forEach(this::addPart_do);
         if (level != null) {
-            if (level.isClientSide) {
+            if (level.isClientSide()) {
                 operate(MultiPart::onWorldJoin);
             }
             notifyPartChange(null);
@@ -447,7 +450,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         operate(MultiPart::onMoved);
     }
 
-    public ItemInteractionResult useItemOn(ItemStack stack, Player player, PartRayTraceResult hit, InteractionHand hand) {
+    public InteractionResult useItemOn(ItemStack stack, Player player, PartRayTraceResult hit, InteractionHand hand) {
         return hit.part.useItemOn(stack, player, hit, hand);
     }
 
@@ -467,8 +470,8 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         }
     }
 
-    public void entityInside(Entity entity) {
-        operate(e -> e.onEntityCollision(entity));
+    public void entityInside(Entity entity, InsideBlockEffectApplier applier, boolean intersects) {
+        operate(e -> e.entityInside(entity, applier, intersects));
     }
 
     public void stepOn(Entity entity) {
@@ -728,12 +731,12 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
      * Creates this tile from an NBT tag
      */
     @Nullable
-    public static TileMultipart fromNBT(CompoundTag tag, BlockPos pos, HolderLookup.Provider registries) {
-        ListTag partList = tag.getList("parts", 10);
+    public static TileMultipart fromNBT(ValueInput input, BlockPos pos) {
+        var partList = input.childrenListOrEmpty("parts");
         List<MultiPart> parts = new ArrayList<>();
 
-        for (int i = 0; i < partList.size(); i++) {
-            MultiPart part = MultiPartRegistries.loadPart(partList.getCompound(i), registries);
+        for (var partTag : partList) {
+            MultiPart part = MultiPartRegistries.loadPart(partTag);
             if (part != null) {
                 parts.add(part);
             }
@@ -741,7 +744,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         if (parts.isEmpty()) return null;
 
         TileMultipart tile = MultipartGenerator.INSTANCE.generateCompositeTile(null, pos, parts, false);
-        tile.loadWithComponents(tag, registries);
+        tile.loadWithComponents(input);
         tile.loadParts(parts);
         return tile;
     }
@@ -754,7 +757,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
     }
 
     private static TileMultipart partRemoved(TileMultipart tile) {
-        TileMultipart newTile = MultipartGenerator.INSTANCE.generateCompositeTile(tile, tile.getBlockPos(), tile.getPartList(), tile.level.isClientSide);
+        TileMultipart newTile = MultipartGenerator.INSTANCE.generateCompositeTile(tile, tile.getBlockPos(), tile.getPartList(), tile.level.isClientSide());
         if (tile != newTile) {
             tile.setValid(false);
             MultipartHelper.silentAddTile(tile.level, tile.getBlockPos(), newTile);

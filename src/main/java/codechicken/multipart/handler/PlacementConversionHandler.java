@@ -39,7 +39,7 @@ public class PlacementConversionHandler {
 
         if (place(event.getEntity(), event.getHand())) {
             event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.sidedSuccess(world.isClientSide));
+            event.setCancellationResult(InteractionResult.SUCCESS);
         }
     }
 
@@ -73,7 +73,7 @@ public class PlacementConversionHandler {
 
         if (!tile.canAddPart(part)) return false;
 
-        if (!world.isClientSide) {
+        if (!world.isClientSide()) {
             TileMultipart.addPart(world, pos, part);
             SoundType sound = part.getSound(ctx);
             if (sound != null) {
@@ -87,7 +87,8 @@ public class PlacementConversionHandler {
                 }
             }
         } else {
-            player.swing(hand);
+            // TODO this is dead now because of InteractionResult changes?
+//            player.swing(hand);
         }
 
         return true;

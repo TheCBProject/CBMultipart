@@ -2,8 +2,8 @@ package codechicken.multipart.util;
 
 import codechicken.asm.ClassHierarchyManager;
 import codechicken.mixin.api.MixinBackend;
-import cpw.mods.modlauncher.TransformingClassLoader;
 import net.covers1624.quack.reflect.PrivateLookups;
+import net.neoforged.fml.classloading.transformation.TransformingClassLoader;
 import net.neoforged.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,11 +21,11 @@ public class ForgeMixinBackend extends MixinBackend.SimpleMixinBackend {
     static {
         try {
             m_buildTransformedClassNodeFor = PrivateLookups.getTrustedLookup()
-                    .findVirtual(TransformingClassLoader.class, "buildTransformedClassNodeFor", MethodType.methodType(byte[].class, String.class, String.class));
+                    .findVirtual(TransformingClassLoader.class, "getMaybeTransformedClassBytes", MethodType.methodType(byte[].class, String.class, String.class));
         } catch (Throwable e) {
             throw new RuntimeException("Unable to retrieve methods via reflection.", e);
         }
-        ClassHierarchyManager.addByteLookupFunc(cName -> getBytesForClass(cName, "computing_frames"));
+        ClassHierarchyManager.addByteLookupFunc(cName -> getBytesForClass(cName, "neoforge:computing_frames"));
     }
 
     public ForgeMixinBackend() {
@@ -34,15 +34,15 @@ public class ForgeMixinBackend extends MixinBackend.SimpleMixinBackend {
 
     @Override
     public byte @Nullable [] getBytes(String name) {
-        return getBytesForClass(name, "codechicken.multipart.util.ForgeMixinBackend");
+        return getBytesForClass(name, "cbmultipart:mixin");
     }
 
     @Override
     public boolean filterMethodAnnotations(String annType, String value) {
-        if (FMLEnvironment.dist == null) {
+        if (FMLEnvironment.getDist() == null) {
             return false;
         }
-        String side = "net.minecraftforge.api.distmarker.Dist." + FMLEnvironment.dist.name();
+        String side = "net.minecraftforge.api.distmarker.Dist." + FMLEnvironment.getDist().name();
         return annType.equals("net.minecraftforge.api.distmarker.OnlyIn") && !value.equals(side);
     }
 

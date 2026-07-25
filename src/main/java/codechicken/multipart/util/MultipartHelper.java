@@ -57,7 +57,7 @@ public class MultipartHelper {
         }
         Collection<MultiPart> parts = MultiPartRegistries.convertBlock(world, pos, world.getBlockState(pos));
         if (!parts.isEmpty()) {
-            TileMultipart tile = MultipartGenerator.INSTANCE.generateCompositeTile(null, pos, parts, world.isClientSide);
+            TileMultipart tile = MultipartGenerator.INSTANCE.generateCompositeTile(null, pos, parts, world.isClientSide());
             tile.setLevel(world);
             parts.forEach(tile::addPart_do);
             return Pair.of(tile, true);
@@ -72,7 +72,7 @@ public class MultipartHelper {
      * Checks if there are redundant traits on the tile and strips them.
      */
     public static TileMultipart partRemoved(TileMultipart tile) {
-        TileMultipart newTile = MultipartGenerator.INSTANCE.generateCompositeTile(tile, tile.getBlockPos(), tile.getPartList(), tile.getLevel().isClientSide);
+        TileMultipart newTile = MultipartGenerator.INSTANCE.generateCompositeTile(tile, tile.getBlockPos(), tile.getPartList(), tile.getLevel().isClientSide());
         if (tile != newTile) {
             tile.setValid(false);
             silentAddTile(tile.getLevel(), tile.getBlockPos(), newTile);
@@ -92,7 +92,7 @@ public class MultipartHelper {
         Pair<TileMultipart, Boolean> pair = getOrConvertTile2(world, pos);
         TileMultipart tile = pair.getLeft();
         boolean converted = pair.getRight();
-        ImmutableSet<MixinFactory.TraitKey> traits = MultipartGenerator.INSTANCE.getTraits(part, world.isClientSide);
+        ImmutableSet<MixinFactory.TraitKey> traits = MultipartGenerator.INSTANCE.getTraits(part, world.isClientSide());
 
         TileMultipart newTile = tile;
         if (newTile != null) {

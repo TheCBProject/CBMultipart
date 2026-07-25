@@ -9,9 +9,7 @@ import codechicken.multipart.util.PartRayTraceResult;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -19,6 +17,8 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.api.distmarker.Dist;
@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 
-public abstract class McStatePart extends BaseMultipart implements NormalOcclusionPart, ModelRenderPart, IconHitEffectsPart {
+public abstract class McStatePart extends BaseMultipart implements NormalOcclusionPart, BlockStateModelPart, IconHitEffectsPart {
 
     public BlockState state;
 
@@ -54,14 +54,13 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
     }
 
     @Override
-    public void save(CompoundTag tag, HolderLookup.Provider registries) {
-        tag.put("state", NbtUtils.writeBlockState(state));
+    public void save(ValueOutput output) {
+        output.store("state", BlockState.CODEC, state);
     }
 
     @Override
-    public void load(CompoundTag tag, HolderLookup.Provider registries) {
-        //TODO is this right?
-        state = NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), tag.getCompound("state"));
+    public void load(ValueInput input) {
+        state = input.read("state", BlockState.CODEC).orElseGet(this::defaultBlockState);
     }
 
     @Override
@@ -72,7 +71,7 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
 
     @Override
     public void readDesc(MCDataInput packet) {
-        state = NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), packet.readCompoundNBT());
+        state = NbtUtils.readBlockState(BuiltInRegistries.BLOCK, packet.readCompoundNBT());
     }
 
     @Override
@@ -112,7 +111,7 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
 
     @Override
     public VoxelShape getRenderOcclusionShape() {
-        return state.getOcclusionShape(level(), pos());
+        return state.getOcclusionShape();
     }
 
     @Override
@@ -162,6 +161,6 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
     public TextureAtlasSprite getBrokenIcon(int side) {
         return Minecraft.getInstance().getBlockRenderer().getBlockModelShaper()
                 .getBlockModel(getCurrentState())
-                .getParticleIcon(getModelData());
+                .particleIcon(); // TODO fake level for model data
     }
 }

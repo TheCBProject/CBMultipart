@@ -13,7 +13,7 @@ public class MinecraftMultipart {
 
     public MinecraftMultipart(IEventBus modBus) {
         MinecraftMultipartModContent.init(modBus);
-        if (FMLEnvironment.dist.isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             ClientInit.init(modBus);
         }
     }

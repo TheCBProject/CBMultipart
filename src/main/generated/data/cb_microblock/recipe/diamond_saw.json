@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "M": {
-      "tag": "c:gems/diamond"
-    },
-    "R": {
-      "tag": "c:rods/stone"
-    },
-    "S": {
-      "tag": "c:rods/wooden"
-    }
+    "M": "#c:gems/diamond",
+    "R": "#c:rods/stone",
+    "S": "#c:rods/wooden"
   },
   "pattern": [
     "SRR",

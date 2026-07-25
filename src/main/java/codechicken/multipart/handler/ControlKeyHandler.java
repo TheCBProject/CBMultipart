@@ -18,7 +18,7 @@ import org.lwjgl.glfw.GLFW;
 public class ControlKeyHandler {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
-    private static final KeyMapping KEY = new KeyMapping("key.control", GLFW.GLFW_KEY_LEFT_CONTROL, "key.categories.gameplay");
+    private static final KeyMapping KEY = new KeyMapping("key.control", GLFW.GLFW_KEY_LEFT_CONTROL, KeyMapping.Category.GAMEPLAY);
 
     private static boolean lastPressed = false;
 

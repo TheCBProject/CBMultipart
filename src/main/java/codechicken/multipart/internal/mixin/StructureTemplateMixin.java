@@ -20,23 +20,23 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin (StructureTemplate.class)
 abstract class StructureTemplateMixin {
 
-    @WrapOperation (
-            method = "placeInWorld",
-            at = @At (
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/block/entity/BlockEntity;loadWithComponents(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/core/HolderLookup$Provider;)V"
-            )
-    )
-    private void onLoadWithComponents(BlockEntity instance, CompoundTag tag, HolderLookup.Provider registries, Operation<Void> original) {
-        var id = tag.getString("id");
-        if (!CBMultipartModContent.MULTIPART_TILE_TYPE.getId().toString().equals(id)) {
-            original.call(instance, tag, registries);
-            return;
-        }
-        var tile = TileMultipart.fromNBT(tag, instance.getBlockPos(), registries);
-        if (tile != null) {
-            MultipartHelper.silentAddTile(instance.getLevel(), instance.getBlockPos(), tile);
-            MultiPartSPH.sendDescUpdate(tile);
-        }
-    }
+//    @WrapOperation (
+//            method = "placeInWorld",
+//            at = @At (
+//                    value = "INVOKE",
+//                    target = "Lnet/minecraft/world/level/block/entity/BlockEntity;loadWithComponents(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/core/HolderLookup$Provider;)V"
+//            )
+//    )
+//    private void onLoadWithComponents(BlockEntity instance, CompoundTag tag, HolderLookup.Provider registries, Operation<Void> original) {
+//        var id = tag.getString("id");
+//        if (!CBMultipartModContent.MULTIPART_TILE_TYPE.getId().toString().equals(id)) {
+//            original.call(instance, tag, registries);
+//            return;
+//        }
+//        var tile = TileMultipart.fromNBT(tag, instance.getBlockPos(), registries);
+//        if (tile != null) {
+//            MultipartHelper.silentAddTile(instance.getLevel(), instance.getBlockPos(), tile);
+//            MultiPartSPH.sendDescUpdate(tile);
+//        }
+//    }
 }

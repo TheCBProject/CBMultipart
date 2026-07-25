@@ -13,12 +13,10 @@ import codechicken.multipart.util.PartRayTraceResult;
 import codechicken.multipart.util.TickScheduler;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -30,12 +28,14 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.model.data.ModelData;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
@@ -135,22 +135,22 @@ public interface MultiPart {
     default void readDesc(MCDataInput packet) { }
 
     /**
-     * Save this part to a {@link CompoundTag}.
+     * Save this part to a {@link ValueOutput}.
      * <p>
      * Only called server-side.
      *
-     * @param tag The tag to write to.
+     * @param output The tag to write to.
      */
-    default void save(CompoundTag tag, HolderLookup.Provider registries) { }
+    default void save(ValueOutput output) { }
 
     /**
-     * Load this part from a {@link CompoundTag}.
+     * Load this part from a {@link ValueInput}.
      * <p>
      * Only called server-side.
      *
-     * @param tag The tag to read from.
+     * @param input The tag to read from.
      */
-    default void load(CompoundTag tag, HolderLookup.Provider registries) { }
+    default void load(ValueInput input) { }
 
     /**
      * Send a packet to this part's client-side counterpart.
@@ -323,7 +323,6 @@ public interface MultiPart {
      *
      * @param context The placement context.
      * @return The sound, or {@code null} for no sound.
-     *
      * @deprecated Use {@link #getSound(UseOnContext)} instead.
      */
     @Nullable
@@ -439,10 +438,10 @@ public interface MultiPart {
      * @param player The player that right-clicked the part.
      * @param hit    The {@link PartRayTraceResult} hit result.
      * @param hand   The {@link InteractionHand} the player is using.
-     * @return The {@link ItemInteractionResult}.
+     * @return The {@link InteractionResult}.
      */
-    default ItemInteractionResult useItemOn(ItemStack stack, Player player, PartRayTraceResult hit, InteractionHand hand) {
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    default InteractionResult useItemOn(ItemStack stack, Player player, PartRayTraceResult hit, InteractionHand hand) {
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     /**
@@ -472,10 +471,8 @@ public interface MultiPart {
      * Called when an entity is within this block space.
      * <p>
      * The entity may not actually be colliding with this part.
-     *
-     * @param entity The {@link Entity}.
      */
-    default void onEntityCollision(Entity entity) { }
+    default void entityInside(Entity entity, InsideBlockEffectApplier applier, boolean intersects) { }
 
     /**
      * Called when an entity is standing on this block space.

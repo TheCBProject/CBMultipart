@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "M": {
-      "item": "minecraft:flint"
-    },
-    "R": {
-      "tag": "c:rods/stone"
-    },
-    "S": {
-      "tag": "c:rods/wooden"
-    }
+    "M": "minecraft:flint",
+    "R": "#c:rods/stone",
+    "S": "#c:rods/wooden"
   },
   "pattern": [
     "SRR",

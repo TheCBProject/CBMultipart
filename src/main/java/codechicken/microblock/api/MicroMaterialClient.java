@@ -1,18 +1,15 @@
 package codechicken.microblock.api;
 
-import codechicken.lib.render.CCRenderState;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.part.MicroblockPart;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.multipart.util.PartRayTraceResult;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.core.Direction;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.level.BlockAndTintGetter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -27,14 +24,18 @@ public abstract class MicroMaterialClient {
         return (MicroMaterialClient) material.renderProperties;
     }
 
-    public abstract RenderType getItemRenderLayer();
+    /**
+     * Collect the model parts of this material.
+     *
+     * @param level         The level, {@code null} when in inventory, otherwise a view from the chunk batching thread.
+     * @param pos           The position in world, {@code null} when in inventory.
+     * @param renderCuboids The cuboids and their masks we wish to render.
+     * @param parts         The parts.
+     */
+    public abstract void collectParts(@Nullable BlockAndTintGetter level, @Nullable BlockPos pos, ImmutableSet<MaskedCuboid> renderCuboids, List<BlockModelPart> parts);
 
-    public abstract List<BakedQuad> getQuads(MicroblockPart part, @Nullable Direction side, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids);
-
-    @Deprecated
-    public abstract void renderCuboids(CCRenderState ccrs, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids);
-
-    public void renderDynamic(MicroblockPart part, @Nullable ItemDisplayContext transformType, PoseStack pStack, MultiBufferSource buffers, int packedLight, int packedOverlay, float partialTicks) { }
+    // TODO
+//    public void submitDynamic(MicroblockPart part, ItemDisplayContext displayCtx, PoseStack poseStack, SubmitNodeCollector collector, int packedLight, int packedOverlay, boolean hasFoil, int outlineColor) { }
 
     public void addHitEffects(MicroblockPart part, PartRayTraceResult hit, ParticleEngine engine) { }
 

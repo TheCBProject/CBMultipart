@@ -5,6 +5,7 @@ import codechicken.multipart.api.TickableTile;
 import codechicken.multipart.block.TileMultipart;
 import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.network.MultiPartSPH;
+import com.mojang.serialization.Codec;
 import io.netty.buffer.Unpooled;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
@@ -14,6 +15,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.ChunkEvent;
@@ -21,7 +24,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by covers1624 on 13/5/20.
@@ -38,14 +43,15 @@ public class MultipartLoadHandler {
     }
 
     // TODO move this to a Mixin.
-    // Vanilla fires BlockEntity.handleUpdateTag before the LevelChunk has been added to the world.
+    // BlockEntity.handleUpdateTag is fired before the chunk is fully added to the world.
+    // There is no way in handleUpdateTag to get access to the Chunk the tile is being built into.
+    // We can potentially use a Mixin to wrap the calls and handle it.
     private static void onChunkLoad(ChunkEvent.Load event) {
         if (event.getLevel().isClientSide() && event.getChunk() instanceof LevelChunk chunk) {
             for (BlockEntity be : List.copyOf(chunk.getBlockEntities().values())) {
-                if (be instanceof TileNBTContainer tile && tile.updateTag != null) {
-                    byte[] data = tile.updateTag.getByteArray("data");
+                if (be instanceof TileNBTContainer tile && tile.clientData != null) {
                     Level level = tile.getLevel();
-                    TileMultipart.handleDescPacket(level, tile.getBlockPos(), new MCDataByteBuf(Unpooled.wrappedBuffer(data), level.registryAccess()));
+                    TileMultipart.handleDescPacket(level, tile.getBlockPos(), new MCDataByteBuf(Unpooled.wrappedBuffer(tile.clientData), level.registryAccess()));
                 }
             }
         }
@@ -64,13 +70,11 @@ public class MultipartLoadHandler {
         //Here just in case something weird happens,
         //we don't load it multiple times.
         private boolean loaded;
-        //The NBT of the tile.
-        //We save this back out in case something breaks.
-        @Nullable
-        public CompoundTag tag;
+
+        private @Nullable ByteBuffer clientData;
 
         @Nullable
-        public CompoundTag updateTag;
+        public Optional<TileMultipart> tile;
 
         public TileNBTContainer(BlockPos pos, BlockState state) {
             super(CBMultipartModContent.MULTIPART_TILE_TYPE.get(), pos, state);
@@ -78,38 +82,34 @@ public class MultipartLoadHandler {
 
         //Handle initial desc sync
         @Override
-        public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
-            if (!tag.contains("data")) {
-                logger.warn("Received update tag without 'data' field. Ignoring..");
-                return;
-            }
-            updateTag = tag;
+        public void handleUpdateTag(ValueInput input) {
+            clientData = input.read("data", Codec.BYTE_BUFFER).orElseThrow();
         }
 
         @Override
-        public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries) {
-            super.loadAdditional(compound, registries);
-            tag = compound.copy();
+        protected void loadAdditional(ValueInput input) {
+            super.loadAdditional(input);
+            tile = Optional.ofNullable(TileMultipart.fromNBT(input, getBlockPos()));
         }
 
         @Override
-        public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries) {
-            super.saveAdditional(compound, registries);
-            if (tag != null) {
-                compound.merge(tag);
+        public void saveAdditional(ValueOutput output) {
+            super.saveAdditional(output);
+            if (tile != null) {
+                tile.ifPresent(t -> t.saveCustomOnly(output));
             }
         }
 
         @Override
         public void tick() {
-            if (level == null || level.isClientSide) {
+            if (level == null || level.isClientSide()) {
                 return;
             }
 
             if (!failed && !loaded) {
-                if (tag != null) {
-                    TileMultipart newTile = TileMultipart.fromNBT(tag, getBlockPos(), getLevel().registryAccess());
-                    if (newTile != null) {
+                if (tile != null) {
+                    if (tile.isPresent()) {
+                        var newTile = tile.get();
                         newTile.clearRemoved();
                         level.setBlockEntity(newTile);
                         newTile.notifyTileChange();

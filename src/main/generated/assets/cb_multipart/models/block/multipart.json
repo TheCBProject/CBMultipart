@@ -1,5 +1,0 @@
-{
-  "parent": "minecraft:block/block",
-  "class": "codechicken.multipart.client.MultipartTileBakedModel",
-  "loader": "codechickenlib:class"
-}

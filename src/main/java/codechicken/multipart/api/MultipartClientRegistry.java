@@ -19,7 +19,7 @@ public class MultipartClientRegistry {
      * @param renderer The {@link PartRenderer}.
      * @throws IllegalArgumentException When attempting to replace an already registered {@link PartRenderer}
      */
-    public static synchronized <T extends MultiPart> void register(MultipartType<? super T> type, PartRenderer<? super T> renderer) {
+    public static synchronized <T extends MultiPart, S> void register(MultipartType<? super T> type, PartRenderer<? super T, S> renderer) {
         if (type.renderer != null) {
             throw new IllegalArgumentException(
                     "Attempted to replace part renderer for: "
@@ -38,7 +38,7 @@ public class MultipartClientRegistry {
      * @return The {@link PartRenderer}, or <code>null</code> if none exists.
      */
     @Nullable
-    public static <T extends MultiPart> PartRenderer<T> getRenderer(MultipartType<?> type) {
+    public static <T extends MultiPart, S> PartRenderer<T, S> getRenderer(MultipartType<?> type) {
         return unsafeCast(type.renderer);
     }
 }

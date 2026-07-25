@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "M": {
-      "tag": "c:ingots/netherite"
-    },
-    "R": {
-      "tag": "c:rods/stone"
-    },
-    "S": {
-      "tag": "c:rods/wooden"
-    }
+    "M": "#c:ingots/netherite",
+    "R": "#c:rods/stone",
+    "S": "#c:rods/wooden"
   },
   "pattern": [
     "SRR",

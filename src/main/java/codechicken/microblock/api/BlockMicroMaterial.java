@@ -1,39 +1,34 @@
 package codechicken.microblock.api;
 
-import codechicken.lib.render.CCRenderState;
-import codechicken.lib.render.particle.CustomBreakingParticle;
 import codechicken.lib.render.particle.CustomParticleHandler;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.client.MicroblockRender;
 import codechicken.microblock.init.CBMicroblockModContent;
-import codechicken.microblock.init.CBMicroblockTags;
 import codechicken.microblock.item.SawComponent;
 import codechicken.microblock.part.MicroblockPart;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.multipart.util.PartRayTraceResult;
+import com.google.common.collect.ImmutableSet;
 import net.covers1624.quack.collection.FastStream;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;
@@ -98,10 +93,7 @@ public class BlockMicroMaterial extends MicroMaterial {
         }
 
         var component = SawComponent.getComponent(saw);
-        if (component == null) {
-            // Fallback to tag check
-            return saw.is(CBMicroblockTags.Items.TOOL_SAW);
-        }
+        if (component == null) return false;
 
         return component.canCut(state);
     }
@@ -115,20 +107,8 @@ public class BlockMicroMaterial extends MicroMaterial {
         cons.accept(new MicroMaterialClient() {
 
             @Override
-            public RenderType getItemRenderLayer() {
-                return ItemBlockRenderTypes.getRenderType(state, true);
-            }
-
-            @Override
-            public List<BakedQuad> getQuads(MicroblockPart part, @Nullable Direction side, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids) {
-                if (side != null) return List.of();
-
-                return MicroblockRender.getQuads(part, state, layer, cuboids);
-            }
-
-            @Override
-            public void renderCuboids(CCRenderState ccrs, @Nullable RenderType layer, Iterable<MaskedCuboid> cuboids) {
-                MicroblockRender.renderCuboids(ccrs, state, layer, cuboids);
+            public void collectParts(@Nullable BlockAndTintGetter level, @Nullable BlockPos pos, ImmutableSet<MaskedCuboid> renderCuboids, List<BlockModelPart> parts) {
+                MicroblockRender.collectParts(level, pos, state, renderCuboids, parts);
             }
 
             @Override
@@ -154,34 +134,25 @@ public class BlockMicroMaterial extends MicroMaterial {
 
             @Override
             public void addLandingEffects(MicroblockPart part, PartRayTraceResult hit, Vector3 entity, int numberOfParticles) {
-                Level level = part.level();
-                ParticleEngine manager = Minecraft.getInstance().particleEngine;
-                TextureAtlasSprite sprite = getSprite(level, part.pos());
-
-                if (numberOfParticles != 0) {
-                    for (int i = 0; i < numberOfParticles; i++) {
-                        double mX = level.random.nextGaussian() * 0.15F;
-                        double mY = level.random.nextGaussian() * 0.15F;
-                        double mZ = level.random.nextGaussian() * 0.15F;
-                        manager.add(CustomBreakingParticle.newLandingParticle((ClientLevel) level, entity.x, entity.y, entity.z, mX, mY, mZ, sprite));
-                    }
-                }
+                CustomParticleHandler.addLandingEffects(
+                        part.level(),
+                        entity,
+                        getSprite(part.level(), part.pos()),
+                        numberOfParticles
+                );
             }
 
             @Override
             public void addRunningEffects(MicroblockPart part, PartRayTraceResult hit, Entity entity) {
-                Level level = part.level();
-                ParticleEngine manager = Minecraft.getInstance().particleEngine;
-                TextureAtlasSprite sprite = getSprite(level, part.pos());
-
-                double x = entity.getX() + (level.random.nextFloat() - 0.5D) * entity.getBbWidth();
-                double y = entity.getBoundingBox().minY + 0.1D;
-                double z = entity.getZ() + (level.random.nextFloat() - 0.5D) * entity.getBbWidth();
-                manager.add(new CustomBreakingParticle((ClientLevel) level, x, y, z, -entity.getDeltaMovement().x * 4.0D, 1.5D, -entity.getDeltaMovement().z * 4.0D, sprite));
+                CustomParticleHandler.addRunningEffects(
+                        part.level(),
+                        entity,
+                        getSprite(part.level(), part.pos())
+                );
             }
 
             private TextureAtlasSprite getSprite(Level level, BlockPos pos) {
-                return Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getTexture(state, level, pos);
+                return Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(state, level, pos);
             }
         });
     }
@@ -189,15 +160,15 @@ public class BlockMicroMaterial extends MicroMaterial {
     /**
      * Builds a {@link BlockMicroMaterial} registry name for the given {@link BlockState}.
      * <p>
-     * Due to the restrictions imposed by {@link ResourceLocation}, the following format is used:<br>
+     * Due to the restrictions imposed by {@link Identifier}, the following format is used:<br>
      * {@code mod_id:block_name//property1.value1/property2.value2/property3.value3}
      *
      * @param state The {@link BlockState} to create a name for.
      * @return The name.
      */
-    public static ResourceLocation makeMaterialKey(BlockState state) {
+    public static Identifier makeMaterialKey(BlockState state) {
         Block block = state.getBlock();
-        ResourceLocation blockKey = BuiltInRegistries.BLOCK.getKey(block);
+        Identifier blockKey = BuiltInRegistries.BLOCK.getKey(block);
         String path = blockKey.getPath();
         if (!state.getProperties().isEmpty()) {
             // Stable sort all keys based off their name, otherwise they may differ on the server/client.
@@ -206,6 +177,6 @@ public class BlockMicroMaterial extends MicroMaterial {
                     .map(e -> e.getKey().getName() + "." + e.getKey().getName(unsafeCast(e.getValue())))
                     .join("/");
         }
-        return ResourceLocation.fromNamespaceAndPath(blockKey.getNamespace(), path);
+        return Identifier.fromNamespaceAndPath(blockKey.getNamespace(), path);
     }
 }

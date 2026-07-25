@@ -6,6 +6,7 @@ import codechicken.microblock.part.*;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.util.PartMap;
 import codechicken.multipart.util.PartRayTraceResult;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by covers1624 on 21/10/22.
@@ -34,11 +35,12 @@ public class EdgePlacementProperties extends PlacementProperties {
     }
 
     @Override
+    @Nullable
     public ExecutablePlacement customPlacement(MicroblockPlacement placement) {
         if (placement.size % 2 == 1) return null;
         PostMicroblockFactory postFactory = CBMicroblockModContent.POST_MICROBLOCK_PART.get();
 
-        PostMicroblockPart part = postFactory.create(placement.level.isClientSide, placement.material);
+        PostMicroblockPart part = postFactory.create(placement.level.isClientSide(), placement.material);
         part.setShape(placement.size, placement.side >> 1);
         if (placement.doExpand) {
             MultiPart hPart = ((PartRayTraceResult) placement.hit).part;

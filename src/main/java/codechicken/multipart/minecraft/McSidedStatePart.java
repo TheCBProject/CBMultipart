@@ -20,7 +20,7 @@ public abstract class McSidedStatePart extends McStatePart implements FacePart {
 
     @Override
     public void onNeighborBlockChanged(BlockPos from) {
-        if (!level().isClientSide) {
+        if (!level().isClientSide()) {
             dropIfCantStay();
         }
     }

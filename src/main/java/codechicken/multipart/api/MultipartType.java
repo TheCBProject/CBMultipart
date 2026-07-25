@@ -4,10 +4,11 @@ import codechicken.lib.data.MCDataInput;
 import codechicken.multipart.CBMultipart;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.init.MultiPartRegistries;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.ValueInput;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -20,7 +21,13 @@ public abstract class MultipartType<T extends MultiPart> {
     /**
      * The registry name used by MultipartType.
      */
-    public static final ResourceKey<Registry<MultipartType<?>>> MULTIPART_TYPES = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(CBMultipart.MOD_ID, "multipart_types"));
+    public static final ResourceKey<Registry<MultipartType<?>>> MULTIPART_TYPES = ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(CBMultipart.MOD_ID, "multipart_types"));
+    // TODO this is cyclic
+//    public static final Codec<MultipartType<?>> TYPE_CODEC = MultiPartRegistries.MULTIPART_TYPES.byNameCodec();
+
+    public static Codec<MultipartType<?>> TYPE_CODEC() {
+        return MultiPartRegistries.MULTIPART_TYPES.byNameCodec();
+    }
 
     // Internal.
     @Nullable
@@ -31,15 +38,15 @@ public abstract class MultipartType<T extends MultiPart> {
 
     /**
      * Called to create a {@link MultiPart} instance on the server
-     * side from a {@link CompoundTag} tag. This is called when
+     * side from a {@link ValueInput} tag. This is called when
      * the MultiPart is loaded from disk.
      *
-     * @param tag The {@link CompoundTag} to load from.
+     * @param input The {@link ValueInput} to load from.
      * @return The {@link MultiPart} instance, or {@code null} to
      * discard.
      */
     @Nullable
-    public abstract T createPartServer(CompoundTag tag);
+    public abstract T createPartServer(ValueInput input);
 
     /**
      * Called to create a {@link MultiPart} instance from
@@ -52,7 +59,7 @@ public abstract class MultipartType<T extends MultiPart> {
      */
     public abstract T createPartClient(MCDataInput packet);
 
-    public ResourceLocation getRegistryName() {
+    public Identifier getRegistryName() {
         return Objects.requireNonNull(MultiPartRegistries.multipartTypes().getKey(this));
     }
 }

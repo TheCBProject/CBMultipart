@@ -9,12 +9,12 @@ import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.util.MultipartPlaceContext;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
 import net.neoforged.neoforge.registries.RegistryBuilder;
@@ -35,8 +35,12 @@ public class MultiPartRegistries {
     private static final Logger logger = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
 
-    private static @Nullable Registry<MultipartType<?>> MULTIPART_TYPES;
-    private static @Nullable Registry<PartConverter> PART_CONVERTERS;
+    public static final Registry<MultipartType<?>> MULTIPART_TYPES = new RegistryBuilder<>(MultipartType.MULTIPART_TYPES)
+            .sync(true)
+            .create();
+    private static final Registry<PartConverter> PART_CONVERTERS = new RegistryBuilder<>(PartConverter.PART_CONVERTERS)
+            .sync(false)
+            .create();
 
     public static void init(IEventBus modBus) {
         LOCK.lock();
@@ -44,19 +48,16 @@ public class MultiPartRegistries {
     }
 
     private static void createRegistries(NewRegistryEvent event) {
-        MULTIPART_TYPES = event.create(new RegistryBuilder<>(MultipartType.MULTIPART_TYPES)
-                .sync(true)
-        );
-        PART_CONVERTERS = event.create(new RegistryBuilder<>(PartConverter.PART_CONVERTERS)
-                .sync(false)
-        );
-
+        event.register(MULTIPART_TYPES);
+        event.register(PART_CONVERTERS);
     }
 
+    @Deprecated (forRemoval = true) // Use the fields directly.
     public static Registry<MultipartType<?>> multipartTypes() {
         return requireNonNull(MULTIPART_TYPES, "MultipartType registry not created yet.");
     }
 
+    @Deprecated (forRemoval = true) // Use the fields directly.
     public static Registry<PartConverter> partConverters() {
         return requireNonNull(PART_CONVERTERS, "PartConverter registry not created yet.");
     }
@@ -74,7 +75,7 @@ public class MultiPartRegistries {
      */
     public static void writePart(MCDataOutput data, MultiPart part) {
         MultipartType<?> type = requireNonNull(part.getType());
-        ResourceLocation name = requireNonNull(type.getRegistryName());
+        Identifier name = requireNonNull(type.getRegistryName());
         if (!MULTIPART_TYPES.containsKey(name)) {
             throw new RuntimeException("MultiPartType with name '" + name + "' is not registered.");
         }
@@ -106,48 +107,43 @@ public class MultiPartRegistries {
      * The part must have a valid {@link MultiPart#getType()}.
      * <p>
      * First writes {@link MultipartType#getRegistryName()} to the 'id'
-     * tag, then calls {@link MultiPart#save(CompoundTag, HolderLookup.Provider)}.
+     * tag, then calls {@link MultiPart#save(ValueOutput)}.
      *
-     * @param nbt  The NBT tag to write to.
-     * @param part The {@link MultiPart} to write.
-     * @return The same NBT tag provided.
+     * @param output The NBT tag to write to.
+     * @param part   The {@link MultiPart} to write.
      */
-    public static CompoundTag savePart(CompoundTag nbt, MultiPart part, HolderLookup.Provider registries) {
-        MultipartType<?> type = requireNonNull(part.getType());
-        ResourceLocation name = requireNonNull(type.getRegistryName());
-        nbt.putString("id", name.toString());
-        part.save(nbt, registries);
-        return nbt;
+    public static void savePart(ValueOutput output, MultiPart part) {
+        output.store("id", MultipartType.TYPE_CODEC(), part.getType());
+        part.save(output);
     }
 
     /**
      * Loads a {@link MultiPart} from an NBT tag.
      * First looks up the {@link MultipartType} from the 'id' tag,
      * Missing {@link MultipartType}s are currently ignored and destroyed,
-     * then calls {@link MultipartType#createPartServer(CompoundTag)}
-     * if the result is non null, then calls {@link MultiPart#load(CompoundTag, HolderLookup.Provider)}.
+     * then calls {@link MultipartType#createPartServer(ValueInput)}
+     * if the result is non null, then calls {@link MultiPart#load(ValueInput)}.
      *
-     * @param nbt The NBT tag to read from.
+     * @param input The NBT tag to read from.
      * @return The new {@link MultiPart} instance, or null.
      */
     @Nullable
-    public static MultiPart loadPart(CompoundTag nbt, HolderLookup.Provider registries) {
-        ResourceLocation name = ResourceLocation.parse(nbt.getString("id"));
-        MultipartType<?> type = MULTIPART_TYPES.get(name);
-        if (type == null) {
+    public static MultiPart loadPart(ValueInput input) {
+        var type = input.read("id", MultipartType.TYPE_CODEC());
+        if (type.isEmpty()) {
             //TODO 'dummy' parts to save these.
-            logger.error("Missing mapping for MultiPartType with ID: {}", name);
+            logger.error("Missing mapping for MultiPartType with ID: {}", input.getStringOr("id", "null"));
             return null;
         }
-        MultiPart part = type.createPartServer(nbt);
+        MultiPart part = type.get().createPartServer(input);
         if (part != null) {
-            part.load(nbt, registries);
+            part.load(input);
         }
         return part;
     }
 
     public static Collection<MultiPart> convertBlock(LevelAccessor level, BlockPos pos, BlockState state) {
-        for (PartConverter conv : PART_CONVERTERS) {
+        for (PartConverter conv : partConverters()) {
             ConversionResult<Collection<MultiPart>> result = conv.convert(level, pos, state);
             if (result.success()) {
                 assert result.result() != null;

@@ -4,8 +4,7 @@ import codechicken.lib.data.MCDataInput;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.util.MicroMaterialRegistry;
 import codechicken.multipart.api.MultipartType;
-import net.minecraft.nbt.CompoundTag;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.level.storage.ValueInput;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -17,14 +16,13 @@ public abstract class MicroblockPartFactory extends MultipartType<MicroblockPart
 
     @Nullable
     @Override
-    public MicroblockPart createPartServer(CompoundTag tag) {
-        MicroMaterial material = MicroMaterialRegistry.getMaterial(tag.getString("material"));
+    public MicroblockPart createPartServer(ValueInput input) {
+        MicroMaterial material = MicroMaterialRegistry.getMaterial(input.getString("material").orElseThrow()); // TODO codec read?
         if (material == null) return null;
 
         return create(false, material);
     }
 
-    @NotNull
     @Override
     public MicroblockPart createPartClient(MCDataInput packet) {
         return create(true, packet.readRegistryIdDirect(MicroMaterialRegistry.microMaterials()));

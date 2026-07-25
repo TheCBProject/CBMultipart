@@ -24,13 +24,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.ToolMaterial;
+import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CopperBulbBlock;
@@ -40,6 +40,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.InterModProcessEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import org.apache.logging.log4j.LogManager;
@@ -56,21 +57,21 @@ public class CBMicroblockModContent {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
-    private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, CBMicroblock.MOD_ID);
+    private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CBMicroblock.MOD_ID);
     private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, CBMicroblock.MOD_ID);
     private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, CBMicroblock.MOD_ID);
     private static final DeferredRegister<MultipartType<?>> MULTIPART_TYPES = DeferredRegister.create(MultipartType.MULTIPART_TYPES, CBMicroblock.MOD_ID);
     private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, CBMicroblock.MOD_ID);
 
-    public static final DeferredHolder<Item, ItemMicroBlock> MICRO_BLOCK_ITEM = ITEMS.register("microblock", () -> new ItemMicroBlock(new Item.Properties()));
+    public static final DeferredItem<ItemMicroBlock> MICRO_BLOCK_ITEM = ITEMS.registerItem("microblock", ItemMicroBlock::new);
 
-    public static final DeferredHolder<Item, Item> STONE_ROD_ITEM = ITEMS.register("stone_rod", () -> new Item(new Item.Properties()));
+    public static final DeferredItem<Item> STONE_ROD_ITEM = ITEMS.registerItem("stone_rod", Item::new);
 
-    public static final DeferredHolder<Item, SawItem> STONE_SAW = ITEMS.register("stone_saw", () -> new SawItem(Tiers.STONE, new Item.Properties().setNoRepair()));
-    public static final DeferredHolder<Item, SawItem> IRON_SAW = ITEMS.register("iron_saw", () -> new SawItem(Tiers.IRON, new Item.Properties().setNoRepair()));
-    public static final DeferredHolder<Item, SawItem> GOLD_SAW = ITEMS.register("gold_saw", () -> new SawItem(Tiers.GOLD, new Item.Properties().setNoRepair()));
-    public static final DeferredHolder<Item, SawItem> DIAMOND_SAW = ITEMS.register("diamond_saw", () -> new SawItem(Tiers.DIAMOND, new Item.Properties().setNoRepair()));
-    public static final DeferredHolder<Item, SawItem> NETHERITE_SAW = ITEMS.register("netherite_saw", () -> new SawItem(Tiers.NETHERITE, new Item.Properties().setNoRepair()));
+    public static final DeferredItem<SawItem> STONE_SAW = ITEMS.registerItem("stone_saw", p -> new SawItem(ToolMaterial.STONE, p.setNoCombineRepair()));
+    public static final DeferredItem<SawItem> IRON_SAW = ITEMS.registerItem("iron_saw", p -> new SawItem(ToolMaterial.IRON, p.setNoCombineRepair()));
+    public static final DeferredItem<SawItem> GOLD_SAW = ITEMS.registerItem("gold_saw", p -> new SawItem(ToolMaterial.GOLD, p.setNoCombineRepair()));
+    public static final DeferredItem<SawItem> DIAMOND_SAW = ITEMS.registerItem("diamond_saw", p -> new SawItem(ToolMaterial.DIAMOND, p.setNoCombineRepair()));
+    public static final DeferredItem<SawItem> NETHERITE_SAW = ITEMS.registerItem("netherite_saw", p -> new SawItem(ToolMaterial.NETHERITE, p.setNoCombineRepair()));
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<MicroMaterialComponent>> MICRO_MATERIAL_COMPONENT = DATA_COMPONENTS.register("micro_material", () ->
             DataComponentType.<MicroMaterialComponent>builder()
@@ -108,7 +109,7 @@ public class CBMicroblockModContent {
     public static final DeferredHolder<MultipartType<?>, EdgeMicroFactory> EDGE_MICROBLOCK_PART = MULTIPART_TYPES.register("edge", EdgeMicroFactory::new);
     public static final DeferredHolder<MultipartType<?>, PostMicroblockFactory> POST_MICROBLOCK_PART = MULTIPART_TYPES.register("post", PostMicroblockFactory::new);
 
-    public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<?>> MICRO_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("microblock", () -> new SimpleCraftingRecipeSerializer<>(e -> new MicroRecipe()));
+    public static final DeferredHolder<RecipeSerializer<?>, CustomRecipe.Serializer<? extends CustomRecipe>> MICRO_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("microblock", () -> new CustomRecipe.Serializer<>(e -> new MicroRecipe()));
 
     public static boolean netheriteSawCutsEverything;
 
@@ -142,7 +143,7 @@ public class CBMicroblockModContent {
         general.save();
         general.forceSync();
 
-        ConfigSyncManager.registerSync(ResourceLocation.fromNamespaceAndPath(CBMicroblock.MOD_ID, "general"), general);
+        ConfigSyncManager.registerSync(Identifier.fromNamespaceAndPath(CBMicroblock.MOD_ID, "general"), general);
     }
 
     private static void onCreativeTabBuild(BuildCreativeModeTabContentsEvent event) {
@@ -533,7 +534,7 @@ public class CBMicroblockModContent {
 
     private static void processIMC(InterModProcessEvent event) {
         MappedRegistry<MicroMaterial> registry = (MappedRegistry<MicroMaterial>) MicroMaterialRegistry.microMaterials();
-        registry.unfreeze();
+        registry.unfreeze(false);
         event.getIMCStream().forEach(e -> {
             if (!e.method().equals("micro_material")) return;
 
@@ -554,7 +555,7 @@ public class CBMicroblockModContent {
                 return;
             }
 
-            ResourceLocation key = BlockMicroMaterial.makeMaterialKey(material.state);
+            Identifier key = BlockMicroMaterial.makeMaterialKey(material.state);
             if (registry.containsKey(key)) {
                 LOGGER.warn("Mod '{}' tried to register a duplicate MicroMaterial. '{}'. Ignoring.", sender, key);
                 return;

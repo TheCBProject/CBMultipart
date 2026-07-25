@@ -11,6 +11,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -24,13 +25,13 @@ import static net.covers1624.quack.util.SneakyUtils.unsafeCast;
 public class CBMultipartModContent {
 
     private static final CrashLock LOCK = new CrashLock("Already initialized.");
-    private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, MOD_ID);
+    private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MOD_ID);
     private static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MOD_ID);
 
-    public static final DeferredHolder<Block, BlockMultipart> MULTIPART_BLOCK = BLOCKS.register("multipart", BlockMultipart::new);
+    public static final DeferredBlock<BlockMultipart> MULTIPART_BLOCK = BLOCKS.registerBlock("multipart", BlockMultipart::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<?>> MULTIPART_TILE_TYPE = TILES.register("saved_multipart", () ->
-            BlockEntityType.Builder.of(TileNBTContainer::new, MULTIPART_BLOCK.get()).build(null));
+            new BlockEntityType<>(TileNBTContainer::new, MULTIPART_BLOCK.get()));
 
     public static void init(IEventBus modBus) {
         LOCK.lock();

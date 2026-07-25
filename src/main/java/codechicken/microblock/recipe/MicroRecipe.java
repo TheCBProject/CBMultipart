@@ -31,18 +31,13 @@ public class MicroRecipe extends CustomRecipe {
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends CustomRecipe> getSerializer() {
         return CBMicroblockModContent.MICRO_RECIPE_SERIALIZER.get();
     }
 
     @Override
     public boolean matches(CraftingInput input, Level level) {
         return !getAssemblyResult(input).isEmpty();
-    }
-
-    @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return width >= 3 && height >= 3;
     }
 
     @Override
@@ -219,7 +214,7 @@ public class MicroRecipe extends CustomRecipe {
         for (int x = 0; x < inv.width(); x++) {
             for (int y = 0; y < inv.height(); y++) {
                 ItemStack item = inv.getItem(x, y);
-                if (item.is(CBMicroblockTags.Items.TOOL_SAW) || SawComponent.getComponent(item) != null) {
+                if (SawComponent.getComponent(item) != null) {
                     return new SawResult(item, x, y);
                 }
             }

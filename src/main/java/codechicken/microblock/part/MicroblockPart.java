@@ -6,23 +6,26 @@ import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterial;
 import codechicken.microblock.api.MicroMaterialClient;
+import codechicken.microblock.client.MicroblockModelData;
 import codechicken.microblock.item.ItemMicroBlock;
 import codechicken.microblock.util.MaskedCuboid;
 import codechicken.microblock.util.MicroMaterialRegistry;
 import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.part.BaseMultipart;
 import codechicken.multipart.util.PartRayTraceResult;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.model.data.ModelData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedList;
@@ -87,16 +90,16 @@ public abstract class MicroblockPart extends BaseMultipart {
     }
 
     @Override
-    public void save(CompoundTag tag, HolderLookup.Provider registries) {
-        tag.putByte("shape", shape);
-        tag.putString("material", material.getRegistryName().toString());
+    public void save(ValueOutput output) {
+        output.putByte("shape", shape);
+        output.putString("material", material.getRegistryName().toString());
     }
 
     @Override
-    public void load(CompoundTag tag, HolderLookup.Provider registries) {
-        shape = tag.getByte("shape");
+    public void load(ValueInput input) {
+        shape = input.getByteOr("shape", (byte) 0);
         // TODO redundant because of `createServer`
-        material = MicroMaterialRegistry.getMaterial(tag.getString("material"));
+        material = MicroMaterialRegistry.getMaterial(input.getString("material").orElseThrow());
     }
 
     public abstract Cuboid6 getBounds();
@@ -133,7 +136,27 @@ public abstract class MicroblockPart extends BaseMultipart {
         return super.getCloneStack(hit);
     }
 
-    public abstract Iterable<MaskedCuboid> getRenderCuboids(boolean isInventory);
+    /**
+     * Get all the boxes this part wishes to render as.
+     * <p>
+     * It is HIGHLY recommended that implementors cache these returned sets.
+     *
+     * @param isInventory If the intent is to be rendered in inventory.
+     * @return The boxes to render as.
+     * @implNote This method returns a ImmutableSet explicitly, as its used as a cache key.
+     */
+    public abstract ImmutableSet<MaskedCuboid> getRenderCuboids(boolean isInventory);
+
+    @Override
+    public ModelData getModelData() {
+        return super.getModelData()
+                .derive()
+                .with(MicroblockModelData.TYPE, new MicroblockModelData(
+                        material,
+                        getRenderCuboids(false)
+                ))
+                .build();
+    }
 
     @Override
     public final MultipartType<?> getType() {

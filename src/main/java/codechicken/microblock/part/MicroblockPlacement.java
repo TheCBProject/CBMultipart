@@ -162,7 +162,7 @@ public class MicroblockPlacement {
     }
 
     public MicroblockPart create(int size, int slot, MicroMaterial material) {
-        MicroblockPart part = microFactory.create(level.isClientSide, material);
+        MicroblockPart part = microFactory.create(level.isClientSide(), material);
         part.setShape(size, slot);
         return part;
     }
