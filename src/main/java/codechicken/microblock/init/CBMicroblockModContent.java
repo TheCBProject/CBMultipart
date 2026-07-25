@@ -89,11 +89,11 @@ public class CBMicroblockModContent {
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MICRO_TAB = TABS.register("microblocks", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.cb_microblock"))
-            .icon(() -> ItemMicroBlock.create(1, 2, MicroMaterialRegistry.getMaterial(BlockMicroMaterial.makeMaterialKey(Blocks.GRASS_BLOCK.defaultBlockState()))))
+            .icon(() -> ItemMicroBlock.create(1, 2, MicroMaterial.REGISTRY.getValue(BlockMicroMaterial.makeMaterialKey(Blocks.GRASS_BLOCK.defaultBlockState()))))
             .displayItems((p, o) -> {
                 for (StandardMicroFactory factory : StandardMicroFactory.FACTORIES.values()) {
                     for (int size : new int[] { 1, 2, 4 }) {
-                        for (MicroMaterial material : MicroMaterialRegistry.microMaterials()) {
+                        for (MicroMaterial material : MicroMaterial.REGISTRY) {
                             o.accept(ItemMicroBlock.create(factory.factoryId, size, material));
                         }
                     }
@@ -533,7 +533,7 @@ public class CBMicroblockModContent {
     }
 
     private static void processIMC(InterModProcessEvent event) {
-        MappedRegistry<MicroMaterial> registry = (MappedRegistry<MicroMaterial>) MicroMaterialRegistry.microMaterials();
+        MappedRegistry<MicroMaterial> registry = (MappedRegistry<MicroMaterial>) MicroMaterial.REGISTRY;
         registry.unfreeze(false);
         event.getIMCStream().forEach(e -> {
             if (!e.method().equals("micro_material")) return;

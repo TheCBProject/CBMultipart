@@ -92,14 +92,14 @@ public abstract class MicroblockPart extends BaseMultipart {
     @Override
     public void save(ValueOutput output) {
         output.putByte("shape", shape);
-        output.putString("material", material.getRegistryName().toString());
+        output.store("material", MicroMaterial.CODEC, material);
     }
 
     @Override
     public void load(ValueInput input) {
         shape = input.getByteOr("shape", (byte) 0);
         // TODO redundant because of `createServer`
-        material = MicroMaterialRegistry.getMaterial(input.getString("material").orElseThrow());
+        material = input.read("material", MicroMaterial.CODEC).orElseThrow();
     }
 
     public abstract Cuboid6 getBounds();

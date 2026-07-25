@@ -50,7 +50,7 @@ public class MicroMaterialConfig {
             }
             return;
         }
-        MappedRegistry<MicroMaterial> registry = (MappedRegistry<MicroMaterial>) MicroMaterialRegistry.microMaterials();
+        MappedRegistry<MicroMaterial> registry = (MappedRegistry<MicroMaterial>) MicroMaterial.REGISTRY;
         registry.unfreeze(false);
         try (BufferedReader reader = Files.newBufferedReader(file)) {
             int i = 0;

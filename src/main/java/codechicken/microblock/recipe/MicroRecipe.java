@@ -232,7 +232,7 @@ public class MicroRecipe extends CustomRecipe {
     @Nullable
     public static MicroMaterial findMaterial(ItemStack stack) {
         if (stack.isEmpty()) return null;
-        for (MicroMaterial material : MicroMaterialRegistry.microMaterials()) {
+        for (MicroMaterial material : MicroMaterial.REGISTRY) {
             ItemStack mStack = material.getItem();
             if (ItemStack.isSameItemSameComponents(mStack, stack)) {
                 return material;

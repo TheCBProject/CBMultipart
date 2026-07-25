@@ -53,7 +53,7 @@ public abstract class MicroMaterial {
      * @return Key this material is registered under
      */
     public Identifier getRegistryName() {
-        return Objects.requireNonNull(MicroMaterialRegistry.microMaterials().getKey(this));
+        return Objects.requireNonNull(MicroMaterial.REGISTRY.getKey(this));
     }
 
     /**
