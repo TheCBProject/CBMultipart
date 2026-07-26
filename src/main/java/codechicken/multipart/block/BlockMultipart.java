@@ -226,15 +226,15 @@ public class BlockMultipart extends Block implements EntityBlock {
             return true;
         }
 
-        tile.harvestPart(hit, player);
+        tile.harvestPart(hit, player, toolStack);
         return level.getBlockEntity(pos) == null;
     }
 
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
-        TileMultipart tile = getTile(builder.getParameter(LootContextParams.BLOCK_ENTITY));//TODO
+        TileMultipart tile = getTile(builder.getParameter(LootContextParams.BLOCK_ENTITY));
         if (tile != null) {
-            return tile.getDrops();
+            return tile.getDrops(builder);
         }
 
         return Collections.emptyList();
@@ -387,7 +387,7 @@ public class BlockMultipart extends Block implements EntityBlock {
     public static void dropAndDestroy(Level world, BlockPos pos) {
         TileMultipart tile = getTile(world, pos);
         if (tile != null && !world.isClientSide()) {
-            tile.dropItems(tile.getDrops());
+            tile.dropItems(tile.getDrops(TileMultipart.lootBuilderForTile(tile)));
         }
 
         world.removeBlock(pos, false);

@@ -22,6 +22,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.model.data.ModelData;
@@ -111,7 +112,7 @@ public abstract class MicroblockPart extends BaseMultipart {
     public abstract int getItemFactoryId();
 
     @Override
-    public Iterable<ItemStack> getDrops() {
+    public Iterable<ItemStack> getDrops(LootParams.Builder builder) {
         int size = getSize();
         List<ItemStack> items = new LinkedList<>();
         for (int s : new int[] { 4, 2, 1 }) {
