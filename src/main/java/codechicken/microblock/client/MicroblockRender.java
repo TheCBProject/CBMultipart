@@ -8,6 +8,7 @@ import codechicken.microblock.init.CBMicroblockModContent;
 import codechicken.microblock.item.MicroMaterialComponent;
 import codechicken.microblock.part.MicroblockPlacement;
 import codechicken.microblock.util.MaskedCuboid;
+import codechicken.multipart.client.MultipartTintRegistry;
 import codechicken.multipart.util.ProxyBlockAndTintGetter;
 import codechicken.multipart.util.Sides;
 import codechicken.multipart.util.WrappedBlockModelPart;
@@ -18,7 +19,6 @@ import com.google.common.collect.ImmutableSet;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
@@ -135,8 +135,6 @@ public class MicroblockRender {
             level = new ProxyBlockAndTintGetter(level, pos, state, ModelData.EMPTY);
         }
 
-        // TODO dynamic tinting system for parts.
-        boolean mayHaveTint = Minecraft.getInstance().getBlockColors().blockColors.containsKey(state.getBlock());
         randy.setSeed(seed);
         var cacheKey = new CacheKey(
                 state,
@@ -145,7 +143,7 @@ public class MicroblockRender {
         );
 
         var output = partsOutput;
-        if (cacheKey.geometryCacheKey != null && !mayHaveTint) {
+        if (cacheKey.geometryCacheKey != null) {
             synchronized (CACHE) {
                 var existing = CACHE.getIfPresent(cacheKey);
                 if (existing != null) {
@@ -184,13 +182,12 @@ public class MicroblockRender {
         private final QuadClamper clamper = new QuadClamper();
         private final QuadFaceStripper faceStripper = new QuadFaceStripper();
         private final QuadReInterpolator reInterpolator = new QuadReInterpolator();
-        private final QuadTinter tinter = new QuadTinter();
 
         public void transform(BlockStateModel model, @Nullable BlockAndTintGetter level, @Nullable BlockPos pos, BlockState state, RandomSource randy, Iterable<MaskedCuboid> renderCuboids, List<BlockModelPart> output) {
             collector.clear();
             model.collectParts(levelOrEmpty(level), posOrZero(pos), state, randy, collector);
             for (var modelPart : collector) {
-                var quads = transformPart(modelPart, level, pos, state, renderCuboids);
+                var quads = transformPart(modelPart, state, renderCuboids);
                 output.add(new WrappedBlockModelPart(modelPart, state) {
                     @Override
                     public List<BakedQuad> getQuads(@Nullable Direction side) {
@@ -201,28 +198,29 @@ public class MicroblockRender {
             collector.clear();
         }
 
-        private List<BakedQuad> transformPart(BlockModelPart modelPart, @Nullable BlockAndTintGetter level, @Nullable BlockPos pos, BlockState state, Iterable<MaskedCuboid> renderCuboids) {
-            BlockColors blockColors = Minecraft.getInstance().getBlockColors();
-
+        private List<BakedQuad> transformPart(BlockModelPart modelPart, BlockState state, Iterable<MaskedCuboid> renderCuboids) {
             ImmutableList.Builder<BakedQuad> quads = ImmutableList.builder();
             for (var side : Sides.SIDES_AND_NULL) {
                 for (var quad : modelPart.getQuads(side)) {
-                    int tint = quad.isTinted() ? blockColors.getColor(state, level, pos, quad.tintIndex()) : -1;
-                    transformQuad(quad, tint, renderCuboids, quads);
+                    int tintIndex = -1;
+                    if (quad.isTinted()) {
+                        tintIndex = MultipartTintRegistry.getOrRegisterPassthroughTint(state, quad.tintIndex());
+                    }
+                    transformQuad(quad, tintIndex, renderCuboids, quads);
                 }
             }
             return quads.build();
         }
 
-        private void transformQuad(BakedQuad quad, int tint, Iterable<MaskedCuboid> renderCuboids, ImmutableList.Builder<BakedQuad> quads) {
-            tinter.setTint(tint);
+        private void transformQuad(BakedQuad quad, int tintIndex, Iterable<MaskedCuboid> renderCuboids, ImmutableList.Builder<BakedQuad> quads) {
 
             for (var cuboid : renderCuboids) {
                 mutableQuad.copyFrom(quad);
+                mutableQuad.tintIndex = tintIndex;
                 faceStripper.setBounds(cuboid.box());
                 faceStripper.setMask(cuboid.sideMask());
                 clamper.setClampBounds(cuboid.box());
-                if (QuadTransformer.transform(mutableQuad, clamper, faceStripper, reInterpolator, tinter)) {
+                if (QuadTransformer.transform(mutableQuad, clamper, faceStripper, reInterpolator)) {
                     quads.add(mutableQuad.bake());
                 }
             }

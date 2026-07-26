@@ -4,18 +4,20 @@ import codechicken.lib.vec.Cuboid6;
 import codechicken.lib.vec.Vector3;
 import codechicken.microblock.api.MicroMaterialClient;
 import codechicken.microblock.item.MicroMaterialComponent;
+import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.util.Sides;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.client.RenderTypeHelper;
 import org.joml.Vector3fc;
 import org.jspecify.annotations.Nullable;
@@ -59,6 +61,9 @@ public class MicroblockItemRenderer implements SpecialModelRenderer<MicroMateria
         var offset = Vector3.CENTER.copy().subtract(part.getBounds().center());
         poseStack.translate(offset.x, offset.y, offset.z);
 
+        var ourState = CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState();
+        BlockColors blockColors = Minecraft.getInstance().getBlockColors();
+
         var cuboids = part.getRenderCuboids(true);
         List<BlockModelPart> list = new ArrayList<>();
         clientMaterial.collectParts(null, null, cuboids, list);
@@ -66,11 +71,25 @@ public class MicroblockItemRenderer implements SpecialModelRenderer<MicroMateria
             // The state used for getRenderType here is not important, all MicroMaterial instances should
             // wrap BlockModelPart capturing the real block state.
             // In-world rendering would pass in our own BlockMultipart state anyway.
-            var renderType = modelPart.getRenderType(Blocks.AIR.defaultBlockState());
+            var renderType = modelPart.getRenderType(ourState);
             collector.submitCustomGeometry(poseStack, RenderTypeHelper.getEntityRenderType(renderType), (pose, consumer) -> {
+                int lastTint = -1;
+                int lastTintIndex = -1;
                 for (var side : Sides.SIDES_AND_NULL) {
                     for (BakedQuad quad : modelPart.getQuads(side)) {
-                        consumer.putBulkData(pose, quad, 1.0F, 1.0F, 1.0F, 1.0F, packedLight, packedOverlay);
+                        float r = 1.0F;
+                        float g = 1.0F;
+                        float b = 1.0F;
+                        if (quad.isTinted()) {
+                            if (lastTintIndex != quad.tintIndex()) {
+                                lastTint = blockColors.getColor(ourState, null, null, quad.tintIndex());
+                                lastTintIndex = quad.tintIndex();
+                            }
+                            r = ARGB.redFloat(lastTint);
+                            g = ARGB.greenFloat(lastTint);
+                            b = ARGB.blueFloat(lastTint);
+                        }
+                        consumer.putBulkData(pose, quad, r, g, b, 1.0F, packedLight, packedOverlay);
                     }
                 }
             });

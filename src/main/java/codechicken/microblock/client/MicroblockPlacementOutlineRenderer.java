@@ -5,6 +5,7 @@ import codechicken.lib.vec.Line3;
 import codechicken.lib.vec.Matrix4;
 import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Vector3;
+import codechicken.multipart.init.CBMultipartModContent;
 import codechicken.multipart.util.Sides;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -19,6 +20,7 @@ import net.minecraft.client.renderer.state.BlockOutlineRenderState;
 import net.minecraft.client.renderer.state.LevelRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.ARGB;
 import net.neoforged.neoforge.client.CustomBlockOutlineRenderer;
 import net.neoforged.neoforge.client.RenderTypeHelper;
 import org.jspecify.annotations.Nullable;
@@ -99,10 +101,26 @@ public class MicroblockPlacementOutlineRenderer implements CustomBlockOutlineRen
     }
 
     private static void renderPreviewParts(PoseStack.Pose pose, VertexConsumer consumer, List<BlockModelPart> parts) {
+        var blockColors = Minecraft.getInstance().getBlockColors();
+        var ourState = CBMultipartModContent.MULTIPART_BLOCK.get().defaultBlockState();
+        int lastTint = -1;
+        int lastTintIndex = -1;
         for (var modelPart : parts) {
             for (var side : Sides.SIDES_AND_NULL) {
                 for (BakedQuad quad : modelPart.getQuads(side)) {
-                    consumer.putBulkData(pose, quad, 1.0F, 1.0F, 1.0F, 0.4f, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+                    float r = 1.0F;
+                    float g = 1.0F;
+                    float b = 1.0F;
+                    if (quad.isTinted()) {
+                        if (lastTintIndex != quad.tintIndex()) {
+                            lastTint = blockColors.getColor(ourState, null, null, quad.tintIndex());
+                            lastTintIndex = quad.tintIndex();
+                        }
+                        r = ARGB.redFloat(lastTint);
+                        g = ARGB.greenFloat(lastTint);
+                        b = ARGB.blueFloat(lastTint);
+                    }
+                    consumer.putBulkData(pose, quad, r, g, b, 0.4f, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
                 }
             }
         }
