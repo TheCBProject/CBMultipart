@@ -3,6 +3,7 @@ package codechicken.multipart.api;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.render.DynamicPartRenderer;
 import codechicken.multipart.api.part.render.OutlinePartRenderer;
+import codechicken.multipart.api.part.render.PartParticleHandler;
 import codechicken.multipart.api.part.render.StaticPartRenderer;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -60,5 +61,19 @@ public final class RegisterMultipartRenderersEvent extends Event implements IMod
         }
 
         type.outlineRenderer = renderer;
+    }
+
+    /**
+     * Register a particle handler for your part.
+     *
+     * @param type    The part type.
+     * @param handler The particle handler.
+     */
+    public <P extends MultiPart> void registerParticleHandler(MultipartType<? extends P> type, PartParticleHandler<P> handler) {
+        if (type.particleHandler != null) {
+            throw new IllegalArgumentException("Can't replace part particle handler for type " + type);
+        }
+
+        type.particleHandler = handler;
     }
 }

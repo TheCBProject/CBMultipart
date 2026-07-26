@@ -73,4 +73,7 @@ public abstract class MultipartType<T extends MultiPart> {
 
     @Nullable
     Object outlineRenderer;
+
+    @Nullable
+    Object particleHandler;
 }

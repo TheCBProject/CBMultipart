@@ -186,38 +186,4 @@ public abstract class MicroblockPart extends BaseMultipart {
     public @Nullable SoundType getSound(@Nullable UseOnContext useOnContext) {
         return material.getSound();
     }
-
-    @Override
-    @OnlyIn (Dist.CLIENT)
-    public void addHitEffects(PartRayTraceResult hit, ParticleEngine engine) {
-        MicroMaterialClient clientMaterial = MicroMaterialClient.get(material);
-        if (clientMaterial != null) {
-            clientMaterial.addHitEffects(this, hit, engine);
-        }
-    }
-
-    @Override
-    @OnlyIn (Dist.CLIENT)
-    public void addDestroyEffects(PartRayTraceResult hit, ParticleEngine engine) {
-        MicroMaterialClient clientMaterial = MicroMaterialClient.get(material);
-        if (clientMaterial != null) {
-            clientMaterial.addDestroyEffects(this, hit, engine);
-        }
-    }
-
-    @Override
-    public void addLandingEffects(PartRayTraceResult hit, Vector3 entity, int numberOfParticles) {
-        MicroMaterialClient clientMaterial = MicroMaterialClient.get(material);
-        if (clientMaterial != null) {
-            clientMaterial.addLandingEffects(this, hit, entity, numberOfParticles);
-        }
-    }
-
-    @Override
-    public void addRunningEffects(PartRayTraceResult hit, Entity entity) {
-        MicroMaterialClient clientMaterial = MicroMaterialClient.get(material);
-        if (clientMaterial != null) {
-            clientMaterial.addRunningEffects(this, hit, entity);
-        }
-    }
 }

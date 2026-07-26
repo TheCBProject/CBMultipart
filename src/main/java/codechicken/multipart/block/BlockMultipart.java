@@ -222,7 +222,7 @@ public class BlockMultipart extends Block implements EntityBlock {
         }
 
         if (level.isClientSide() && tile.isClientTile()) {
-            hit.part.addDestroyEffects(hit, Minecraft.getInstance().particleEngine);
+            tile.addDestroyEffects(hit);
             return true;
         }
 

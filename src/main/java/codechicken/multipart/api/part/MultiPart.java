@@ -498,45 +498,6 @@ public interface MultiPart {
     }
 
     /**
-     * Add particles and other effects when a player is mining this part.
-     *
-     * @param hit    The {@link PartRayTraceResult} hit result.
-     * @param engine The {@link ParticleEngine} to spawn particles.
-     */
-    @OnlyIn (Dist.CLIENT)
-    default void addHitEffects(PartRayTraceResult hit, ParticleEngine engine) { }
-
-    /**
-     * Add particles and other effects when a player finishes breaking this part.
-     *
-     * @param hit    The {@link PartRayTraceResult} hit result.
-     * @param engine The {@link ParticleEngine} to spawn particles.
-     */
-    @OnlyIn (Dist.CLIENT)
-    default void addDestroyEffects(PartRayTraceResult hit, ParticleEngine engine) { }
-
-    /**
-     * Add particles and other effects when a player lands on this part.
-     *
-     * @param hit               The hit directly bellow the entities feet.
-     * @param entity            The position of the entity.
-     * @param numberOfParticles The number of particles to spawn.
-     */
-    @OnlyIn (Dist.CLIENT)
-    default void addLandingEffects(PartRayTraceResult hit, Vector3 entity, int numberOfParticles) { }
-
-    /**
-     * Add particles and other effects when a player runs over this part.
-     * <p>
-     * This is called on both the client and the server.
-     *
-     * @param hit    The hit directly bellow the players feet.
-     * @param entity The entity running.
-     */
-    @OnlyIn (Dist.CLIENT)
-    default void addRunningEffects(PartRayTraceResult hit, Entity entity) { }
-
-    /**
      * Gets the bounds of this part for Frustum culling.
      * Bounds are relative to the current part's coordinates.
      *

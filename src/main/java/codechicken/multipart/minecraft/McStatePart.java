@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 
-public abstract class McStatePart extends BaseMultipart implements NormalOcclusionPart, BlockStateModelPart, IconHitEffectsPart {
+public abstract class McStatePart extends BaseMultipart implements NormalOcclusionPart, BlockStateModelPart {
 
     public BlockState state;
 
@@ -141,24 +141,5 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
     @Override
     public SoundType getSound(@Nullable UseOnContext useOnContext) {
         return state.getSoundType(level(), pos(), useOnContext != null ? useOnContext.getPlayer() : null);
-    }
-
-    @Override
-    public Cuboid6 getBounds() {
-        return new Cuboid6(getShape(CollisionContext.empty()).bounds());
-    }
-
-    @Override
-    @OnlyIn (Dist.CLIENT)
-    public TextureAtlasSprite getBreakingIcon(PartRayTraceResult hit) {
-        return getBrokenIcon(hit.getDirection().ordinal());
-    }
-
-    @Override
-    @OnlyIn (Dist.CLIENT)
-    public TextureAtlasSprite getBrokenIcon(int side) {
-        return Minecraft.getInstance().getBlockRenderer().getBlockModelShaper()
-                .getBlockModel(getCurrentState())
-                .particleIcon(); // TODO fake level for model data
     }
 }

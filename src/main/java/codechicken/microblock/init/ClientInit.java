@@ -1,13 +1,14 @@
 package codechicken.microblock.init;
 
-import codechicken.microblock.client.MicroblockPartRenderer;
 import codechicken.microblock.client.MicroblockItemRenderer;
+import codechicken.microblock.client.MicroblockPartRenderer;
 import codechicken.microblock.client.MicroblockRender;
-import codechicken.multipart.api.MultipartClientRegistry;
+import codechicken.microblock.part.MicroblockPart;
+import codechicken.microblock.part.MicroblockPartParticleHandler;
+import codechicken.multipart.api.MultipartType;
 import codechicken.multipart.api.RegisterMultipartRenderersEvent;
 import net.covers1624.quack.util.CrashLock;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 
 /**
@@ -27,11 +28,16 @@ public class ClientInit {
     }
 
     private static void onRegisterMultipartRenderers(RegisterMultipartRenderersEvent event) {
-        event.registerStaticPartRenderer(CBMicroblockModContent.FACE_MICROBLOCK_PART.get(), MicroblockPartRenderer::new);
-        event.registerStaticPartRenderer(CBMicroblockModContent.HOLLOW_MICROBLOCK_PART.get(), MicroblockPartRenderer::new);
-        event.registerStaticPartRenderer(CBMicroblockModContent.CORNER_MICROBLOCK_PART.get(), MicroblockPartRenderer::new);
-        event.registerStaticPartRenderer(CBMicroblockModContent.EDGE_MICROBLOCK_PART.get(), MicroblockPartRenderer::new);
-        event.registerStaticPartRenderer(CBMicroblockModContent.POST_MICROBLOCK_PART.get(), MicroblockPartRenderer::new);
+        registerRenderers(event, CBMicroblockModContent.FACE_MICROBLOCK_PART.get());
+        registerRenderers(event, CBMicroblockModContent.HOLLOW_MICROBLOCK_PART.get());
+        registerRenderers(event, CBMicroblockModContent.CORNER_MICROBLOCK_PART.get());
+        registerRenderers(event, CBMicroblockModContent.EDGE_MICROBLOCK_PART.get());
+        registerRenderers(event, CBMicroblockModContent.POST_MICROBLOCK_PART.get());
+    }
+
+    private static void registerRenderers(RegisterMultipartRenderersEvent event, MultipartType<? extends MicroblockPart> type) {
+        event.registerStaticPartRenderer(type, MicroblockPartRenderer::new);
+        event.registerParticleHandler(type, new MicroblockPartParticleHandler());
     }
 
     private static void onRegisterSpecialModelRenderers(RegisterSpecialModelRendererEvent event) {

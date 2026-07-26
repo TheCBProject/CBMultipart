@@ -3,8 +3,8 @@ package codechicken.multipart.api;
 import codechicken.multipart.api.part.MultiPart;
 import codechicken.multipart.api.part.render.DynamicPartRenderer;
 import codechicken.multipart.api.part.render.OutlinePartRenderer;
+import codechicken.multipart.api.part.render.PartParticleHandler;
 import codechicken.multipart.api.part.render.StaticPartRenderer;
-import codechicken.multipart.init.MultiPartRegistries;
 import net.covers1624.quack.util.CrashLock;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -43,8 +43,13 @@ public class MultipartClientRegistry {
     }
 
     @Nullable
-    public static <T extends MultiPart, S> OutlinePartRenderer<T> getOutlinePartRenderer(MultipartType<?> type) {
+    public static <T extends MultiPart> OutlinePartRenderer<T> getOutlinePartRenderer(MultipartType<?> type) {
         return unsafeCast(type.outlineRenderer);
+    }
+
+    @Nullable
+    public static <T extends MultiPart> PartParticleHandler<T> getPartParticleHandler(MultipartType<?> type) {
+        return unsafeCast(type.particleHandler);
     }
 
     public static void loadStaticPartRenderers() {

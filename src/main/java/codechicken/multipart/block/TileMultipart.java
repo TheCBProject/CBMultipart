@@ -62,7 +62,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -371,7 +370,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
 
     private VoxelShape mergedShape(Function<MultiPart, VoxelShape> func) {
         var shapeToPart = FastStream.of(getPartList())
-                .toImmutableMap(func, Function.identity());
+                .toGuavaImmutableMap(func, Function.identity());
 
         var merged = VoxelShapeCache.merge(shapeToPart.keySet());
         return new VoxelShape(merged.shape) {
@@ -383,8 +382,7 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
             @Override
             public @Nullable BlockHitResult clip(Vec3 start, Vec3 end, BlockPos pos) {
                 return FastStream.of(shapeToPart.entrySet())
-                        .map(e -> clipPart(e.getKey(), e.getValue(), start, end, pos))
-                        .filter(Objects::nonNull)
+                        .mapNonNull(e -> clipPart(e.getKey(), e.getValue(), start, end, pos))
                         .minByDoubleOrDefault(e -> e.distance);
             }
 
@@ -499,22 +497,20 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
      */
     public TileMultipart tile() { return this; }
 
-    public void addLandingEffects(Vector3 entity, int numberOfParticles) {
-        PartRayTraceResult hit = hitFeet(entity);
-        if (hit == null) return;
+    public void addHitEffects(PartRayTraceResult hit) {
+    }
 
-        hit.part.addLandingEffects(hit, entity, numberOfParticles);
+    public void addDestroyEffects(PartRayTraceResult hit) {
+    }
+
+    public void addLandingEffects(Vector3 entity, int numberOfParticles) {
     }
 
     public void addRunningEffects(Entity entity) {
-        PartRayTraceResult hit = hitFeet(Vector3.fromEntity(entity));
-        if (hit == null) return;
-
-        hit.part.addRunningEffects(hit, entity);
     }
 
     @Nullable
-    private PartRayTraceResult hitFeet(Vector3 entityPos) {
+    public PartRayTraceResult hitFeet(Vector3 entityPos) {
         BlockHitResult hit = getCollisionShape(CollisionContext.empty()).clip(
                 entityPos.copy().add(0, 0.01, 0).vec3(),
                 entityPos.copy().add(0, -0.01, 0).vec3(),
