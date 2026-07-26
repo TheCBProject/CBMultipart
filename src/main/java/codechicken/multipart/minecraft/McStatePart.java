@@ -47,7 +47,7 @@ public abstract class McStatePart extends BaseMultipart implements NormalOcclusi
     }
 
     @Override
-    public ItemStack getCloneStack(PartRayTraceResult hit) {
+    public ItemStack getCloneStack(PartRayTraceResult hit, Player player) {
         return getDropStack();
     }
 

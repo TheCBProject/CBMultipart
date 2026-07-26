@@ -270,14 +270,6 @@ public interface MultiPart {
      * @return The {@link ItemStack} pick result.
      */
     default ItemStack getCloneStack(PartRayTraceResult hit, Player player) {
-        return getCloneStack(hit);
-    }
-
-    /**
-     * @deprecated Use player sensitive version.
-     */
-    @Deprecated
-    default ItemStack getCloneStack(PartRayTraceResult hit) {
         return ItemStack.EMPTY;
     }
 
@@ -318,19 +310,6 @@ public interface MultiPart {
     }
 
     /**
-     * Used to get the sound for this part when placed.
-     *
-     * @param context The placement context.
-     * @return The sound, or {@code null} for no sound.
-     * @deprecated Use {@link #getSound(UseOnContext)} instead.
-     */
-    @Nullable
-    @Deprecated
-    default SoundType getPlacementSound(UseOnContext context) {
-        return SoundType.STONE;
-    }
-
-    /**
      * Used to get the sound for this part.
      *
      * @param useOnContext The placement context if part is being placed
@@ -338,9 +317,6 @@ public interface MultiPart {
      */
     @Nullable
     default SoundType getSound(@Nullable UseOnContext useOnContext) {
-        if (useOnContext != null) {
-            return getPlacementSound(useOnContext);
-        }
         return SoundType.STONE;
     }
 

@@ -125,14 +125,14 @@ public abstract class MicroblockPart extends BaseMultipart {
     }
 
     @Override
-    public ItemStack getCloneStack(PartRayTraceResult hit) {
+    public ItemStack getCloneStack(PartRayTraceResult hit, Player player) {
         int size = getSize();
         for (int s : new int[] { 4, 2, 1 }) {
             if (size % s == 0 && size / s >= 1) {
                 return ItemMicroBlock.create(getItemFactoryId(), size, material);
             }
         }
-        return super.getCloneStack(hit);
+        return super.getCloneStack(hit, player);
     }
 
     /**

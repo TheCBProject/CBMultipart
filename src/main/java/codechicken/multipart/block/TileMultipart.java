@@ -102,7 +102,6 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
      */
     public void copyFrom(TileMultipart that) {
         partList = that.partList;
-        markShapeChange();
     }
 
     /**
@@ -129,7 +128,6 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
      */
     public void clearParts() {
         partList = new CopyOnWriteArrayList<>();
-        markShapeChange();
     }
 
     /**
@@ -281,7 +279,6 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
 
         partList.add(part);
         bindPart(part);
-        markShapeChange();
         ((BaseMultipart) part).bind(this);
     }
 
@@ -321,7 +318,6 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         partRemoved(part, idx);
         part.onRemoved();
         ((BaseMultipart) part).bind(null);
-        markShapeChange();
         recalcLight(false, true);
 
         if (partList.isEmpty()) level.removeBlock(worldPosition, false);
@@ -633,11 +629,6 @@ public class TileMultipart extends BlockEntity implements IChunkLoadTile {
         if (block && lm.blockEngine != null) {
             lm.blockEngine.checkBlock(worldPosition);
         }
-    }
-
-    // This isn't required anymore.
-    @Deprecated (forRemoval = true)
-    public void markShapeChange() {
     }
 
     /**
