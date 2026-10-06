@@ -3,6 +3,9 @@ loaderVersion="[2,)"
 issueTrackerURL="https://github.com/TheCBProject/ForgeMultipart"
 license="GNU Lesser General Public License v2.1"
 
+[[mixins]]
+config="mixins.cbmultipart.json"
+
 #CBMultipart
 [[mods]]
     modId="cb_multipart"
